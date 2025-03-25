@@ -1,61 +1,23 @@
 ---
 layout: default
+title: "Blog Culinaire"
 ---
 
-<div class="container">
-  <header>
-    <h1>Blog Culinaire</h1>
-    <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Rechercher un restaurant..." onkeyup="filterRestaurants()" />
-    </div>
-  </header>
+# Bienvenue sur mon Blog Culinaire
 
-  <div class="filters">
-    <label for="style-filter">Filtrer par style de cuisine :</label>
-    <select id="style-filter" onchange="filterRestaurants()">
-      <option value="">Tous les styles</option>
-      <option value="Asiatique">Asiatique</option>
-      <option value="Italien">Italien</option>
-      <option value="Français">Français</option>
-      <option value="Américain">Américain</option>
-      <option value="Autre">Autre</option>
-    </select>
-  </div>
+Voici une liste de mes restaurants préférés, évalués par mes soins. Cliquez sur chaque article pour en savoir plus !
 
-  <div class="restaurant-list">
-    {% for restaurant in site.posts %}
-      <div class="restaurant-card" data-style="{{ restaurant.style }}">
-        <img src="{{ restaurant.image | relative_url }}" alt="Image de {{ restaurant.title }}" class="restaurant-image">
-        <div class="restaurant-info">
-          <h2>{{ restaurant.title }}</h2>
-          <p><strong>Style :</strong> {{ restaurant.style }}</p>
-          <p><strong>Date :</strong> {{ restaurant.date | date: "%d %B %Y" }}</p>
-          <p><strong>Note :</strong> {{ restaurant.note }} / 5</p>
-          <p><strong>Résumé :</strong> {{ restaurant.description }}</p>
-        </div>
+<div class="restaurant-list">
+  {% for post in site.posts %}
+    {% if post.categories contains 'restaurants' %}
+      <div class="restaurant-item">
+        <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+        <p><strong>Date:</strong> {{ post.date | date: "%d %b %Y" }}</p>
+        <p><strong>Note:</strong> {{ post.note }} / 5</p>
+        <p><strong>Style:</strong> {{ post.style }}</p>
+        <p>{{ post.description | truncatewords: 30 }}</p>
+        <a href="{{ post.url }}">Lire plus...</a>
       </div>
-    {% endfor %}
-  </div>
+    {% endif %}
+  {% endfor %}
 </div>
-
-<script>
-  function filterRestaurants() {
-    const searchInput = document.getElementById('search-input').value.toLowerCase();
-    const styleFilter = document.getElementById('style-filter').value;
-    const restaurants = document.querySelectorAll('.restaurant-card');
-
-    restaurants.forEach(restaurant => {
-      const title = restaurant.querySelector('h2').textContent.toLowerCase();
-      const style = restaurant.getAttribute('data-style').toLowerCase();
-
-      const matchesSearch = title.includes(searchInput);
-      const matchesStyle = styleFilter === '' || style === styleFilter.toLowerCase();
-
-      if (matchesSearch && matchesStyle) {
-        restaurant.style.display = 'block';
-      } else {
-        restaurant.style.display = 'none';
-      }
-    });
-  }
-</script>
