@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Netlify CMS</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Netlify CMS</title>
+  <link rel="stylesheet" href="path/to/netlify-cms.css">
+</head>
+<body>
+  <div id="cms"></div>
+  <script src="https://cdn.jsdelivr.net/npm/netlify-cms@2.10.0/dist/bootstrap.js"></script> <!-- Bootstrap first -->
     <script src="https://cdn.jsdelivr.net/npm/netlify-cms@2.10.0/dist/netlify-cms.js"></script>
-  </head>
-  <body>
-    <h1>Netlify CMS</h1>
-    <script>
-      CMS.init();
-    </script>
-  </body>
+  <script>
+    CMS.init();
+  </script>
+</body>
 </html>
