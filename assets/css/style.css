@@ -1,0 +1,66 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+header nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+header nav ul li {
+  display: inline;
+  margin-right: 15px;
+}
+
+header nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.restaurant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.restaurant-card {
+  width: 30%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.restaurant-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.restaurant-info h2 {
+  font-size: 1.5em;
+  color: #333;
+}
+
+.restaurant-info p {
+  font-size: 1em;
+  color: #555;
+}
+
+.filters {
+  margin-bottom: 20px;
+}
