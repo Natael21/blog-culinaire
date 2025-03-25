@@ -1,6 +1,7 @@
 backend:
   name: git-gateway
-  branch: main # ou la branche que tu utilises
+  repo: Natael21/blog-culinaire # your GitHub username and repository name, separated by a slash
+  branch: master # optional, default value is "master"
 
 media_folder: "static/images" # Le dossier où les images sont stockées
 public_folder: "/images" # L'URL où les images seront accessibles
