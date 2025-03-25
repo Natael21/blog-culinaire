@@ -6,20 +6,6 @@ media_folder: "static/images" # Le dossier où les images sont stockées
 public_folder: "/images" # L'URL où les images seront accessibles
 
 collections:
-  - name: "posts"  # Nom de la collection
-    label: "Blog Posts"
-    folder: "_posts"  # Dossier où les fichiers markdown des articles sont stockés
-    create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Date", name: "date", widget: "datetime" }
-      - { label: "Body", name: "body", widget: "markdown" }
-      - { label: "Thumbnail", name: "thumbnail", widget: "image" }
-      - { label: "Rating", name: "rating", widget: "number", min: 1, max: 5 }
-      - { label: "Cuisine Type", name: "cuisine_type", widget: "string" }
-
-collections:
   - name: "restaurants"
     label: "Restaurants"
     folder: "_posts/restaurants"
