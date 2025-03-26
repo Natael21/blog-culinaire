@@ -3,40 +3,44 @@ layout: default
 ---
 
 <article class="restaurant-detail">
-  <div class="restaurant-header" style="background-image: url('{{ page.image }}');">
+  <div class="restaurant-header" style="background-image: url('{{ page.image | default: "/images/header.jpg" }}');">
     <div class="restaurant-header-content">
       <h1>{{ page.title }}</h1>
       <div class="restaurant-meta">
         <div class="rating">
-          <span class="stars">
-            {% assign full_stars = page.note | floor %}
+          <span class="stars" aria-label="Note: {{ page.note | default: 0 }} sur 5">
+            {% assign full_stars = page.note | default: 0 | floor %}
             {% for i in (1..full_stars) %}⭐{% endfor %}
-            {% assign decimal_part = page.note | minus: full_stars %}
+            {% assign decimal_part = page.note | default: 0 | minus: full_stars %}
             {% if decimal_part >= 0.5 %}⭐{% endif %}
           </span>
-          <span class="score">{{ page.note }}/5</span>
+          <span class="score">{{ page.note | default: 0 }}/5</span>
         </div>
-        <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+        {% if page.style %}
+        <span class="style"><i class="fas fa-utensils" aria-hidden="true"></i> {{ page.style }}</span>
+        {% endif %}
       </div>
     </div>
   </div>
 
   <div class="restaurant-content">
+    {% if page.description %}
     <div class="restaurant-description">
       <p>{{ page.description }}</p>
     </div>
+    {% endif %}
 
     <div class="restaurant-body">
       {{ content }}
     </div>
 
-    {% if page.images %}
+    {% if page.images and page.images.size > 0 %}
     <div class="restaurant-gallery">
       <h2>Galerie photos</h2>
       <div class="gallery-grid">
         {% for image in page.images %}
         <div class="gallery-item">
-          <img src="{{ image.image }}" alt="{{ page.title }}">
+          <img src="{{ image.image }}" alt="{{ page.title }} - Photo {{ forloop.index }}" loading="lazy">
         </div>
         {% endfor %}
       </div>
@@ -52,16 +56,16 @@ layout: default
           {% assign next_index = post_index | minus: 1 %}
           {% if prev_index < forloop.length %}
             {% assign prev_post = posts[prev_index] %}
-            <a href="{{ prev_post.url }}" class="prev">
-              <i class="fas fa-arrow-left"></i>
+            <a href="{{ prev_post.url }}" class="prev" rel="prev">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i>
               {{ prev_post.title }}
             </a>
           {% endif %}
           {% if next_index >= 0 %}
             {% assign next_post = posts[next_index] %}
-            <a href="{{ next_post.url }}" class="next">
+            <a href="{{ next_post.url }}" class="next" rel="next">
               {{ next_post.title }}
-              <i class="fas fa-arrow-right"></i>
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
             </a>
           {% endif %}
         {% endif %}
@@ -70,8 +74,8 @@ layout: default
   </div>
 </article>
 
-<a href="javascript:history.back()" class="back-button">
-  <i class="fas fa-arrow-left"></i>
+<a href="javascript:history.back()" class="back-button" role="button">
+  <i class="fas fa-arrow-left" aria-hidden="true"></i>
   <span>Retour</span>
 </a>
 
@@ -79,5 +83,15 @@ layout: default
   // Store the scroll position when leaving the page
   window.addEventListener('beforeunload', function() {
     sessionStorage.setItem('scrollPosition', window.scrollY);
+  });
+
+  // Handle back button navigation
+  document.querySelector('.back-button').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/';
+    }
   });
 </script>

@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Blog culinaire de critiques de restaurants à Sherbrooke" />
     <title>{{ page.title }} | Blog Culinaire</title>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" defer></script>
   </head>
   <body>
     <nav class="main-nav">
@@ -54,8 +55,8 @@
       </div>
     </footer>
 
-    <a href="javascript:void(0)" class="login-button" id="login-button">
-      <i class="fas fa-user"></i>
+    <a href="javascript:void(0)" class="login-button" id="login-button" role="button" aria-label="Connexion">
+      <i class="fas fa-user" aria-hidden="true"></i>
       <span>Connexion</span>
     </a>
 

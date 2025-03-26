@@ -530,11 +530,29 @@ footer {
   background-color: rgba(255, 255, 255, 1);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
 }
 
 .login-button i {
   font-size: 0.9rem;
   color: var(--primary-color);
+}
+
+/* Remove duplicate login button styles */
+.auth-nav .login-button {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
+  background-color: var(--accent-color);
+  color: var(--white) !important;
+}
+
+.auth-nav .login-button:hover {
+  background-color: #c0392b;
+}
+
+.auth-nav .login-button i {
+  color: var(--white);
 }
 
 /* Back button for restaurant pages */
@@ -603,6 +621,10 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
   .restaurant-header {
     height: 300px;
     margin: -1rem -1rem 1rem;
@@ -651,6 +673,35 @@ footer {
     float: none;
     margin: 2rem 0;
     max-width: 100%;
+  }
+
+  .main-nav {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0.5rem 1rem;
+  }
+
+  .main-nav ul {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .main-nav a {
+    font-size: 1rem;
+    padding: 0.5rem 0;
+  }
+
+  .hero {
+    margin-top: 0;
+    height: 300px;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero .tagline {
+    font-size: 1rem;
   }
 }
 
@@ -709,28 +760,6 @@ footer {
 
 .auth-nav {
   margin-left: 2rem;
-}
-
-.login-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: #e74c3c;
-  color: white !important;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: 600;
-  transition: background-color 0.3s ease;
-}
-
-.login-button:hover {
-  background-color: #c0392b;
-  cursor: pointer;
-}
-
-.login-button i {
-  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
