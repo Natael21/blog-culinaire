@@ -448,17 +448,22 @@ footer {
   text-decoration: none;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  z-index: 1000;
+  transition: all 0.3s ease;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
 }
 
 .login-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  background: #c0392b;
 }
 
 .login-button i {
-  margin-right: 0.5rem;
+  font-size: 1.2rem;
 }
 
 @media (max-width: 768px) {
@@ -485,5 +490,6 @@ footer {
     bottom: 1rem;
     right: 1rem;
     padding: 0.8rem 1.5rem;
+    font-size: 1rem;
   }
 }
