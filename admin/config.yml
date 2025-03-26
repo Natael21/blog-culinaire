@@ -10,7 +10,6 @@ backend:
 media_folder: "/images" # Le dossier où les images sont stockées
 public_folder: "/images" # L'URL où les images seront accessibles
 
-
 collections:
   - name: "restaurants"
     label: "Restaurants"
