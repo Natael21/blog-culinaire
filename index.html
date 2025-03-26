@@ -1,61 +1,32 @@
+
+
 ---
 layout: default
+title: Accueil
 ---
 
-<div class="container">
-  <header>
-    <h1>Blog Culinaire</h1>
-    <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Rechercher un restaurant..." onkeyup="filterRestaurants()" />
-    </div>
-  </header>
-
-  <div class="filters">
-    <label for="style-filter">Filtrer par style de cuisine :</label>
-    <select id="style-filter" onchange="filterRestaurants()">
-      <option value="">Tous les styles</option>
-      <option value="Asiatique">Asiatique</option>
-      <option value="Italien">Italien</option>
-      <option value="Français">Français</option>
-      <option value="Américain">Américain</option>
-      <option value="Autre">Autre</option>
-    </select>
+<!-- Header Hero -->
+<header class="hero">
+  <div class="hero" style="background-image: url('/images/header.jpg');">
+    <h1>Appréciation Restaurants Sherbrooke</h1>
+    <p>Explore nos avis sur les meilleurs restaurants de Sherbrooke, notés avec passion par deux gourmets.</p>
   </div>
+</header>
 
-  <div class="restaurant-list">
-    {% for restaurant in site.posts %}
-      <div class="restaurant-card" data-style="{{ restaurant.style }}">
-        <img src="{{ restaurant.image | relative_url }}" alt="Image de {{ restaurant.title }}" class="restaurant-image">
-        <div class="restaurant-info">
-          <h2>{{ restaurant.title }}</h2>
-          <p><strong>Style :</strong> {{ restaurant.style }}</p>
-          <p><strong>Date :</strong> {{ restaurant.date | date: "%d %B %Y" }}</p>
-          <p><strong>Note :</strong> {{ restaurant.note }} / 5</p>
-          <p><strong>Résumé :</strong> {{ restaurant.description }}</p>
+<!-- Articles Grid -->
+<main class="restaurant-grid">
+  {% assign sorted_posts = site.posts | where_exp: "post", "post.categories contains 'restaurants'" | sort: 'date' | reverse %}
+  {% for post in sorted_posts limit:24 %}
+    <article class="card">
+      <a href="{{ post.url }}">
+        <img src="{{ post.image | relative_url }}" alt="Image de {{ post.title }}">
+        <div class="card-content">
+          <h2>{{ post.title }}</h2>
+          <p class="note">⭐ {{ post.note }} / 5</p>
+          <p>{{ post.description | truncate: 100 }}</p>
+          <time>{{ post.date | date: "%d %B %Y" }}</time>
         </div>
-      </div>
-    {% endfor %}
-  </div>
-</div>
-
-<script>
-  function filterRestaurants() {
-    const searchInput = document.getElementById('search-input').value.toLowerCase();
-    const styleFilter = document.getElementById('style-filter').value;
-    const restaurants = document.querySelectorAll('.restaurant-card');
-
-    restaurants.forEach(restaurant => {
-      const title = restaurant.querySelector('h2').textContent.toLowerCase();
-      const style = restaurant.getAttribute('data-style').toLowerCase();
-
-      const matchesSearch = title.includes(searchInput);
-      const matchesStyle = styleFilter === '' || style === styleFilter.toLowerCase();
-
-      if (matchesSearch && matchesStyle) {
-        restaurant.style.display = 'block';
-      } else {
-        restaurant.style.display = 'none';
-      }
-    });
-  }
-</script>
+      </a>
+    </article>
+  {% endfor %}
+</main>
