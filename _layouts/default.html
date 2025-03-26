@@ -10,6 +10,22 @@
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
+    <nav class="menu">
+      <div class="menu-container">
+        <ul class="menu-left">
+          <li><a href="{{ '/' | relative_url }}">Accueil</a></li>
+          <li><a href="{{ '/about/' | relative_url }}">À propos</a></li>
+          <li><a href="{{ '/contact/' | relative_url }}">Contact</a></li>
+        </ul>
+        <div class="menu-right">
+          <a href="/admin/" class="login-button" id="login-button">
+            <i class="fas fa-user"></i>
+            <span>Connexion</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
     <header class="hero" style="background-image: url('/images/header.jpg');">
       <div class="hero-overlay">
         <h1>Blog Culinaire Sherbrooke</h1>
@@ -21,16 +37,6 @@
         </div>
       </div>
     </header>
-
-    <nav class="menu">
-      <div class="menu-container">
-        <ul>
-          <li><a href="{{ '/' | relative_url }}">Accueil</a></li>
-          <li><a href="{{ '/about/' | relative_url }}">À propos</a></li>
-          <li><a href="{{ '/contact/' | relative_url }}">Contact</a></li>
-        </ul>
-      </div>
-    </nav>
 
     <main class="container">
       {{ content }}
@@ -55,11 +61,6 @@
         <p>Blog culinaire © 2025 – Fait avec ❤️ par Nataël & Nicolas</p>
       </div>
     </footer>
-
-    <a href="/admin/" class="login-button" id="login-button">
-      <i class="fas fa-user"></i>
-      <span>Connexion</span>
-    </a>
 
     <script>
       if (window.netlifyIdentity) {
