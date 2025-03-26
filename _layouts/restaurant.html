@@ -8,7 +8,12 @@ layout: default
       <h1>{{ page.title }}</h1>
       <div class="restaurant-meta">
         <div class="rating">
-          <span class="stars">{% for i in (1..page.note) %}⭐{% endfor %}</span>
+          <span class="stars">
+            {% assign full_stars = page.note | floor %}
+            {% for i in (1..full_stars) %}⭐{% endfor %}
+            {% assign decimal_part = page.note | minus: full_stars %}
+            {% if decimal_part >= 0.5 %}⭐{% endif %}
+          </span>
           <span class="score">{{ page.note }}/5</span>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
