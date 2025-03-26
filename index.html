@@ -3,19 +3,42 @@ layout: default
 title: Accueil
 ---
 
+<div class="page-header">
+  <h2>Nos Dernières Découvertes</h2>
+  <p>Explorez nos critiques de restaurants à Sherbrooke</p>
+</div>
+
 <div class="post-grid">
   {% assign posts = site.posts | where_exp:"item", "item.categories contains 'restaurants'" %}
-  {% for post in posts %}
+  {% for post in posts limit:12 %}
     <div class="post-card">
       <a href="{{ post.url | relative_url }}">
         <img src="{{ post.image | relative_url }}" alt="{{ post.title }}">
         <div class="content">
           <h2>{{ post.title }}</h2>
-          <p>Note : ⭐ {{ post.note }}/5</p>
-          <p>{{ post.description | truncate: 100 }}</p>
-          <p><em>{{ post.date | date: "%d %b %Y" }}</em></p>
+          <div class="rating">
+            <span class="stars">{% for i in (1..post.note) %}⭐{% endfor %}</span>
+            <span class="score">{{ post.note }}/5</span>
+          </div>
+          <p class="description">{{ post.description | truncate: 100 }}</p>
+          <div class="meta">
+            <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
+            <span class="price-range"><i class="fas fa-dollar-sign"></i> {{ post.price_range }}</span>
+          </div>
         </div>
       </a>
     </div>
   {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if paginator.previous_page %}
+    <a href="{{ paginator.previous_page_path }}" class="previous">← Précédent</a>
+  {% endif %}
+  
+  <span class="page_number">Page {{ paginator.page }} sur {{ paginator.total_pages }}</span>
+  
+  {% if paginator.next_page %}
+    <a href="{{ paginator.next_page_path }}" class="next">Suivant →</a>
+  {% endif %}
 </div>

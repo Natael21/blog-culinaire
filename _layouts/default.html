@@ -5,22 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ page.title }} | Blog Culinaire</title>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   </head>
   <body>
     <header class="hero" style="background-image: url('/images/header.jpg');">
       <div class="hero-overlay">
         <h1>Blog Culinaire Sherbrooke</h1>
-        <p>Nos critiques honnêtes de restaurants à Sherbrooke – pour les amoureux de bonne bouffe</p>
+        <p class="tagline">Nos critiques honnêtes de restaurants à Sherbrooke – pour les amoureux de bonne bouffe</p>
+        <div class="social-links">
+          <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+        </div>
       </div>
     </header>
 
     <nav class="menu">
-      <ul>
-        <li><a href="{{ '/' | relative_url }}">Accueil</a></li>
-        <li><a href="{{ '/about/' | relative_url }}">À propos</a></li>
-        <li><a href="{{ '/contact/' | relative_url }}">Contact</a></li>
-      </ul>
+      <div class="menu-container">
+        <ul>
+          <li><a href="{{ '/' | relative_url }}">Accueil</a></li>
+          <li><a href="{{ '/about/' | relative_url }}">À propos</a></li>
+          <li><a href="{{ '/contact/' | relative_url }}">Contact</a></li>
+        </ul>
+      </div>
     </nav>
 
     <main class="container">
@@ -28,7 +36,23 @@
     </main>
 
     <footer>
-      <p>Blog culinaire © 2025 – Fait avec ❤️ par Nataël & Nicolas</p>
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>À propos de nous</h3>
+          <p>Deux passionnés de gastronomie qui partagent leurs découvertes culinaires à Sherbrooke.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Suivez-nous</h3>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Blog culinaire © 2025 – Fait avec ❤️ par Nataël & Nicolas</p>
+      </div>
     </footer>
   </body>
 </html>
