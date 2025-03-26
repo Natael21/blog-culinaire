@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
     <header class="hero" style="background-image: url('/images/header.jpg');">
@@ -54,5 +55,22 @@
         <p>Blog culinaire © 2025 – Fait avec ❤️ par Nataël & Nicolas</p>
       </div>
     </footer>
+
+    <a href="/admin/" class="login-button">
+      <i class="fas fa-user"></i>
+      Connexion
+    </a>
+
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+    </script>
   </body>
 </html>

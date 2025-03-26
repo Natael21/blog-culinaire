@@ -1,8 +1,41 @@
-<article class="restaurant-post">
-  <h1>{{ page.title }}</h1>
-  <p>Note : {{ page.note }} / 5</p>
-  <p>Style : {{ page.style }}</p>
-  <img src="{{ page.image }}" alt="{{ page.title }}">
-  <p>{{ page.description }}</p>
-  {{ content }}
+---
+layout: default
+---
+
+<article class="restaurant-detail">
+  <div class="restaurant-header" style="background-image: url('{{ page.image }}');">
+    <div class="restaurant-header-content">
+      <h1>{{ page.title }}</h1>
+      <div class="restaurant-meta">
+        <div class="rating">
+          <span class="stars">{% for i in (1..page.note) %}⭐{% endfor %}</span>
+          <span class="score">{{ page.note }}/5</span>
+        </div>
+        <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="restaurant-content">
+    <div class="restaurant-description">
+      <p>{{ page.description }}</p>
+    </div>
+
+    <div class="restaurant-body">
+      {{ content }}
+    </div>
+
+    {% if page.images %}
+    <div class="restaurant-gallery">
+      <h2>Galerie photos</h2>
+      <div class="gallery-grid">
+        {% for image in page.images %}
+        <div class="gallery-item">
+          <img src="{{ image.image }}" alt="{{ page.title }}">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
 </article>
