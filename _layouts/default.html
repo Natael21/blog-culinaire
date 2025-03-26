@@ -10,21 +10,23 @@
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
-    <nav class="menu">
-      <div class="menu-container">
-        <ul class="menu-left">
-          <li><a href="{{ '/' | relative_url }}">Accueil</a></li>
-          <li><a href="{{ '/about/' | relative_url }}">À propos</a></li>
-          <li><a href="{{ '/contact/' | relative_url }}">Contact</a></li>
-        </ul>
-        <div class="menu-right">
-          <a href="/admin/" class="login-button" id="login-button">
+    <div class="top-nav">
+      <div class="nav-container">
+        <nav class="main-nav">
+          <ul>
+            <li><a href="{{ '/' | relative_url }}">Accueil</a></li>
+            <li><a href="{{ '/about/' | relative_url }}">À propos</a></li>
+            <li><a href="{{ '/contact/' | relative_url }}">Contact</a></li>
+          </ul>
+        </nav>
+        <div class="auth-nav">
+          <a href="/admin" class="login-button">
             <i class="fas fa-user"></i>
             <span>Connexion</span>
           </a>
         </div>
       </div>
-    </nav>
+    </div>
 
     <header class="hero" style="background-image: url('/images/header.jpg');">
       <div class="hero-overlay">
@@ -65,13 +67,17 @@
     <script>
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", user => {
-          const loginButton = document.getElementById('login-button');
+          const loginButton = document.querySelector('.login-button');
           if (user) {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
             loginButton.href = '/admin/';
           } else {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
             loginButton.href = '#';
+            loginButton.onclick = () => {
+              window.netlifyIdentity.open();
+              return false;
+            };
           }
         });
 

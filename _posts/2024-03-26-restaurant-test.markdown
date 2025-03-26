@@ -4,10 +4,9 @@ title: "Le Petit Bistro"
 date: 2024-03-26
 categories: [restaurants]
 image: /images/restaurant-test.jpg
-note: 4.5
+note: 4
 style: "Français"
 description: "Un charmant petit bistro français au cœur de Sherbrooke, offrant une cuisine authentique et raffinée dans une ambiance chaleureuse."
-price_range: "$$"
 ---
 
 ## Notre expérience
