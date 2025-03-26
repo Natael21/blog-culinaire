@@ -73,7 +73,7 @@
             loginButton.href = '/admin/';
           } else {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
-            loginButton.href = '#';
+            loginButton.href = 'javascript:void(0)';
             loginButton.onclick = () => {
               window.netlifyIdentity.open();
               return false;
@@ -82,10 +82,15 @@
         });
 
         window.netlifyIdentity.on("login", () => {
-          document.location.href = "/admin/";
+          const loginButton = document.querySelector('.login-button');
+          loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
+          loginButton.href = '/admin/';
         });
 
         window.netlifyIdentity.on("logout", () => {
+          const loginButton = document.querySelector('.login-button');
+          loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
+          loginButton.href = 'javascript:void(0)';
           document.location.href = "/";
         });
       }
