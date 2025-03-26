@@ -1,32 +1,21 @@
-
-
 ---
 layout: default
 title: Accueil
 ---
 
-<!-- Header Hero -->
-<header class="hero">
-  <div class="hero" style="background-image: url('/images/header.jpg');">
-    <h1>Appréciation Restaurants Sherbrooke</h1>
-    <p>Explore nos avis sur les meilleurs restaurants de Sherbrooke, notés avec passion par deux gourmets.</p>
-  </div>
-</header>
-
-<!-- Articles Grid -->
-<main class="restaurant-grid">
-  {% assign sorted_posts = site.posts | where_exp: "post", "post.categories contains 'restaurants'" | sort: 'date' | reverse %}
-  {% for post in sorted_posts limit:24 %}
-    <article class="card">
-      <a href="{{ post.url }}">
-        <img src="{{ post.image | relative_url }}" alt="Image de {{ post.title }}">
-        <div class="card-content">
+<div class="post-grid">
+  {% assign posts = site.posts | where_exp:"item", "item.categories contains 'restaurants'" %}
+  {% for post in posts %}
+    <div class="post-card">
+      <a href="{{ post.url | relative_url }}">
+        <img src="{{ post.image | relative_url }}" alt="{{ post.title }}">
+        <div class="content">
           <h2>{{ post.title }}</h2>
-          <p class="note">⭐ {{ post.note }} / 5</p>
+          <p>Note : ⭐ {{ post.note }}/5</p>
           <p>{{ post.description | truncate: 100 }}</p>
-          <time>{{ post.date | date: "%d %B %Y" }}</time>
+          <p><em>{{ post.date | date: "%d %b %Y" }}</em></p>
         </div>
       </a>
-    </article>
+    </div>
   {% endfor %}
-</main>
+</div>
