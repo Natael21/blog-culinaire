@@ -472,20 +472,27 @@ footer {
 
 /* Login Button */
 .login-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: var(--primary-color);
-  color: var(--white) !important;
-  border-radius: 6px;
-  font-size: 1rem;
+  background-color: rgba(44, 62, 80, 0.8);
+  color: white !important;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
   transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .login-button:hover {
-  background: var(--accent-color);
+  background-color: rgba(44, 62, 80, 1);
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .login-button i {
@@ -515,8 +522,8 @@ footer {
   .login-button {
     bottom: 1rem;
     right: 1rem;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -540,24 +547,31 @@ footer {
   align-items: center;
 }
 
+.main-nav {
+  margin: 1.5rem 0;
+}
+
 .main-nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
+  justify-content: center;
   gap: 2rem;
 }
 
 .main-nav a {
   text-decoration: none;
-  color: #333;
+  color: var(--white);
   font-weight: 600;
-  font-size: 1rem;
-  transition: color 0.3s ease;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .main-nav a:hover {
-  color: #e74c3c;
+  color: var(--accent-color);
+  transform: translateY(-2px);
 }
 
 .auth-nav {
@@ -604,5 +618,9 @@ footer {
 
   .hero {
     margin-top: 120px;
+  }
+
+  .main-nav a {
+    font-size: 1rem;
   }
 }

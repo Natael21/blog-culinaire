@@ -10,8 +10,10 @@
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
-    <div class="top-nav">
-      <div class="nav-container">
+    <header class="hero" style="background-image: url('/images/header.jpg');">
+      <div class="hero-overlay">
+        <h1>Blog Culinaire Sherbrooke</h1>
+        <p class="tagline">Nos critiques honnêtes de restaurants à Sherbrooke – pour les amoureux de bonne bouffe</p>
         <nav class="main-nav">
           <ul>
             <li><a href="{{ '/' | relative_url }}">Accueil</a></li>
@@ -19,19 +21,6 @@
             <li><a href="{{ '/contact/' | relative_url }}">Contact</a></li>
           </ul>
         </nav>
-        <div class="auth-nav">
-          <a href="/admin" class="login-button">
-            <i class="fas fa-user"></i>
-            <span>Connexion</span>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <header class="hero" style="background-image: url('/images/header.jpg');">
-      <div class="hero-overlay">
-        <h1>Blog Culinaire Sherbrooke</h1>
-        <p class="tagline">Nos critiques honnêtes de restaurants à Sherbrooke – pour les amoureux de bonne bouffe</p>
         <div class="social-links">
           <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
           <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
@@ -64,16 +53,24 @@
       </div>
     </footer>
 
+    <a href="javascript:void(0)" class="login-button" id="login-button">
+      <i class="fas fa-user"></i>
+      <span>Connexion</span>
+    </a>
+
     <script>
       if (window.netlifyIdentity) {
+        const loginButton = document.getElementById('login-button');
+        
         window.netlifyIdentity.on("init", user => {
-          const loginButton = document.querySelector('.login-button');
           if (user) {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
-            loginButton.href = '/admin/';
+            loginButton.onclick = () => {
+              window.location.href = '/admin/';
+              return false;
+            };
           } else {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
-            loginButton.href = 'javascript:void(0)';
             loginButton.onclick = () => {
               window.netlifyIdentity.open();
               return false;
@@ -82,16 +79,20 @@
         });
 
         window.netlifyIdentity.on("login", () => {
-          const loginButton = document.querySelector('.login-button');
           loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
-          loginButton.href = '/admin/';
+          loginButton.onclick = () => {
+            window.location.href = '/admin/';
+            return false;
+          };
         });
 
         window.netlifyIdentity.on("logout", () => {
-          const loginButton = document.querySelector('.login-button');
           loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
-          loginButton.href = 'javascript:void(0)';
-          document.location.href = "/";
+          loginButton.onclick = () => {
+            window.netlifyIdentity.open();
+            return false;
+          };
+          window.location.href = "/";
         });
       }
     </script>
