@@ -37,6 +37,31 @@ layout: default
       </div>
     </div>
     {% endif %}
+
+    <div class="restaurant-navigation">
+      {% assign posts = site.posts | where: "layout", "restaurant" | sort: "date" | reverse %}
+      {% for post in posts %}
+        {% if post.url == page.url %}
+          {% assign post_index = forloop.index0 %}
+          {% assign prev_index = post_index | plus: 1 %}
+          {% assign next_index = post_index | minus: 1 %}
+          {% if prev_index < forloop.length %}
+            {% assign prev_post = posts[prev_index] %}
+            <a href="{{ prev_post.url }}" class="prev">
+              <i class="fas fa-arrow-left"></i>
+              {{ prev_post.title }}
+            </a>
+          {% endif %}
+          {% if next_index >= 0 %}
+            {% assign next_post = posts[next_index] %}
+            <a href="{{ next_post.url }}" class="next">
+              {{ next_post.title }}
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
   </div>
 </article>
 
