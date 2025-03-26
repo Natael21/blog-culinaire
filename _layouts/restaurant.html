@@ -39,3 +39,15 @@ layout: default
     {% endif %}
   </div>
 </article>
+
+<a href="javascript:history.back()" class="back-button">
+  <i class="fas fa-arrow-left"></i>
+  <span>Retour</span>
+</a>
+
+<script>
+  // Store the scroll position when leaving the page
+  window.addEventListener('beforeunload', function() {
+    sessionStorage.setItem('scrollPosition', window.scrollY);
+  });
+</script>

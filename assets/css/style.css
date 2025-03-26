@@ -23,8 +23,7 @@ body {
   justify-content: center;
   color: var(--white);
   position: relative;
-  margin-top: 60px;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
 .hero::before {
@@ -251,9 +250,11 @@ footer {
 }
 
 .page-header {
+  background: var(--white);
   text-align: center;
   margin-bottom: 3rem;
   padding: 2rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .page-header h2 {
@@ -479,24 +480,58 @@ footer {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background-color: rgba(44, 62, 80, 0.8);
-  color: white !important;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--primary-color) !important;
   text-decoration: none;
   border-radius: 4px;
   font-weight: 600;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .login-button:hover {
-  background-color: rgba(44, 62, 80, 1);
+  background-color: rgba(255, 255, 255, 1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .login-button i {
-  font-size: 1rem;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+}
+
+/* Back button for restaurant pages */
+.back-button {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--primary-color) !important;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.back-button i {
+  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {
@@ -519,11 +554,18 @@ footer {
     padding: 1rem;
   }
 
-  .login-button {
-    bottom: 1rem;
-    right: 1rem;
+  .login-button, .back-button {
     padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    bottom: 1rem;
+  }
+  
+  .login-button {
+    right: 1rem;
+  }
+  
+  .back-button {
+    left: 1rem;
   }
 }
 
