@@ -9,28 +9,39 @@ title: Accueil
 </div>
 
 <div class="post-grid">
-  {% assign posts = site.posts | where_exp:"item", "item.categories contains 'restaurants'" %}
-  {% for post in posts limit:12 %}
+  {% for post in site.posts %}
+    {% if post.layout == 'restaurant' %}
     <div class="post-card">
-      <a href="{{ post.url | relative_url }}">
-        <img src="{{ post.image | relative_url }}" alt="{{ post.title }}">
+      <a href="{{ post.url | relative_url }}" class="post-link">
+        <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
         <div class="content">
           <h2>{{ post.title }}</h2>
           <div class="rating">
-            <span class="stars">{% for i in (1..post.note) %}⭐{% endfor %}</span>
-            <span class="score">{{ post.note }}/5</span>
+            <span class="stars">
+              {% assign rating = post.note | default: 0 %}
+              {% for i in (1..5) %}
+                {% if i <= rating %}
+                  ⭐
+                {% endif %}
+              {% endfor %}
+            </span>
+            <span class="score">{{ rating }}/5</span>
           </div>
-          <p class="description">{{ post.description | truncate: 100 }}</p>
+          <p class="description">{{ post.description | truncate: 150 }}</p>
           <div class="meta">
             <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
-            <span class="price-range"><i class="fas fa-dollar-sign"></i> {{ post.price_range }}</span>
+            {% if post.style %}
+            <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
+            {% endif %}
           </div>
         </div>
       </a>
     </div>
+    {% endif %}
   {% endfor %}
 </div>
 
+{% if paginator.total_pages > 1 %}
 <div class="pagination">
   {% if paginator.previous_page %}
     <a href="{{ paginator.previous_page_path }}" class="previous">← Précédent</a>
@@ -42,3 +53,4 @@ title: Accueil
     <a href="{{ paginator.next_page_path }}" class="next">Suivant →</a>
   {% endif %}
 </div>
+{% endif %}
