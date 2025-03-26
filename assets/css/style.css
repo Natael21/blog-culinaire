@@ -2,52 +2,65 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f4f4f4;
 }
 
 header {
   background-color: #333;
   color: white;
-  padding: 1rem;
+  padding: 10px;
   text-align: center;
 }
 
-header nav a {
+header nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+header nav ul li {
+  display: inline;
+  margin-right: 15px;
+}
+
+header nav ul li a {
   color: white;
-  margin: 0 1rem;
   text-decoration: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .restaurant-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 20px;
-  padding: 20px;
 }
 
-.restaurant-item {
-  background-color: white;
-  padding: 20px;
+.restaurant-card {
+  width: 30%;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 15px;
 }
 
-.restaurant-item h2 {
-  font-size: 1.5rem;
+.restaurant-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.restaurant-info h2 {
+  font-size: 1.5em;
   color: #333;
 }
 
-.restaurant-item a {
-  text-decoration: none;
-  color: #007BFF;
+.restaurant-info p {
+  font-size: 1em;
+  color: #555;
 }
 
-footer {
-  background-color: #333;
-  color: white;
-  padding: 1rem;
-  text-align: center;
-  position: fixed;
-  width: 100%;
-  bottom: 0;
+.filters {
+  margin-bottom: 20px;
 }
