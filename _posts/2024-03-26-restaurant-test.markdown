@@ -4,50 +4,44 @@ title: "Le Petit Bistro"
 date: 2024-03-26
 categories: [restaurants]
 image: /images/restaurant-test.jpg
-note: 4
+note: 4.5
 style: "Français"
-description: "Un charmant petit bistro français au cœur de Sherbrooke, offrant une cuisine authentique et raffinée dans une ambiance chaleureuse."
+description: "Une expérience gastronomique française authentique au cœur de Sherbrooke. Ambiance chaleureuse et cuisine raffinée."
 ---
 
-## Notre expérience
+## Notre Expérience
 
-Situé dans le quartier historique de Sherbrooke, Le Petit Bistro nous a charmés dès notre arrivée. L'ambiance est chaleureuse et intime, avec des murs en pierre et un éclairage tamisé qui crée une atmosphère parfaite pour un dîner romantique.
+<div class="image-container right">
+  <img src="/images/restaurant-test.jpg" alt="La façade du Petit Bistro" class="content-image">
+  <p class="image-caption">La façade élégante du Petit Bistro</p>
+</div>
 
-### Les points forts
+Le Petit Bistro nous a accueillis dans une ambiance chaleureuse et authentique. Dès notre arrivée, nous avons été charmés par la décoration soignée qui mêle habilement le style bistrot parisien traditionnel aux touches modernes.
 
-- Service impeccable et attentionné
-- Menu saisonnier mettant en valeur les produits locaux
-- Carte des vins impressionnante
-- Desserts faits maison exceptionnels
+## Les Plats Dégustés
 
-### Ce que nous avons dégusté
+### Entrées
+![Notre sélection d'entrées](/images/restaurant-test.jpg)
 
-1. **Entrée** : Soupe à l'oignon gratinée
-   - Une version classique mais parfaite
-   - Fromage fondu à point
-   - Pain croustillant
+Les entrées étaient particulièrement réussies, avec une présentation soignée et des saveurs bien équilibrées.
 
-2. **Plat principal** : Filet mignon sauce au poivre
-   - Viande tendre et savoureuse
-   - Sauce riche et crémeuse
-   - Légumes de saison parfaitement cuits
+### Plat Principal
+<div class="image-container left">
+  <img src="/images/restaurant-test.jpg" alt="Le plat signature" class="content-image">
+  <p class="image-caption">Le plat signature : Magret de canard aux fruits rouges</p>
+</div>
 
-3. **Dessert** : Crème brûlée à la vanille
-   - Caramel parfaitement craquant
-   - Crème onctueuse et parfumée
-   - Fruits rouges frais en accompagnement
+Le magret de canard était cuit à la perfection, avec une peau croustillante et une chair tendre et juteuse. La sauce aux fruits rouges apportait une touche d'acidité bienvenue qui équilibrait parfaitement le plat.
 
-## Verdict
+## Notre Verdict
 
-Le Petit Bistro est une véritable perle dans le paysage culinaire sherbrookois. La qualité des ingrédients, l'attention aux détails et le service impeccable en font un restaurant à ne pas manquer. Nous recommandons particulièrement la terrasse en été pour un dîner en plein air.
+Une excellente adresse qui mérite sa réputation. La cuisine est précise, les produits sont de qualité, et le service est attentionné sans être guindé.
 
-### Prix
-- Entrées : 12-18$
-- Plats principaux : 28-42$
-- Desserts : 8-12$
+## Informations Pratiques
 
-### Informations pratiques
-- Réservation recommandée
-- Stationnement gratuit à proximité
-- Ouvert du mardi au samedi
-- Service de 17h à 22h 
+- **Prix**: $$
+- **Adresse**: 123 rue des Gourmets, Sherbrooke
+- **Réservation**: Recommandée les week-ends
+- **Horaires**: 
+  - Mardi-Samedi: 11h30-14h30, 17h30-22h00
+  - Dimanche-Lundi: Fermé 

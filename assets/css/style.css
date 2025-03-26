@@ -435,6 +435,40 @@ footer {
   line-height: 1.8;
 }
 
+.restaurant-body img, .restaurant-body .content-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 2rem 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.restaurant-body .image-container {
+  margin: 2rem 0;
+}
+
+.restaurant-body .image-container.left {
+  float: left;
+  margin-right: 2rem;
+  margin-bottom: 1rem;
+  max-width: 50%;
+}
+
+.restaurant-body .image-container.right {
+  float: right;
+  margin-left: 2rem;
+  margin-bottom: 1rem;
+  max-width: 50%;
+}
+
+.restaurant-body .image-caption {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
 .restaurant-gallery {
   margin-top: 3rem;
 }
@@ -610,6 +644,13 @@ footer {
   .restaurant-navigation a {
     width: 100%;
     justify-content: center;
+  }
+
+  .restaurant-body .image-container.left,
+  .restaurant-body .image-container.right {
+    float: none;
+    margin: 2rem 0;
+    max-width: 100%;
   }
 }
 
