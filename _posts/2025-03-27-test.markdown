@@ -5,6 +5,8 @@ note: 4
 style: Asiatique
 description: "123344"
 image: /images/chanchai.jpeg
+locale: 'fr'
+encoding: utf-8
 ---
 
 **I﻿ncroyabole !**
@@ -16,3 +18,9 @@ image: /images/chanchai.jpeg
 
 
 **N﻿icoas :**
+
+- { label: "Note sur 5", name: "note", widget: "number", min: 0, max: 5, value_type: "int" }
+
+- { label: "Contenu", name: "body", widget: "markdown", default: "**Nataël** :\n\n\n\n**Nicolas** :\n" }
+
+- { label: "Galerie d'images", name: "images", widget: "list", field: {label: "Image", name: "image", widget: "image"}, required: false }
