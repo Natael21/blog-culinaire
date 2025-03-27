@@ -5,6 +5,15 @@ backend:
   auth_endpoint: "https://${AUTH0_DOMAIN}/authorize"
   identity_url: "https://appreciationrestaurantssherbrooke.netlify.app/.netlify/identity"
   gateway_url: "https://appreciationrestaurantssherbrooke.netlify.app/.netlify/git"
+  commit_messages:
+    create: 'Create {{collection}} "{{slug}}"'
+    update: 'Update {{collection}} "{{slug}}"'
+    delete: 'Delete {{collection}} "{{slug}}"'
+    uploadMedia: 'Upload "{{path}}"'
+    deleteMedia: 'Delete "{{path}}"'
+  open_authoring: true
+  use_graphql: true
+  publish_mode: editorial_workflow
 
 auth:
   provider: auth0
@@ -19,6 +28,7 @@ collections:
     label: "Restaurants"
     folder: "_posts"
     create: true
+    publish: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Nom du restaurant", name: "title", widget: "string" }
