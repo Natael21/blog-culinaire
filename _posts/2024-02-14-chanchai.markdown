@@ -4,16 +4,20 @@ title: "Chanchai"
 date: 2024-02-14
 note: 4
 style: "Thaïlandais"
-description: "Un restaurant thaïlandais authentique qui vous transporte directement en Asie !"
+description: "L'un des plus grands restaurants thaïlandais en ville !"
 image: "/images/chanchai.jpeg"
 images:
   - image: "/images/chanchai.jpeg"
+  - image: "/images/chanchai_natael.jpg"
+  - image: "/images/chanchai_nicolas.jpg"
 ---
 
 **Nataël** :
 
-J'ai eu la chance de goûter au General Chanchai, un plat signature du restaurant. Le poulet était parfaitement pané et la sauce était délicieusement épicée. Les légumes étaient frais et croquants, et le riz était bien cuit. L'ambiance est très agréable avec une décoration qui nous fait voyager. Le service est attentionné et le personnel est très accueillant. C'est un excellent endroit pour découvrir la cuisine thaïlandaise authentique !
+Excellent endroit tranquille pour manger de la bonne nourriture de type thaïlandaise ! Pour ma part, j'ai eu la chance de goûter un poulet général Chanchai, l'équivalent d'un poulet général Tao. Les saveurs étaient au rendez-vous à tous les niveaux ! Le poulet était très bien assaisonné et dans une bonne sauce, les légumes sautés étaient parfaitement salés et goûteux et finalement les nouilles complétaient très bien le tout ! De plus, ce sont de généreuses portions pour le prix, donc ça en vaut la peine !
 
 **Nicolas** :
 
-Pour ma part, j'ai opté pour un pad thai aux crevettes qui était excellent ! Les nouilles étaient parfaitement cuites et la sauce était bien équilibrée. Les crevettes étaient fraîches et bien préparées. J'ai particulièrement apprécié les arachides croquantes qui donnaient une belle texture au plat. L'ambiance est chaleureuse et le service est rapide. Le personnel est passionné et prend le temps d'expliquer les plats et leurs ingrédients. C'est un restaurant à ne pas manquer pour les amateurs de cuisine thaïlandaise ! 
+Nous étions chanceux d'avoir eu nos places, le resto n'acceptait plus les réservations ! Heureusement, nous sommes arrivés dès l'ouverture et il ne restait plus que trois tables pour deux disponibles. Il avait aussi l'option d'emporter notre souper, mais ça n'aurait pas suffi pour apprécier pleinement !
+
+J'ai pris le Pad Sew Cew (ou Pad Sew Ew) qui a le goût similaire de la recette originale, mais les nouilles sont plutôt dérivées du Chow Mein. J'ai adoré ce plat, surtout que tous les légumes y sont frais, ça fait la différence ! Cependant, j'ai trouvé que c'était une trop grande portion, j'imagine que les différents formats (petit, moyen, grand) viendront s'ajouter bientôt. Pour l'instant, assurez-vous d'avoir un bon appétit avant de commander 🙂 

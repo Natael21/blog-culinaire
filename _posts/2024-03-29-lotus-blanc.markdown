@@ -11,6 +11,7 @@ images:
   - image: "/images/Lotus blanc_nicolas.jpg"
   - image: "/images/Lotus blanc_natael.jpg"
   - image: "/images/Lotus blanc_soupe boeuf.jpg"
+  - image: "/images/Lotus Blanc_entré_nat.jpg"
   - image: "/images/Lotus blanc_rouleaux.jpg"
   - image: "/images/Lotus Blanc_Nicolas (2).jpg"
   - image: "/images/Lotus blanc bol.jpg"
