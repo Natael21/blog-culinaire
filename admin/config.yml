@@ -1,11 +1,15 @@
 backend:
   name: git-gateway
   branch: master
-  identity_url: https://appreciationrestaurantssherbrooke.netlify.app/.netlify/identity
-  gateway_url: https://appreciationrestaurantssherbrooke.netlify.app/.netlify/git
   auth_type: oauth
-  auth_endpoint: https://dev-o6jdwvfssux2qw4h.us.auth0.com/authorize
-  client_id: Co9g1RLoovI5XcOJYhyFzF1D6a5oBRzh
+  auth_endpoint: "https://${AUTH0_DOMAIN}/authorize"
+  identity_url: "https://appreciationrestaurantssherbrooke.netlify.app/.netlify/identity"
+  gateway_url: "https://appreciationrestaurantssherbrooke.netlify.app/.netlify/git"
+
+auth:
+  provider: auth0
+  auth0_domain: "${AUTH0_DOMAIN}"
+  client_id: "${AUTH0_CLIENT_ID}"
 
 media_folder: "/images"
 public_folder: "/images"
