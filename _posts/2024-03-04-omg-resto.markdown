@@ -1,0 +1,21 @@
+---
+layout: restaurant
+title: "OMG Resto"
+date: 2024-03-04
+note: 3
+style: "Américain"
+description: "Anciennement OMG Burger, c'est un très beau restaurant dans une ancienne église qui a été revampé pour la cause. La carte des mets a beaucoup changé et offre malheureusement moins de choix de burger qu'auparavant !"
+image: "/images/OMG_Resto.jpg"
+images:
+  - image: "/images/OMG_natael.JPG"
+  - image: "/images/OMG_Nicolas.jpg"
+  - image: "/images/OMG_bieres.jpg"
+---
+
+**Nataël** :
+
+Ça faisait déjà plusieurs années que j'y étais allé, probablement avant la covid. Donc, j'étais content de voir les changements apportés au restaurant. Par contre, j'ai été un peu déçu de voir que le menu avait beaucoup changé et qu'il y avait moins de choix de burgers. Malgré tout, le burger que j'ai choisi était très bon et le service était excellent !
+
+**Nicolas** :
+
+À venir 

@@ -1,0 +1,20 @@
+---
+layout: restaurant
+title: "Guacamole y tequila (Sherbrooke)"
+date: 2023-05-14
+note: 3
+style: "Mexicain"
+description: "Belle ambiance mexicaine, ce restaurant offre des classiques mexicains ainsi qu'une grande variété de cocktails."
+image: "/images/Guacamole y tequila.png"
+images:
+  - image: "/images/Guecamole y Tequila Nicolas.png"
+  - image: "/images/Guecamole y Tequila Nataël.jpg"
+---
+
+**Nataël** :
+
+Pour cette occasion, j'ai décidé d'être aventurier et d'y aller avec des enchiladas, mais accompagné d'une sauce piquante ! Malheureusement, je ne suis pas très tolérant à la sauce piquante et j'ai eu du mal à terminer mon repas. Cependant, la qualité de la nourriture était bonne et l'ambiance très agréable.
+
+**Nicolas** :
+
+À venir 

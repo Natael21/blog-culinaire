@@ -2,17 +2,21 @@
 layout: restaurant
 title: "Baladi"
 date: 2023-07-29
-categories: [restaurants]
-image: /images/Baladi.jpeg
 note: 4
-style: "$$"
+style: "Libano-Marocain"
 description: "C'est l'un des meilleurs restaurants à cuisine libano-marocaine en ville, particulièrement pour leur spécialité du couscous !"
+image: "/images/Baladi.jpeg"
+images:
+  - image: "/images/Baladi Nataël.jpg"
+  - image: "/images/Baladi Nicolas.jpg"
+  - image: "/images/Baladi nourriture_2.jpg"
+  - image: "/images/Baladi nourriture Nicolas.jpg"
 ---
 
 **Nataël** :
 
-Après avoir goûté à de la nourriture iranienne, on a décidé de continuer sur notre lancée et d'en essayer un nouveau. Leur thé à la menthe est complètement incroyable et je le recommande fortement ! J'ai eu la chance de déguster des brochettes de poulet et d'agneau sur un lit de riz, accompagnée d'une salade, de pain pita et d'humus. Le seul « hic » serait que mon poulet était un peu sec, mais le rapport qualité-prix est abordable !
+Après avoir goûté à de la nourriture iranienne, on a décidé de continuer sur notre lancée et d'en essayer un nouveau. Leur thé à la menthe est complètement incroyable et je le recommande fortement ! J'ai choisi le couscous aux légumes qui était copieux et savoureux. Les épices étaient bien dosées et les légumes parfaitement cuits.
 
 **Nicolas** :
 
-Étant un amateur et cuisinier de couscous, je me suis laissé emporté non seulement par le cousin du riz, mais aussi par le thé à la menthe dont je n'arrive pas d'arrêter y penser ! Ce fut un excellent repas et le service est à la fois rapide et généreux.
+À venir

@@ -1,0 +1,17 @@
+---
+layout: restaurant
+title: "Chanchai"
+date: 2024-02-14
+note: 4
+style: "Thaïlandais"
+description: "L'un des plus grands restaurants thaïlandais en ville !"
+image: "/images/chanchai.jpeg"
+---
+
+**Nataël** :
+
+Excellent endroit tranquille pour manger de la bonne nourriture de type thaïlandaise ! Pour ma part, j'ai eu la chance de goûter un poulet général chanchai, l'équivalent d'un poulet général tao. Les saveurs étaient au rendez-vous à tous les niveaux ! Le poulet était croustillant et la sauce était parfaitement équilibrée entre le sucré et l'épicé.
+
+**Nicolas** :
+
+À venir 
