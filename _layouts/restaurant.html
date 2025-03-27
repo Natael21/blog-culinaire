@@ -8,8 +8,14 @@ layout: default
       <h1>{{ page.title }}</h1>
       <div class="restaurant-meta">
         <div class="rating">
-          {% assign rating = page.note | default: 0 %}
-          <span class="stars">{% for i in (1..rating) %}⭐{% endfor %}</span>
+          {% assign rating = page.note | default: 0 | round %}
+          <span class="stars">
+            {% for i in (1..5) %}
+              {% if i <= rating %}
+                ⭐
+              {% endif %}
+            {% endfor %}
+          </span>
           <span class="score">{{ rating }}/5</span>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
