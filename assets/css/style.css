@@ -363,6 +363,7 @@ footer {
   background-position: center;
   position: relative;
   margin: -2rem -2rem 2rem;
+  background-image: url('/images/header.jpg');
 }
 
 .restaurant-header::before {

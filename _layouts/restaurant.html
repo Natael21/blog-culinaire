@@ -3,18 +3,19 @@ layout: default
 ---
 
 <article class="restaurant-detail">
-  <div class="restaurant-header" style="background-image: url('{{ page.image | default: "/images/header.jpg" }}');">
+  <div class="restaurant-header" data-background="{{ page.image | default: '/images/header.jpg' }}">
     <div class="restaurant-header-content">
       <h1>{{ page.title }}</h1>
       <div class="restaurant-meta">
         <div class="rating">
-          <span class="stars" aria-label="Note: {{ page.note | default: 0 }} sur 5">
-            {% assign full_stars = page.note | default: 0 | floor %}
+          {% assign rating = page.note | default: 0 %}
+          <span class="stars" aria-label="Note: {{ rating }} sur 5">
+            {% assign full_stars = rating | floor %}
             {% for i in (1..full_stars) %}⭐{% endfor %}
-            {% assign decimal_part = page.note | default: 0 | minus: full_stars %}
+            {% assign decimal_part = rating | minus: full_stars %}
             {% if decimal_part >= 0.5 %}⭐{% endif %}
           </span>
-          <span class="score">{{ page.note | default: 0 }}/5</span>
+          <span class="score">{{ rating }}/5</span>
         </div>
         {% if page.style %}
         <span class="style"><i class="fas fa-utensils" aria-hidden="true"></i> {{ page.style }}</span>
@@ -80,12 +81,19 @@ layout: default
 </a>
 
 <script>
-  // Store the scroll position when leaving the page
+  // Set background image
+  const header = document.querySelector('.restaurant-header');
+  if (header) {
+    const background = header.dataset.background;
+    if (background) {
+      header.style.backgroundImage = `url('${background}')`;
+    }
+  }
+
   window.addEventListener('beforeunload', function() {
     sessionStorage.setItem('scrollPosition', window.scrollY);
   });
 
-  // Handle back button navigation
   document.querySelector('.back-button').addEventListener('click', function(e) {
     e.preventDefault();
     if (window.history.length > 1) {
