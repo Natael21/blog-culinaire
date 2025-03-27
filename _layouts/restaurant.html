@@ -3,103 +3,51 @@ layout: default
 ---
 
 <article class="restaurant-detail">
-  <div class="restaurant-header" data-background="{{ page.image | default: '/images/header.jpg' }}">
+  <div class="restaurant-header" style="background-image: url('{{ page.image }}');">
     <div class="restaurant-header-content">
       <h1>{{ page.title }}</h1>
       <div class="restaurant-meta">
         <div class="rating">
-          {% assign rating = page.note | default: 0 %}
-          <span class="stars" aria-label="Note: {{ rating }} sur 5">
-            {% assign full_stars = rating | floor %}
-            {% for i in (1..full_stars) %}⭐{% endfor %}
-            {% assign decimal_part = rating | minus: full_stars %}
-            {% if decimal_part >= 0.5 %}⭐{% endif %}
-          </span>
-          <span class="score">{{ rating }}/5</span>
+          <span class="stars">{% for i in (1..page.note) %}⭐{% endfor %}</span>
+          <span class="score">{{ page.note }}/5</span>
         </div>
-        {% if page.style %}
-        <span class="style"><i class="fas fa-utensils" aria-hidden="true"></i> {{ page.style }}</span>
-        {% endif %}
+        <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
       </div>
     </div>
   </div>
 
   <div class="restaurant-content">
-    {% if page.description %}
     <div class="restaurant-description">
       <p>{{ page.description }}</p>
     </div>
-    {% endif %}
 
     <div class="restaurant-body">
       {{ content }}
     </div>
 
-    {% if page.images and page.images.size > 0 %}
+    {% if page.images %}
     <div class="restaurant-gallery">
       <h2>Galerie photos</h2>
       <div class="gallery-grid">
         {% for image in page.images %}
         <div class="gallery-item">
-          <img src="{{ image.image }}" alt="{{ page.title }} - Photo {{ forloop.index }}" loading="lazy">
+          <img src="{{ image.image }}" alt="{{ page.title }}">
         </div>
         {% endfor %}
       </div>
     </div>
     {% endif %}
-
-    <div class="restaurant-navigation">
-      {% assign posts = site.posts | where: "layout", "restaurant" | sort: "date" | reverse %}
-      {% for post in posts %}
-        {% if post.url == page.url %}
-          {% assign post_index = forloop.index0 %}
-          {% assign prev_index = post_index | plus: 1 %}
-          {% assign next_index = post_index | minus: 1 %}
-          {% if prev_index < forloop.length %}
-            {% assign prev_post = posts[prev_index] %}
-            <a href="{{ prev_post.url }}" class="prev" rel="prev">
-              <i class="fas fa-arrow-left" aria-hidden="true"></i>
-              {{ prev_post.title }}
-            </a>
-          {% endif %}
-          {% if next_index >= 0 %}
-            {% assign next_post = posts[next_index] %}
-            <a href="{{ next_post.url }}" class="next" rel="next">
-              {{ next_post.title }}
-              <i class="fas fa-arrow-right" aria-hidden="true"></i>
-            </a>
-          {% endif %}
-        {% endif %}
-      {% endfor %}
-    </div>
   </div>
 </article>
 
-<a href="javascript:history.back()" class="back-button" role="button">
-  <i class="fas fa-arrow-left" aria-hidden="true"></i>
+<a href="javascript:history.back()" class="back-button">
+  <i class="fas fa-arrow-left"></i>
   <span>Retour</span>
 </a>
 
 <script>
-  // Set background image
-  const header = document.querySelector('.restaurant-header');
-  if (header) {
-    const background = header.dataset.background;
-    if (background) {
-      header.style.backgroundImage = `url('${background}')`;
-    }
-  }
-
+  // Store the scroll position when leaving the page
   window.addEventListener('beforeunload', function() {
     sessionStorage.setItem('scrollPosition', window.scrollY);
-  });
-
-  document.querySelector('.back-button').addEventListener('click', function(e) {
-    e.preventDefault();
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = '/';
-    }
   });
 </script>

@@ -250,9 +250,11 @@ footer {
 }
 
 .page-header {
+  background: var(--white);
   text-align: center;
   margin-bottom: 3rem;
   padding: 2rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .page-header h2 {
@@ -363,7 +365,6 @@ footer {
   background-position: center;
   position: relative;
   margin: -2rem -2rem 2rem;
-  background-image: url('/images/header.jpg');
 }
 
 .restaurant-header::before {
@@ -436,40 +437,6 @@ footer {
   line-height: 1.8;
 }
 
-.restaurant-body img, .restaurant-body .content-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin: 2rem 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.restaurant-body .image-container {
-  margin: 2rem 0;
-}
-
-.restaurant-body .image-container.left {
-  float: left;
-  margin-right: 2rem;
-  margin-bottom: 1rem;
-  max-width: 50%;
-}
-
-.restaurant-body .image-container.right {
-  float: right;
-  margin-left: 2rem;
-  margin-bottom: 1rem;
-  max-width: 50%;
-}
-
-.restaurant-body .image-caption {
-  text-align: center;
-  font-style: italic;
-  color: #666;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-}
-
 .restaurant-gallery {
   margin-top: 3rem;
 }
@@ -523,37 +490,17 @@ footer {
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  pointer-events: none;
 }
 
 .login-button:hover {
   background-color: rgba(255, 255, 255, 1);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
 }
 
 .login-button i {
   font-size: 0.9rem;
   color: var(--primary-color);
-}
-
-/* Remove duplicate login button styles */
-.auth-nav .login-button {
-  position: static;
-  opacity: 1;
-  pointer-events: auto;
-  background-color: var(--accent-color);
-  color: var(--white) !important;
-}
-
-.auth-nav .login-button:hover {
-  background-color: #c0392b;
-}
-
-.auth-nav .login-button i {
-  color: var(--white);
 }
 
 /* Back button for restaurant pages */
@@ -564,68 +511,30 @@ footer {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  background-color: var(--accent-color);
-  color: white !important;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--primary-color) !important;
   text-decoration: none;
   border-radius: 4px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
   z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .back-button:hover {
-  background-color: #c0392b;
+  background-color: rgba(255, 255, 255, 1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .back-button i {
-  font-size: 1rem;
-}
-
-/* Restaurant navigation */
-.restaurant-navigation {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-}
-
-.restaurant-navigation a {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  background-color: var(--primary-color);
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.restaurant-navigation a:hover {
-  background-color: var(--accent-color);
-  transform: translateY(-2px);
-}
-
-.restaurant-navigation .prev i {
-  margin-right: 0.5rem;
-}
-
-.restaurant-navigation .next i {
-  margin-left: 0.5rem;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-
   .restaurant-header {
     height: 300px;
     margin: -1rem -1rem 1rem;
@@ -658,52 +567,6 @@ footer {
   .back-button {
     left: 1rem;
   }
-
-  .restaurant-navigation {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .restaurant-navigation a {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .restaurant-body .image-container.left,
-  .restaurant-body .image-container.right {
-    float: none;
-    margin: 2rem 0;
-    max-width: 100%;
-  }
-
-  .main-nav {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 0.5rem 1rem;
-  }
-
-  .main-nav ul {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .main-nav a {
-    font-size: 1rem;
-    padding: 0.5rem 0;
-  }
-
-  .hero {
-    margin-top: 0;
-    height: 300px;
-  }
-
-  .hero h1 {
-    font-size: 2rem;
-  }
-
-  .hero .tagline {
-    font-size: 1rem;
-  }
 }
 
 /* Navigation */
@@ -727,13 +590,7 @@ footer {
 }
 
 .main-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  padding: 1rem 2rem;
-  background: transparent;
+  margin: 1.5rem 0;
 }
 
 .main-nav ul {
@@ -761,6 +618,28 @@ footer {
 
 .auth-nav {
   margin-left: 2rem;
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #e74c3c;
+  color: white !important;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #c0392b;
+  cursor: pointer;
+}
+
+.login-button i {
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {

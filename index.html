@@ -19,10 +19,11 @@ title: Accueil
           <div class="rating">
             <span class="stars">
               {% assign rating = post.note | default: 0 %}
-              {% assign full_stars = rating | floor %}
-              {% for i in (1..full_stars) %}⭐{% endfor %}
-              {% assign decimal_part = rating | minus: full_stars %}
-              {% if decimal_part >= 0.5 %}⭐{% endif %}
+              {% for i in (1..5) %}
+                {% if i <= rating %}
+                  ⭐
+                {% endif %}
+              {% endfor %}
             </span>
             <span class="score">{{ rating }}/5</span>
           </div>
