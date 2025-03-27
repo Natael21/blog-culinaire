@@ -364,7 +364,8 @@ footer {
   background-size: cover;
   background-position: center;
   position: relative;
-  margin: -2rem -2rem 2rem;
+  margin: 0;
+  border-bottom: 5px solid var(--accent-color);
 }
 
 .restaurant-header::before {
@@ -665,4 +666,35 @@ footer {
   .main-nav a {
     font-size: 1rem;
   }
+}
+
+.main-nav-container {
+  background: var(--primary-color);
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.main-nav-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.main-nav-container a {
+  text-decoration: none;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.main-nav-container a:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
 }
