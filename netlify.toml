@@ -1,12 +1,13 @@
 [build]
-  command = "jekyll build"
+  command = "bundle exec jekyll build"
   publish = "_site"
 
 [build.environment]
   JEKYLL_ENV = "production"
+  RUBY_VERSION = "2.7.4"
 
 [[plugins]]
-  package = "netlify-plugin-jekyll-cache"
+  package = "@netlify/plugin-sitemap"
 
 [[headers]]
   for = "/*"
@@ -15,4 +16,4 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:; connect-src 'self' https:; media-src 'self' https:; object-src 'none'; frame-src 'self' https:; worker-src 'self' blob:;" 
+    Content-Security-Policy = "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: identity.netlify.com; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https: fonts.gstatic.com data:; connect-src 'self' https: identity.netlify.com; media-src 'self' https:; object-src 'none'; frame-src 'self' https: identity.netlify.com; worker-src 'self' blob:;" 
