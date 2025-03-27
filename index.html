@@ -8,10 +8,11 @@ title: Accueil
   <p>Explorez nos critiques de restaurants à Sherbrooke</p>
 </div>
 
-<div class="filters-container">
-  <div class="filters">
+<div class="content-wrapper">
+  <div class="filters-sidebar">
     <div class="filter-group">
-      <label for="sort-by">Trier par:</label>
+      <h3>Filtres</h3>
+      <label for="sort-by">Trier par</label>
       <select id="sort-by" class="filter-select">
         <option value="date-desc">Date (Plus récent)</option>
         <option value="date-asc">Date (Plus ancien)</option>
@@ -20,10 +21,8 @@ title: Accueil
         <option value="rating-desc">Note (Plus haute)</option>
         <option value="rating-asc">Note (Plus basse)</option>
       </select>
-    </div>
-    
-    <div class="filter-group">
-      <label for="style-filter">Style de cuisine:</label>
+
+      <label for="style-filter">Style de cuisine</label>
       <select id="style-filter" class="filter-select">
         <option value="">Tous les styles</option>
         <option value="Asiatique">Asiatique</option>
@@ -41,68 +40,52 @@ title: Accueil
         <option value="Pub">Pub</option>
         <option value="Boulangerie-Café">Boulangerie-Café</option>
       </select>
-    </div>
 
-    <div class="filter-group">
-      <label for="rating-filter">Note minimum:</label>
+      <label for="rating-filter">Note</label>
       <select id="rating-filter" class="filter-select">
         <option value="">Toutes les notes</option>
         <option value="5">5 étoiles</option>
-        <option value="4">4 étoiles et plus</option>
-        <option value="3">3 étoiles et plus</option>
-        <option value="2">2 étoiles et plus</option>
-        <option value="1">1 étoile et plus</option>
+        <option value="4">4 étoiles</option>
+        <option value="3">3 étoiles</option>
+        <option value="2">2 étoiles</option>
+        <option value="1">1 étoile</option>
       </select>
     </div>
   </div>
-</div>
 
-<div class="post-grid" id="restaurant-grid">
-  {% for post in site.posts %}
-    {% if post.layout == 'restaurant' %}
-    <div class="post-card" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-rating="{{ post.note }}" data-style="{{ post.style }}">
-      <a href="{{ post.url | relative_url }}" class="post-link">
-        <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
-        <div class="content">
-          <h2>{{ post.title }}</h2>
-          <div class="rating">
-            <span class="stars">
-              {% assign rating = post.note | default: 0 %}
-              {% for i in (1..5) %}
-                {% if i <= rating %}
-                  ⭐
-                {% endif %}
-              {% endfor %}
-            </span>
-            <span class="score">{{ rating }}/5</span>
+  <div class="post-grid" id="restaurant-grid">
+    {% for post in site.posts %}
+      {% if post.layout == 'restaurant' %}
+      <div class="post-card" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-rating="{{ post.note }}" data-style="{{ post.style }}">
+        <a href="{{ post.url | relative_url }}" class="post-link">
+          <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
+          <div class="content">
+            <h2>{{ post.title }}</h2>
+            <div class="rating">
+              <span class="stars">
+                {% assign rating = post.note | default: 0 %}
+                {% for i in (1..5) %}
+                  {% if i <= rating %}
+                    ⭐
+                  {% endif %}
+                {% endfor %}
+              </span>
+              <span class="score">{{ rating }}/5</span>
+            </div>
+            <p class="description">{{ post.description | truncate: 150 }}</p>
+            <div class="meta">
+              <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
+              {% if post.style %}
+              <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
+              {% endif %}
+            </div>
           </div>
-          <p class="description">{{ post.description | truncate: 150 }}</p>
-          <div class="meta">
-            <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
-            {% if post.style %}
-            <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
-            {% endif %}
-          </div>
-        </div>
-      </a>
-    </div>
-    {% endif %}
-  {% endfor %}
+        </a>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
 </div>
-
-{% if paginator.total_pages > 1 %}
-<div class="pagination">
-  {% if paginator.previous_page %}
-    <a href="{{ paginator.previous_page_path }}" class="previous">← Précédent</a>
-  {% endif %}
-  
-  <span class="page_number">Page {{ paginator.page }} sur {{ paginator.total_pages }}</span>
-  
-  {% if paginator.next_page %}
-    <a href="{{ paginator.next_page_path }}" class="next">Suivant →</a>
-  {% endif %}
-</div>
-{% endif %}
 
 <script>
   // Restore scroll position when returning to the page
@@ -123,7 +106,7 @@ title: Accueil
 
   function filterRestaurants() {
     const selectedStyle = styleFilter.value;
-    const minRating = ratingFilter.value;
+    const exactRating = ratingFilter.value;
     const sortValue = sortSelect.value;
 
     // Filter by style and rating
@@ -131,7 +114,7 @@ title: Accueil
       const style = restaurant.dataset.style;
       const rating = parseFloat(restaurant.dataset.rating);
       const styleMatch = !selectedStyle || style === selectedStyle;
-      const ratingMatch = !minRating || rating >= parseFloat(minRating);
+      const ratingMatch = !exactRating || rating === parseFloat(exactRating);
       return styleMatch && ratingMatch;
     });
 

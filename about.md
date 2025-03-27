@@ -10,84 +10,69 @@ title: À propos
 
 <div class="about-content">
   <p>Curieux de la cuisine sherbrookoise ? Vous trouverez ici nos commentaires et appréciations sur les divers restaurants de Sherbrooke que nous avons essayés. Au lieu de prendre beaucoup de temps et d'argent à choisir quel sera votre endroit préféré, la consultation de notre site vous aidera à économiser du temps. Bonne lecture et bon appétit !</p>
+</div>
 
-  <div class="team-section">
-    <div class="team-member">
-      <div class="member-photo">
-        <img src="/images/Saveur_delice_Natael.jpg" alt="Nataël" loading="lazy">
-      </div>
-      <h3>Nataël</h3>
-      <p>Passionné de gastronomie et toujours à la recherche de nouvelles saveurs à Sherbrooke.</p>
-    </div>
-
-    <div class="team-member">
-      <div class="member-photo">
-        <img src="/images/Saveur_delice_Nicolas.jpg" alt="Nicolas" loading="lazy">
-      </div>
-      <h3>Nicolas</h3>
-      <p>Amateur de bonne cuisine et explorateur culinaire sherbrookois.</p>
-    </div>
+<div class="team-section">
+  <div class="team-member">
+    <img src="/images/Baladi Nataël.jpg" alt="Nataël" class="team-photo" loading="lazy">
+    <h3>Nataël</h3>
+    <p>Passionné de cuisine et toujours à la recherche de nouvelles saveurs</p>
+  </div>
+  <div class="team-member">
+    <img src="/images/Persepolis Nicolas.jpg" alt="Nicolas" class="team-photo" loading="lazy">
+    <h3>Nicolas</h3>
+    <p>Amateur de bonne cuisine et critique culinaire enthousiaste</p>
   </div>
 </div>
 
 <style>
 .team-section {
-  margin-top: 3rem;
   display: flex;
-  gap: 2rem;
   justify-content: center;
+  gap: 3rem;
+  margin-top: 3rem;
   flex-wrap: wrap;
 }
 
 .team-member {
-  flex: 1;
-  min-width: 250px;
-  max-width: 350px;
   text-align: center;
+  flex: 0 1 300px;
 }
 
-.member-photo {
+.team-photo {
   width: 200px;
   height: 200px;
-  margin: 0 auto 1rem;
   border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.member-photo img {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
-  object-position: center;
-  transition: transform 0.3s ease;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.member-photo:hover img {
+.team-photo:hover {
   transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
 .team-member h3 {
   color: var(--primary-color);
   font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
   margin: 0.5rem 0;
 }
 
 .team-member p {
   color: #666;
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {
   .team-section {
-    flex-direction: column;
-    align-items: center;
+    gap: 2rem;
   }
-
-  .team-member {
-    max-width: 100%;
+  
+  .team-photo {
+    width: 150px;
+    height: 150px;
   }
 }
 </style>
