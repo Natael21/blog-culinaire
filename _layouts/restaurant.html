@@ -133,6 +133,10 @@ layout: default
 .gallery-item {
   cursor: pointer;
   transition: transform 0.3s ease;
+  height: 250px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
 }
 
 .gallery-item:hover {
@@ -140,7 +144,19 @@ layout: default
 }
 
 .gallery-item img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 25%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
 }
 </style>
