@@ -4,7 +4,7 @@ title: "El Chupa Resto"
 date: 2024-03-16
 note: 4
 style: "Mexicain"
-description: "C'est la relève du fameux restaurant El Tabernaco ! De plus, la décoration et l'ambiance est la même qu'avant, ce qui est assez incroyable !"
+description: "Un endroit chaleureux qui a su reprendre le flambeau d'El Tabernaco avec brio !"
 image: "/images/El Chupa Resto.png"
 images:
   - image: "/images/El Chupa Resto_natael.jpg"
@@ -13,8 +13,8 @@ images:
 
 **Nataël** :
 
-Pour ma part, j'ai pris un repas classique, une quesadilla au bœuf, accompagné d'une sauce et de guacamole bien sûr ! Je dois dire que le goût y était et que c'était très bon. Le service était excellent et l'ambiance était parfaite !
+Ayant été un grand fan d'El Tabernaco, j'étais très curieux d'essayer El Chupa Resto qui a repris le local. Je dois dire que j'ai été agréablement surpris ! L'ambiance est toujours aussi chaleureuse et le service est excellent. J'ai pris une quesadilla au bœuf qui était vraiment délicieuse, la viande était tendre et bien assaisonnée, et le fromage était fondant à souhait. Les portions sont généreuses et les prix sont raisonnables. Le restaurant a gardé l'esprit festif et convivial d'El Tabernaco tout en apportant sa propre touche. Les tortillas sont faites maison et ça fait toute la différence !
 
 **Nicolas** :
 
-J'ai pris un burrito au poulet avec une sauce piquante et du guacamole. La sauce était parfaitement épicée et le guacamole était frais et savoureux. Le service était excellent et l'ambiance était très chaleureuse. C'est vraiment la relève parfaite d'El Tabernaco ! 
+Pour ma part, j'ai opté pour un burrito au poulet qui était excellent ! La sauce était bien relevée sans être trop piquante, et les légumes étaient frais et croquants. J'ai particulièrement apprécié la guacamole maison qui accompagnait le plat. L'ambiance est vraiment agréable, on se sent comme dans un véritable restaurant mexicain. Le service était rapide et attentionné. Je recommande vivement cet endroit pour les amateurs de cuisine mexicaine authentique ! 

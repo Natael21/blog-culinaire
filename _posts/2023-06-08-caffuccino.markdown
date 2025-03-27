@@ -1,10 +1,10 @@
 ---
 layout: restaurant
-title: "Caffuccino (Complexe Sportif Thibault GM)"
-date: 2024-05-04
+title: "Caffuccino"
+date: 2023-06-08
 note: 4
 style: "Café-Bistro"
-description: "Un endroit idéal pour regarder un match d'hockey !"
+description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
 image: "/images/Caffucino.jpg"
 images:
   - image: "/images/Caffucino_Nicolas.jpg"
@@ -13,8 +13,8 @@ images:
 
 **Nataël** :
 
-Pour commencer notre soirée, nous avons commandé une sangria rosée qui était incroyable ! Bien fruité et sucré avec un léger goût d'alcool ! Sinon, pour ma part, j'ai eu la chance de déguster un merveilleux burger de poulet grillé avec un accompagnement de frites. Le burger était très bon et les frites étaient croustillantes à souhait ! Le service était excellent et rapide. L'ambiance était parfaite pour regarder un match d'hockey !
+J'ai été agréablement surpris par ce petit café-bistro ! L'ambiance est très chaleureuse avec une belle décoration et une musique douce en fond. J'ai pris un sandwich au poulet qui était excellent, avec des ingrédients frais et une sauce maison délicieuse. Le café est également très bon et les desserts sont faits maison. Le service est attentionné et le personnel est très accueillant. C'est un endroit parfait pour un déjeuner ou un dîner léger dans une ambiance détendue.
 
 **Nicolas** :
 
-J'ai opté pour un burger au poulet grillé avec des frites qui était excellent ! Le burger était juteux et bien assaisonné, les frites étaient croustillantes et le service était rapide. La sangria rosée était délicieuse et l'ambiance était parfaite pour regarder un match d'hockey. C'est un excellent endroit pour manger un bon repas et regarder un match ! 
+Pour ma part, j'ai opté pour une salade César qui était fraîche et bien assaisonnée. Le poulet était tendre et le parmesan donnait un goût délicieux au plat. J'ai aussi eu la chance de goûter à leur café qui est excellent. L'ambiance est très agréable avec une belle terrasse en été. Le service est rapide et le personnel est toujours souriant. Les portions sont généreuses et les prix sont raisonnables. C'est un excellent endroit pour manger sainement tout en se faisant plaisir ! 

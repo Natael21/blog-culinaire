@@ -4,14 +4,16 @@ title: "Chanchai"
 date: 2024-02-14
 note: 4
 style: "Thaïlandais"
-description: "L'un des plus grands restaurants thaïlandais en ville !"
+description: "Un restaurant thaïlandais authentique qui vous transporte directement en Asie !"
 image: "/images/chanchai.jpeg"
+images:
+  - image: "/images/chanchai.jpeg"
 ---
 
 **Nataël** :
 
-Excellent endroit tranquille pour manger de la bonne nourriture de type thaïlandaise ! Pour ma part, j'ai eu la chance de goûter un poulet général chanchai, l'équivalent d'un poulet général tao. Les saveurs étaient au rendez-vous à tous les niveaux ! Le poulet était croustillant et la sauce était parfaitement équilibrée entre le sucré et l'épicé.
+J'ai eu la chance de goûter au General Chanchai, un plat signature du restaurant. Le poulet était parfaitement pané et la sauce était délicieusement épicée. Les légumes étaient frais et croquants, et le riz était bien cuit. L'ambiance est très agréable avec une décoration qui nous fait voyager. Le service est attentionné et le personnel est très accueillant. C'est un excellent endroit pour découvrir la cuisine thaïlandaise authentique !
 
 **Nicolas** :
 
-J'ai pris un pad thaï aux crevettes qui était excellent ! Les crevettes étaient fraîches et bien cuites, les nouilles étaient parfaitement préparées et la sauce était délicieuse. Le service était rapide et attentionné. C'est définitivement un endroit à revisiter ! 
+Pour ma part, j'ai opté pour un pad thai aux crevettes qui était excellent ! Les nouilles étaient parfaitement cuites et la sauce était bien équilibrée. Les crevettes étaient fraîches et bien préparées. J'ai particulièrement apprécié les arachides croquantes qui donnaient une belle texture au plat. L'ambiance est chaleureuse et le service est rapide. Le personnel est passionné et prend le temps d'expliquer les plats et leurs ingrédients. C'est un restaurant à ne pas manquer pour les amateurs de cuisine thaïlandaise ! 

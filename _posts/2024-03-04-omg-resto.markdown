@@ -4,18 +4,18 @@ title: "OMG Resto"
 date: 2024-03-04
 note: 4
 style: "Américain"
-description: "Anciennement OMG Burger, c'est un très beau restaurant dans une ancienne église qui a été revampé pour la cause. La carte des mets a beaucoup changé et offre malheureusement moins de choix de burger qu'auparavant !"
+description: "Anciennement OMG Burger, ce restaurant a su se réinventer tout en gardant l'essence de ce qui faisait son succès !"
 image: "/images/OMG_Resto.jpg"
 images:
-  - image: "/images/OMG_natael.JPG"
-  - image: "/images/OMG_Nicolas.jpg"
   - image: "/images/OMG_bieres.jpg"
+  - image: "/images/OMG_Nicolas.jpg"
+  - image: "/images/OMG_natael.JPG"
 ---
 
 **Nataël** :
 
-Ça faisait déjà plusieurs années que j'y étais allé, probablement avant la covid. Donc, j'étais content de voir les changements apportés au restaurant. Par contre, j'ai été un peu déçu de voir que le menu avait beaucoup changé et qu'il y avait moins de choix de burgers. Malgré tout, le burger que j'ai choisi était très bon et le service était excellent !
+J'ai été un peu déçu de voir que le menu des burgers a été réduit, mais je comprends que le restaurant veut se diversifier. J'ai pris un burger au bœuf avec frites, et je dois dire que la qualité est toujours au rendez-vous ! La viande était juteuse et bien assaisonnée, et les frites étaient parfaitement croustillantes. L'ambiance est toujours aussi agréable et le service est rapide. J'apprécie particulièrement leur sélection de bières artisanales qui accompagne parfaitement les burgers.
 
 **Nicolas** :
 
-Pour ma part, j'ai pris un burger au poulet avec des frites. Le burger était très bon et les frites étaient croustillantes. Le service était excellent et l'ambiance était très agréable. C'est un endroit parfait pour aller manger un bon burger et boire une bonne bière ! 
+Pour ma part, j'ai opté pour un burger au poulet qui était excellent ! La sauce maison donnait un goût unique au plat. Les frites étaient délicieuses et bien assaisonnées. L'ambiance est très conviviale et le service est efficace. Le personnel est toujours aussi accueillant et prend le temps de nous expliquer les différents plats. C'est un excellent endroit pour manger un bon burger et passer un bon moment entre amis ! 
