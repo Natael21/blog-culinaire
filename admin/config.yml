@@ -13,7 +13,8 @@ backend:
     deleteMedia: 'Delete "{{path}}"'
   open_authoring: true
   use_graphql: true
-  publish_mode: editorial_workflow
+
+publish_mode: editorial_workflow
 
 auth:
   provider: auth0
