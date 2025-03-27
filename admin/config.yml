@@ -1,6 +1,12 @@
 backend:
+  backend:
   name: git-gateway
-  branch: master # optional, default value is "master"
+  branch: master
+  identity_url: https://appreciationrestaurantssherbrooke.netlify.app/.netlify/identity
+  gateway_url: https://appreciationrestaurantssherbrooke.netlify.app/.netlify/git
+  auth_type: oauth
+  auth_endpoint: https://dev-o6jdwvfssux2qw4h.us.auth0.com/authorize
+  client_id: Co9g1RLoovI5XcOJYhyFzF1D6a5oBRzh
 
 media_folder: "/images" # Le dossier où les images sont stockées
 public_folder: "/images" # L'URL où les images seront accessibles
