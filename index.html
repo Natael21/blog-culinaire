@@ -8,10 +8,59 @@ title: Accueil
   <p>Explorez nos critiques de restaurants à Sherbrooke</p>
 </div>
 
-<div class="post-grid">
+<div class="filters-container">
+  <div class="filters">
+    <div class="filter-group">
+      <label for="sort-by">Trier par:</label>
+      <select id="sort-by" class="filter-select">
+        <option value="date-desc">Date (Plus récent)</option>
+        <option value="date-asc">Date (Plus ancien)</option>
+        <option value="name-asc">Nom (A-Z)</option>
+        <option value="name-desc">Nom (Z-A)</option>
+        <option value="rating-desc">Note (Plus haute)</option>
+        <option value="rating-asc">Note (Plus basse)</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label for="style-filter">Style de cuisine:</label>
+      <select id="style-filter" class="filter-select">
+        <option value="">Tous les styles</option>
+        <option value="Asiatique">Asiatique</option>
+        <option value="Italien">Italien</option>
+        <option value="Mexicain">Mexicain</option>
+        <option value="Bistro">Bistro</option>
+        <option value="Américain">Américain</option>
+        <option value="Libano-Marocain">Libano-Marocain</option>
+        <option value="Iranien">Iranien</option>
+        <option value="Vietnamien">Vietnamien</option>
+        <option value="Thaïlandais">Thaïlandais</option>
+        <option value="Indien">Indien</option>
+        <option value="Café-Bistro">Café-Bistro</option>
+        <option value="Microbrasserie">Microbrasserie</option>
+        <option value="Pub">Pub</option>
+        <option value="Boulangerie-Café">Boulangerie-Café</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="rating-filter">Note minimum:</label>
+      <select id="rating-filter" class="filter-select">
+        <option value="">Toutes les notes</option>
+        <option value="5">5 étoiles</option>
+        <option value="4">4 étoiles et plus</option>
+        <option value="3">3 étoiles et plus</option>
+        <option value="2">2 étoiles et plus</option>
+        <option value="1">1 étoile et plus</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="post-grid" id="restaurant-grid">
   {% for post in site.posts %}
     {% if post.layout == 'restaurant' %}
-    <div class="post-card">
+    <div class="post-card" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-rating="{{ post.note }}" data-style="{{ post.style }}">
       <a href="{{ post.url | relative_url }}" class="post-link">
         <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
         <div class="content">
@@ -64,4 +113,57 @@ title: Accueil
       sessionStorage.removeItem('scrollPosition');
     }
   });
+
+  // Filtering functionality
+  const sortSelect = document.getElementById('sort-by');
+  const styleFilter = document.getElementById('style-filter');
+  const ratingFilter = document.getElementById('rating-filter');
+  const restaurantGrid = document.getElementById('restaurant-grid');
+  let restaurants = Array.from(restaurantGrid.children);
+
+  function filterRestaurants() {
+    const selectedStyle = styleFilter.value;
+    const minRating = ratingFilter.value;
+    const sortValue = sortSelect.value;
+
+    // Filter by style and rating
+    let filteredRestaurants = restaurants.filter(restaurant => {
+      const style = restaurant.dataset.style;
+      const rating = parseFloat(restaurant.dataset.rating);
+      const styleMatch = !selectedStyle || style === selectedStyle;
+      const ratingMatch = !minRating || rating >= parseFloat(minRating);
+      return styleMatch && ratingMatch;
+    });
+
+    // Sort filtered restaurants
+    filteredRestaurants.sort((a, b) => {
+      switch(sortValue) {
+        case 'date-desc':
+          return new Date(b.dataset.date) - new Date(a.dataset.date);
+        case 'date-asc':
+          return new Date(a.dataset.date) - new Date(b.dataset.date);
+        case 'name-asc':
+          return a.querySelector('h2').textContent.localeCompare(b.querySelector('h2').textContent);
+        case 'name-desc':
+          return b.querySelector('h2').textContent.localeCompare(a.querySelector('h2').textContent);
+        case 'rating-desc':
+          return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+        case 'rating-asc':
+          return parseFloat(a.dataset.rating) - parseFloat(b.dataset.rating);
+        default:
+          return 0;
+      }
+    });
+
+    // Update the grid
+    restaurantGrid.innerHTML = '';
+    filteredRestaurants.forEach(restaurant => {
+      restaurantGrid.appendChild(restaurant);
+    });
+  }
+
+  // Add event listeners
+  sortSelect.addEventListener('change', filterRestaurants);
+  styleFilter.addEventListener('change', filterRestaurants);
+  ratingFilter.addEventListener('change', filterRestaurants);
 </script>
