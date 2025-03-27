@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Village De Chine"
-date: 2023-07-26
+date: 2022-09-29
 note: 3
 style: "Chinois"
 description: "Un établissement qui perpétue les traditions de la cuisine chinoise authentique. Une carte variée et généreuse qui saura satisfaire les amateurs de saveurs asiatiques dans une ambiance familiale chaleureuse."

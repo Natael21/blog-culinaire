@@ -9,6 +9,7 @@ image: "/images/Daniel lapointe.jpg"
 images:
   - image: "/images/Daniel lapointe.jpg"
   - image: "/images/Daniel Lapointe Natael.jpg"
+  - image: "/images/Daniel Lapointe Natael_2.jpg"
   - image: "/images/Daniel Lapointe Nicolas.jpg"
   - image: "/images/Daniel Lapointe Nicolas_2.jpg"
 ---

@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Habenaros Grill Mexicain"
-date: 2023-08-02
+date: 2022-08-30
 note: 4
 style: "Mexicain"
 description: "Une authentique expérience culinaire mexicaine qui vous transporte au cœur du Mexique. Des spécialités traditionnelles préparées avec des ingrédients frais et des saveurs authentiques dans une ambiance festive."

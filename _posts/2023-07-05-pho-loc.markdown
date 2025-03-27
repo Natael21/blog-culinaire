@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Restaurant Pho Loc"
-date: 2023-07-05
+date: 2023-03-10
 note: 4
 style: "Asiatique"
 description: "Une authentique expérience culinaire vietnamienne au cœur de Sherbrooke. Le restaurant Pho Loc vous propose une délicieuse sélection de soupes phở traditionnelles et de plats savoureux dans une ambiance chaleureuse."

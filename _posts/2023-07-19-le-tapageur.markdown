@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Le Tapageur"
-date: 2023-07-19
+date: 2022-10-08
 note: 4
 style: "Bistro"
 description: "Un bistro contemporain qui sublime les produits locaux à travers une cuisine créative et raffinée. Une expérience gastronomique unique dans une ambiance élégante et décontractée."

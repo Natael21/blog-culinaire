@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Caffuccino"
-date: 2023-06-08
+date: 2024-03-04
 note: 4
 style: "Café-Bistro"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"

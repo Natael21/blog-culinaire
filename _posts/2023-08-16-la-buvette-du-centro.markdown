@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "La Buvette du Centro"
-date: 2023-08-16
+date: 2022-04-13
 note: 4
 style: "Bistro"
 description: "Un bistro raffiné au cœur du centre-ville qui allie avec élégance une cuisine créative et une sélection de vins soigneusement choisie. Une expérience gastronomique sophistiquée dans une ambiance décontractée."
