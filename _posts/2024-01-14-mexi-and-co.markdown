@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Mexi & Co"
-date: 2024-03-13
+date: 2024-05-13
 note: 5
 style: "Mexicain"
 description: "L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !"
