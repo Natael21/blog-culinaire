@@ -17,4 +17,4 @@ La Buvette du Centro incarne l'excellence du bistro contemporain sherbrookois. S
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un plat de pâtes fraîches qui était excellent ! Les pâtes étaient parfaitement al dente, la sauce était crémeuse et savoureuse, et les ingrédients étaient frais. Le service était impeccable et l'ambiance était très agréable. La sélection de vins était impressionnante et le personnel était très connaisseur. C'est un excellent endroit pour manger un bon repas et déguster de bons vins ! 

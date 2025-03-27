@@ -19,4 +19,4 @@ Une excellente découverte ! Les saveurs indiennes sont au rendez-vous et le ser
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un plat de tikka masala au poulet qui était excellent ! La sauce était crémeuse et épicée à la perfection, le poulet était tendre et bien mariné. Le riz basmati était parfaitement cuit et le naan était délicieux. L'ambiance était chaleureuse et le service très attentionné. C'est un excellent endroit pour découvrir la cuisine indienne ! 

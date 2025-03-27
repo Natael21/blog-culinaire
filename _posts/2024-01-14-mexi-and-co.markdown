@@ -1,10 +1,10 @@
 ---
 layout: restaurant
-title: "Mexi&Co"
-date: 2024-01-14
-note: 4
+title: "Mexi & Co. (bar à nachos)"
+date: 2024-05-13
+note: 5
 style: "Mexicain"
-description: "Une expérience culinaire mexicaine contemporaine qui réinvente les classiques avec créativité. Des saveurs authentiques et des présentations modernes dans une ambiance festive."
+description: "Bienvenido ! Nous avons eu la chance d'essayer ce nouveau petit restaurant au centre-ville de Sherbrooke l'été passé (2023), servant l'un des meilleurs Nachos en ville !"
 image: "/images/Mexi&co.png"
 images:
   - image: "/images/Mexi&Co_tacos.jpg"
@@ -21,8 +21,8 @@ images:
 
 **Nataël** :
 
-Mexi&Co représente une approche moderne et raffinée de la cuisine mexicaine. L'établissement, avec son ambiance festive et son décor contemporain, crée l'environnement parfait pour une expérience culinaire mémorable. Les tacos, préparés avec des ingrédients frais et des saveurs authentiques, révèlent une maîtrise parfaite des techniques culinaires mexicaines. La mousse au citron vert, particulièrement remarquable, offre une conclusion rafraîchissante au repas. Le service, dynamique et attentionné, contribue à une soirée agréable et conviviale.
+Depuis notre première visite, c'est notre meilleure tournée; toutes les papilles gustatives se mettent en marche; toutes les saveurs sont au rendez-vous. C'est un restaurant à ne pas manquer si vous êtes amateur de cuisine mexicaine !
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un plat de tacos qui était excellent ! Les tortillas étaient fraîches et moelleuses, la viande était tendre et bien assaisonnée, et les légumes étaient croquants. Le guacamole était délicieux et le service était rapide. L'ambiance était très agréable et le personnel était très accueillant. C'est un excellent endroit pour manger de la bonne nourriture mexicaine ! 

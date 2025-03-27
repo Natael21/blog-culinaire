@@ -20,4 +20,4 @@ Une belle découverte ! Le service était impeccable et la nourriture délicieus
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un plat de riz cantonais qui était excellent ! Le riz était parfaitement cuit, les légumes étaient croquants et le porc était tendre. La soupe wonton était délicieuse et le service était rapide. L'ambiance était très agréable et le personnel était très accueillant. C'est un excellent endroit pour manger de la bonne nourriture asiatique ! 

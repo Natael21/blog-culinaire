@@ -14,4 +14,4 @@ Le Tapageur incarne parfaitement l'essence du bistro moderne sherbrookois. Son m
 
 **Nicolas** :
 
-À venir 
+J'ai choisi un plat de poisson frais qui était excellent ! Le poisson était parfaitement cuit et bien assaisonné, les légumes étaient frais et croquants, et la sauce était délicieuse. Le service était impeccable et l'ambiance était très agréable. C'est un excellent endroit pour manger un bon repas gastronomique ! 

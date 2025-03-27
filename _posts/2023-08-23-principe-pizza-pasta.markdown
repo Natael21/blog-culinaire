@@ -14,4 +14,4 @@ Principe Pizza Pasta, bien que malheureusement fermé aujourd'hui, représentait
 
 **Nicolas** :
 
-À venir 
+J'ai eu la chance de manger à Principe Pizza Pasta plusieurs fois et c'était toujours un plaisir ! Les pizzas étaient excellentes, avec une pâte fine et croustillante et des garnitures fraîches. Les pâtes étaient toujours cuites à la perfection et les sauces étaient délicieuses. Le service était chaleureux et l'ambiance était très agréable. C'est vraiment dommage que ce restaurant ait fermé ses portes, c'était un excellent endroit pour manger de la bonne nourriture italienne ! 

@@ -18,4 +18,4 @@ C'est un restaurant qui se fait discret sur la rue Wellington, mais qui offre un
 
 **Nicolas** :
 
-À venir 
+J'ai choisi le plat de koobideh, qui est composé de deux brochettes de bœuf haché grillé, accompagné de riz safran et de légumes grillés. La viande était parfaitement assaisonnée et très tendre. Le riz était délicieux et les légumes bien préparés. Le service était excellent et l'ambiance très agréable. C'est un excellent endroit pour découvrir la cuisine iranienne ! 

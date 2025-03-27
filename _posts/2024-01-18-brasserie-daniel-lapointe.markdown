@@ -19,4 +19,4 @@ J'ai toujours voulu aller aux crevettes à volonté et dès que j'ai vu la promo
 
 **Nicolas** :
 
-À venir 
+Pour ma part, j'ai aussi profité des crevettes à volonté. J'ai commencé par les crevettes tempura qui étaient croustillantes à souhait, suivies des crevettes à l'ail qui étaient succulentes. Le service était excellent et l'ambiance était très agréable. C'est définitivement un endroit à revisiter lors des prochaines promotions de crevettes à volonté !

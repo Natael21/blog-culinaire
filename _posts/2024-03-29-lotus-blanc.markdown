@@ -4,8 +4,8 @@ title: "Lotus Blanc Vietnamien"
 date: 2024-03-29
 note: 4
 style: "Vietnamien"
-description: "Un endroit qui saura vous surprendre avec son authentique cuisine vietnamienne et son ambiance chaleureuse !"
-image: "/images/Lotus Blanc.jpg"
+description: "Un endroit qui saura vous surprendre !"
+image: "/images/lotus blanc.png"
 images:
   - image: "/images/Lotus blanc_wonton.jpg"
   - image: "/images/Lotus blanc_nicolas.jpg"
@@ -23,4 +23,4 @@ Voulant essayer un nouveau restaurant, le lotus blanc nous est venu en tête ! U
 
 **Nicolas** :
 
-À venir 
+Pour ma part, j'ai pris une soupe aux légumes qui était excellente ! Les légumes étaient frais et croquants, et le bouillon était très savoureux. J'ai aussi eu la chance de goûter aux beignets de crevettes qui étaient délicieux. Le service était impeccable et l'ambiance était très agréable avec la musique traditionnelle en fond sonore. 

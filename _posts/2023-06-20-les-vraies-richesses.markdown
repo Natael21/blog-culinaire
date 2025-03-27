@@ -14,4 +14,4 @@ Comme repas principal, j'ai eu l'occasion de manger un sandwich croissant et jam
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un sandwich au poulet et avocat qui était excellent ! Le pain était frais et moelleux, le poulet était tendre et l'avocat ajoutait une touche de fraîcheur parfaite. J'ai accompagné mon repas d'un croissant au beurre qui était délicieux. Le service était rapide et l'ambiance était très agréable. C'est un excellent endroit pour manger un bon sandwich et des viennoiseries ! 

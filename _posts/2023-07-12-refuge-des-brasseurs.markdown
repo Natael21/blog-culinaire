@@ -17,6 +17,6 @@ Le Refuge des Brasseurs représente l'excellence de la culture brassicole québ�
 
 **Nicolas** :
 
-À venir
+J'ai opté pour un burger au bœuf avec des frites qui était excellent ! Le burger était juteux et bien assaisonné, les frites étaient croustillantes et la bière artisanale était délicieuse. Le service était rapide et l'ambiance était très agréable. C'est un excellent endroit pour manger un bon repas et déguster des bières artisanales !
 
  

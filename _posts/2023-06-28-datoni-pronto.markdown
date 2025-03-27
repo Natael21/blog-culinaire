@@ -17,4 +17,4 @@ Nous avons eu la chance de déguster une pizza Calabrese (Sauce/Mozzarella/parme
 
 **Nicolas** :
 
-À venir 
+La pizza était excellente ! La pâte était fine et croustillante, les saucisses italiennes étaient savoureuses et les légumes frais. Le parmesan ajoutait une touche de salé parfaite. Le service était rapide et l'ambiance était agréable. C'est un excellent endroit pour manger une bonne pizza italienne ! 

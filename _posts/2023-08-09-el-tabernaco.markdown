@@ -17,4 +17,4 @@ El Tabernaco, bien que malheureusement fermé aujourd'hui, restera dans nos mém
 
 **Nicolas** :
 
-À venir 
+J'ai eu la chance de manger à El Tabernaco plusieurs fois et c'était toujours excellent ! Les tacos étaient délicieux, avec des tortillas faites maison et des garnitures fraîches. Le guacamole était parfaitement assaisonné et les sauces étaient délicieuses. Le service était toujours impeccable et l'ambiance était très agréable. C'est vraiment dommage que ce restaurant ait fermé ses portes, c'était un excellent endroit pour manger de la bonne nourriture mexicaine ! 

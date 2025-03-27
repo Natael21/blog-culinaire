@@ -17,4 +17,4 @@ Le Dauphin incarne l'excellence de la cuisine bistro contemporaine à Sherbrooke
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un plat de poisson frais qui était excellent ! Le poisson était parfaitement cuit et bien assaisonné, les légumes étaient frais et croquants, et la sauce était délicieuse. Le service était impeccable et l'ambiance était très agréable. La sélection de vins était impressionnante et le personnel était très connaisseur. C'est un excellent endroit pour manger un bon repas gastronomique ! 

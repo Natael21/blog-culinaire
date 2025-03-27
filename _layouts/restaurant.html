@@ -37,8 +37,8 @@ layout: default
       <h2>Galerie photos</h2>
       <div class="gallery-grid">
         {% for image in page.images %}
-        <div class="gallery-item">
-          <img src="{{ image.image }}" alt="{{ page.title }}">
+        <div class="gallery-item" onclick="openModal(this)">
+          <img src="{{ image.image }}" alt="{{ page.title }}" loading="lazy">
         </div>
         {% endfor %}
       </div>
@@ -46,6 +46,12 @@ layout: default
     {% endif %}
   </div>
 </article>
+
+<!-- Modal -->
+<div id="imageModal" class="modal">
+  <span class="close" onclick="closeModal()">&times;</span>
+  <img id="modalImage" src="" alt="Image en grand format">
+</div>
 
 <a href="javascript:history.back()" class="back-button">
   <i class="fas fa-arrow-left"></i>
@@ -57,4 +63,84 @@ layout: default
   window.addEventListener('beforeunload', function() {
     sessionStorage.setItem('scrollPosition', window.scrollY);
   });
+
+  // Modal functionality
+  function openModal(element) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    modal.style.display = "flex";
+    modalImg.src = element.querySelector('img').src;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('imageModal');
+    modal.style.display = "none";
+    document.body.style.overflow = 'auto';
+  }
+
+  // Close modal when clicking outside the image
+  window.onclick = function(event) {
+    const modal = document.getElementById('imageModal');
+    if (event.target == modal) {
+      closeModal();
+    }
+  }
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  });
 </script>
+
+<style>
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal img {
+  max-width: 90%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #bbb;
+}
+
+.gallery-item {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+  transform: scale(1.05);
+}
+
+.gallery-item img {
+  object-fit: cover;
+  object-position: center;
+}
+</style>

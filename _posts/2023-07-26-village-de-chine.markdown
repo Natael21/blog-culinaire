@@ -14,4 +14,4 @@ Le Village De Chine offre une expérience culinaire chinoise traditionnelle dans
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un plat de riz sauté aux légumes qui était bon, mais pas exceptionnel. Les légumes étaient frais, mais le riz était un peu trop cuit. Le service était correct et l'ambiance était agréable. C'est un endroit correct pour manger de la nourriture chinoise, mais il y a probablement de meilleures options en ville. 

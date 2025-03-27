@@ -1,10 +1,10 @@
 ---
 layout: restaurant
-title: "Caffuccino"
-date: 2023-06-08
+title: "Caffuccino (Complexe Sportif Thibault GM)"
+date: 2024-05-04
 note: 4
-style: "Café"
-description: "Un café-bistro chaleureux qui allie l'art du café et une cuisine réconfortante. Une ambiance décontractée parfaite pour un déjeuner, un dîner ou une pause café gourmande."
+style: "Café-Bistro"
+description: "Un endroit idéal pour regarder un match d'hockey !"
 image: "/images/Caffucino.jpg"
 images:
   - image: "/images/Caffucino_Nicolas.jpg"
@@ -13,8 +13,8 @@ images:
 
 **Nataël** :
 
-Caffuccino représente l'excellence du café-bistro moderne à Sherbrooke. L'établissement, avec son ambiance chaleureuse et son décor contemporain, crée l'environnement idéal pour une pause gourmande. Le café, préparé avec expertise, révèle des arômes riches et équilibrés. Le menu, qui propose une sélection variée de plats réconfortants, témoigne d'une attention particulière à la qualité des ingrédients. Le service, amical et efficace, contribue à une expérience agréable et décontractée.
+Pour commencer notre soirée, nous avons commandé une sangria rosée qui était incroyable ! Bien fruité et sucré avec un léger goût d'alcool ! Sinon, pour ma part, j'ai eu la chance de déguster un merveilleux burger de poulet grillé avec un accompagnement de frites. Le burger était très bon et les frites étaient croustillantes à souhait ! Le service était excellent et rapide. L'ambiance était parfaite pour regarder un match d'hockey !
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un burger au poulet grillé avec des frites qui était excellent ! Le burger était juteux et bien assaisonné, les frites étaient croustillantes et le service était rapide. La sangria rosée était délicieuse et l'ambiance était parfaite pour regarder un match d'hockey. C'est un excellent endroit pour manger un bon repas et regarder un match ! 

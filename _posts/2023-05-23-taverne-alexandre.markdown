@@ -17,4 +17,4 @@ Il ne faut pas se fier à l'extérieur, mais bien à l'intérieur; on y retrouve
 
 **Nicolas** :
 
-À venir 
+J'ai pris un burger au bœuf avec des frites qui était excellent ! Le burger était juteux et bien assaisonné, les frites étaient croustillantes et le service était rapide. L'ambiance était très agréable et le personnel était très accueillant. C'est un excellent endroit pour manger un bon repas et boire une bonne bière ! 

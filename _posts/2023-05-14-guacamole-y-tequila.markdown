@@ -17,4 +17,4 @@ Pour cette occasion, j'ai décidé d'être aventurier et d'y aller avec des ench
 
 **Nicolas** :
 
-À venir 
+J'ai opté pour un burrito au poulet qui était bon, mais pas exceptionnel. La sauce était un peu trop piquante pour mon goût. Le service était correct et l'ambiance était agréable. C'est un endroit correct pour manger de la nourriture mexicaine, mais il y a probablement de meilleures options en ville. 

@@ -14,4 +14,4 @@ Habenaros Grill Mexicain représente une véritable immersion dans la cuisine me
 
 **Nicolas** :
 
-À venir 
+J'ai choisi un plat de fajitas au poulet qui était excellent ! Le poulet était tendre et bien assaisonné, les légumes étaient frais et croquants, et les tortillas étaient chaudes et moelleuses. Le guacamole était délicieux et le service était rapide. L'ambiance était très agréable et le personnel était très accueillant. C'est un excellent endroit pour manger de la bonne nourriture mexicaine ! 
