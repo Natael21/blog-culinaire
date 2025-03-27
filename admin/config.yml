@@ -14,7 +14,7 @@ public_folder: "/images"
 collections:
   - name: "restaurants"
     label: "Restaurants"
-    folder: "_posts/restaurants"
+    folder: "_posts"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
