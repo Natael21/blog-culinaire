@@ -4,17 +4,18 @@ title: "Le Dauphin"
 date: 2023-08-29
 note: 4
 style: "Bistro"
-description: "Un bistro raffiné qui allie tradition et modernité dans une ambiance élégante. Une cuisine créative qui met en valeur les produits locaux avec finesse et originalité."
+description: "Un bistro offrant des plats classiques comme des côtes levées et des frites dans une ambiance chaleureuse"
 image: "/images/Le Dauphin.jpg"
 images:
+  - image: "/images/Le Dauphin.jpg"
   - image: "/images/Le Dauphin_Nataël.jpg"
   - image: "/images/Le Dauphin_Nicolas.jpg"
 ---
 
 **Nataël** :
 
-Le Dauphin incarne l'excellence de la cuisine bistro contemporaine à Sherbrooke. L'établissement, avec son ambiance sophistiquée et son décor élégant, crée l'environnement parfait pour une expérience gastronomique raffinée. Le menu, qui évolue au fil des saisons, témoigne d'une créativité culinaire remarquable. Les plats, préparés avec des ingrédients locaux de qualité, révèlent une attention particulière aux saveurs et aux textures. Le service, professionnel et attentionné, contribue à une soirée mémorable.
+Par cette belle-journée ensoleillée, j'ai pris la décision de me gâter avec une belle grosse assiette de côtes levées marinée dans une bonne sauce BBQ avec comme accompagnement une salade de chou, des frites et une sauce pour les frites. Le tout pour 31$, ce qui est relativement bon marché (prix au moment du post). Tout était savoureux et les côtes levées étaient bien tendres et se détachaient de l'os très facilement ! Je n'ai pas été déçu :) !
 
 **Nicolas** :
 
-J'ai opté pour un plat de poisson frais qui était excellent ! Le poisson était parfaitement cuit et bien assaisonné, les légumes étaient frais et croquants, et la sauce était délicieuse. Le service était impeccable et l'ambiance était très agréable. La sélection de vins était impressionnante et le personnel était très connaisseur. C'est un excellent endroit pour manger un bon repas gastronomique ! 
+À venir 
