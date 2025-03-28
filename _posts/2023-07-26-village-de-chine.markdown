@@ -1,17 +1,21 @@
 ---
 layout: restaurant
-title: "Village De Chine"
+title: "Village de Chine"
 date: 2022-09-29
 note: 3
-style: "Chinois"
-description: "Un établissement qui perpétue les traditions de la cuisine chinoise authentique. Une carte variée et généreuse qui saura satisfaire les amateurs de saveurs asiatiques dans une ambiance familiale chaleureuse."
+style: "Asiatique"
+description: "Un restaurant chinois avec un vaste menu, idéal pour découvrir la cuisine chinoise traditionnelle"
 image: "/images/Village de chine.PNG"
+images:
+  - image: "/images/Village de chine.PNG"
 ---
+
+Bienvenue au Restaurant Village de Chine !
 
 **Nataël** :
 
-Le Village De Chine offre une expérience culinaire chinoise traditionnelle dans un cadre familial accueillant. Le menu, d'une richesse remarquable, présente une sélection variée de plats authentiques. Les portions généreuses témoignent de la générosité de l'établissement. Les nouilles sautées, préparées avec maestria, révèlent des saveurs équilibrées, tandis que les rouleaux impériaux, d'une croustillance parfaite, constituent un excellent prélude au repas. L'ambiance chaleureuse et le service attentionné contribuent à une expérience gastronomique agréable.
+Comme étant un grand amateur de Chow Mein, je voulais essayer un nouvel emplacement et j'aime bien découvrir de nouvelle culture aussi ! J'ai donc pris l'assiette de chow mein aux légumes ! C'était bon, mais pas extraordinaire, car j'ai trouvé qu'il y avait beaucoup de tofu et très peu de légumes, donc on se tanne assez rapidement de manger l'équivalent d'un bloc de tofu ! Il y a un très grand menu disponible, donc il y a surement d'autre plat qui se démarque, mais je ne recommande pas le chow mein de cet endroit. Si vous voulez un très bon Chow mein, aller voir notre chronique sur le restaurant Pho Loc !
 
 **Nicolas** :
 
-J'ai opté pour un plat de riz sauté aux légumes qui était bon, mais pas exceptionnel. Les légumes étaient frais, mais le riz était un peu trop cuit. Le service était correct et l'ambiance était agréable. C'est un endroit correct pour manger de la nourriture chinoise, mais il y a probablement de meilleures options en ville. 
+Pour ceux qui aiment la salade de riz, vous aimerez cet endroit. Je n'ai pas eu l'occasion de goûter à leur meilleur puisque le menu me semblait dispendieux, j'ai alors opté pour une salade de riz au poulet. Ce dernier est juste assez bien cuit, mais il y manquait des légumes. Cependant, pour ceux qui veulent s'investir généreusement pour la cuisine chinoise, ça vaut la peine ! 

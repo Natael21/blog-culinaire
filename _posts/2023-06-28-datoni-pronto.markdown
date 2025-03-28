@@ -1,20 +1,25 @@
 ---
 layout: restaurant
-title: "DaToni Pronto"
+title: "Datoni Pronto"
 date: 2023-06-28
 note: 4
 style: "Italien"
-description: "Benvenuto a tutti ! Ce fut exquis : nous avons mangé une pizza Calabrese avec une excellente combinaison de saveurs italiennes authentiques."
+description: "Une pizzéria authentique avec des produits d'origine italienne et une ambiance parfaite pour les rendez-vous galants !"
 image: "/images/datoni pronto.jpg"
 images:
+  - image: "/images/datoni pronto.jpg"
   - image: "/images/Datoni Pronto Nicolas.jpg"
   - image: "/images/Datoni Pronto Nataël.jpg"
 ---
 
-**Nataël** :
+Benvenuto a tutti ! 
 
-Nous avons eu la chance de déguster une pizza Calabrese (Sauce/Mozzarella/parmesan/Saucisses Italiennes/Poivrons verts/Oignons) au coût de 30.95 $ avant taxes. Étant donné que notre pizza était de 16 pouces, nous avons eu la possibilité de l'avoir séparée en deux grands morceaux. La qualité des ingrédients était excellente et la cuisson parfaite !
+Ce fut exquis : nous avons mangé une pizza Calabrese (Sauce/Mozzarella/parmesan/Saucisses Italiennes/Poivrons verts/Oignons) au coût de 30.95 $ avant taxes. Étant donné que notre pizza était de 16 pouces, nous avons eu la possibilité de l'avoir séparée en deux grands morceaux. Quoique leur spécialité demeure la pizza, il reste qu'il y a les pâtes fraîches accompagnées de la sauce de votre choix parmi les 14 sauces à votre disposition. Vous n'êtes pas inspirés ? Les cuisiniers mijotent votre repas « Menu du jour » à l'inspiration du jour.
 
-**Nicolas** :
+Si vous êtes curieux de l'art culinaire italienne, vous trouverez plusieurs produits d'origine italienne au fond du restaurant, dont plusieurs condiments, vinaigrettes, pâtes alimentaires, voire des desserts dont le fameux Tiramisu, de l'italien tirami sù, littéralement « tire-moi vers le haut », « remonte-moi le moral », « redonne-moi des forces » ! 
 
-La pizza était excellente ! La pâte était fine et croustillante, les saucisses italiennes étaient savoureuses et les légumes frais. Le parmesan ajoutait une touche de salé parfaite. Le service était rapide et l'ambiance était agréable. C'est un excellent endroit pour manger une bonne pizza italienne ! 
+Il y a aussi plusieurs types de cafés dont l'Expresso, le Cappucino et le décaféiné en forme de sachet de 340 grammes, environnant entre 15 et 20 $, que vous pouvez acheter sur place. Pour ceux qui veulent profiter de l'Italie à domicile, plusieurs recettes déjà préparées par les employés se retrouvent dans les congélateurs, notamment la délicieuse lasagne Pronto familiale ainsi que celle au Mac & Cheese. Entre autres, la livraison à domicile est offerte par Uber Eats ainsi que J'ai faim.
+
+L'ambiance du restaurant est conviviale et tranquille, parfaite pour prévoir des « dates » ! 
+
+Buon appetito e alla prossima ! 

@@ -5,7 +5,10 @@ date: 2022-04-02
 note: 3
 style: "Italien"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui proposait une cuisine italienne traditionnelle, avec des pizzas et des pâtes authentiques dans une ambiance familiale chaleureuse."
-image: "/images/restaurant-test.jpg"
+image: "/images/la brigade resto.jpg"
+images:
+  - image: "/images/la brigade resto.jpg"
+  - image: "/images/La Brigade Nicolas et Nataël.jpg"
 ---
 
 **Nataël** :

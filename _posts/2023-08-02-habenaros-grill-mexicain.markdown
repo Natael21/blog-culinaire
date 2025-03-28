@@ -4,14 +4,18 @@ title: "Habenaros Grill Mexicain"
 date: 2022-08-30
 note: 4
 style: "Mexicain"
-description: "Une authentique expérience culinaire mexicaine qui vous transporte au cœur du Mexique. Des spécialités traditionnelles préparées avec des ingrédients frais et des saveurs authentiques dans une ambiance festive."
+description: "Un fast-food mexicain parfait pour s'initier à la cuisine mexicaine avec des prix abordables"
 image: "/images/Habenaros Grill Mexicain.JPG"
+images:
+  - image: "/images/Habenaros Grill Mexicain.JPG"
 ---
+
+C'est à cet endroit que nous avons été introduit à la cuisine mexicaine pour la première fois et nous avons été satisfaits ! 
 
 **Nataël** :
 
-Habenaros Grill Mexicain représente une véritable immersion dans la cuisine mexicaine authentique. Les plats, préparés avec des ingrédients frais et de qualité, révèlent toute la richesse des saveurs mexicaines. Les tacos al pastor, particulièrement remarquables, offrent une combinaison parfaite de saveurs et de textures. Le guacamole maison, préparé avec des avocats mûrs à point, témoigne d'une attention particulière aux ingrédients. La possibilité d'ajuster le niveau de piquant selon les préférences personnelles démontre une considération appréciable pour les goûts de chaque client.
+C'est un bon « fast-food » de nourriture mexicaine, parfait pour s'initier. Certes, ça n'a pas le gout authentique du Mexique, mais on s'en rapproche !
 
 **Nicolas** :
 
-J'ai choisi un plat de fajitas au poulet qui était excellent ! Le poulet était tendre et bien assaisonné, les légumes étaient frais et croquants, et les tortillas étaient chaudes et moelleuses. Le guacamole était délicieux et le service était rapide. L'ambiance était très agréable et le personnel était très accueillant. C'est un excellent endroit pour manger de la bonne nourriture mexicaine ! 
+D'ailleurs, pour compléter les dires de Nataël, nous avons découvert le dessert de prédilection des Mexicains : les churros. Étant moi-même jadis fan des queues de castors, je trouvais que cela avait un goût similaire, mais encore plus délicieux. Les prix y sont davantage abordables que plusieurs restaurants mexicains, c'est parfait pour s'initier à ce type de cuisine. 

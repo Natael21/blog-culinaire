@@ -1,20 +1,23 @@
 ---
 layout: restaurant
-title: "Restaurant Pho Loc"
-date: 2023-03-10
+title: "Pho Loc"
+date: 2023-07-05
 note: 4
-style: "Asiatique"
-description: "Une authentique expérience culinaire vietnamienne au cœur de Sherbrooke. Le restaurant Pho Loc vous propose une délicieuse sélection de soupes phở traditionnelles et de plats savoureux dans une ambiance chaleureuse."
+style: "Vietnamien"
+description: "Une authentique cuisine vietnamienne dans un cadre pittoresque et intime"
 image: "/images/pho loc.PNG"
 images:
+  - image: "/images/pho loc.PNG"
   - image: "/images/Pho Loc Nicolas.jpg"
   - image: "/images/Pho Loc Nataël.jpg"
 ---
 
+Chào mừng ! C'est par un bel après-midi ensoleillé que nous nous sommes réfugiés de la chaleur torride chez Pho Loc, l'un des restaurants vietnamiens les plus notoires de l'Estrie.
+
 **Nataël** :
 
-Ma première expérience avec la soupe phở fut une véritable révélation ! Le bouillon, riche en saveurs et en arômes, révèle toute la subtilité de la cuisine vietnamienne. La viande, tendre et savoureuse, s'harmonise parfaitement avec les nouilles fraîches et les herbes aromatiques. L'ambiance du restaurant, simple mais authentique, vous transporte instantanément au Vietnam. Le service, efficace et attentionné, contribue à une expérience culinaire mémorable.
+C'est avec ma famille que j'ai pu découvrir ce merveilleux endroit ! Je m'y étais régalé et je rêvais d'y retourner depuis longtemps, surtout pour manger le fameux chow mein !
 
 **Nicolas** :
 
-J'ai choisi un plat de riz sauté aux légumes et au poulet qui était excellent ! Le riz était parfaitement cuit, les légumes étaient croquants et le poulet était tendre. La sauce était délicieuse et bien équilibrée. Le service était rapide et l'ambiance était très agréable. C'est un excellent endroit pour découvrir la cuisine vietnamienne ! 
+Nous avons dégusté de délicieuses nouilles Chow mein, mais avec une touche vietnamienne. Pour les personnes qui en sont moins familier, la cuisine vietnamienne est principalement riche en glucides dérivés du riz et des plats de nouilles de riz. D'autre part, les plats chinois sont riches en sauces épaisses et en ingrédients de plus grande taille. D'ailleurs, ce fut un repas léger et exotique; plusieurs légumes de toutes couleurs accompagnent ce plat de résistance. Nous avons eu même l'opportunité d'entendre la musique vietnamienne traditionnelle. De plus, nous étions seuls, c'était l'un des endroits les plus intimes et figure l'un des restaurants les plus pittoresques depuis notre tournée culinaire régionale ! 
