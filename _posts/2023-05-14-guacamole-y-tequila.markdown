@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Guacamole y tequila (Sherbrooke)"
 date: 2023-05-14
-note: 3
+note: 4
 style: "Mexicain"
 description: "Belle ambiance mexicaine, ce restaurant offre des classiques mexicains ainsi qu'une grande variété de cocktails."
 price: "medium"

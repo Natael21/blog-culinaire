@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Brasserie Daniel Lapointe"
 date: 2024-01-18
-note: 4
+note: 4.5
 style: "Microbrasserie"
 price: "medium"
 description: "Une brasserie réputée pour ses délicieuses crevettes à volonté les jeudis soirs !"
