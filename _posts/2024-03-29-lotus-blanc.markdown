@@ -4,7 +4,7 @@ title: "Lotus Blanc Vietnamien"
 date: 2024-03-29
 note: 4
 style: "Vietnamien"
-description: "Un endroit qui saura vous surprendre !"
+description: "Un restaurant vietnamien authentique avec une ambiance sereine et des tables d'hôte abordables !"
 price: "budget"
 image: "/images/lotus blanc.png"
 images:

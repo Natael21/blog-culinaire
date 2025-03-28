@@ -4,7 +4,7 @@ title: "Saveur et Délice"
 date: 2024-11-15
 note: 4
 style: "Asiatique"
-description: "Une cuisine asiatique avec une touche québécoise"
+description: "Une cuisine asiatique avec une touche québécoise, dans une ambiance conviviale et des portions généreuses à prix abordable !"
 price: "budget"
 image: "/images/Saveur et délice.jpg"
 images:

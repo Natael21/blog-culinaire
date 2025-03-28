@@ -4,7 +4,7 @@ title: "Chanchai"
 date: 2024-02-14
 note: 4
 style: "Thaïlandais"
-description: "L'un des plus grands restaurants thaïlandais en ville !"
+description: "Un restaurant thaïlandais authentique avec des portions généreuses et des saveurs traditionnelles bien maîtrisées !"
 price: "medium"
 image: "/images/chanchai.jpeg"
 images:
