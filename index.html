@@ -3,11 +3,6 @@ layout: default
 title: Accueil
 ---
 
-<div class="page-header">
-  <h2>Nos Dernières Découvertes</h2>
-  <p>Explorez nos critiques de restaurants à Sherbrooke</p>
-</div>
-
 <div class="main-content">
   <!-- Filtres à gauche -->
   <aside class="filters-sidebar">
@@ -23,28 +18,25 @@ title: Accueil
         </div>
       </div>
 
-      <!-- Style de cuisine avec recherche intégrée -->
+      <!-- Style de cuisine -->
       <div class="filter-item">
         <label for="style-filter">Style de cuisine</label>
-        <div class="select-search-wrapper">
-          <input type="text" id="style-search" class="select-search" placeholder="Rechercher ou sélectionner...">
-          <select id="style-filter" class="filter-select" size="8">
-            <option value="">Tous les styles</option>
-            <option value="Asiatique">Asiatique</option>
-            <option value="Italien">Italien</option>
-            <option value="Mexicain">Mexicain</option>
-            <option value="Bistro">Bistro</option>
-            <option value="Américain">Américain</option>
-            <option value="Libano-Marocain">Libano-Marocain</option>
-            <option value="Iranien">Iranien</option>
-            <option value="Vietnamien">Vietnamien</option>
-            <option value="Thaïlandais">Thaïlandais</option>
-            <option value="Indien">Indien</option>
-            <option value="Café-Bistro">Café-Bistro</option>
-            <option value="Microbrasserie">Microbrasserie</option>
-            <option value="Pub">Pub</option>
-          </select>
-        </div>
+        <select id="style-filter" class="filter-select">
+          <option value="">Tous les styles</option>
+          <option value="Asiatique">Asiatique</option>
+          <option value="Italien">Italien</option>
+          <option value="Mexicain">Mexicain</option>
+          <option value="Bistro">Bistro</option>
+          <option value="Américain">Américain</option>
+          <option value="Libano-Marocain">Libano-Marocain</option>
+          <option value="Iranien">Iranien</option>
+          <option value="Vietnamien">Vietnamien</option>
+          <option value="Thaïlandais">Thaïlandais</option>
+          <option value="Indien">Indien</option>
+          <option value="Café-Bistro">Café-Bistro</option>
+          <option value="Microbrasserie">Microbrasserie</option>
+          <option value="Pub">Pub</option>
+        </select>
       </div>
 
       <!-- Note -->
@@ -91,8 +83,13 @@ title: Accueil
     </div>
   </aside>
 
-  <!-- Grille de restaurants -->
+  <!-- Contenu principal -->
   <div class="content-wrapper">
+    <div class="page-header">
+      <h2>Nos Dernières Découvertes</h2>
+      <p>Explorez nos critiques de restaurants à Sherbrooke</p>
+    </div>
+
     <div class="post-grid" id="restaurant-grid">
       {% for post in site.posts %}
         {% if post.layout == 'restaurant' %}
@@ -153,16 +150,26 @@ title: Accueil
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   padding: 2rem;
   height: fit-content;
-  margin-bottom: 2rem;
+  margin-top: 2rem;
 }
 
-.filter-group h3 {
-  font-family: 'Playfair Display', serif;
-  color: var(--primary-color);
-  margin: 0 0 1.5rem;
-  font-size: 1.5rem;
-  border-bottom: 2px solid var(--accent-color);
-  padding-bottom: 0.8rem;
+.content-wrapper {
+  flex-grow: 1;
+}
+
+.page-header {
+  background: var(--white);
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
 }
 
 .filter-item {
@@ -173,7 +180,7 @@ title: Accueil
   display: block;
   font-weight: 600;
   color: var(--primary-color);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   font-size: 0.95rem;
 }
 
@@ -198,25 +205,6 @@ title: Accueil
   transition: all 0.3s ease;
 }
 
-.search-input:focus {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
-  outline: none;
-}
-
-.select-search-wrapper {
-  position: relative;
-}
-
-.select-search {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px 8px 0 0;
-  font-size: 0.95rem;
-  margin-bottom: -1px;
-}
-
 .filter-select {
   width: 100%;
   padding: 0.8rem 1rem;
@@ -232,16 +220,6 @@ title: Accueil
   background-repeat: no-repeat;
   background-position: calc(100% - 1rem) center;
   padding-right: 2.5rem;
-}
-
-.filter-select[size] {
-  border-radius: 0 0 8px 8px;
-  border-top: none;
-}
-
-.filter-select:hover, .filter-select:focus {
-  border-color: var(--accent-color);
-  outline: none;
 }
 
 .reset-filters {
@@ -262,21 +240,6 @@ title: Accueil
   transition: all 0.3s ease;
 }
 
-.reset-filters:hover {
-  background: #eee;
-  border-color: var(--accent-color);
-}
-
-.content-wrapper {
-  flex-grow: 1;
-}
-
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
 @media (max-width: 1200px) {
   .post-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -292,10 +255,7 @@ title: Accueil
     width: 100%;
     position: relative;
     top: 0;
-  }
-
-  .post-grid {
-    grid-template-columns: repeat(2, 1fr);
+    margin-bottom: 2rem;
   }
 }
 
@@ -311,38 +271,13 @@ title: Accueil
 </style>
 
 <script>
-// Fonction de filtrage existante...
 const titleSearch = document.getElementById('title-search');
-const styleSearch = document.getElementById('style-search');
 const styleFilter = document.getElementById('style-filter');
 const ratingFilter = document.getElementById('rating-filter');
 const priceFilter = document.getElementById('price-filter');
 const sortSelect = document.getElementById('sort-by');
 const restaurantGrid = document.getElementById('restaurant-grid');
 let restaurants = Array.from(restaurantGrid.children);
-
-// Nouvelle fonction pour filtrer les options du select de style
-styleSearch.addEventListener('input', function(e) {
-  const searchText = e.target.value.toLowerCase();
-  const options = styleFilter.options;
-  
-  for (let i = 0; i < options.length; i++) {
-    const option = options[i];
-    const text = option.text.toLowerCase();
-    
-    if (text.includes(searchText) || searchText === '') {
-      option.style.display = '';
-    } else {
-      option.style.display = 'none';
-    }
-  }
-});
-
-// Synchroniser la sélection
-styleFilter.addEventListener('change', function() {
-  styleSearch.value = this.options[this.selectedIndex].text;
-  filterRestaurants();
-});
 
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
@@ -393,17 +328,10 @@ function filterRestaurants() {
 
 function resetFilters() {
   titleSearch.value = '';
-  styleSearch.value = '';
   styleFilter.value = '';
   ratingFilter.value = '';
   priceFilter.value = '';
   sortSelect.value = 'date-desc';
-  
-  // Réafficher toutes les options du select de style
-  Array.from(styleFilter.options).forEach(option => {
-    option.style.display = '';
-  });
-  
   filterRestaurants();
 }
 
