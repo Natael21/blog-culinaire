@@ -2,7 +2,7 @@
 layout: restaurant
 title: "OMG Resto"
 date: 2024-03-04
-note: 3.5
+note: 4
 style: "Américain"
 description: "Un restaurant qui a été revampé pour la cause. Par contre, la carte des mets a beaucoup changé et elle offre malheureusement beaucoup moins de choix de burgers qu'auparavant !"
 price: "medium"
