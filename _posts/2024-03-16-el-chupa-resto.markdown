@@ -4,7 +4,7 @@ title: "El Chupa Resto"
 date: 2024-03-16
 note: 4
 style: "Mexicain"
-description: "Un endroit chaleureux qui a su reprendre le flambeau d'El Tabernaco avec brio !"
+description: "Cuisine mexicaine authentique avec tortillas maison et ambiance chaleureuse."
 price: "medium"
 image: "/images/El Chupa Resto.png"
 images:

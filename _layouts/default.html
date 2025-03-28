@@ -8,6 +8,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <style>
+      .site-return {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .site-return:hover {
+        background-color: #34495e;
+        transform: translateY(-2px);
+      }
+      .site-return i {
+        font-size: 0.9em;
+      }
+      @media (max-width: 768px) {
+        .site-return {
+          top: 10px;
+          right: 10px;
+          padding: 8px 15px;
+          font-size: 0.9em;
+        }
+      }
+    </style>
   </head>
   <body>
     <header class="hero" style="background-image: url('/images/header.jpg');">
@@ -23,6 +58,10 @@
       <a href="javascript:void(0)" class="admin-button" id="login-button">
         <i class="fas fa-user"></i>
         <span>Connexion</span>
+      </a>
+      <a href="/" class="site-return">
+        <i class="fas fa-arrow-left"></i>
+        <span>Retour au site</span>
       </a>
     </header>
 
