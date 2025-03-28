@@ -108,6 +108,15 @@ title: Accueil
               {% if post.style %}
               <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
               {% endif %}
+              <span class="price">
+                {% if post.price == "budget" %}
+                  <i class="fas fa-dollar-sign"></i>
+                {% elsif post.price == "medium" %}
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+                {% elsif post.price == "expensive" %}
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+                {% endif %}
+              </span>
             </div>
           </div>
         </a>
@@ -261,6 +270,41 @@ title: Accueil
     margin: 1rem 0;
     padding: 1rem;
   }
+}
+
+.post-card .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #666;
+  gap: 0.5rem;
+}
+
+.post-card .meta i {
+  margin-right: 0.3rem;
+}
+
+.post-card .price {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.post-card .price i {
+  margin-right: 0;
+}
+
+.restaurant-meta .price {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.restaurant-meta .price i {
+  margin-right: 0;
 }
 </style>
 

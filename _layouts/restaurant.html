@@ -19,6 +19,15 @@ layout: default
           <span class="score">{{ rating }}/5</span>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+        <span class="price">
+          {% if page.price == "budget" %}
+            <i class="fas fa-dollar-sign"></i>
+          {% elsif page.price == "medium" %}
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+          {% elsif page.price == "expensive" %}
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+          {% endif %}
+        </span>
       </div>
     </div>
   </div>
