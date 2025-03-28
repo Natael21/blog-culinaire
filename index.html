@@ -86,7 +86,8 @@ title: Accueil
            data-rating="{{ post.note }}" 
            data-style="{{ post.style }}"
            data-title="{{ post.title | downcase }}"
-           data-price="{{ post.price | default: 'medium' }}">
+           data-price="{{ post.price | default: 'medium' }}"
+           id="{{ post.title | slugify }}">
         <a href="{{ post.url | relative_url }}" class="post-link">
           <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
           <div class="content">
@@ -368,4 +369,18 @@ titleSearch.addEventListener('input', filterRestaurants);
 styleFilter.addEventListener('change', filterRestaurants);
 ratingFilter.addEventListener('change', filterRestaurants);
 priceFilter.addEventListener('change', filterRestaurants);
+
+// Scroll to last viewed restaurant
+document.addEventListener('DOMContentLoaded', function() {
+  const lastViewedRestaurant = localStorage.getItem('lastViewedRestaurant');
+  if (lastViewedRestaurant) {
+    const restaurantElement = document.getElementById(lastViewedRestaurant);
+    if (restaurantElement) {
+      setTimeout(() => {
+        restaurantElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+    localStorage.removeItem('lastViewedRestaurant');
+  }
+});
 </script>

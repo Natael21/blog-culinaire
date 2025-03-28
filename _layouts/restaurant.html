@@ -91,7 +91,7 @@ layout: default
   <img id="modalImage" src="" alt="Image en grand format">
 </div>
 
-<a href="javascript:history.back()" class="back-button">
+<a href="{{ '/' | relative_url }}" class="back-button" onclick="storeRestaurantId(event)">
   <i class="fas fa-arrow-left"></i>
   <span>Retour</span>
 </a>
@@ -101,6 +101,14 @@ layout: default
   window.addEventListener('beforeunload', function() {
     sessionStorage.setItem('scrollPosition', window.scrollY);
   });
+
+  // Store restaurant ID before redirecting
+  function storeRestaurantId(event) {
+    event.preventDefault();
+    const restaurantId = '{{ page.title | slugify }}';
+    localStorage.setItem('lastViewedRestaurant', restaurantId);
+    window.location.href = "{{ '/' | relative_url }}";
+  }
 
   // Modal functionality
   function openModal(element) {
