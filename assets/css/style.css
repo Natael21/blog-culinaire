@@ -237,6 +237,16 @@ footer {
   margin-bottom: 1rem;
 }
 
+.footer-link {
+  color: var(--white);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: var(--accent-color);
+}
+
 .footer-section p {
   margin: 0;
   opacity: 0.9;
