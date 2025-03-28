@@ -3,32 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Netlify CMS</title>
+    <title>Administration | Blog Culinaire</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <style>
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #e74c3c;
+        --text-color: #333;
+        --border-color: #ddd;
+        --background-light: #f8f9fa;
+        --white: #ffffff;
+      }
+
       body {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'Open Sans', sans-serif;
+        color: var(--text-color);
+        background-color: var(--background-light);
       }
+
       .admin-header {
-        background-color: #2c3e50;
+        background-color: var(--primary-color);
         padding: 1rem 2rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
       }
+
       .admin-title {
-        color: white;
+        color: var(--white);
+        font-family: 'Playfair Display', serif;
         font-size: 1.5rem;
         font-weight: 600;
         margin: 0;
       }
+
       .back-to-site {
-        background-color: #34495e;
-        color: white;
+        background-color: var(--secondary-color);
+        color: var(--white);
         padding: 0.8rem 1.2rem;
         border-radius: 8px;
         text-decoration: none;
@@ -39,24 +61,99 @@
         transition: all 0.3s ease;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
+
       .back-to-site:hover {
-        background-color: #2c3e50;
+        background-color: var(--accent-color);
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       }
+
       .back-to-site i {
         font-size: 1.1em;
       }
+
+      /* Styles pour Netlify CMS */
+      #nc-root {
+        margin-top: 64px; /* Hauteur du header */
+      }
+
+      /* Personnalisation des formulaires */
+      .css-1q9mc2j-ControlContainer {
+        background-color: var(--white) !important;
+        border-radius: 8px !important;
+        border: 1px solid var(--border-color) !important;
+      }
+
+      .css-1q9mc2j-ControlContainer:hover {
+        border-color: var(--accent-color) !important;
+      }
+
+      /* Boutons */
+      .css-1hvrgvd-CollectionTopContainer button,
+      .css-1f7nhiq-ControlContainer button {
+        background-color: var(--accent-color) !important;
+        color: var(--white) !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+      }
+
+      .css-1hvrgvd-CollectionTopContainer button:hover,
+      .css-1f7nhiq-ControlContainer button:hover {
+        background-color: var(--secondary-color) !important;
+        transform: translateY(-2px) !important;
+      }
+
+      /* Champs de texte */
+      input[type="text"],
+      textarea {
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-family: 'Open Sans', sans-serif !important;
+      }
+
+      input[type="text"]:focus,
+      textarea:focus {
+        border-color: var(--accent-color) !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1) !important;
+      }
+
+      /* Labels */
+      label {
+        font-family: 'Open Sans', sans-serif !important;
+        font-weight: 600 !important;
+        color: var(--text-color) !important;
+      }
+
+      /* Liste des articles */
+      .css-1hvrgvd-CollectionTopContainer {
+        background-color: var(--white) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+        margin: 1rem !important;
+        padding: 1.5rem !important;
+      }
+
+      /* Responsive */
       @media (max-width: 768px) {
         .admin-header {
           padding: 1rem;
         }
+        
         .admin-title {
           font-size: 1.2rem;
         }
+        
         .back-to-site {
           padding: 0.6rem 1rem;
           font-size: 0.9em;
+        }
+
+        #nc-root {
+          margin-top: 56px;
         }
       }
     </style>
@@ -80,6 +177,9 @@
           }
         });
       }
+
+      // Configuration supplémentaire de Netlify CMS
+      CMS.registerPreviewStyle("/assets/css/style.css");
     </script>
   </body>
 </html>
