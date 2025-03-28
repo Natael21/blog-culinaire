@@ -20,6 +20,10 @@
           <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
         </div>
       </div>
+      <a href="javascript:void(0)" class="admin-button" id="login-button">
+        <i class="fas fa-user"></i>
+        <span>Connexion</span>
+      </a>
     </header>
 
     <nav class="main-nav-container">
@@ -54,10 +58,9 @@
       </div>
     </footer>
 
-    <a href="javascript:void(0)" class="login-button" id="login-button">
-      <i class="fas fa-user"></i>
-      <span>Connexion</span>
-    </a>
+    <button id="scroll-to-top" class="scroll-to-top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
 
     <script>
       if (window.netlifyIdentity) {
@@ -96,6 +99,24 @@
           window.location.href = "/";
         });
       }
+
+      // Scroll to top functionality
+      const scrollToTopButton = document.getElementById('scroll-to-top');
+      
+      window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+          scrollToTopButton.classList.add('show');
+        } else {
+          scrollToTopButton.classList.remove('show');
+        }
+      });
+
+      scrollToTopButton.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
     </script>
   </body>
 </html>
