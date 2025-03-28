@@ -32,13 +32,112 @@ collections:
     folder: "_posts"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    editor:
+      preview: true
     fields:
-      - { label: "Layout", name: "layout", widget: "hidden", default: "restaurant" }
-      - { label: "Nom du restaurant", name: "title", widget: "string" }
-      - { label: "Date", name: "date", widget: "datetime", format: "YYYY-MM-DD" }
-      - { label: "Note sur 5", name: "note", widget: "number", min: 0, max: 5, value_type: "int" }
-      - { label: "Style de nourriture", name: "style", widget: "select", options: ["Asiatique", "Italien", "Français", "Américain", "Autre"] }
-      - { label: "Résumé", name: "description", widget: "text" }
-      - { label: "Contenu", name: "body", widget: "markdown", default: "**Nataël** :\n\n\n\n**Nicolas** :\n" }
-      - { label: "Image principale", name: "image", widget: "image" }
-      - { label: "Galerie d'images", name: "images", widget: "list", field: {label: "Image", name: "image", widget: "image"}, required: false }
+      - { 
+          label: "Layout",
+          name: "layout",
+          widget: "hidden",
+          default: "restaurant"
+        }
+      - {
+          label: "Nom du restaurant",
+          name: "title",
+          widget: "string",
+          hint: "Nom complet du restaurant"
+        }
+      - {
+          label: "Date de la visite",
+          name: "date",
+          widget: "datetime",
+          format: "YYYY-MM-DD",
+          date_format: "DD/MM/YYYY",
+          time_format: false,
+          hint: "Date de votre visite au restaurant"
+        }
+      - {
+          label: "Note sur 5",
+          name: "note",
+          widget: "number",
+          min: 1,
+          max: 5,
+          value_type: "int",
+          hint: "Évaluez le restaurant de 1 à 5 étoiles"
+        }
+      - {
+          label: "Style de cuisine",
+          name: "style",
+          widget: "select",
+          options: [
+            "Asiatique",
+            "Italien",
+            "Mexicain",
+            "Bistro",
+            "Américain",
+            "Libano-Marocain",
+            "Iranien",
+            "Vietnamien",
+            "Indien",
+            "Café-Bistro",
+            "Microbrasserie",
+            "Pub",
+            "Français",
+            "Fusion",
+            "Méditerranéen",
+            "Fast-food",
+            "Végétarien/Vegan",
+            "Fruits de mer",
+            "Autre"
+          ],
+          hint: "Sélectionnez le style principal de cuisine"
+        }
+      - {
+          label: "Fourchette de prix",
+          name: "price",
+          widget: "select",
+          options: [
+            { label: "Budget ($)", value: "budget" },
+            { label: "Moyen ($$)", value: "medium" },
+            { label: "Luxe ($$$)", value: "expensive" }
+          ],
+          hint: "Sélectionnez la gamme de prix du restaurant"
+        }
+      - {
+          label: "Description courte",
+          name: "description",
+          widget: "text",
+          hint: "Une brève description du restaurant (max 150 caractères)",
+          pattern: ['.{0,150}', "Maximum 150 caractères"]
+        }
+      - {
+          label: "Image principale",
+          name: "image",
+          widget: "image",
+          hint: "Image principale qui apparaîtra dans la liste et en haut de l'article",
+          media_library: {
+            config: {
+              multiple: false
+            }
+          }
+        }
+      - {
+          label: "Galerie d'images",
+          name: "images",
+          widget: "list",
+          summary: "{{fields.image}}",
+          field: {
+            label: "Image",
+            name: "image",
+            widget: "image"
+          },
+          hint: "Ajoutez des images supplémentaires pour la galerie (optionnel)",
+          required: false
+        }
+      - {
+          label: "Contenu de l'article",
+          name: "body",
+          widget: "markdown",
+          hint: "Rédigez vos impressions sur le restaurant",
+          default: "**Nataël** :\n\n\n\n**Nicolas** :\n"
+        }
