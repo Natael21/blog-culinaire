@@ -94,7 +94,7 @@ title: Accueil
             <h2>{{ post.title }}</h2>
             <div class="rating">
               <span class="stars">
-                {% assign rating = post.note | default: 0 %}
+                {% assign rating = post.note | plus: 0.0 %}
                 {% for i in (1..5) %}
                   {% assign current = i | minus: 1 %}
                   {% if rating > current %}

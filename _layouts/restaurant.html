@@ -8,7 +8,7 @@ layout: default
       <h1>{{ page.title }}</h1>
       <div class="restaurant-meta">
         <div class="rating">
-          {% assign rating = page.note | default: 0 %}
+          {% assign rating = page.note | plus: 0.0 %}
           <span class="stars">
             {% for i in (1..5) %}
               {% assign current = i | minus: 1 %}
