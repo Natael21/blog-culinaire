@@ -57,7 +57,13 @@ layout: default
     </div>
     {% endif %}
   </div>
-</article>
+
+  <!-- Section Commentaires -->
+  <div class="comments-section">
+    <h2>Commentaires</h2>
+    <div id="disqus_thread"></div>
+  </div>
+</div>
 
 <!-- Navigation buttons -->
 <div class="restaurant-navigation">
@@ -141,7 +147,19 @@ layout: default
       closeModal();
     }
   });
+
+  var disqus_config = function () {
+    this.page.url = "{{ site.url }}{{ page.url }}";
+    this.page.identifier = "{{ page.url }}";
+  };
+  (function() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://appreciationrestaurantssherbrooke.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
 </script>
+<noscript>Veuillez activer JavaScript pour voir les <a href="https://disqus.com/?ref_noscript">commentaires propulsés par Disqus.</a></noscript>
 
 <style>
 .modal {
@@ -266,5 +284,26 @@ layout: default
     max-width: 100%;
     justify-content: center;
   }
+}
+
+.comments-section {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin-top: 2rem;
+}
+
+.comments-section h2 {
+  font-family: 'Playfair Display', serif;
+  color: var(--primary-color);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+}
+
+#disqus_thread {
+  margin-top: 1.5rem;
 }
 </style>
