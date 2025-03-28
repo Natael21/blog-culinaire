@@ -16,6 +16,10 @@
         --border-color: #ddd;
         --background-light: #f8f9fa;
         --white: #ffffff;
+        --success-color: #2ecc71;
+        --warning-color: #f1c40f;
+        --error-color: #e74c3c;
+        --header-height: 64px;
       }
 
       body {
@@ -24,6 +28,7 @@
         font-family: 'Open Sans', sans-serif;
         color: var(--text-color);
         background-color: var(--background-light);
+        min-height: 100vh;
       }
 
       .admin-header {
@@ -38,6 +43,8 @@
         left: 0;
         right: 0;
         z-index: 1000;
+        height: var(--header-height);
+        box-sizing: border-box;
       }
 
       .admin-title {
@@ -74,73 +81,178 @@
 
       /* Styles pour Netlify CMS */
       #nc-root {
-        margin-top: 64px; /* Hauteur du header */
+        margin-top: calc(var(--header-height) + 2rem);
+        padding: 0 2rem 2rem;
       }
 
-      /* Personnalisation des formulaires */
-      .css-1q9mc2j-ControlContainer {
-        background-color: var(--white) !important;
-        border-radius: 8px !important;
-        border: 1px solid var(--border-color) !important;
-      }
-
-      .css-1q9mc2j-ControlContainer:hover {
-        border-color: var(--accent-color) !important;
-      }
-
-      /* Boutons */
-      .css-1hvrgvd-CollectionTopContainer button,
-      .css-1f7nhiq-ControlContainer button {
-        background-color: var(--accent-color) !important;
-        color: var(--white) !important;
-        border-radius: 8px !important;
-        padding: 8px 16px !important;
-        font-weight: 600 !important;
+      /* Collection List */
+      [class*="ListCard"] {
+        background: var(--white) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
         transition: all 0.3s ease !important;
+        margin-bottom: 1rem !important;
+        border: 1px solid var(--border-color) !important;
       }
 
-      .css-1hvrgvd-CollectionTopContainer button:hover,
-      .css-1f7nhiq-ControlContainer button:hover {
-        background-color: var(--secondary-color) !important;
+      [class*="ListCard"]:hover {
         transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1) !important;
       }
 
-      /* Champs de texte */
-      input[type="text"],
-      textarea {
+      /* Editor Container */
+      [class*="EditorContainer"] {
+        background: var(--white) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+        padding: 2rem !important;
+        margin: 1rem !important;
+      }
+
+      /* Form Controls */
+      [class*="ControlContainer"] {
+        background: var(--white) !important;
         border: 1px solid var(--border-color) !important;
         border-radius: 8px !important;
-        padding: 8px 12px !important;
-        font-family: 'Open Sans', sans-serif !important;
+        padding: 1.2rem !important;
+        margin-bottom: 2rem !important;
       }
 
-      input[type="text"]:focus,
-      textarea:focus {
+      [class*="ControlContainer"]:focus-within {
         border-color: var(--accent-color) !important;
-        outline: none !important;
         box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1) !important;
       }
 
       /* Labels */
-      label {
+      [class*="FieldLabel"] {
         font-family: 'Open Sans', sans-serif !important;
         font-weight: 600 !important;
         color: var(--text-color) !important;
+        font-size: 1rem !important;
+        margin-bottom: 0.8rem !important;
       }
 
-      /* Liste des articles */
-      .css-1hvrgvd-CollectionTopContainer {
+      /* Inputs */
+      input[type="text"],
+      input[type="number"],
+      textarea,
+      select {
+        font-family: 'Open Sans', sans-serif !important;
+        padding: 0.8rem 1rem !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important;
+        width: 100% !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        background-color: var(--white) !important;
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      textarea:focus,
+      select:focus {
+        outline: none !important;
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1) !important;
+      }
+
+      /* Buttons */
+      button[class*="Button"] {
+        background-color: var(--accent-color) !important;
+        color: var(--white) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.8rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+      }
+
+      button[class*="Button"]:hover {
+        background-color: var(--secondary-color) !important;
+        transform: translateY(-2px) !important;
+      }
+
+      /* Success Button */
+      button[class*="SuccessButton"] {
+        background-color: var(--success-color) !important;
+      }
+
+      /* Delete Button */
+      button[class*="DeleteButton"] {
+        background-color: var(--error-color) !important;
+      }
+
+      /* Markdown Editor */
+      [class*="MarkdownEditor"] {
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        margin-top: 1rem !important;
+      }
+
+      [class*="ToolbarContainer"] {
+        background-color: var(--background-light) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        padding: 0.8rem !important;
+      }
+
+      [class*="EditorArea"] {
+        padding: 1.2rem !important;
+        min-height: 200px !important;
+        background-color: var(--white) !important;
+      }
+
+      /* Image Upload */
+      [class*="ImageUpload"] {
+        border: 2px dashed var(--border-color) !important;
+        border-radius: 8px !important;
+        padding: 2rem !important;
+        text-align: center !important;
+        transition: all 0.3s ease !important;
+        background-color: var(--background-light) !important;
+        margin-top: 0.5rem !important;
+      }
+
+      [class*="ImageUpload"]:hover {
+        border-color: var(--accent-color) !important;
+        background-color: rgba(231, 76, 60, 0.05) !important;
+      }
+
+      /* Collection Top */
+      [class*="CollectionTopContainer"] {
+        margin-bottom: 2rem !important;
+        padding: 1rem !important;
         background-color: var(--white) !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-        margin: 1rem !important;
-        padding: 1.5rem !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
       }
 
-      /* Responsive */
+      /* Collection Controls */
+      [class*="CollectionControlsContainer"] {
+        padding: 1rem !important;
+        background-color: var(--white) !important;
+        border-radius: 8px !important;
+        margin-bottom: 1rem !important;
+      }
+
+      /* Hints */
+      [class*="FieldHint"] {
+        color: #666 !important;
+        font-size: 0.9rem !important;
+        margin-top: 0.5rem !important;
+        font-style: italic !important;
+      }
+
+      /* Responsive Design */
       @media (max-width: 768px) {
         .admin-header {
           padding: 1rem;
+          height: 56px;
         }
         
         .admin-title {
@@ -153,7 +265,18 @@
         }
 
         #nc-root {
-          margin-top: 56px;
+          margin-top: calc(56px + 1rem);
+          padding: 0 1rem 1rem;
+        }
+
+        [class*="EditorContainer"] {
+          padding: 1rem !important;
+          margin: 0.5rem !important;
+        }
+
+        [class*="ControlContainer"] {
+          padding: 1rem !important;
+          margin-bottom: 1.5rem !important;
         }
       }
     </style>
