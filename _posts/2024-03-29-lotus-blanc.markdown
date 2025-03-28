@@ -5,6 +5,7 @@ date: 2024-03-29
 note: 4
 style: "Vietnamien"
 description: "Un endroit qui saura vous surprendre !"
+price: "budget"
 image: "/images/lotus blanc.png"
 images:
   - image: "/images/Lotus blanc_wonton.jpg"

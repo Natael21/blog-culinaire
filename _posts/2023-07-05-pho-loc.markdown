@@ -4,6 +4,7 @@ title: "Pho Loc"
 date: 2023-05-10
 note: 4
 style: "Vietnamien"
+price: "budget"
 description: "Une authentique cuisine vietnamienne dans un cadre pittoresque et intime"
 image: "/images/pho loc.PNG"
 images:

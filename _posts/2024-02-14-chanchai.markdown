@@ -5,6 +5,7 @@ date: 2024-02-14
 note: 4
 style: "Thaïlandais"
 description: "L'un des plus grands restaurants thaïlandais en ville !"
+price: "medium"
 image: "/images/chanchai.jpeg"
 images:
   - image: "/images/chanchai.jpeg"

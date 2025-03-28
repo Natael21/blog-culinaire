@@ -5,6 +5,7 @@ date: 2023-05-14
 note: 3
 style: "Mexicain"
 description: "Belle ambiance mexicaine, ce restaurant offre des classiques mexicains ainsi qu'une grande variété de cocktails."
+price: "medium"
 image: "/images/Guacamole y tequila.png"
 images:
   - image: "/images/Guecamole y Tequila Nicolas.png"

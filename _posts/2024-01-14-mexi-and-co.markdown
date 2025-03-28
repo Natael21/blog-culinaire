@@ -5,6 +5,7 @@ date: 2024-05-13
 note: 5
 style: "Mexicain"
 description: "L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !"
+price: "medium"
 image: "/images/Mexi&co.png"
 images:
   - image: "/images/Mexi&co.png"

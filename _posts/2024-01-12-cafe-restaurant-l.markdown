@@ -5,6 +5,7 @@ date: 2024-01-12
 note: 4
 style: "Iranien"
 description: "Salaam ! Vous avez besoin d'un coin tranquille pour savourer un repas gastronomique ? La cuisine iranienne saura vous impressionner dans ce restaurant paisible !"
+price: "medium"
 image: "/images/Café Restaurant L.png"
 images:
   - image: "/images/Café Restaurant L.png"

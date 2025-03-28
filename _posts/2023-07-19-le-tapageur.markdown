@@ -4,7 +4,8 @@ title: "Le Tapageur"
 date: 2022-10-08
 note: 4
 style: "Bistro"
-description: "Un restaurant festif avec des plats spectaculaires et une ambiance vivante, parfait pour les célébrations"
+price: "medium"
+description: "Un bistro festif offrant des plats spectaculaires et une ambiance vivante, parfait pour les célébrations"
 image: "/images/Le Tapageur.jpg"
 images:
   - image: "/images/Le Tapageur.jpg"

@@ -4,6 +4,7 @@ title: "Restaurant Persépolis"
 date: 2023-06-13
 note: 5
 style: "Iranien"
+price: "medium"
 description: "Une authentique cuisine iranienne servie dans un cadre chaleureux et décoré avec soin"
 image: "/images/Restaurant Persépolis.jpg"
 images:

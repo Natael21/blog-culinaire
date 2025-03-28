@@ -5,6 +5,7 @@ date: 2024-11-15
 note: 4
 style: "Asiatique"
 description: "Une cuisine asiatique avec une touche québécoise"
+price: "budget"
 image: "/images/Saveur et délice.jpg"
 images:
   - image: "/images/Saveur_delice_Natael.jpg"

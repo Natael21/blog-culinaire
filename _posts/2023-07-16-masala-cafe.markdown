@@ -5,6 +5,7 @@ date: 2023-07-16
 note: 5
 style: "Indien"
 description: "Sabhee ko namaskaar ! Par une longue semaine de pluie, un excellent restaurant indien orné de reliques qui pimentent votre journée."
+price: "medium"
 image: "/images/Masala café.png"
 images:
   - image: "/images/Masala café.png"

@@ -5,8 +5,10 @@ date: 2024-05-04
 note: 4
 style: "Café-Bistro"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
+price: "medium"
 image: "/images/Caffucino.jpg"
 images:
+  - image: "/images/Caffucino.jpg"
   - image: "/images/Caffucino_Nicolas.jpg"
   - image: "/images/Caffucino_Nataël.jpg"
 ---
