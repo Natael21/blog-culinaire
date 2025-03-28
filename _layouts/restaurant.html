@@ -1,5 +1,6 @@
 ---
 layout: default
+comments: true
 ---
 
 <article class="restaurant-detail">
@@ -148,13 +149,16 @@ layout: default
     }
   });
 
+  // Configuration Disqus
   var disqus_config = function () {
     this.page.url = "{{ site.url }}{{ page.url }}";
     this.page.identifier = "{{ page.url }}";
+    this.page.title = "{{ page.title }}";
   };
+
   (function() {
     var d = document, s = d.createElement('script');
-    s.src = 'https://appreciationrestaurantssherbrooke.disqus.com/embed.js';
+    s.src = 'https://{{ site.disqus.shortname }}.disqus.com/embed.js';
     s.setAttribute('data-timestamp', +new Date());
     (d.head || d.body).appendChild(s);
   })();
@@ -305,5 +309,6 @@ layout: default
 
 #disqus_thread {
   margin-top: 1.5rem;
+  width: 100%;
 }
 </style>
