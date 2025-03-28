@@ -12,89 +12,51 @@ title: Accueil
   <div class="filters-sidebar">
     <div class="filter-group">
       <h3>Filtres</h3>
-      
-      <!-- Barre de recherche pour le titre -->
-      <label for="title-search">Rechercher un restaurant</label>
-      <input type="text" id="title-search" class="search-input" placeholder="Nom du restaurant...">
+      <label for="sort-by">Trier par</label>
+      <select id="sort-by" class="filter-select">
+        <option value="date-desc">Date (Plus récent)</option>
+        <option value="date-asc">Date (Plus ancien)</option>
+        <option value="name-asc">Nom (A-Z)</option>
+        <option value="name-desc">Nom (Z-A)</option>
+        <option value="rating-desc">Note (Plus haute)</option>
+        <option value="rating-asc">Note (Plus basse)</option>
+      </select>
 
-      <!-- Barre de recherche pour le style -->
-      <label for="style-search">Rechercher un style de cuisine</label>
-      <input type="text" id="style-search" class="search-input" placeholder="Style de cuisine...">
+      <label for="style-filter">Style de cuisine</label>
+      <select id="style-filter" class="filter-select">
+        <option value="">Tous les styles</option>
+        <option value="Asiatique">Asiatique</option>
+        <option value="Italien">Italien</option>
+        <option value="Mexicain">Mexicain</option>
+        <option value="Bistro">Bistro</option>
+        <option value="Américain">Américain</option>
+        <option value="Libano-Marocain">Libano-Marocain</option>
+        <option value="Iranien">Iranien</option>
+        <option value="Vietnamien">Vietnamien</option>
+        <option value="Thaïlandais">Thaïlandais</option>
+        <option value="Indien">Indien</option>
+        <option value="Café-Bistro">Café-Bistro</option>
+        <option value="Microbrasserie">Microbrasserie</option>
+        <option value="Pub">Pub</option>
+        <option value="Boulangerie-Café">Boulangerie-Café</option>
+      </select>
 
-      <!-- Menu déroulant principal -->
-      <button class="filter-toggle" onclick="toggleFilters()">
-        <i class="fas fa-chevron-down"></i> Filtres avancés
-      </button>
-
-      <div class="advanced-filters" id="advanced-filters">
-        <!-- Style de cuisine -->
-        <label for="style-filter">Style de cuisine</label>
-        <select id="style-filter" class="filter-select">
-          <option value="">Tous les styles</option>
-          <option value="Asiatique">Asiatique</option>
-          <option value="Italien">Italien</option>
-          <option value="Mexicain">Mexicain</option>
-          <option value="Bistro">Bistro</option>
-          <option value="Américain">Américain</option>
-          <option value="Libano-Marocain">Libano-Marocain</option>
-          <option value="Iranien">Iranien</option>
-          <option value="Vietnamien">Vietnamien</option>
-          <option value="Thaïlandais">Thaïlandais</option>
-          <option value="Indien">Indien</option>
-          <option value="Café-Bistro">Café-Bistro</option>
-          <option value="Microbrasserie">Microbrasserie</option>
-          <option value="Pub">Pub</option>
-          <option value="Boulangerie-Café">Boulangerie-Café</option>
-        </select>
-
-        <!-- Note -->
-        <label for="rating-filter">Note</label>
-        <select id="rating-filter" class="filter-select">
-          <option value="">Toutes les notes</option>
-          <option value="5">5 étoiles</option>
-          <option value="4">4 étoiles</option>
-          <option value="3">3 étoiles</option>
-          <option value="2">2 étoiles</option>
-          <option value="1">1 étoile</option>
-        </select>
-
-        <!-- Prix -->
-        <label for="price-filter">Fourchette de prix</label>
-        <select id="price-filter" class="filter-select">
-          <option value="">Tous les prix</option>
-          <option value="budget">Budget ($)</option>
-          <option value="medium">Moyen ($$)</option>
-          <option value="expensive">Luxe ($$$)</option>
-        </select>
-
-        <!-- Tri -->
-        <label for="sort-by">Trier par</label>
-        <select id="sort-by" class="filter-select">
-          <option value="date-desc">Date (Plus récent)</option>
-          <option value="date-asc">Date (Plus ancien)</option>
-          <option value="name-asc">Nom (A-Z)</option>
-          <option value="name-desc">Nom (Z-A)</option>
-          <option value="rating-desc">Note (Plus haute)</option>
-          <option value="rating-asc">Note (Plus basse)</option>
-        </select>
-      </div>
-
-      <!-- Bouton de réinitialisation -->
-      <button class="reset-filters" onclick="resetFilters()">
-        <i class="fas fa-undo"></i> Réinitialiser les filtres
-      </button>
+      <label for="rating-filter">Note</label>
+      <select id="rating-filter" class="filter-select">
+        <option value="">Toutes les notes</option>
+        <option value="5">5 étoiles</option>
+        <option value="4">4 étoiles</option>
+        <option value="3">3 étoiles</option>
+        <option value="2">2 étoiles</option>
+        <option value="1">1 étoile</option>
+      </select>
     </div>
   </div>
 
   <div class="post-grid" id="restaurant-grid">
     {% for post in site.posts %}
       {% if post.layout == 'restaurant' %}
-      <div class="post-card" 
-           data-date="{{ post.date | date: '%Y-%m-%d' }}" 
-           data-rating="{{ post.note }}" 
-           data-style="{{ post.style }}"
-           data-title="{{ post.title | downcase }}"
-           data-price="{{ post.price | default: 'medium' }}">
+      <div class="post-card" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-rating="{{ post.note }}" data-style="{{ post.style }}">
         <a href="{{ post.url | relative_url }}" class="post-link">
           <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
           <div class="content">
@@ -135,58 +97,25 @@ title: Accueil
     }
   });
 
-  // Toggle advanced filters
-  function toggleFilters() {
-    const advancedFilters = document.getElementById('advanced-filters');
-    const toggleButton = document.querySelector('.filter-toggle');
-    advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
-    toggleButton.querySelector('i').classList.toggle('fa-chevron-down');
-    toggleButton.querySelector('i').classList.toggle('fa-chevron-up');
-  }
-
-  // Reset all filters
-  function resetFilters() {
-    document.getElementById('title-search').value = '';
-    document.getElementById('style-search').value = '';
-    document.getElementById('style-filter').value = '';
-    document.getElementById('rating-filter').value = '';
-    document.getElementById('price-filter').value = '';
-    document.getElementById('sort-by').value = 'date-desc';
-    filterRestaurants();
-  }
-
   // Filtering functionality
-  const titleSearch = document.getElementById('title-search');
-  const styleSearch = document.getElementById('style-search');
+  const sortSelect = document.getElementById('sort-by');
   const styleFilter = document.getElementById('style-filter');
   const ratingFilter = document.getElementById('rating-filter');
-  const priceFilter = document.getElementById('price-filter');
-  const sortSelect = document.getElementById('sort-by');
   const restaurantGrid = document.getElementById('restaurant-grid');
   let restaurants = Array.from(restaurantGrid.children);
 
   function filterRestaurants() {
-    const searchTitle = titleSearch.value.toLowerCase();
-    const searchStyle = styleSearch.value.toLowerCase();
     const selectedStyle = styleFilter.value;
     const exactRating = ratingFilter.value;
-    const selectedPrice = priceFilter.value;
     const sortValue = sortSelect.value;
 
-    // Filter by search terms, style, rating and price
+    // Filter by style and rating
     let filteredRestaurants = restaurants.filter(restaurant => {
-      const title = restaurant.dataset.title;
-      const style = restaurant.dataset.style.toLowerCase();
+      const style = restaurant.dataset.style;
       const rating = parseFloat(restaurant.dataset.rating);
-      const price = restaurant.dataset.price;
-      
-      const titleMatch = !searchTitle || title.includes(searchTitle);
-      const styleMatch = !searchStyle || style.includes(searchStyle);
-      const exactStyleMatch = !selectedStyle || restaurant.dataset.style === selectedStyle;
+      const styleMatch = !selectedStyle || style === selectedStyle;
       const ratingMatch = !exactRating || rating === parseFloat(exactRating);
-      const priceMatch = !selectedPrice || price === selectedPrice;
-      
-      return titleMatch && styleMatch && exactStyleMatch && ratingMatch && priceMatch;
+      return styleMatch && ratingMatch;
     });
 
     // Sort filtered restaurants
@@ -217,116 +146,7 @@ title: Accueil
   }
 
   // Add event listeners
-  titleSearch.addEventListener('input', filterRestaurants);
-  styleSearch.addEventListener('input', filterRestaurants);
+  sortSelect.addEventListener('change', filterRestaurants);
   styleFilter.addEventListener('change', filterRestaurants);
   ratingFilter.addEventListener('change', filterRestaurants);
-  priceFilter.addEventListener('change', filterRestaurants);
-  sortSelect.addEventListener('change', filterRestaurants);
 </script>
-
-<style>
-.content-wrapper {
-  display: flex;
-  gap: 2rem;
-  margin: 0 auto;
-  max-width: 1400px;
-  padding: 0 1rem;
-}
-
-.filters-sidebar {
-  width: 300px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 2rem;
-  align-self: flex-start;
-  background: var(--white);
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 1.5rem;
-  height: fit-content;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.7rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.filter-toggle {
-  width: 100%;
-  padding: 0.7rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 1rem 0;
-}
-
-.filter-toggle:hover {
-  background: var(--accent-color);
-}
-
-.advanced-filters {
-  display: none;
-  margin-top: 1rem;
-}
-
-.reset-filters {
-  width: 100%;
-  padding: 0.7rem;
-  background: #f8f8f8;
-  color: var(--primary-color);
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.reset-filters:hover {
-  background: #eee;
-}
-
-.post-grid {
-  flex-grow: 1;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-@media (max-width: 1200px) {
-  .post-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .content-wrapper {
-    flex-direction: column;
-  }
-
-  .filters-sidebar {
-    width: 100%;
-    position: relative;
-    top: 0;
-    margin-bottom: 2rem;
-  }
-
-  .post-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
