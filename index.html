@@ -4,17 +4,18 @@ title: Accueil
 ---
 
 <div class="main-content">
-  <!-- Filtres à gauche -->
-  <aside class="filters-sidebar">
+  <div class="page-header">
+    <h2>Nos Dernières Découvertes</h2>
+    <p>Explorez nos critiques de restaurants à Sherbrooke</p>
+  </div>
+
+  <!-- Barre de filtres -->
+  <div class="filters-container">
     <div class="filter-group">
-      <h3>Filtres</h3>
-      
-      <!-- Barre de recherche pour le titre -->
-      <div class="filter-item">
-        <div class="search-input-wrapper">
-          <i class="fas fa-search"></i>
-          <input type="text" id="title-search" class="search-input" placeholder="Rechercher un restaurant...">
-        </div>
+      <!-- Barre de recherche -->
+      <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="title-search" class="search-input" placeholder="Rechercher un restaurant...">
       </div>
 
       <!-- Bouton filtres avancés -->
@@ -74,76 +75,66 @@ title: Accueil
         </button>
       </div>
     </div>
-  </aside>
+  </div>
 
-  <!-- Contenu principal -->
-  <div class="content-wrapper">
-    <div class="page-header">
-      <h2>Nos Dernières Découvertes</h2>
-      <p>Explorez nos critiques de restaurants à Sherbrooke</p>
-    </div>
-
-    <div class="post-grid" id="restaurant-grid">
-      {% for post in site.posts %}
-        {% if post.layout == 'restaurant' %}
-        <div class="post-card" 
-             data-date="{{ post.date | date: '%Y-%m-%d' }}" 
-             data-rating="{{ post.note }}" 
-             data-style="{{ post.style }}"
-             data-title="{{ post.title | downcase }}"
-             data-price="{{ post.price | default: 'medium' }}">
-          <a href="{{ post.url | relative_url }}" class="post-link">
-            <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
-            <div class="content">
-              <h2>{{ post.title }}</h2>
-              <div class="rating">
-                <span class="stars">
-                  {% assign rating = post.note | default: 0 %}
-                  {% for i in (1..5) %}
-                    {% if i <= rating %}
-                      ⭐
-                    {% endif %}
-                  {% endfor %}
-                </span>
-                <span class="score">{{ rating }}/5</span>
-              </div>
-              <p class="description">{{ post.description | truncate: 150 }}</p>
-              <div class="meta">
-                <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
-                {% if post.style %}
-                <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
-                {% endif %}
-              </div>
+  <!-- Grille des restaurants -->
+  <div class="post-grid" id="restaurant-grid">
+    {% for post in site.posts %}
+      {% if post.layout == 'restaurant' %}
+      <div class="post-card" 
+           data-date="{{ post.date | date: '%Y-%m-%d' }}" 
+           data-rating="{{ post.note }}" 
+           data-style="{{ post.style }}"
+           data-title="{{ post.title | downcase }}"
+           data-price="{{ post.price | default: 'medium' }}">
+        <a href="{{ post.url | relative_url }}" class="post-link">
+          <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
+          <div class="content">
+            <h2>{{ post.title }}</h2>
+            <div class="rating">
+              <span class="stars">
+                {% assign rating = post.note | default: 0 %}
+                {% for i in (1..5) %}
+                  {% if i <= rating %}
+                    ⭐
+                  {% endif %}
+                {% endfor %}
+              </span>
+              <span class="score">{{ rating }}/5</span>
             </div>
-          </a>
-        </div>
-        {% endif %}
-      {% endfor %}
-    </div>
+            <p class="description">{{ post.description | truncate: 150 }}</p>
+            <div class="meta">
+              <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
+              {% if post.style %}
+              <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endif %}
+    {% endfor %}
   </div>
 </div>
 
 <style>
 .main-content {
-  display: flex;
-  gap: 2rem;
-  margin: 0 auto;
   max-width: 1400px;
+  margin: 0 auto;
   padding: 0 2rem;
 }
 
-.filters-sidebar {
-  width: 300px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 2rem;
-  align-self: flex-start;
+.filters-container {
   background: var(--white);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   padding: 2rem;
-  height: fit-content;
-  margin-top: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin: 2rem 0;
+}
+
+.filter-group {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .search-input-wrapper {
@@ -168,6 +159,12 @@ title: Accueil
   transition: all 0.3s ease;
 }
 
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
+}
+
 .advanced-filters-btn {
   width: 100%;
   padding: 0.8rem;
@@ -188,6 +185,7 @@ title: Accueil
 
 .advanced-filters-btn:hover {
   background: var(--accent-color);
+  transform: translateY(-1px);
 }
 
 .advanced-filters {
@@ -220,6 +218,16 @@ title: Accueil
   transition: all 0.3s ease;
 }
 
+.filter-select:hover {
+  border-color: var(--accent-color);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
+}
+
 .reset-filters {
   width: 100%;
   padding: 0.8rem;
@@ -241,34 +249,17 @@ title: Accueil
 .reset-filters:hover {
   background: #eee;
   border-color: var(--accent-color);
-}
-
-@media (max-width: 1200px) {
-  .post-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 992px) {
-  .main-content {
-    flex-direction: column;
-  }
-
-  .filters-sidebar {
-    width: 100%;
-    position: relative;
-    top: 0;
-    margin-bottom: 2rem;
-  }
+  transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {
-  .post-grid {
-    grid-template-columns: 1fr;
-  }
-
   .main-content {
     padding: 0 1rem;
+  }
+  
+  .filters-container {
+    margin: 1rem 0;
+    padding: 1rem;
   }
 }
 </style>
