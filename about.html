@@ -4,44 +4,43 @@ title: À propos
 ---
 
 <div class="about-content">
-  <h1>À propos de nous</h1>
-  
-  <div class="team-member">
-    <h2>Nataël Laroche-Latulippe</h2>
-    <div class="social-links">
-      <a href="https://www.linkedin.com/in/nata%C3%ABl-laroche-latulippe-a81925213/" target="_blank" class="social-link">
-        <i class="fab fa-linkedin"></i>
-      </a>
-      <a href="https://www.facebook.com/profile.php?id=100010241551753" target="_blank" class="social-link">
-        <i class="fab fa-facebook"></i>
-      </a>
+  <div class="page-header">
+    <h1>À propos de nous</h1>
+    <p class="subtitle">Découvrez notre histoire et notre mission</p>
+  </div>
+
+  <div class="intro-text">
+    <p>
+      Curieux de la cuisine sherbrookoise ? Vous trouverez ici nos commentaires et appréciations sur les divers restaurants 
+      de Sherbrooke que nous avons essayés. Au lieu de prendre beaucoup de temps et d'argent à choisir quel sera votre 
+      endroit préféré, la consultation de notre site vous aidera à économiser du temps. Bonne lecture et bon appétit !
+    </p>
+  </div>
+
+  <div class="team-grid">
+    <div class="team-member">
+      <div class="member-photo">
+        <img src="/images/Lotus blanc_natael.jpg" alt="Nataël Laroche-Latulippe">
+      </div>
+      <h2>Nataël</h2>
+      <p class="member-title">Passionné de cuisine et toujours à la recherche de nouvelles saveurs</p>
+      <div class="social-links">
+        <a href="https://www.linkedin.com/in/nata%C3%ABl-laroche-latulippe-a81925213/" target="_blank" class="social-link">
+          <i class="fab fa-linkedin"></i>
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=100010241551753" target="_blank" class="social-link">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </div>
     </div>
-    <p>
-      Passionné de gastronomie et de découvertes culinaires, je partage mes expériences dans les restaurants de Sherbrooke. 
-      En tant que développeur logiciel et amateur de bonne cuisine, j'aime combiner ma rigueur professionnelle avec mon 
-      enthousiasme pour la gastronomie locale. À travers ce blog, je souhaite faire découvrir les meilleures adresses 
-      de notre région et contribuer à la promotion de la scène culinaire sherbrookoise.
-    </p>
-  </div>
 
-  <div class="team-member">
-    <h2>Nicolas Girard</h2>
-    <p>
-      Co-fondateur de ce blog culinaire, Nicolas apporte son expertise et sa passion pour la gastronomie à chaque critique. 
-      Avec un palais raffiné et un œil attentif aux détails, il contribue à offrir des critiques équilibrées et honnêtes 
-      des établissements sherbrookois. Son approche authentique et sa connaissance approfondie de la cuisine locale en font 
-      un critique culinaire de confiance.
-    </p>
-  </div>
-
-  <div class="about-mission">
-    <h2>Notre Mission</h2>
-    <p>
-      Notre blog est né d'une passion commune pour la gastronomie et d'une volonté de partager nos découvertes culinaires 
-      à Sherbrooke. Nous visitons chaque restaurant personnellement et partageons nos expériences de manière honnête et 
-      constructive. Notre objectif est d'aider les amateurs de bonne cuisine à découvrir les meilleures adresses de la 
-      région, tout en soutenant la scène gastronomique locale.
-    </p>
+    <div class="team-member">
+      <div class="member-photo">
+        <img src="/images/Lotus blanc_nicolas.jpg" alt="Nicolas Girard">
+      </div>
+      <h2>Nicolas</h2>
+      <p class="member-title">Amateur de bonne cuisine et critique culinaire enthousiaste</p>
+    </div>
   </div>
 </div>
 
@@ -55,62 +54,107 @@ title: À propos
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.about-content h1 {
+.page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.page-header h1 {
   font-family: 'Playfair Display', serif;
   color: var(--primary-color);
   font-size: 2.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-header .subtitle {
+  color: #666;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.intro-text {
+  text-align: center;
+  margin-bottom: 4rem;
+  color: #444;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 3rem;
   text-align: center;
 }
 
 .team-member {
-  margin-bottom: 3rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.member-photo {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.member-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .team-member h2 {
   font-family: 'Playfair Display', serif;
   color: var(--primary-color);
   font-size: 1.8rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-.team-member .social-links {
+.member-title {
+  color: #666;
+  font-size: 1rem;
   margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
-.team-member .social-link {
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.social-link {
   color: var(--primary-color);
   font-size: 1.5rem;
-  margin-right: 1rem;
   transition: color 0.3s ease;
 }
 
-.team-member .social-link:hover {
+.social-link:hover {
   color: var(--accent-color);
 }
 
-.team-member p {
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: #444;
-}
+@media (max-width: 768px) {
+  .about-content {
+    padding: 1.5rem;
+  }
 
-.about-mission {
-  margin-top: 3rem;
-}
+  .page-header h1 {
+    font-size: 2rem;
+  }
 
-.about-mission h2 {
-  font-family: 'Playfair Display', serif;
-  color: var(--primary-color);
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-}
+  .team-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 
-.about-mission p {
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: #444;
+  .member-photo {
+    width: 150px;
+    height: 150px;
+  }
 }
 </style> 
