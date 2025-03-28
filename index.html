@@ -3,23 +3,31 @@ layout: default
 title: Accueil
 ---
 
-<div class="main-content">
-  <!-- Filtres à gauche -->
-  <aside class="filters-sidebar">
+<div class="page-header">
+  <h2>Nos Dernières Découvertes</h2>
+  <p>Explorez nos critiques de restaurants à Sherbrooke</p>
+</div>
+
+<div class="content-wrapper">
+  <div class="filters-sidebar">
     <div class="filter-group">
       <h3>Filtres</h3>
       
       <!-- Barre de recherche pour le titre -->
-      <div class="filter-item">
-        <label for="title-search">Rechercher un restaurant</label>
-        <div class="search-input-wrapper">
-          <i class="fas fa-search"></i>
-          <input type="text" id="title-search" class="search-input" placeholder="Nom du restaurant...">
-        </div>
-      </div>
+      <label for="title-search">Rechercher un restaurant</label>
+      <input type="text" id="title-search" class="search-input" placeholder="Nom du restaurant...">
 
-      <!-- Style de cuisine -->
-      <div class="filter-item">
+      <!-- Barre de recherche pour le style -->
+      <label for="style-search">Rechercher un style de cuisine</label>
+      <input type="text" id="style-search" class="search-input" placeholder="Style de cuisine...">
+
+      <!-- Menu déroulant principal -->
+      <button class="filter-toggle" onclick="toggleFilters()">
+        <i class="fas fa-chevron-down"></i> Filtres avancés
+      </button>
+
+      <div class="advanced-filters" id="advanced-filters">
+        <!-- Style de cuisine -->
         <label for="style-filter">Style de cuisine</label>
         <select id="style-filter" class="filter-select">
           <option value="">Tous les styles</option>
@@ -36,11 +44,10 @@ title: Accueil
           <option value="Café-Bistro">Café-Bistro</option>
           <option value="Microbrasserie">Microbrasserie</option>
           <option value="Pub">Pub</option>
+          <option value="Boulangerie-Café">Boulangerie-Café</option>
         </select>
-      </div>
 
-      <!-- Note -->
-      <div class="filter-item">
+        <!-- Note -->
         <label for="rating-filter">Note</label>
         <select id="rating-filter" class="filter-select">
           <option value="">Toutes les notes</option>
@@ -50,10 +57,8 @@ title: Accueil
           <option value="2">2 étoiles</option>
           <option value="1">1 étoile</option>
         </select>
-      </div>
 
-      <!-- Prix -->
-      <div class="filter-item">
+        <!-- Prix -->
         <label for="price-filter">Fourchette de prix</label>
         <select id="price-filter" class="filter-select">
           <option value="">Tous les prix</option>
@@ -61,10 +66,8 @@ title: Accueil
           <option value="medium">Moyen ($$)</option>
           <option value="expensive">Luxe ($$$)</option>
         </select>
-      </div>
 
-      <!-- Tri -->
-      <div class="filter-item">
+        <!-- Tri -->
         <label for="sort-by">Trier par</label>
         <select id="sort-by" class="filter-select">
           <option value="date-desc">Date (Plus récent)</option>
@@ -81,62 +84,154 @@ title: Accueil
         <i class="fas fa-undo"></i> Réinitialiser les filtres
       </button>
     </div>
-  </aside>
+  </div>
 
-  <!-- Contenu principal -->
-  <div class="content-wrapper">
-    <div class="page-header">
-      <h2>Nos Dernières Découvertes</h2>
-      <p>Explorez nos critiques de restaurants à Sherbrooke</p>
-    </div>
-
-    <div class="post-grid" id="restaurant-grid">
-      {% for post in site.posts %}
-        {% if post.layout == 'restaurant' %}
-        <div class="post-card" 
-             data-date="{{ post.date | date: '%Y-%m-%d' }}" 
-             data-rating="{{ post.note }}" 
-             data-style="{{ post.style }}"
-             data-title="{{ post.title | downcase }}"
-             data-price="{{ post.price | default: 'medium' }}">
-          <a href="{{ post.url | relative_url }}" class="post-link">
-            <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
-            <div class="content">
-              <h2>{{ post.title }}</h2>
-              <div class="rating">
-                <span class="stars">
-                  {% assign rating = post.note | default: 0 %}
-                  {% for i in (1..5) %}
-                    {% if i <= rating %}
-                      ⭐
-                    {% endif %}
-                  {% endfor %}
-                </span>
-                <span class="score">{{ rating }}/5</span>
-              </div>
-              <p class="description">{{ post.description | truncate: 150 }}</p>
-              <div class="meta">
-                <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
-                {% if post.style %}
-                <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
-                {% endif %}
-              </div>
+  <div class="post-grid" id="restaurant-grid">
+    {% for post in site.posts %}
+      {% if post.layout == 'restaurant' %}
+      <div class="post-card" 
+           data-date="{{ post.date | date: '%Y-%m-%d' }}" 
+           data-rating="{{ post.note }}" 
+           data-style="{{ post.style }}"
+           data-title="{{ post.title | downcase }}"
+           data-price="{{ post.price | default: 'medium' }}">
+        <a href="{{ post.url | relative_url }}" class="post-link">
+          <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
+          <div class="content">
+            <h2>{{ post.title }}</h2>
+            <div class="rating">
+              <span class="stars">
+                {% assign rating = post.note | default: 0 %}
+                {% for i in (1..5) %}
+                  {% if i <= rating %}
+                    ⭐
+                  {% endif %}
+                {% endfor %}
+              </span>
+              <span class="score">{{ rating }}/5</span>
             </div>
-          </a>
-        </div>
-        {% endif %}
-      {% endfor %}
-    </div>
+            <p class="description">{{ post.description | truncate: 150 }}</p>
+            <div class="meta">
+              <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
+              {% if post.style %}
+              <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endif %}
+    {% endfor %}
   </div>
 </div>
 
+<script>
+  // Restore scroll position when returning to the page
+  window.addEventListener('load', function() {
+    const scrollPosition = sessionStorage.getItem('scrollPosition');
+    if (scrollPosition) {
+      window.scrollTo(0, parseInt(scrollPosition));
+      sessionStorage.removeItem('scrollPosition');
+    }
+  });
+
+  // Toggle advanced filters
+  function toggleFilters() {
+    const advancedFilters = document.getElementById('advanced-filters');
+    const toggleButton = document.querySelector('.filter-toggle');
+    advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
+    toggleButton.querySelector('i').classList.toggle('fa-chevron-down');
+    toggleButton.querySelector('i').classList.toggle('fa-chevron-up');
+  }
+
+  // Reset all filters
+  function resetFilters() {
+    document.getElementById('title-search').value = '';
+    document.getElementById('style-search').value = '';
+    document.getElementById('style-filter').value = '';
+    document.getElementById('rating-filter').value = '';
+    document.getElementById('price-filter').value = '';
+    document.getElementById('sort-by').value = 'date-desc';
+    filterRestaurants();
+  }
+
+  // Filtering functionality
+  const titleSearch = document.getElementById('title-search');
+  const styleSearch = document.getElementById('style-search');
+  const styleFilter = document.getElementById('style-filter');
+  const ratingFilter = document.getElementById('rating-filter');
+  const priceFilter = document.getElementById('price-filter');
+  const sortSelect = document.getElementById('sort-by');
+  const restaurantGrid = document.getElementById('restaurant-grid');
+  let restaurants = Array.from(restaurantGrid.children);
+
+  function filterRestaurants() {
+    const searchTitle = titleSearch.value.toLowerCase();
+    const searchStyle = styleSearch.value.toLowerCase();
+    const selectedStyle = styleFilter.value;
+    const exactRating = ratingFilter.value;
+    const selectedPrice = priceFilter.value;
+    const sortValue = sortSelect.value;
+
+    // Filter by search terms, style, rating and price
+    let filteredRestaurants = restaurants.filter(restaurant => {
+      const title = restaurant.dataset.title;
+      const style = restaurant.dataset.style.toLowerCase();
+      const rating = parseFloat(restaurant.dataset.rating);
+      const price = restaurant.dataset.price;
+      
+      const titleMatch = !searchTitle || title.includes(searchTitle);
+      const styleMatch = !searchStyle || style.includes(searchStyle);
+      const exactStyleMatch = !selectedStyle || restaurant.dataset.style === selectedStyle;
+      const ratingMatch = !exactRating || rating === parseFloat(exactRating);
+      const priceMatch = !selectedPrice || price === selectedPrice;
+      
+      return titleMatch && styleMatch && exactStyleMatch && ratingMatch && priceMatch;
+    });
+
+    // Sort filtered restaurants
+    filteredRestaurants.sort((a, b) => {
+      switch(sortValue) {
+        case 'date-desc':
+          return new Date(b.dataset.date) - new Date(a.dataset.date);
+        case 'date-asc':
+          return new Date(a.dataset.date) - new Date(b.dataset.date);
+        case 'name-asc':
+          return a.querySelector('h2').textContent.localeCompare(b.querySelector('h2').textContent);
+        case 'name-desc':
+          return b.querySelector('h2').textContent.localeCompare(a.querySelector('h2').textContent);
+        case 'rating-desc':
+          return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+        case 'rating-asc':
+          return parseFloat(a.dataset.rating) - parseFloat(b.dataset.rating);
+        default:
+          return 0;
+      }
+    });
+
+    // Update the grid
+    restaurantGrid.innerHTML = '';
+    filteredRestaurants.forEach(restaurant => {
+      restaurantGrid.appendChild(restaurant);
+    });
+  }
+
+  // Add event listeners
+  titleSearch.addEventListener('input', filterRestaurants);
+  styleSearch.addEventListener('input', filterRestaurants);
+  styleFilter.addEventListener('change', filterRestaurants);
+  ratingFilter.addEventListener('change', filterRestaurants);
+  priceFilter.addEventListener('change', filterRestaurants);
+  sortSelect.addEventListener('change', filterRestaurants);
+</script>
+
 <style>
-.main-content {
+.content-wrapper {
   display: flex;
   gap: 2rem;
   margin: 0 auto;
   max-width: 1400px;
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 
 .filters-sidebar {
@@ -147,97 +242,69 @@ title: Accueil
   align-self: flex-start;
   background: var(--white);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1.5rem;
   height: fit-content;
-  margin-top: 2rem;
-}
-
-.content-wrapper {
-  flex-grow: 1;
-}
-
-.page-header {
-  background: var(--white);
-  text-align: center;
-  margin-bottom: 2rem;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-.filter-item {
-  margin-bottom: 1.5rem;
-}
-
-.filter-item label {
-  display: block;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: 0.8rem;
-  font-size: 0.95rem;
-}
-
-.search-input-wrapper {
-  position: relative;
-}
-
-.search-input-wrapper i {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem;
+  padding: 0.7rem;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
-.filter-select {
+.filter-toggle {
   width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  background-color: var(--white);
-  color: var(--text-color);
+  padding: 0.7rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: calc(100% - 1rem) center;
-  padding-right: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem 0;
+}
+
+.filter-toggle:hover {
+  background: var(--accent-color);
+}
+
+.advanced-filters {
+  display: none;
+  margin-top: 1rem;
 }
 
 .reset-filters {
   width: 100%;
-  padding: 0.8rem;
-  margin-top: 1rem;
+  padding: 0.7rem;
   background: #f8f8f8;
   color: var(--primary-color);
   border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 0.9rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.reset-filters:hover {
+  background: #eee;
+}
+
+.post-grid {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
 }
 
 @media (max-width: 1200px) {
@@ -246,8 +313,8 @@ title: Accueil
   }
 }
 
-@media (max-width: 992px) {
-  .main-content {
+@media (max-width: 768px) {
+  .content-wrapper {
     flex-direction: column;
   }
 
@@ -257,88 +324,9 @@ title: Accueil
     top: 0;
     margin-bottom: 2rem;
   }
-}
 
-@media (max-width: 768px) {
   .post-grid {
     grid-template-columns: 1fr;
   }
-
-  .main-content {
-    padding: 0 1rem;
-  }
 }
 </style>
-
-<script>
-const titleSearch = document.getElementById('title-search');
-const styleFilter = document.getElementById('style-filter');
-const ratingFilter = document.getElementById('rating-filter');
-const priceFilter = document.getElementById('price-filter');
-const sortSelect = document.getElementById('sort-by');
-const restaurantGrid = document.getElementById('restaurant-grid');
-let restaurants = Array.from(restaurantGrid.children);
-
-function filterRestaurants() {
-  const searchTitle = titleSearch.value.toLowerCase();
-  const selectedStyle = styleFilter.value;
-  const exactRating = ratingFilter.value;
-  const selectedPrice = priceFilter.value;
-  const sortValue = sortSelect.value;
-
-  let filteredRestaurants = restaurants.filter(restaurant => {
-    const title = restaurant.dataset.title;
-    const style = restaurant.dataset.style;
-    const rating = parseFloat(restaurant.dataset.rating);
-    const price = restaurant.dataset.price;
-    
-    const titleMatch = !searchTitle || title.includes(searchTitle);
-    const styleMatch = !selectedStyle || style === selectedStyle;
-    const ratingMatch = !exactRating || rating === parseFloat(exactRating);
-    const priceMatch = !selectedPrice || price === selectedPrice;
-    
-    return titleMatch && styleMatch && ratingMatch && priceMatch;
-  });
-
-  // Tri
-  filteredRestaurants.sort((a, b) => {
-    switch(sortValue) {
-      case 'date-desc':
-        return new Date(b.dataset.date) - new Date(a.dataset.date);
-      case 'date-asc':
-        return new Date(a.dataset.date) - new Date(b.dataset.date);
-      case 'name-asc':
-        return a.querySelector('h2').textContent.localeCompare(b.querySelector('h2').textContent);
-      case 'name-desc':
-        return b.querySelector('h2').textContent.localeCompare(a.querySelector('h2').textContent);
-      case 'rating-desc':
-        return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
-      case 'rating-asc':
-        return parseFloat(a.dataset.rating) - parseFloat(b.dataset.rating);
-      default:
-        return 0;
-    }
-  });
-
-  restaurantGrid.innerHTML = '';
-  filteredRestaurants.forEach(restaurant => {
-    restaurantGrid.appendChild(restaurant);
-  });
-}
-
-function resetFilters() {
-  titleSearch.value = '';
-  styleFilter.value = '';
-  ratingFilter.value = '';
-  priceFilter.value = '';
-  sortSelect.value = 'date-desc';
-  filterRestaurants();
-}
-
-// Ajout des event listeners
-titleSearch.addEventListener('input', filterRestaurants);
-styleFilter.addEventListener('change', filterRestaurants);
-ratingFilter.addEventListener('change', filterRestaurants);
-priceFilter.addEventListener('change', filterRestaurants);
-sortSelect.addEventListener('change', filterRestaurants);
-</script>
