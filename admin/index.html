@@ -11,7 +11,7 @@
       :root {
         --primary-color: #2c3e50;
         --secondary-color: #34495e;
-        --accent-color: #e74c3c;
+        --accent-color: #2c3e50;
         --text-color: #333;
         --border-color: #ddd;
         --background-light: #f8f9fa;
@@ -120,7 +120,7 @@
 
       [class*="ControlContainer"]:focus-within {
         border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1) !important;
+        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1) !important;
       }
 
       /* Labels */
@@ -153,7 +153,7 @@
       select:focus {
         outline: none !important;
         border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1) !important;
+        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1) !important;
       }
 
       /* Buttons */
@@ -175,6 +175,18 @@
       button[class*="Button"]:hover {
         background-color: var(--secondary-color) !important;
         transform: translateY(-2px) !important;
+      }
+
+      /* Upload Button */
+      button[class*="UploadButton"] {
+        background-color: var(--accent-color) !important;
+        color: var(--white) !important;
+        border: 2px solid var(--accent-color) !important;
+      }
+
+      button[class*="UploadButton"]:hover {
+        background-color: var(--secondary-color) !important;
+        border-color: var(--secondary-color) !important;
       }
 
       /* Success Button */
@@ -220,32 +232,71 @@
 
       [class*="ImageUpload"]:hover {
         border-color: var(--accent-color) !important;
-        background-color: rgba(231, 76, 60, 0.05) !important;
+        background-color: rgba(44, 62, 80, 0.05) !important;
       }
 
-      /* Collection Top */
-      [class*="CollectionTopContainer"] {
-        margin-bottom: 2rem !important;
-        padding: 1rem !important;
-        background-color: var(--white) !important;
+      /* Preview Styles */
+      .frame-content {
+        background: var(--white) !important;
+        padding: 2rem !important;
         border-radius: 12px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
       }
 
-      /* Collection Controls */
-      [class*="CollectionControlsContainer"] {
-        padding: 1rem !important;
-        background-color: var(--white) !important;
+      .frame-content img {
+        max-width: 100% !important;
+        height: auto !important;
         border-radius: 8px !important;
-        margin-bottom: 1rem !important;
       }
 
-      /* Hints */
-      [class*="FieldHint"] {
-        color: #666 !important;
-        font-size: 0.9rem !important;
-        margin-top: 0.5rem !important;
-        font-style: italic !important;
+      /* Gallery Preview */
+      .gallery-preview {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+        gap: 1rem !important;
+        margin-top: 1rem !important;
+      }
+
+      .gallery-preview img {
+        width: 100% !important;
+        height: 200px !important;
+        object-fit: cover !important;
+        border-radius: 8px !important;
+        transition: transform 0.3s ease !important;
+      }
+
+      .gallery-preview img:hover {
+        transform: scale(1.05) !important;
+      }
+
+      /* Media Library Dialog */
+      [class*="StyledModal"] {
+        background: var(--white) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+      }
+
+      [class*="LibraryTop"] {
+        background-color: var(--background-light) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      /* Multiple Image Selection */
+      [class*="CardGrid"] {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        gap: 1rem !important;
+        padding: 1rem !important;
+      }
+
+      [class*="CardImage"] {
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+      }
+
+      [class*="CardImage"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
       }
 
       /* Responsive Design */
@@ -278,6 +329,10 @@
           padding: 1rem !important;
           margin-bottom: 1.5rem !important;
         }
+
+        .gallery-preview {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        }
       }
     </style>
   </head>
@@ -301,8 +356,68 @@
         });
       }
 
-      // Configuration supplémentaire de Netlify CMS
+      // Configuration de l'aperçu personnalisé
       CMS.registerPreviewStyle("/assets/css/style.css");
+      
+      // Personnalisation de l'aperçu des restaurants
+      CMS.registerPreviewTemplate("restaurants", createClass({
+        render: function() {
+          const entry = this.props.entry;
+          const image = entry.getIn(['data', 'image']);
+          const images = entry.getIn(['data', 'images']) || [];
+          
+          return h('div', {className: "restaurant-preview"},
+            h('div', {className: "restaurant-header"},
+              h('h1', {}, entry.getIn(['data', 'title'])),
+              h('div', {className: "restaurant-meta"},
+                h('div', {className: "rating"},
+                  Array(5).fill().map((_, i) => 
+                    h('i', {
+                      className: `fas fa-star${i < entry.getIn(['data', 'note']) ? '' : '-o'}`,
+                      key: i
+                    })
+                  ),
+                  h('span', {}, `${entry.getIn(['data', 'note'])}/5`)
+                ),
+                h('div', {className: "style"},
+                  h('i', {className: "fas fa-utensils"}),
+                  h('span', {}, entry.getIn(['data', 'style']))
+                ),
+                h('div', {className: "price"},
+                  Array(entry.getIn(['data', 'price']) === 'expensive' ? 3 : 
+                       entry.getIn(['data', 'price']) === 'medium' ? 2 : 1)
+                    .fill()
+                    .map((_, i) => h('i', {className: "fas fa-dollar-sign", key: i}))
+                )
+              )
+            ),
+            h('div', {className: "restaurant-content"},
+              h('img', {
+                src: image,
+                className: "main-image"
+              }),
+              h('div', {className: "description"},
+                entry.getIn(['data', 'description'])
+              ),
+              h('div', {className: "gallery-preview"},
+                images.map((img, i) => 
+                  h('img', {
+                    src: img.get('image'),
+                    key: i,
+                    alt: `Image ${i + 1}`
+                  })
+                )
+              ),
+              h('div', {
+                className: "content",
+                dangerouslySetInnerHTML: {
+                  __html: this.props.widgetFor('body')
+                }
+              })
+            )
+          );
+        }
+      }));
     </script>
   </body>
 </html>
