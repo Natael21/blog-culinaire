@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Principe Pizza Pasta (Fermé)"
 date: 2022-04-02
-note: 3
+note: 5
 style: "Italien"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui proposait une cuisine italienne traditionnelle, avec des pizzas et des pâtes authentiques dans une ambiance familiale chaleureuse."
 image: "/images/la brigade resto.jpg"

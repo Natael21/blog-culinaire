@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Pho Loc"
-date: 2023-07-05
+date: 2023-05-10
 note: 4
 style: "Vietnamien"
 description: "Une authentique cuisine vietnamienne dans un cadre pittoresque et intime"

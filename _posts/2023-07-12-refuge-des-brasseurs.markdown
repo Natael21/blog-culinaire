@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: "Le Refuge des Brasseurs"
-date: 2023-07-12
+date: 2022-12-14
 note: 4
 style: "Microbrasserie"
 description: "Une microbrasserie conviviale avec des bières artisanales et une cuisine variée, parfaite pour les étudiants avec la carte blanche"
