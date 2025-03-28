@@ -19,6 +19,7 @@ layout: default
           <span class="score">{{ rating }}/5</span>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+        <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
         <span class="price">
           {% if page.price == "budget" %}
             <i class="fas fa-dollar-sign"></i>
