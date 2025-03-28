@@ -23,25 +23,28 @@ permalink: /about/
       <div class="member-photo">
         <img src="/images/Lotus blanc_natael.jpg" alt="Nataël Laroche-Latulippe">
       </div>
-      <h2>Nataël</h2>
-      <p class="member-title">Passionné de cuisine et toujours à la recherche de nouvelles saveurs</p>
-      <div class="social-links">
-        <a href="https://www.linkedin.com/in/nata%C3%ABl-laroche-latulippe-a81925213/" target="_blank" class="social-link">
-          <i class="fab fa-linkedin"></i>
-        </a>
-        <a href="https://www.facebook.com/profile.php?id=100010241551753" target="_blank" class="social-link">
-          <i class="fab fa-facebook"></i>
-        </a>
-      </div>
+      <h2>Nataël Laroche-Latulippe</h2>
+      <p class="member-intro">Passionné de gastronomie et toujours à la recherche de nouvelles saveurs à Sherbrooke.</p>
+      <p class="member-bio">
+        Développeur web de profession et critique culinaire par passion, je parcours les restaurants de Sherbrooke pour partager mes découvertes gastronomiques. Mon approche combine rigueur analytique et amour authentique de la bonne cuisine. Vous pouvez me retrouver sur LinkedIn et Facebook, où je partage également mon parcours professionnel et mes aventures culinaires.
+      </p>
     </div>
 
     <div class="team-member">
       <div class="member-photo">
         <img src="/images/Lotus blanc_nicolas.jpg" alt="Nicolas Girard">
       </div>
-      <h2>Nicolas</h2>
-      <p class="member-title">Amateur de bonne cuisine et critique culinaire enthousiaste</p>
+      <h2>Nicolas Girard</h2>
+      <p class="member-intro">Amateur de bonne cuisine et explorateur culinaire sherbrookois.</p>
+      <p class="member-bio">À venir</p>
     </div>
+  </div>
+
+  <div class="mission-section">
+    <h2>Notre Mission</h2>
+    <p>
+      Nous avons créé ce blog avec un objectif simple : partager nos expériences culinaires authentiques à Sherbrooke. Chaque critique est le fruit d'une visite réelle, payée de notre poche, pour vous offrir des avis honnêtes et impartiaux. Notre but est de vous aider à découvrir les meilleures tables de la région, des petits trésors cachés aux établissements réputés.
+    </p>
   </div>
 </div>
 
@@ -116,11 +119,15 @@ permalink: /about/
   margin-bottom: 0.5rem;
 }
 
-.member-title {
+.member-intro {
+  font-style: italic;
   color: #666;
-  font-size: 1rem;
   margin-bottom: 1rem;
-  line-height: 1.5;
+}
+
+.member-bio {
+  line-height: 1.8;
+  color: #444;
 }
 
 .social-links {
@@ -137,6 +144,23 @@ permalink: /about/
 
 .social-link:hover {
   color: var(--accent-color);
+}
+
+.mission-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #eee;
+}
+
+.mission-section h2 {
+  color: var(--primary-color);
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 1rem;
+}
+
+.mission-section p {
+  line-height: 1.8;
+  color: #444;
 }
 
 @media (max-width: 768px) {
