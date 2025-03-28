@@ -96,16 +96,24 @@ title: Accueil
               <span class="stars">
                 {% assign rating = post.note | plus: 0.0 %}
                 {% for i in (1..5) %}
-                  {% if rating >= i %}
+                  {% assign current = forloop.index %}
+                  {% if rating >= current %}
                     <i class="fas fa-star"></i>
-                  {% elsif rating >= i | minus: 0.5 %}
+                  {% elsif rating > current | minus: 1 %}
                     <i class="fas fa-star-half-alt"></i>
                   {% else %}
                     <i class="far fa-star"></i>
                   {% endif %}
                 {% endfor %}
               </span>
-              <span class="score">{{ rating }}/5</span>
+              <span class="score">
+                {% assign decimal_part = rating | modulo: 1 %}
+                {% if decimal_part == 0 %}
+                  {{ rating | floor }}/5
+                {% else %}
+                  {{ rating }}/5
+                {% endif %}
+              </span>
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
             <div class="meta">
