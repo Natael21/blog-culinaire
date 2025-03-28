@@ -3,421 +3,149 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Administration | Blog Culinaire</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <title>Ajouter une Recette | Blog Culinaire</title>
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-      :root {
-        --primary-color: #2c3e50;
-        --secondary-color: #34495e;
-        --accent-color: #2c3e50;
-        --text-color: #333;
-        --border-color: #ddd;
-        --background-light: #f8f9fa;
-        --white: #ffffff;
-        --success-color: #2ecc71;
-        --warning-color: #f1c40f;
-        --error-color: #e74c3c;
-        --header-height: 64px;
-      }
-
       body {
+        font-family: 'Open Sans', sans-serif;
+        background-color: #f4f4f9;
         margin: 0;
         padding: 0;
-        font-family: 'Open Sans', sans-serif;
-        color: var(--text-color);
-        background-color: var(--background-light);
-        min-height: 100vh;
       }
-
-      .admin-header {
-        background-color: var(--primary-color);
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      .header {
+        background-color: #2c3e50;
+        color: white;
         padding: 1rem 2rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        height: var(--header-height);
-        box-sizing: border-box;
       }
-
-      .admin-title {
-        color: var(--white);
+      .header h1 {
         font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        font-weight: 600;
         margin: 0;
       }
-
-      .back-to-site {
-        background-color: var(--secondary-color);
-        color: var(--white);
-        padding: 0.8rem 1.2rem;
+      .form-section {
+        background: white;
+        padding: 2rem;
         border-radius: 8px;
-        text-decoration: none;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-top: 2rem;
       }
-
-      .back-to-site:hover {
-        background-color: var(--accent-color);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      .form-group {
+        margin-bottom: 1.5rem;
       }
-
-      .back-to-site i {
-        font-size: 1.1em;
+      .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
       }
-
-      /* Styles pour Netlify CMS */
-      #nc-root {
-        margin-top: calc(var(--header-height) + 2rem);
-        padding: 0 2rem 2rem;
+      .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
       }
-
-      /* Collection List */
-      [class*="ListCard"] {
-        background: var(--white) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-        transition: all 0.3s ease !important;
-        margin-bottom: 1rem !important;
-        border: 1px solid var(--border-color) !important;
+      .form-group textarea {
+        resize: vertical;
+        height: 150px;
       }
-
-      [class*="ListCard"]:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.1) !important;
+      .submit-btn {
+        background-color: #2c3e50;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
       }
-
-      /* Editor Container */
-      [class*="EditorContainer"] {
-        background: var(--white) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-        padding: 2rem !important;
-        margin: 1rem !important;
-      }
-
-      /* Form Controls */
-      [class*="ControlContainer"] {
-        background: var(--white) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 8px !important;
-        padding: 1.2rem !important;
-        margin-bottom: 2rem !important;
-      }
-
-      [class*="ControlContainer"]:focus-within {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1) !important;
-      }
-
-      /* Labels */
-      [class*="FieldLabel"] {
-        font-family: 'Open Sans', sans-serif !important;
-        font-weight: 600 !important;
-        color: var(--text-color) !important;
-        font-size: 1rem !important;
-        margin-bottom: 0.8rem !important;
-      }
-
-      /* Inputs */
-      input[type="text"],
-      input[type="number"],
-      textarea,
-      select {
-        font-family: 'Open Sans', sans-serif !important;
-        padding: 0.8rem 1rem !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 8px !important;
-        width: 100% !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease !important;
-        background-color: var(--white) !important;
-      }
-
-      input[type="text"]:focus,
-      input[type="number"]:focus,
-      textarea:focus,
-      select:focus {
-        outline: none !important;
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1) !important;
-      }
-
-      /* Buttons */
-      button[class*="Button"] {
-        background-color: var(--accent-color) !important;
-        color: var(--white) !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 0.8rem 1.5rem !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 0.5rem !important;
-      }
-
-      button[class*="Button"]:hover {
-        background-color: var(--secondary-color) !important;
-        transform: translateY(-2px) !important;
-      }
-
-      /* Upload Button */
-      button[class*="UploadButton"] {
-        background-color: var(--accent-color) !important;
-        color: var(--white) !important;
-        border: 2px solid var(--accent-color) !important;
-      }
-
-      button[class*="UploadButton"]:hover {
-        background-color: var(--secondary-color) !important;
-        border-color: var(--secondary-color) !important;
-      }
-
-      /* Success Button */
-      button[class*="SuccessButton"] {
-        background-color: var(--success-color) !important;
-      }
-
-      /* Delete Button */
-      button[class*="DeleteButton"] {
-        background-color: var(--error-color) !important;
-      }
-
-      /* Markdown Editor */
-      [class*="MarkdownEditor"] {
-        border: 1px solid var(--border-color) !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-        margin-top: 1rem !important;
-      }
-
-      [class*="ToolbarContainer"] {
-        background-color: var(--background-light) !important;
-        border-bottom: 1px solid var(--border-color) !important;
-        padding: 0.8rem !important;
-      }
-
-      [class*="EditorArea"] {
-        padding: 1.2rem !important;
-        min-height: 200px !important;
-        background-color: var(--white) !important;
-      }
-
-      /* Image Upload */
-      [class*="ImageUpload"] {
-        border: 2px dashed var(--border-color) !important;
-        border-radius: 8px !important;
-        padding: 2rem !important;
-        text-align: center !important;
-        transition: all 0.3s ease !important;
-        background-color: var(--background-light) !important;
-        margin-top: 0.5rem !important;
-      }
-
-      [class*="ImageUpload"]:hover {
-        border-color: var(--accent-color) !important;
-        background-color: rgba(44, 62, 80, 0.05) !important;
-      }
-
-      /* Preview Styles */
-      .frame-content {
-        background: var(--white) !important;
-        padding: 2rem !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-      }
-
-      .frame-content img {
-        max-width: 100% !important;
-        height: auto !important;
-        border-radius: 8px !important;
-      }
-
-      /* Gallery Preview */
-      .gallery-preview {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
-        gap: 1rem !important;
-        margin-top: 1rem !important;
-      }
-
-      .gallery-preview img {
-        width: 100% !important;
-        height: 200px !important;
-        object-fit: cover !important;
-        border-radius: 8px !important;
-        transition: transform 0.3s ease !important;
-      }
-
-      .gallery-preview img:hover {
-        transform: scale(1.05) !important;
-      }
-
-      /* Media Library Dialog */
-      [class*="StyledModal"] {
-        background: var(--white) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
-      }
-
-      [class*="LibraryTop"] {
-        background-color: var(--background-light) !important;
-        border-bottom: 1px solid var(--border-color) !important;
-      }
-
-      /* Multiple Image Selection */
-      [class*="CardGrid"] {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-        gap: 1rem !important;
-        padding: 1rem !important;
-      }
-
-      [class*="CardImage"] {
-        border-radius: 8px !important;
-        transition: all 0.3s ease !important;
-      }
-
-      [class*="CardImage"]:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-      }
-
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        .admin-header {
-          padding: 1rem;
-          height: 56px;
-        }
-        
-        .admin-title {
-          font-size: 1.2rem;
-        }
-        
-        .back-to-site {
-          padding: 0.6rem 1rem;
-          font-size: 0.9em;
-        }
-
-        #nc-root {
-          margin-top: calc(56px + 1rem);
-          padding: 0 1rem 1rem;
-        }
-
-        [class*="EditorContainer"] {
-          padding: 1rem !important;
-          margin: 0.5rem !important;
-        }
-
-        [class*="ControlContainer"] {
-          padding: 1rem !important;
-          margin-bottom: 1.5rem !important;
-        }
-
-        .gallery-preview {
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-        }
+      .submit-btn:hover {
+        background-color: #34495e;
       }
     </style>
   </head>
   <body>
-    <header class="admin-header">
-      <h1 class="admin-title">Administration</h1>
-      <a href="/" class="back-to-site">
-        <i class="fas fa-arrow-left"></i>
-        <span>Retour au site</span>
-      </a>
+    <header class="header">
+      <h1>Ajouter une Recette</h1>
+      <a href="/" class="back-to-site"><i class="fas fa-arrow-left"></i> Retour au site</a>
     </header>
-    <script src="https://unpkg.com/netlify-cms@^2.10.0/dist/netlify-cms.js"></script>
-    <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-
-      // Configuration de l'aperçu personnalisé
-      CMS.registerPreviewStyle("/assets/css/style.css");
-      
-      // Personnalisation de l'aperçu des restaurants
-      CMS.registerPreviewTemplate("restaurants", createClass({
-        render: function() {
-          const entry = this.props.entry;
-          const image = entry.getIn(['data', 'image']);
-          const images = entry.getIn(['data', 'images']) || [];
-          
-          return h('div', {className: "restaurant-preview"},
-            h('div', {className: "restaurant-header"},
-              h('h1', {}, entry.getIn(['data', 'title'])),
-              h('div', {className: "restaurant-meta"},
-                h('div', {className: "rating"},
-                  Array(5).fill().map((_, i) => 
-                    h('i', {
-                      className: `fas fa-star${i < entry.getIn(['data', 'note']) ? '' : '-o'}`,
-                      key: i
-                    })
-                  ),
-                  h('span', {}, `${entry.getIn(['data', 'note'])}/5`)
-                ),
-                h('div', {className: "style"},
-                  h('i', {className: "fas fa-utensils"}),
-                  h('span', {}, entry.getIn(['data', 'style']))
-                ),
-                h('div', {className: "price"},
-                  Array(entry.getIn(['data', 'price']) === 'expensive' ? 3 : 
-                       entry.getIn(['data', 'price']) === 'medium' ? 2 : 1)
-                    .fill()
-                    .map((_, i) => h('i', {className: "fas fa-dollar-sign", key: i}))
-                )
-              )
-            ),
-            h('div', {className: "restaurant-content"},
-              h('img', {
-                src: image,
-                className: "main-image"
-              }),
-              h('div', {className: "description"},
-                entry.getIn(['data', 'description'])
-              ),
-              h('div', {className: "gallery-preview"},
-                images.map((img, i) => 
-                  h('img', {
-                    src: img.get('image'),
-                    key: i,
-                    alt: `Image ${i + 1}`
-                  })
-                )
-              ),
-              h('div', {
-                className: "content",
-                dangerouslySetInnerHTML: {
-                  __html: this.props.widgetFor('body')
-                }
-              })
-            )
-          );
-        }
-      }));
-    </script>
+    <main class="container">
+      <section class="form-section">
+        <form>
+          <div class="form-group">
+            <label for="title">Nom du Restaurant</label>
+            <input type="text" id="title" name="title" placeholder="Entrez le nom du restaurant" required />
+          </div>
+          <div class="form-group">
+            <label for="date">Date de la Visite</label>
+            <input type="date" id="date" name="date" required />
+          </div>
+          <div class="form-group">
+            <label for="rating">Note</label>
+            <select id="rating" name="rating" required>
+              <option value="">Sélectionnez une note</option>
+              <option value="1">1 étoile</option>
+              <option value="2">2 étoiles</option>
+              <option value="3">3 étoiles</option>
+              <option value="4">4 étoiles</option>
+              <option value="5">5 étoiles</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="style">Style de Cuisine</label>
+            <select id="style" name="style" required>
+              <option value="">Sélectionnez un style</option>
+              <option value="Asiatique">Asiatique</option>
+              <option value="Italien">Italien</option>
+              <option value="Mexicain">Mexicain</option>
+              <option value="Bistro">Bistro</option>
+              <option value="Américain">Américain</option>
+              <option value="Libano-Marocain">Libano-Marocain</option>
+              <option value="Iranien">Iranien</option>
+              <option value="Vietnamien">Vietnamien</option>
+              <option value="Indien">Indien</option>
+              <option value="Café-Bistro">Café-Bistro</option>
+              <option value="Microbrasserie">Microbrasserie</option>
+              <option value="Pub">Pub</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="price">Fourchette de Prix</label>
+            <select id="price" name="price" required>
+              <option value="">Sélectionnez une fourchette</option>
+              <option value="budget">Budget ($)</option>
+              <option value="medium">Moyen ($$)</option>
+              <option value="expensive">Luxe ($$$)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="description">Description Courte</label>
+            <textarea id="description" name="description" placeholder="Entrez une brève description" maxlength="150" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="image">Image Principale</label>
+            <input type="file" id="image" name="image" accept="image/*" required />
+          </div>
+          <div class="form-group">
+            <label for="gallery">Galerie d'Images</label>
+            <input type="file" id="gallery" name="gallery" accept="image/*" multiple />
+          </div>
+          <div class="form-group">
+            <label for="content">Contenu de l'Article</label>
+            <textarea id="content" name="content" placeholder="Rédigez vos impressions sur le restaurant" required></textarea>
+          </div>
+          <button type="submit" class="submit-btn">Soumettre</button>
+        </form>
+      </section>
+    </main>
   </body>
 </html>
