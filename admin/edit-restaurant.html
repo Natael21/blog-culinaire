@@ -655,6 +655,71 @@
         return formattedContent;
       }
 
+      // Variable pour suivre les modifications
+      let hasChanges = false;
+      let initialState = {};
+
+      // Fonction pour sauvegarder l'état initial
+      function saveInitialState() {
+        initialState = {
+          name: document.getElementById('name').value,
+          cuisine: document.getElementById('cuisine').value,
+          price: document.getElementById('price').value,
+          rating: document.getElementById('rating').value,
+          address: document.getElementById('address').value,
+          summary: summaryEditor.root.innerHTML,
+          description: descriptionEditor.root.innerHTML,
+          mainImage: document.querySelector('.preview-card img').src,
+          galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
+        };
+        hasChanges = false;
+      }
+
+      // Fonction pour vérifier s'il y a eu des changements
+      function checkForChanges() {
+        const currentState = {
+          name: document.getElementById('name').value,
+          cuisine: document.getElementById('cuisine').value,
+          price: document.getElementById('price').value,
+          rating: document.getElementById('rating').value,
+          address: document.getElementById('address').value,
+          summary: summaryEditor.root.innerHTML,
+          description: descriptionEditor.root.innerHTML,
+          mainImage: document.querySelector('.preview-card img').src,
+          galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
+        };
+
+        return JSON.stringify(currentState) !== JSON.stringify(initialState);
+      }
+
+      // Mettre à jour les écouteurs d'événements pour détecter les changements
+      function setupChangeDetection() {
+        const inputs = ['name', 'cuisine', 'price', 'rating', 'address'];
+        inputs.forEach(id => {
+          document.getElementById(id).addEventListener('input', () => {
+            hasChanges = checkForChanges();
+          });
+        });
+
+        summaryEditor.on('text-change', () => {
+          hasChanges = checkForChanges();
+        });
+
+        descriptionEditor.on('text-change', () => {
+          hasChanges = checkForChanges();
+        });
+
+        // Pour l'image principale
+        document.getElementById('main-image').addEventListener('change', () => {
+          hasChanges = true;
+        });
+
+        // Pour la galerie d'images
+        document.getElementById('gallery-input').addEventListener('change', () => {
+          hasChanges = true;
+        });
+      }
+
       // Fonction pour charger les données du restaurant
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -672,6 +737,7 @@
             const match = line.match(/^(\w+):\s*(.+)$/);
             if (match) {
               const [_, key, value] = match;
+              // Nettoyer les guillemets des valeurs
               metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
             }
           });
@@ -683,21 +749,20 @@
           document.getElementById('address').value = metadata.address || '';
 
           // Gérer le prix avec une logique plus robuste
-          const priceValue = metadata.price ? metadata.price.trim() : '';
+          const priceValue = metadata.price ? metadata.price.replace(/"/g, '').trim() : '$';
           const priceSelect = document.getElementById('price');
-          let foundPrice = false;
           
-          for(let i = 0; i < priceSelect.options.length; i++) {
-            if(priceSelect.options[i].value === priceValue) {
-              priceSelect.selectedIndex = i;
-              foundPrice = true;
-              break;
+          // Trouver l'option correspondante dans le select
+          Array.from(priceSelect.options).forEach((option, index) => {
+            if (option.value === priceValue) {
+              priceSelect.selectedIndex = index;
             }
-          }
-          
-          if(!foundPrice) {
-            priceSelect.selectedIndex = 0; // Default to first option if not found
-          }
+          });
+
+          // Mettre à jour les affichages du prix
+          document.querySelectorAll('.preview-card-meta .price-value, .preview-full .price-value').forEach(el => {
+            el.textContent = priceValue;
+          });
 
           // Remplir les éditeurs avec le contenu formaté
           summaryEditor.root.innerHTML = metadata.description || '';
@@ -742,7 +807,7 @@
           document.querySelectorAll('.preview-card-meta').forEach(meta => {
             const priceSpan = meta.querySelector('.price');
             if (priceSpan) {
-              priceSpan.innerHTML = `<i class="fas fa-dollar-sign"></i> <span class="price-value">${metadata.price || '$'}</span>`;
+              priceSpan.innerHTML = `<i class="fas fa-dollar-sign"></i> <span class="price-value">${priceValue}</span>`;
             }
           });
 
@@ -761,6 +826,11 @@
         // Activer la vue carte par défaut
         document.querySelector('.preview-toggle button[data-preview="card"]').click();
         updatePreview();
+
+        // Sauvegarder l'état initial après le chargement
+        saveInitialState();
+        // Configurer la détection des changements
+        setupChangeDetection();
       }
 
       // Fonction pour mettre à jour l'aperçu
@@ -992,6 +1062,11 @@
       async function confirmExit(event) {
         event.preventDefault();
         
+        if (!hasChanges) {
+          window.location.href = '/admin/';
+          return;
+        }
+        
         const result = await Swal.fire({
           title: 'Attention !',
           text: 'Tous les changements non sauvegardés seront perdus. Voulez-vous vraiment quitter la page ?',
@@ -1013,13 +1088,6 @@
         e.preventDefault();
         await confirmExit(e);
       };
-
-      // Ajouter la confirmation avant de quitter la page
-      window.addEventListener('beforeunload', function(e) {
-        const confirmationMessage = 'Tous les changements non sauvegardés seront perdus.';
-        e.returnValue = confirmationMessage;
-        return confirmationMessage;
-      });
 
       // Charger les données au chargement de la page
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
