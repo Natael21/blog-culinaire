@@ -63,14 +63,19 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
       .preview-section {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         position: sticky;
-        top: 2rem;
+        top: 4rem;
         height: calc(100vh - 4rem);
-        overflow-y: auto;
+        overflow-y: hidden;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .preview-section.unsynced {
+        position: static;
+        height: auto;
+        overflow-y: visible;
       }
       .preview-toggle {
         display: flex;
@@ -1650,82 +1655,69 @@
       // Charger les données au chargement de la page
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
 
-      // Gestion du défilement synchronisé
-      const scrollToggle = document.getElementById('scrollToggle');
-      const formSection = document.querySelector('.form-section');
-      const previewSection = document.querySelector('.preview-section');
+      // Gestion de la synchronisation du scroll
       let isSynced = true;
-      let isScrolling = false;
+      const previewSection = document.querySelector('.preview-section');
+      const scrollToggleBtn = document.querySelector('.scroll-toggle');
       let lastScrollTop = 0;
 
-      // Fonction pour mettre à jour la position de la section de prévisualisation
       function updatePreviewSectionPosition() {
         if (isSynced) {
           previewSection.style.position = 'sticky';
           previewSection.style.height = 'calc(100vh - 4rem)';
-          previewSection.style.overflowY = 'auto';
+          previewSection.style.overflowY = 'hidden';
           previewSection.classList.remove('unsynced');
+          scrollToggleBtn.innerHTML = '<i class="fas fa-link"></i> Désynchroniser';
         } else {
           previewSection.style.position = 'static';
           previewSection.style.height = 'auto';
           previewSection.style.overflowY = 'visible';
           previewSection.classList.add('unsynced');
+          scrollToggleBtn.innerHTML = '<i class="fas fa-unlink"></i> Synchroniser';
         }
       }
 
-      // Gestionnaire d'événements pour le bouton de synchronisation
-      scrollToggle.addEventListener('click', () => {
+      // Gestionnaire du bouton de synchronisation
+      scrollToggleBtn.addEventListener('click', () => {
         isSynced = !isSynced;
-        scrollToggle.classList.toggle('unsynced');
+        updatePreviewSectionPosition();
         
         if (isSynced) {
-          scrollToggle.innerHTML = '<i class="fas fa-link"></i><span>Défilement synchronisé</span>';
-          // Synchroniser la position actuelle lors du retour au mode synchronisé
-          const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+          // Synchroniser la position actuelle lors du retour en mode synchronisé
+          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
           const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-          previewSection.scrollTop = (scrollPercentage / 100) * previewScrollHeight;
-        } else {
-          scrollToggle.innerHTML = '<i class="fas fa-unlink"></i><span>Défilement indépendant</span>';
+          previewSection.scrollTop = previewScrollHeight * scrollRatio;
         }
-        
-        updatePreviewSectionPosition();
       });
 
-      // Gestionnaire d'événements pour le défilement synchronisé
-      document.addEventListener('scroll', () => {
-        if (!isSynced || isScrolling) return;
-        
-        const previewSection = document.querySelector('.preview-section');
-        if (previewSection && !previewSection.classList.contains('unsynced')) {
-          isScrolling = true;
-          const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-          previewSection.scrollTop = (scrollPercentage / 100) * previewScrollHeight;
-          lastScrollTop = previewSection.scrollTop;
+      // Gestionnaire du scroll pour la synchronisation
+      window.addEventListener('scroll', () => {
+        if (isSynced) {
           requestAnimationFrame(() => {
-            isScrolling = false;
+            const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+            const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
+            previewSection.scrollTop = previewScrollHeight * scrollRatio;
           });
         }
       });
 
-      // Gestionnaire d'événements pour le défilement de la section de prévisualisation
+      // Gestionnaire du scroll pour la section de prévisualisation
       previewSection.addEventListener('scroll', () => {
-        if (!isSynced || isScrolling) return;
-        
-        isScrolling = true;
-        const scrollPercentage = (previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight)) * 100;
-        window.scrollTo({
-          top: (scrollPercentage / 100) * (document.documentElement.scrollHeight - window.innerHeight),
-          behavior: 'auto'
-        });
-        lastScrollTop = previewSection.scrollTop;
-        requestAnimationFrame(() => {
-          isScrolling = false;
-        });
+        if (isSynced) {
+          requestAnimationFrame(() => {
+            const scrollRatio = previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight);
+            const windowScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            window.scrollTo(0, windowScrollHeight * scrollRatio);
+          });
+        }
       });
 
-      // Gestionnaire d'événements pour le redimensionnement
-      window.addEventListener('resize', updatePreviewSectionPosition);
+      // Mise à jour de la position lors du redimensionnement de la fenêtre
+      window.addEventListener('resize', () => {
+        if (isSynced) {
+          updatePreviewSectionPosition();
+        }
+      });
 
       // Initialisation de la position
       updatePreviewSectionPosition();
