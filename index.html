@@ -872,20 +872,6 @@ styleFilter.addEventListener('change', filterRestaurants);
 ratingFilter.addEventListener('change', filterRestaurants);
 priceFilter.addEventListener('change', filterRestaurants);
 
-// Scroll to last viewed restaurant
-document.addEventListener('DOMContentLoaded', function() {
-  const lastViewedRestaurant = localStorage.getItem('lastViewedRestaurant');
-  if (lastViewedRestaurant) {
-    const restaurantElement = document.getElementById(lastViewedRestaurant);
-    if (restaurantElement) {
-      setTimeout(() => {
-        restaurantElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-    }
-    localStorage.removeItem('lastViewedRestaurant');
-  }
-});
-
 // Modification de la gestion des vues
 document.addEventListener('DOMContentLoaded', function() {
   const viewButtons = document.querySelectorAll('.view-btn');
@@ -898,10 +884,19 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.style.opacity = '1';
   });
   
-  // Forcer la vue en pastilles au chargement
-  restaurantGrid.classList.remove('list-view');
-  document.querySelector('[data-view="grid"]').classList.add('active');
-  document.querySelector('[data-view="list"]').classList.remove('active');
+  // Récupérer la dernière vue utilisée depuis le localStorage
+  const lastView = localStorage.getItem('selectedView') || 'grid';
+  
+  // Appliquer la dernière vue utilisée
+  if (lastView === 'list') {
+    restaurantGrid.classList.add('list-view');
+    document.querySelector('[data-view="list"]').classList.add('active');
+    document.querySelector('[data-view="grid"]').classList.remove('active');
+  } else {
+    restaurantGrid.classList.remove('list-view');
+    document.querySelector('[data-view="grid"]').classList.add('active');
+    document.querySelector('[data-view="list"]').classList.remove('active');
+  }
   
   viewButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -909,6 +904,11 @@ document.addEventListener('DOMContentLoaded', function() {
       button.classList.add('active');
       
       const view = button.dataset.view;
+      // Sauvegarder la vue sélectionnée dans le localStorage
+      if (view === 'list' || view === 'grid') {
+        localStorage.setItem('selectedView', view);
+      }
+      
       if (view === 'list') {
         restaurantGrid.classList.add('list-view');
       } else if (view === 'grid') {
@@ -918,5 +918,17 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+  
+  // Scroll to last viewed restaurant
+  const lastViewedRestaurant = localStorage.getItem('lastViewedRestaurant');
+  if (lastViewedRestaurant) {
+    const restaurantElement = document.getElementById(lastViewedRestaurant);
+    if (restaurantElement) {
+      setTimeout(() => {
+        restaurantElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+    localStorage.removeItem('lastViewedRestaurant');
+  }
 });
 </script>
