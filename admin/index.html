@@ -86,14 +86,14 @@
       .admin-nav button i {
         font-size: 1.2rem;
       }
-      .content-section {
+      .admin-content-section {
         display: none;
         background: white;
         padding: 2rem;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
-      .content-section.active {
+      .admin-content-section.active {
         display: block;
       }
       /* Styles pour la section Restaurants */
@@ -816,7 +816,8 @@
       <h1>Administration du Blog Culinaire</h1>
       <a href="/" class="back-to-site"><i class="fas fa-arrow-left"></i> Retour au site</a>
     </header>
-    <main class="container">
+
+    <div class="admin-container">
       <nav class="admin-nav">
         <button class="active" data-section="restaurants">
           <i class="fas fa-utensils"></i>
@@ -826,7 +827,7 @@
           <i class="fas fa-tasks"></i>
           Workflow de publication
         </button>
-        <button data-section="media">
+        <button data-section="images">
           <i class="fas fa-images"></i>
           Gestion des images
         </button>
@@ -836,8 +837,7 @@
         </button>
       </nav>
 
-      <!-- Section Restaurants -->
-      <section id="restaurants" class="content-section active">
+      <div id="restaurants" class="admin-content-section active">
         <div class="section-header">
           <h2>Gestion des Restaurants</h2>
           <a href="/admin/edit-restaurant.html" class="add-restaurant-btn">
@@ -859,10 +859,9 @@
         <div class="restaurant-list" id="restaurant-list">
           <!-- Les restaurants seront chargés dynamiquement ici -->
         </div>
-      </section>
+      </div>
 
-      <!-- Section Workflow -->
-      <section id="workflow" class="content-section">
+      <div id="workflow" class="admin-content-section">
         <h2>Workflow de Publication</h2>
         <div class="workflow-columns">
           <div class="column draft">
@@ -886,10 +885,9 @@
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <!-- Section Médias -->
-      <section id="media" class="content-section">
+      <div id="images" class="admin-content-section">
         <div class="section-header">
           <h2>Gestion des Médias</h2>
           <div class="media-filters">
@@ -918,10 +916,9 @@
         <div class="media-library" id="media-library">
           <!-- Les médias seront chargés dynamiquement ici -->
         </div>
-      </section>
+      </div>
 
-      <!-- Section À venir -->
-      <section id="upcoming" class="content-section">
+      <div id="upcoming" class="admin-content-section">
         <div class="section-header">
           <h2>Restaurants à Venir</h2>
           <button class="action-btn add-btn" onclick="showUpcomingModal()">
@@ -933,7 +930,7 @@
             <!-- Les restaurants à venir seront chargés dynamiquement ici -->
           </div>
         </div>
-      </section>
+      </div>
 
       <!-- Modal pour ajouter/modifier un restaurant à venir -->
       <div id="upcoming-modal" class="modal">
@@ -1011,8 +1008,7 @@
           </div>
         </div>
       </div>
-
-    </main>
+    </div>
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
@@ -1134,7 +1130,7 @@
           document.querySelectorAll('.admin-nav button').forEach(btn => btn.classList.remove('active'));
           button.classList.add('active');
           
-          document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+          document.querySelectorAll('.admin-content-section').forEach(section => section.classList.remove('active'));
           document.getElementById(button.dataset.section).classList.add('active');
         });
       });
