@@ -1105,7 +1105,10 @@ document.addEventListener('DOMContentLoaded', function() {
   viewButtons.forEach(button => {
     button.addEventListener('click', async () => {
       const view = button.dataset.view;
-      localStorage.setItem('selectedView', view);
+      // Ne sauvegarder la vue que si nous sommes sur la page d'accueil
+      if (isHomePage) {
+        localStorage.setItem('selectedView', view);
+      }
       await updateView(view);
     });
   });
@@ -1117,8 +1120,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Appliquer la vue actuelle
-  updateView(currentView);
+  // Appliquer la vue actuelle seulement si nous sommes sur la page d'accueil
+  if (isHomePage) {
+    updateView(currentView);
+  }
 
   // Fonction pour attendre un certain temps
   function sleep(ms) {
