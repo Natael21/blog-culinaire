@@ -1128,6 +1128,60 @@
       .preview-toggle button:hover {
         transform: translateY(-2px);
       }
+
+      .restaurant-filters {
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 0;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .search-filter {
+        position: relative;
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .search-filter i {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+      }
+
+      .filter-input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        padding-right: 2.5rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .filter-input:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+
+      .filter-select {
+        padding: 0.8rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 200px;
+      }
+
+      .filter-select:focus {
+        border-color: #3498db;
+        outline: none;
+      }
     </style>
   </head>
   <body>
@@ -1159,6 +1213,20 @@
       <section id="restaurants" class="content-section active">
         <div class="section-header">
           <h2>Gestion des Restaurants</h2>
+          <div class="restaurant-filters">
+            <div class="search-filter">
+              <input type="text" id="restaurant-search" placeholder="Rechercher un restaurant..." class="filter-input">
+              <i class="fas fa-search"></i>
+            </div>
+            <div class="sort-filters">
+              <select id="sort-by" class="filter-select">
+                <option value="date-desc">Date (Plus récent)</option>
+                <option value="date-asc">Date (Plus ancien)</option>
+                <option value="name-asc">Nom (A-Z)</option>
+                <option value="name-desc">Nom (Z-A)</option>
+              </select>
+            </div>
+          </div>
           <a href="/admin/edit-restaurant.html" class="add-restaurant-btn">
             <i class="fas fa-plus"></i> Créer un nouveau restaurant
           </a>
@@ -1367,6 +1435,47 @@
           }
         }
       }
+
+      // Fonction pour filtrer et trier les restaurants
+      function filterAndSortRestaurants() {
+        const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
+        const sortBy = document.getElementById('sort-by').value;
+        const restaurantItems = Array.from(document.querySelectorAll('.restaurant-item'));
+
+        // Filtrer
+        restaurantItems.forEach(item => {
+          const title = item.querySelector('h3').textContent.toLowerCase();
+          item.style.display = title.includes(searchTerm) ? 'flex' : 'none';
+        });
+
+        // Trier
+        const sortedItems = restaurantItems.sort((a, b) => {
+          const titleA = a.querySelector('h3').textContent;
+          const titleB = b.querySelector('h3').textContent;
+          const dateA = a.querySelector('.restaurant-meta span').textContent;
+          const dateB = b.querySelector('.restaurant-meta span').textContent;
+
+          switch(sortBy) {
+            case 'date-desc':
+              return new Date(dateB) - new Date(dateA);
+            case 'date-asc':
+              return new Date(dateA) - new Date(dateB);
+            case 'name-asc':
+              return titleA.localeCompare(titleB);
+            case 'name-desc':
+              return titleB.localeCompare(titleA);
+            default:
+              return 0;
+          }
+        });
+
+        const restaurantList = document.getElementById('restaurant-list');
+        sortedItems.forEach(item => restaurantList.appendChild(item));
+      }
+
+      // Ajouter les écouteurs d'événements pour les filtres
+      document.getElementById('restaurant-search').addEventListener('input', filterAndSortRestaurants);
+      document.getElementById('sort-by').addEventListener('change', filterAndSortRestaurants);
     </script>
   </body>
 </html>
