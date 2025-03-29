@@ -7,6 +7,10 @@ comments: true
   <div class="restaurant-header" style="background-image: url('{{ page.image }}');">
     <div class="restaurant-header-content">
       <h1>{{ page.title }}</h1>
+      <div class="restaurant-location">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>{{ page.location }}</span>
+      </div>
       <div class="restaurant-meta">
         <div class="rating">
           <span class="stars">
@@ -310,5 +314,27 @@ comments: true
 #disqus_thread {
   margin-top: 1.5rem;
   width: 100%;
+}
+
+.restaurant-header-content {
+  text-align: center;
+  padding: 2rem;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7));
+}
+
+.restaurant-location {
+  color: white;
+  font-size: 1.2rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.restaurant-location i {
+  color: var(--accent-color);
 }
 </style>
