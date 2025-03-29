@@ -1266,153 +1266,141 @@
 
       // Fonction pour charger les données du restaurant
       async function loadRestaurantData() {
-        const urlParams = new URLSearchParams(window.location.search);
-        let content = urlParams.get('content');
-        
-        if (!content) {
-          saveInitialState();
-          setupChangeDetection();
-          return;
-        }
-
         try {
+          // Récupérer les paramètres de l'URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const fileContent = urlParams.get('content');
+          
+          if (!fileContent) {
+            throw new Error('Aucun contenu trouvé');
+          }
+
           // Décoder le contenu
-          content = decodeURIComponent(content);
+          const decodedContent = decodeURIComponent(fileContent);
           
           // Séparer le frontmatter du contenu
-          const parts = content.split('---').filter(part => part.trim());
+          const parts = decodedContent.split('---').filter(part => part.trim());
           if (parts.length < 2) {
-            throw new Error("Format de fichier invalide");
+            throw new Error('Format de fichier invalide');
           }
 
-          // Extraire les métadonnées du frontmatter
-          const metadata = {};
+          // Extraire les métadonnées
           const frontmatter = parts[1];
-          const lines = frontmatter.split('\n');
+          const content = parts.slice(2).join('---').trim();
 
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (!trimmedLine || trimmedLine.startsWith('#')) continue;
+          // Extraire les champs du frontmatter
+          const title = frontmatter.match(/title:\s*"([^"]+)"/)?.[1];
+          const date = frontmatter.match(/date:\s*(\d{4}-\d{2}-\d{2})/)?.[1];
+          const note = frontmatter.match(/note:\s*(\d+)/)?.[1];
+          const style = frontmatter.match(/style:\s*"([^"]+)"/)?.[1];
+          const description = frontmatter.match(/description:\s*"([^"]+)"/)?.[1];
+          const price = frontmatter.match(/price:\s*"([^"]+)"/)?.[1];
+          const image = frontmatter.match(/image:\s*"([^"]+)"/)?.[1];
 
-            // Chercher la première occurrence de ':'
-            const colonIndex = trimmedLine.indexOf(':');
-            if (colonIndex === -1) continue;
-
-            const key = trimmedLine.slice(0, colonIndex).trim();
-            let value = trimmedLine.slice(colonIndex + 1).trim();
-
-            // Nettoyer la valeur des guillemets et espaces
-            value = value.replace(/^["']|["']$/g, '').trim();
-
-            // Ignorer les lignes qui commencent par '-' (listes)
-            if (!key.startsWith('-')) {
-              metadata[key] = value;
-            }
+          // Remplir le formulaire
+          document.getElementById('name').value = title || '';
+          document.getElementById('cuisine').value = style || '';
+          document.getElementById('price').value = price || '';
+          document.getElementById('rating').value = note || '';
+          
+          // Mettre à jour les éditeurs de texte
+          if (window.summaryEditor) {
+            window.summaryEditor.root.innerHTML = description || '';
+          }
+          if (window.descriptionEditor) {
+            window.descriptionEditor.root.innerHTML = content || '';
           }
 
-          // Remplir les champs du formulaire avec les valeurs par défaut si nécessaire
-          document.getElementById('name').value = metadata.title || '';
-          document.getElementById('cuisine').value = metadata.style || '';
-          document.getElementById('rating').value = parseFloat(metadata.note) || 4;
-          document.getElementById('address').value = metadata.address || '';
-          document.getElementById('price').value = metadata.price || '$$';
-
-          // Mettre à jour les éditeurs
-          summaryEditor.root.innerHTML = metadata.description || '';
-          descriptionEditor.root.innerHTML = parts[2] ? formatDescription(parts[2].trim()) : '';
-
-          // Gérer l'image principale
-          if (metadata.image) {
-            const mainImageUrl = cleanImagePath(metadata.image);
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
-            previewImages.forEach(img => {
-              img.src = mainImageUrl;
-              img.onerror = () => img.src = '/images/restaurant-test.jpg';
-            });
-          }
-
-          // Mettre à jour les prévisualisations
-          updatePreview();
-          updateGalleryPreview(false);
+          // Mettre à jour l'aperçu
+          updatePreview({
+            title,
+            style,
+            price,
+            note,
+            description,
+            content,
+            image
+          });
 
           // Sauvegarder l'état initial
-          setTimeout(saveInitialState, 100);
-          setupChangeDetection();
+          window.initialState = {
+            title,
+            style,
+            price,
+            note,
+            description,
+            content,
+            image
+          };
 
         } catch (error) {
-          console.error("Erreur lors du chargement des données:", error);
+          console.error('Erreur lors du chargement du restaurant:', error);
           Swal.fire({
-            title: 'Erreur',
-            text: `Une erreur est survenue lors du chargement du restaurant: ${error.message}`,
             icon: 'error',
-            confirmButtonText: 'OK'
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors du chargement du restaurant: ' + error.message
           });
         }
       }
 
       // Fonction pour mettre à jour l'aperçu
-      function updatePreview() {
-        const name = document.getElementById('name').value || 'Nom du Restaurant';
-        const cuisine = document.getElementById('cuisine').value || 'Style de cuisine';
-        const price = document.getElementById('price').value || '$';
-        const rating = document.getElementById('rating').value || '4.5';
-        const address = document.getElementById('address').value || 'Adresse du restaurant';
-        const summary = summaryEditor.root.innerHTML;
-        const description = descriptionEditor.root.innerHTML;
-        const date = new Date().toLocaleDateString('fr-FR', { 
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        });
-
-        // Mise à jour de la vue carte
-        document.querySelectorAll('.preview-card').forEach(card => {
-          // Ajouter la date si elle n'existe pas
-          if (!card.querySelector('.preview-date')) {
-            const dateDiv = document.createElement('div');
-            dateDiv.className = 'preview-date';
-            card.appendChild(dateDiv);
-          }
+      function updatePreview(data) {
+        try {
+          const { title, style, price, note, description, content, image } = data;
           
-          card.querySelector('.preview-date').textContent = date;
-          card.querySelector('h3').textContent = name;
-          card.querySelector('.style').textContent = cuisine;
-          card.querySelector('.note').textContent = rating;
-          card.querySelector('.price-value').textContent = price;
-          const summaryP = card.querySelector('.preview-card-content p') || document.createElement('p');
-          summaryP.innerHTML = summary;
-          if (!card.querySelector('.preview-card-content p')) {
-            card.querySelector('.preview-card-content').insertBefore(summaryP, card.querySelector('.preview-card-meta'));
+          // Mise à jour de la vue carte
+          const card = document.querySelector('.preview-card');
+          if (card) {
+            // Mise à jour de l'image
+            const cardImage = card.querySelector('img');
+            if (image) {
+              cardImage.src = image;
+              cardImage.onerror = () => cardImage.src = '/images/restaurant-test.jpg';
+            }
+
+            // Mise à jour des métadonnées
+            card.querySelector('h3').textContent = title || 'Nom du Restaurant';
+            card.querySelector('.style').textContent = style || 'Style de cuisine';
+            card.querySelector('.note').textContent = note || '0';
+            card.querySelector('.price-value').textContent = price || 'Prix';
+
+            // Mise à jour de la description
+            const descriptionElement = card.querySelector('.preview-card-content p');
+            if (descriptionElement) {
+              descriptionElement.innerHTML = description || '';
+            }
           }
-        });
 
-        // Mise à jour de la vue complète
-        document.querySelectorAll('.preview-full h3').forEach(el => el.textContent = name);
-        document.querySelectorAll('.preview-full .style').forEach(el => el.textContent = cuisine);
-        document.querySelectorAll('.preview-full .note').forEach(el => el.textContent = rating);
-        document.querySelectorAll('.preview-full .price-value').forEach(el => el.textContent = price);
-        document.querySelectorAll('.preview-full .address').forEach(el => el.textContent = address);
-        document.querySelectorAll('.preview-full .summary-text').forEach(el => {
-          el.innerHTML = summary;
-          el.querySelectorAll('p').forEach(p => {
-            p.style.marginBottom = '1.2rem';
-          });
-        });
-        document.querySelectorAll('.preview-full .description-text').forEach(el => {
-          el.innerHTML = descriptionEditor.root.innerHTML;
-          el.querySelectorAll('p').forEach(p => {
-            p.style.marginBottom = '1.2rem';
-          });
-        });
+          // Mise à jour de la vue complète
+          const full = document.querySelector('.preview-full');
+          if (full) {
+            // Mise à jour de l'image
+            const fullImage = full.querySelector('img');
+            if (image) {
+              fullImage.src = image;
+              fullImage.onerror = () => fullImage.src = '/images/restaurant-test.jpg';
+            }
 
-        // Mise à jour du résumé dans la vue carte avec limitation de longueur
-        document.querySelectorAll('.preview-card-content p').forEach(p => {
-          p.innerHTML = summary;
-          p.style.display = '-webkit-box';
-          p.style.webkitLineClamp = '3';
-          p.style.webkitBoxOrient = 'vertical';
-          p.style.overflow = 'hidden';
-        });
+            // Mise à jour des métadonnées
+            full.querySelector('h3').textContent = title || 'Nom du Restaurant';
+            full.querySelector('.style').textContent = style || 'Style de cuisine';
+            full.querySelector('.note').textContent = note || '0';
+            full.querySelector('.price-value').textContent = price || 'Prix';
+
+            // Mise à jour du contenu
+            const summaryText = full.querySelector('.summary-text');
+            if (summaryText) {
+              summaryText.innerHTML = description || '';
+            }
+
+            const descriptionText = full.querySelector('.description-text');
+            if (descriptionText) {
+              descriptionText.innerHTML = content || '';
+            }
+          }
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour de l\'aperçu:', error);
+        }
       }
 
       // Gestionnaire d'événements pour les champs de formulaire
@@ -1659,6 +1647,74 @@
 
       // Charger les données au chargement de la page
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
+
+      function initializeEditors() {
+        // Configuration des éditeurs Quill
+        const toolbarOptions = [
+          ['bold', 'italic'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['clean']
+        ];
+
+        // Éditeur pour le résumé
+        window.summaryEditor = new Quill('#summary-editor', {
+          theme: 'snow',
+          modules: {
+            toolbar: toolbarOptions
+          },
+          placeholder: 'Entrez une brève description du restaurant...'
+        });
+
+        // Éditeur pour la description complète
+        window.descriptionEditor = new Quill('#description-editor', {
+          theme: 'snow',
+          modules: {
+            toolbar: toolbarOptions
+          },
+          placeholder: 'Entrez la description complète du restaurant...'
+        });
+
+        // Gestionnaires d'événements pour la mise à jour en temps réel
+        const updatePreviewDebounced = debounce(() => {
+          const data = {
+            title: document.getElementById('name').value,
+            style: document.getElementById('cuisine').value,
+            price: document.getElementById('price').value,
+            note: document.getElementById('rating').value,
+            description: window.summaryEditor.root.innerHTML,
+            content: window.descriptionEditor.root.innerHTML,
+            image: document.querySelector('.preview-card img').src
+          };
+          updatePreview(data);
+        }, 300);
+
+        // Ajouter les écouteurs d'événements
+        ['name', 'cuisine', 'price', 'rating'].forEach(id => {
+          document.getElementById(id).addEventListener('input', updatePreviewDebounced);
+        });
+
+        window.summaryEditor.on('text-change', updatePreviewDebounced);
+        window.descriptionEditor.on('text-change', updatePreviewDebounced);
+      }
+
+      // Fonction utilitaire pour debounce
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      // Initialiser les éditeurs au chargement de la page
+      document.addEventListener('DOMContentLoaded', () => {
+        initializeEditors();
+        loadRestaurantData();
+      });
     </script>
   </body>
 </html> 

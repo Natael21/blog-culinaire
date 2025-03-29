@@ -154,12 +154,42 @@ body {
   gap: 1.5rem;
   color: #666;
   font-size: 0.9rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  margin-top: auto;
 }
 
 .restaurant-meta span {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.restaurant-meta .cuisine-style {
+  color: #666;
+}
+
+.restaurant-meta .cuisine-style i {
+  color: #666;
+}
+
+.restaurant-meta .price {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.restaurant-meta .price i {
+  color: #2ecc71;
+  margin-right: -2px;
+}
+
+.restaurant-meta .date {
+  color: #666;
+}
+
+.restaurant-meta .date i {
+  color: #666;
 }
 
 .restaurant-actions {
