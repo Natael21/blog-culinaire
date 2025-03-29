@@ -517,6 +517,14 @@
         transform: translateY(-2px);
       }
 
+      .action-btn.save-btn:hover {
+        background-color: #27ae60 !important;
+      }
+
+      .action-btn.cancel-btn:hover {
+        background-color: #c0392b !important;
+      }
+
       /* Style pour la prévisualisation */
       .preview-container {
         background: #f8f9fa;
@@ -542,14 +550,33 @@
       }
 
       /* Style pour la liste des restaurants à venir */
+      .upcoming-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
       .upcoming-item {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem 1.5rem 1.5rem 4rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         position: relative;
-        padding-left: 3rem;
+        transition: all 0.3s ease;
+        cursor: move;
+      }
+
+      .upcoming-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       }
 
       .drag-handle {
         position: absolute;
-        left: 0;
+        left: 1rem;
         top: 50%;
         transform: translateY(-50%);
         width: 2rem;
@@ -575,11 +602,49 @@
 
       .upcoming-item.dragging {
         opacity: 0.5;
+        background: #f8f9fa;
       }
 
-      .upcoming-item.dragging .drag-handle {
-        background: var(--primary-color);
-        color: white;
+      .upcoming-info {
+        flex: 1;
+        min-width: 0;
+        padding-right: 1rem;
+      }
+
+      .upcoming-info h3 {
+        color: var(--primary-color);
+        font-size: 1.4rem;
+        margin: 0 0 0.5rem 0;
+      }
+
+      .upcoming-info p {
+        color: #666;
+        margin: 0 0 1rem 0;
+        line-height: 1.5;
+      }
+
+      .upcoming-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        color: #666;
+        font-size: 0.95rem;
+      }
+
+      .upcoming-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .upcoming-meta i {
+        color: var(--accent-color);
+      }
+
+      .upcoming-actions {
+        display: flex;
+        gap: 0.8rem;
+        flex-shrink: 0;
       }
 
       /* Styles pour la section Médias */
@@ -800,55 +865,6 @@
       /* Styles pour la section À venir */
       .upcoming-section {
         margin-top: 2rem;
-      }
-
-      .upcoming-list {
-        display: grid;
-        gap: 1.5rem;
-      }
-
-      .upcoming-item {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: all 0.3s ease;
-      }
-
-      .upcoming-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      }
-
-      .upcoming-info {
-        flex: 1;
-      }
-
-      .upcoming-info h3 {
-        color: var(--primary-color);
-        font-size: 1.4rem;
-        margin-bottom: 0.5rem;
-      }
-
-      .upcoming-meta {
-        display: flex;
-        gap: 1.5rem;
-        color: #666;
-        font-size: 0.95rem;
-        margin-top: 0.5rem;
-      }
-
-      .upcoming-meta span {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .upcoming-meta i {
-        color: var(--accent-color);
       }
 
       .upcoming-actions {
@@ -1132,10 +1148,10 @@
                   <input type="number" id="restaurant-order" class="form-input" min="1" value="50">
                 </div>
                 <div class="form-actions">
-                  <button type="submit" class="action-btn edit-btn">
+                  <button type="submit" class="action-btn save-btn" style="background-color: #2ecc71; color: white;">
                     <i class="fas fa-save"></i> Enregistrer
                   </button>
-                  <button type="button" class="action-btn delete-btn" onclick="closeUpcomingModal()">
+                  <button type="button" class="action-btn cancel-btn" style="background-color: #e74c3c; color: white;" onclick="closeUpcomingModal()">
                     <i class="fas fa-times"></i> Annuler
                   </button>
                 </div>
@@ -1144,10 +1160,6 @@
             <div class="preview-container">
               <div class="preview-header">
                 <h3>Prévisualisation</h3>
-                <div class="preview-toggle">
-                  <button class="active" data-view="card">Carte</button>
-                  <button data-view="full">Complet</button>
-                </div>
               </div>
               <div class="preview-content">
                 <!-- La prévisualisation sera mise à jour dynamiquement -->
@@ -1645,6 +1657,7 @@ order: ${formData.order}
         }
       }
 
+      // Initialisation de Sortable pour la liste des restaurants à venir
       document.addEventListener('DOMContentLoaded', function() {
         const upcomingList = document.getElementById('upcoming-list');
         if (upcomingList) {
@@ -1654,9 +1667,12 @@ order: ${formData.order}
             ghostClass: 'dragging',
             onStart: function(evt) {
               evt.item.classList.add('dragging');
+              document.body.style.cursor = 'grabbing';
             },
             onEnd: async function(evt) {
               evt.item.classList.remove('dragging');
+              document.body.style.cursor = 'default';
+              
               const items = Array.from(upcomingList.children);
               const updates = items.map((item, index) => ({
                 path: item.dataset.path,
