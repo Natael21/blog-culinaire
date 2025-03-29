@@ -146,12 +146,16 @@
         box-shadow: none;
         padding: 0;
       }
-      .preview-toggle {
+      .preview-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+      .preview-toggle, .sync-toggle {
         display: flex;
         gap: 0.5rem;
-        margin-bottom: 1rem;
       }
-      .preview-toggle button {
+      .preview-toggle button, .sync-toggle button {
         padding: 0.5rem 1rem;
         border: none;
         border-radius: 6px;
@@ -159,14 +163,19 @@
         transition: all 0.3s ease;
         background: #f8f9fa;
         color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
-      .preview-toggle button.active {
+      .preview-toggle button.active, .sync-toggle button.active {
         background: #3498db;
         color: white;
       }
-      .preview-toggle button:not(.active) {
-        background: #f8f9fa;
-        color: #2c3e50;
+      .preview-toggle button:hover, .sync-toggle button:hover {
+        transform: translateY(-2px);
+      }
+      .preview-toggle button i, .sync-toggle button i {
+        font-size: 1rem;
       }
       .form-group {
         margin-bottom: 1.5rem;
@@ -636,7 +645,7 @@
 
     <button class="scroll-toggle" id="scrollToggle">
       <i class="fas fa-link"></i>
-      <span>Désynchroniser</span>
+      <span>Synchroniser</span>
     </button>
 
     <div class="container">
@@ -717,62 +726,75 @@
       </div>
 
       <div class="preview-section">
-        <h2>Aperçu</h2>
-        <div class="preview-toggle">
-          <button class="active" id="sync-preview">
-            <i class="fas fa-link"></i> Synchroniser
-          </button>
-          <button id="unsync-preview">
-            <i class="fas fa-unlink"></i> Désynchroniser
-          </button>
-        </div>
-
-        <div class="preview-card">
-          <div class="preview-date">14 Mar 2024</div>
-          <img src="/images/header.jpg" alt="Restaurant">
-          <div class="preview-card-content">
-            <h3>Nom du Restaurant</h3>
-            <p></p>
-            <div class="preview-card-meta">
-              <span class="rating">
-                <i class="fas fa-star"></i>
-                <span class="note">4.5</span>/5
-              </span>
-              <span class="cuisine">
-                <i class="fas fa-utensils"></i>
-                <span class="style">Style de cuisine</span>
-              </span>
-              <span class="price">
-                <i class="fas fa-dollar-sign"></i>
-                <span class="price-value">Prix</span>
-              </span>
+        <div class="preview-header">
+          <h2>Aperçu</h2>
+          <div class="preview-controls">
+            <div class="preview-toggle">
+              <button class="active" data-view="card">
+                <i class="fas fa-th-large"></i> Vue carte
+              </button>
+              <button data-view="full">
+                <i class="fas fa-expand"></i> Vue complète
+              </button>
+            </div>
+            <div class="sync-toggle">
+              <button class="active" data-sync="true">
+                <i class="fas fa-link"></i> Synchroniser
+              </button>
+              <button data-sync="false">
+                <i class="fas fa-unlink"></i> Désynchroniser
+              </button>
             </div>
           </div>
         </div>
+        <div class="preview-content">
+          <div class="preview-card">
+            <div class="preview-date">14 Mar 2024</div>
+            <img src="/images/header.jpg" alt="Restaurant">
+            <div class="preview-card-content">
+              <h3>Nom du Restaurant</h3>
+              <p></p>
+              <div class="preview-card-meta">
+                <span class="rating">
+                  <i class="fas fa-star"></i>
+                  <span class="note">4.5</span>/5
+                </span>
+                <span class="cuisine">
+                  <i class="fas fa-utensils"></i>
+                  <span class="style">Style de cuisine</span>
+                </span>
+                <span class="price">
+                  <i class="fas fa-dollar-sign"></i>
+                  <span class="price-value">Prix</span>
+                </span>
+              </div>
+            </div>
+          </div>
 
-        <div class="preview-full active">
-          <img src="/images/header.jpg" alt="Restaurant">
-          <div class="preview-content">
-            <h3>Nom du Restaurant</h3>
-            <div class="preview-meta">
-              <span class="rating"><i class="fas fa-star"></i> <span class="note">4.5</span>/5</span>
-              <span class="cuisine"><i class="fas fa-utensils"></i> <span class="style">Style de cuisine</span></span>
-              <span class="price"><i class="fas fa-dollar-sign"></i> <span class="price-value">Prix</span></span>
-            </div>
-            <div class="preview-address">
-              <i class="fas fa-map-marker-alt"></i> <span class="address">Adresse du restaurant</span>
-            </div>
-            <div class="preview-summary">
-              <h4>Résumé</h4>
-              <div class="summary-text"></div>
-            </div>
-            <div class="preview-description">
-              <h4>Description complète</h4>
-              <div class="description-text"></div>
-            </div>
-            <div class="preview-gallery">
-              <h4>Galerie photos</h4>
-              <div class="gallery-preview"></div>
+          <div class="preview-full">
+            <img src="/images/header.jpg" alt="Restaurant">
+            <div class="preview-content">
+              <h3>Nom du Restaurant</h3>
+              <div class="preview-meta">
+                <span class="rating"><i class="fas fa-star"></i> <span class="note">4.5</span>/5</span>
+                <span class="cuisine"><i class="fas fa-utensils"></i> <span class="style">Style de cuisine</span></span>
+                <span class="price"><i class="fas fa-dollar-sign"></i> <span class="price-value">Prix</span></span>
+              </div>
+              <div class="preview-address">
+                <i class="fas fa-map-marker-alt"></i> <span class="address">Adresse du restaurant</span>
+              </div>
+              <div class="preview-summary">
+                <h4>Résumé</h4>
+                <div class="summary-text"></div>
+              </div>
+              <div class="preview-description">
+                <h4>Description complète</h4>
+                <div class="description-text"></div>
+              </div>
+              <div class="preview-gallery">
+                <h4>Galerie photos</h4>
+                <div class="gallery-preview"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -895,560 +917,7 @@
         placeholder: 'Entrez une description détaillée du restaurant...'
       });
 
-      // Fonction pour formater le texte de la description
-      function formatDescription(content) {
-        // Séparer le contenu en sections par auteur
-        const sections = content.split(/\*\*(Nataël|Nicolas)\*\* ?:/);
-        let formattedContent = '';
-        
-        for (let i = 1; i < sections.length; i += 2) {
-          const author = sections[i];
-          const text = sections[i + 1] || '';
-          
-          // Formater chaque section avec le nom en gras et le texte
-          formattedContent += `<p><strong>${author}</strong> :</p>`;
-          
-          // Séparer et formater les paragraphes
-          const paragraphs = text.trim().split(/\n\n+/);
-          paragraphs.forEach(paragraph => {
-            if (paragraph.trim()) {
-              formattedContent += `<p>${paragraph.trim()}</p>`;
-            }
-          });
-        }
-        
-        return formattedContent;
-      }
-
-      // Variable pour suivre les modifications
-      let hasChanges = false;
-      let initialState = {};
-
-      // Fonction pour sauvegarder l'état initial
-      function saveInitialState() {
-        initialState = {
-          name: document.getElementById('name').value.trim(),
-          date: document.getElementById('date').value,
-          cuisine: document.getElementById('cuisine').value.trim(),
-          price: document.getElementById('price').value,
-          rating: document.getElementById('rating').value,
-          address: document.getElementById('address').value.trim(),
-          summary: summaryEditor.root.innerHTML.trim(),
-          description: descriptionEditor.root.innerHTML.trim(),
-          mainImage: document.querySelector('#main-image-preview img').src,
-          galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
-        };
-        console.log('État initial sauvegardé:', initialState);
-      }
-
-      // Fonction pour vérifier s'il y a eu des changements
-      function checkForChanges() {
-        const currentState = {
-          name: document.getElementById('name').value.trim(),
-          date: document.getElementById('date').value,
-          cuisine: document.getElementById('cuisine').value.trim(),
-          price: document.getElementById('price').value,
-          rating: document.getElementById('rating').value,
-          address: document.getElementById('address').value.trim(),
-          summary: summaryEditor.root.innerHTML.trim(),
-          description: descriptionEditor.root.innerHTML.trim(),
-          mainImage: document.querySelector('#main-image-preview img').src,
-          galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
-        };
-
-        // Comparer chaque propriété individuellement
-        const hasNameChanged = currentState.name !== initialState.name;
-        const hasDateChanged = currentState.date !== initialState.date;
-        const hasCuisineChanged = currentState.cuisine !== initialState.cuisine;
-        const hasPriceChanged = currentState.price !== initialState.price;
-        const hasRatingChanged = currentState.rating !== initialState.rating;
-        const hasAddressChanged = currentState.address !== initialState.address;
-        const hasSummaryChanged = currentState.summary !== initialState.summary;
-        const hasDescriptionChanged = currentState.description !== initialState.description;
-        const hasMainImageChanged = currentState.mainImage !== initialState.mainImage;
-        const hasGalleryChanged = JSON.stringify(currentState.galleryImages) !== JSON.stringify(initialState.galleryImages);
-
-        const hasChanges = hasNameChanged || 
-                          hasDateChanged ||
-                          hasCuisineChanged || 
-                          hasPriceChanged || 
-                          hasRatingChanged || 
-                          hasAddressChanged || 
-                          hasSummaryChanged || 
-                          hasDescriptionChanged || 
-                          hasMainImageChanged || 
-                          hasGalleryChanged;
-
-        console.log('Changements détectés:', {
-          name: hasNameChanged,
-          date: hasDateChanged,
-          cuisine: hasCuisineChanged,
-          price: hasPriceChanged,
-          rating: hasRatingChanged,
-          address: hasAddressChanged,
-          summary: hasSummaryChanged,
-          description: hasDescriptionChanged,
-          mainImage: hasMainImageChanged,
-          gallery: hasGalleryChanged
-        });
-
-        return hasChanges;
-      }
-
-      // Mettre à jour les écouteurs d'événements pour détecter les changements
-      function setupChangeDetection() {
-        const inputs = ['name', 'date', 'cuisine', 'price', 'rating', 'address'];
-        inputs.forEach(id => {
-          document.getElementById(id).addEventListener('input', () => {
-            console.log(`Changement détecté dans ${id}`);
-          });
-        });
-
-        summaryEditor.on('text-change', () => {
-          console.log('Changement détecté dans le résumé');
-        });
-
-        descriptionEditor.on('text-change', () => {
-          console.log('Changement détecté dans la description');
-        });
-
-        document.getElementById('main-image').addEventListener('change', () => {
-          console.log('Changement détecté dans l\'image principale');
-        });
-
-        document.getElementById('gallery-input').addEventListener('change', () => {
-          console.log('Changement détecté dans la galerie');
-        });
-      }
-
-      // Fonction pour extraire les images du contenu Markdown
-      function extractImagesFromMarkdown(content) {
-        const images = [];
-        
-        // Extraire le frontmatter
-        const parts = content.split('---');
-        if (parts.length >= 2) {
-          const frontmatter = parts[1];
-          
-          // Chercher la section images dans le frontmatter
-          const imagesMatch = frontmatter.match(/images:\n((\s*- image: "[^"]+"\n)+)/);
-          
-          if (imagesMatch) {
-            const imagesSection = imagesMatch[1];
-            const imageMatches = imagesSection.matchAll(/- image: "([^"]+)"/g);
-            
-            for (const match of imageMatches) {
-              const src = match[1];
-              // Exclure les images spécifiques
-              const excludedImages = [
-                'header.jpg',
-                'favicon',
-                'profil.jpg',
-                'restaurant-test.jpg'
-              ];
-
-              const shouldExclude = excludedImages.some(excluded => 
-                src.toLowerCase().includes(excluded.toLowerCase())
-              );
-
-              if (!shouldExclude) {
-                images.push({ src: src, alt: '' });
-              }
-            }
-          }
-        }
-        
-        console.log("Images extraites:", images); // Debug
-        return images;
-      }
-
-      // Fonction pour nettoyer les chaînes de caractères pour le frontmatter
-      function sanitizeFrontmatterValue(value) {
-        // Échapper les guillemets doubles
-        value = value.replace(/"/g, '\\"');
-        // Échapper les retours à la ligne
-        value = value.replace(/\n/g, ' ');
-        // Échapper les tabulations
-        value = value.replace(/\t/g, ' ');
-        return value;
-      }
-
-      // Fonction pour convertir le prix en format frontmatter
-      function convertPriceToFrontmatter(price) {
-        const priceMap = {
-          '$': 'budget',
-          '$$': 'medium',
-          '$$$': 'expensive'
-        };
-        return priceMap[price] || 'medium';
-      }
-
-      // Fonction pour convertir le prix du frontmatter en format affichage
-      function convertPriceFromFrontmatter(price) {
-        const priceMap = {
-          'budget': '$',
-          'medium': '$$',
-          'expensive': '$$$'
-        };
-        return priceMap[price] || '$$';
-      }
-
-      // Fonction pour valider les données du restaurant
-      async function validateRestaurantData(metadata, fullContent) {
-        try {
-          // Récupérer le nom du restaurant pour construire l'URL
-          const restaurantName = metadata.title
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
-            .replace(/[^a-z0-9]+/g, '-'); // Remplacer les caractères spéciaux par des tirets
-          
-          // Construire l'URL du post original en utilisant la date du frontmatter
-          const postUrl = `/_posts/${metadata.date}-${restaurantName}.markdown`;
-          
-          // Récupérer le contenu original du post
-          const response = await fetch(postUrl);
-          if (!response.ok) {
-            console.warn(`Impossible de trouver le post original pour ${restaurantName}`);
-            return;
-          }
-          
-          const originalContent = await response.text();
-          const originalParts = originalContent.split('---');
-          const originalFrontmatter = originalParts[1];
-          const originalFullContent = originalParts[2] || '';
-          
-          // Extraire les métadonnées originales avec support des accents
-          const originalMetadata = {};
-          originalFrontmatter.split('\n').forEach(line => {
-            const match = line.match(/^(\w+):\s*(.+)$/);
-            if (match) {
-              const [_, key, value] = match;
-              originalMetadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
-            }
-          });
-          
-          // Comparer les métadonnées
-          const fieldsToCheck = ['title', 'date', 'style', 'price', 'note', 'address', 'description', 'image'];
-          const missingFields = [];
-          const differentFields = [];
-          
-          fieldsToCheck.forEach(field => {
-            if (!metadata[field] && originalMetadata[field]) {
-              missingFields.push(field);
-            } else if (metadata[field] !== originalMetadata[field]) {
-              differentFields.push(field);
-            }
-          });
-          
-          // Si des champs sont manquants ou différents, afficher une alerte
-          if (missingFields.length > 0 || differentFields.length > 0) {
-            let message = '';
-            if (missingFields.length > 0) {
-              message += `Les champs suivants sont présents dans le post original mais manquants dans l'édition :<br><br>
-                         ${missingFields.map(field => `<strong>${field}</strong>`).join('<br>')}<br><br>`;
-            }
-            if (differentFields.length > 0) {
-              message += `Les champs suivants sont différents du post original :<br><br>
-                         ${differentFields.map(field => `<strong>${field}</strong>`).join('<br>')}<br><br>`;
-            }
-            message += 'Voulez-vous restaurer ces données ?';
-            
-            await Swal.fire({
-              title: 'Différences détectées',
-              html: message,
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: 'Oui, restaurer',
-              cancelButtonText: 'Non, garder les changements',
-              confirmButtonColor: '#2ecc71',
-              cancelButtonColor: '#e74c3c'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                // Restaurer les données manquantes et différentes
-                [...missingFields, ...differentFields].forEach(field => {
-                  metadata[field] = originalMetadata[field];
-                  // Mettre à jour les champs du formulaire
-                  switch(field) {
-                    case 'title':
-                      document.getElementById('name').value = originalMetadata[field];
-                      break;
-                    case 'style':
-                      document.getElementById('cuisine').value = originalMetadata[field];
-                      break;
-                    case 'price':
-                      document.getElementById('price').value = originalMetadata[field];
-                      break;
-                    case 'note':
-                      document.getElementById('rating').value = originalMetadata[field];
-                      break;
-                    case 'address':
-                      document.getElementById('address').value = originalMetadata[field];
-                      break;
-                    case 'description':
-                      summaryEditor.root.innerHTML = originalMetadata[field];
-                      break;
-                    case 'image':
-                      const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
-                      previewImages.forEach(img => {
-                        img.src = originalMetadata[field];
-                      });
-                      break;
-                  }
-                });
-                updatePreview();
-              }
-            });
-          }
-          
-          // Vérifier si le contenu de la description est différent
-          if (fullContent.trim() !== originalFullContent.trim()) {
-            await Swal.fire({
-              title: 'Contenu de la description différent',
-              html: 'Le contenu de la description est différent de celui du post original.<br><br>Voulez-vous restaurer le contenu original ?',
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: 'Oui, restaurer',
-              cancelButtonText: 'Non, garder les changements',
-              confirmButtonColor: '#2ecc71',
-              cancelButtonColor: '#e74c3c'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                const formattedContent = formatDescription(originalFullContent.trim());
-                descriptionEditor.root.innerHTML = formattedContent;
-                updatePreview();
-              }
-            });
-          }
-          
-        } catch (error) {
-          console.error('Erreur lors de la validation des données:', error);
-        }
-      }
-
-      // Modifier la fonction loadRestaurantData pour inclure la date
-      async function loadRestaurantData() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const content = urlParams.get('content');
-        
-        if (content) {
-          try {
-            const decodedContent = decodeURIComponent(content);
-            console.log("Contenu décodé:", decodedContent);
-            
-            // Extraire les images avant de séparer le contenu
-            const galleryImages = extractImagesFromMarkdown(decodedContent);
-            console.log("Images de la galerie extraites:", galleryImages);
-
-            const parts = decodedContent.split('---');
-            if (parts.length < 3) {
-              throw new Error('Format de fichier invalide');
-            }
-            
-            const frontmatter = parts[1];
-            const fullContent = parts[2] || '';
-
-            // Extraire les métadonnées avec gestion des erreurs
-            const metadata = {};
-            frontmatter.split('\n').forEach(line => {
-              const match = line.match(/^(\w+):\s*(.+)$/);
-              if (match) {
-                const [_, key, value] = match;
-                metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
-              }
-            });
-
-            // Vérifier les champs requis
-            const requiredFields = ['title', 'date', 'style', 'price', 'note', 'address', 'description', 'image'];
-            const missingFields = requiredFields.filter(field => !metadata[field]);
-            
-            if (missingFields.length > 0) {
-              console.warn('Champs manquants:', missingFields);
-              // Remplir avec des valeurs par défaut pour les champs manquants
-              missingFields.forEach(field => {
-                switch(field) {
-                  case 'title':
-                    metadata.title = 'Nouveau Restaurant';
-                    break;
-                  case 'date':
-                    metadata.date = new Date().toISOString().split('T')[0];
-                    break;
-                  case 'style':
-                    metadata.style = 'Non spécifié';
-                    break;
-                  case 'price':
-                    metadata.price = 'medium';
-                    break;
-                  case 'note':
-                    metadata.note = '4.5';
-                    break;
-                  case 'address':
-                    metadata.address = 'Adresse à spécifier';
-                    break;
-                  case 'description':
-                    metadata.description = 'Description à venir...';
-                    break;
-                  case 'image':
-                    metadata.image = '/images/header.jpg';
-                    break;
-                }
-              });
-            }
-
-            // Remplir les champs du formulaire avec les métadonnées
-            document.getElementById('name').value = metadata.title || '';
-            const date = metadata.date ? new Date(metadata.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-            document.getElementById('date').value = date;
-            document.getElementById('cuisine').value = metadata.style || '';
-            document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
-            document.getElementById('address').value = metadata.address || '';
-
-            // Gérer le prix avec conversion
-            const priceSelect = document.getElementById('price');
-            const priceValue = convertPriceFromFrontmatter(metadata.price) || '$$';
-            Array.from(priceSelect.options).forEach((option, index) => {
-              if (option.value === priceValue) {
-                priceSelect.selectedIndex = index;
-              }
-            });
-
-            // Remplir les éditeurs avec le contenu
-            summaryEditor.root.innerHTML = metadata.description || '';
-            
-            // Formater le contenu de la description
-            const formattedContent = formatDescription(fullContent.trim());
-            descriptionEditor.root.innerHTML = formattedContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
-
-            // Gérer l'image principale
-            const mainImageUrl = metadata.image || '/images/header.jpg';
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
-            previewImages.forEach(img => {
-              img.style.display = 'block';
-              img.src = mainImageUrl;
-            });
-
-            // Vider les galeries existantes
-            document.getElementById('gallery-grid').innerHTML = '';
-            document.querySelector('.gallery-preview').innerHTML = '';
-
-            // Ajouter les images à la galerie en excluant l'image principale
-            galleryImages.forEach(({ src, alt }) => {
-              if (src !== mainImageUrl) {
-                console.log("Ajout de l'image à la galerie:", src);
-                addGalleryImage(src, alt, false);
-              }
-            });
-
-            // Mettre à jour les prévisualisations
-            updatePreview();
-            updateGalleryPreview(false);
-
-            // Activer la vue complète par défaut
-            document.querySelector('.preview-toggle button[data-preview="full"]').click();
-
-            // Sauvegarder l'état initial après le chargement complet
-            setTimeout(() => {
-              saveInitialState();
-              console.log('État initial sauvegardé après chargement complet');
-              setupChangeDetection();
-            }, 100);
-
-          } catch (error) {
-            console.error('Erreur lors du chargement des données:', error);
-            // Afficher une alerte à l'utilisateur
-            await Swal.fire({
-              title: 'Erreur de chargement',
-              text: 'Une erreur est survenue lors du chargement des données du restaurant. Les champs ont été remplis avec des valeurs par défaut.',
-              icon: 'warning',
-              confirmButtonText: 'OK'
-            });
-          }
-        } else {
-          // Nouveau post avec des valeurs par défaut
-          document.getElementById('name').value = '';
-          document.getElementById('date').value = new Date().toISOString().split('T')[0];
-          document.getElementById('cuisine').value = '';
-          document.getElementById('price').value = '$$';
-          document.getElementById('rating').value = '4.5';
-          document.getElementById('address').value = '';
-          summaryEditor.root.innerHTML = 'Entrez une brève description du restaurant...';
-          descriptionEditor.root.innerHTML = '**Nataël** :\n\n\n\n**Nicolas** :\n';
-          
-          const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
-          previewImages.forEach(img => {
-            img.style.display = 'block';
-            img.src = '/images/header.jpg';
-          });
-
-          saveInitialState();
-          setupChangeDetection();
-        }
-      }
-
-      // Fonction pour mettre à jour l'aperçu
-      function updatePreview() {
-        const name = document.getElementById('name').value || 'Nom du Restaurant';
-        const dateInput = document.getElementById('date').value;
-        const date = dateInput ? new Date(new Date(dateInput).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', { 
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        }).replace('.', '') : new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', { 
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        }).replace('.', '');
-        const cuisine = document.getElementById('cuisine').value || 'Style de cuisine';
-        const price = document.getElementById('price').value || '$';
-        const rating = document.getElementById('rating').value || '4.5';
-        const address = document.getElementById('address').value || 'Adresse du restaurant';
-        const summary = summaryEditor.root.innerHTML;
-        const description = descriptionEditor.root.innerHTML;
-
-        // Mise à jour de la vue carte
-        document.querySelectorAll('.preview-card').forEach(card => {
-          card.querySelector('.preview-date').textContent = date;
-          card.querySelector('h3').textContent = name;
-          card.querySelector('.style').textContent = cuisine;
-          card.querySelector('.note').textContent = rating;
-          card.querySelector('.price-value').textContent = price;
-          const summaryP = card.querySelector('.preview-card-content p') || document.createElement('p');
-          summaryP.innerHTML = summary;
-          if (!card.querySelector('.preview-card-content p')) {
-            card.querySelector('.preview-card-content').insertBefore(summaryP, card.querySelector('.preview-card-meta'));
-          }
-        });
-
-        // Mise à jour de la vue complète
-        document.querySelectorAll('.preview-full').forEach(full => {
-          // Ajouter la date si elle n'existe pas
-          if (!full.querySelector('.preview-date')) {
-            const dateDiv = document.createElement('div');
-            dateDiv.className = 'preview-date';
-            full.querySelector('.preview-content').insertBefore(dateDiv, full.querySelector('.preview-meta'));
-          }
-          
-          full.querySelector('.preview-date').textContent = date;
-          full.querySelector('h3').textContent = name;
-          full.querySelector('.style').textContent = cuisine;
-          full.querySelector('.note').textContent = rating;
-          full.querySelector('.price-value').textContent = price;
-          full.querySelector('.address').textContent = address;
-          full.querySelector('.summary-text').innerHTML = summary;
-          full.querySelector('.description-text').innerHTML = description;
-        });
-
-        // Mise à jour du résumé dans la vue carte avec limitation de longueur
-        document.querySelectorAll('.preview-card-content p').forEach(p => {
-          p.innerHTML = summary;
-          p.style.display = '-webkit-box';
-          p.style.webkitLineClamp = '3';
-          p.style.webkitBoxOrient = 'vertical';
-          p.style.overflow = 'hidden';
-        });
-      }
-
-      // Gestionnaire d'événements pour les champs de formulaire
+      // Gestionnaires d'événements pour les champs de formulaire
       document.getElementById('name').addEventListener('input', updatePreview);
       document.getElementById('date').addEventListener('input', updatePreview);
       document.getElementById('cuisine').addEventListener('input', updatePreview);
@@ -1547,44 +1016,40 @@
         }
       }
 
-      // Gestionnaire d'événements pour les champs de formulaire
-      document.getElementById('name').addEventListener('input', updatePreview);
-      document.getElementById('date').addEventListener('input', updatePreview);
-      document.getElementById('cuisine').addEventListener('input', updatePreview);
-      document.getElementById('price').addEventListener('input', updatePreview);
-      document.getElementById('rating').addEventListener('input', updatePreview);
-      document.getElementById('address').addEventListener('input', updatePreview);
-      summaryEditor.on('text-change', updatePreview);
-      descriptionEditor.on('text-change', updatePreview);
-
-      // Gestion de l'image principale
-      document.querySelector('.change-image-btn').addEventListener('click', () => {
-        document.getElementById('main-image').click();
-      });
-
-      document.getElementById('main-image').addEventListener('change', function(e) {
-        if (e.target.files && e.target.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
-            previewImages.forEach(img => img.src = e.target.result);
-          };
-          reader.readAsDataURL(e.target.files[0]);
-        }
-      });
-
-      // Gestion du toggle des previews
+      // Gestion des boutons de vue
       document.querySelectorAll('.preview-toggle button').forEach(button => {
         button.addEventListener('click', () => {
-          // Désactiver tous les boutons et vues
           document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
-          document.querySelectorAll('.preview-card, .preview-full').forEach(preview => preview.style.display = 'none');
-          
-          // Activer le bouton cliqué et sa vue correspondante
           button.classList.add('active');
-          const previewToShow = document.querySelector(`.preview-${button.dataset.preview}`);
-          if(previewToShow) {
-            previewToShow.style.display = 'block';
+          
+          const view = button.dataset.view;
+          const previewContent = document.querySelector('.preview-content');
+          
+          if (view === 'card') {
+            previewContent.classList.remove('preview-full');
+            previewContent.classList.add('preview-card');
+          } else {
+            previewContent.classList.remove('preview-card');
+            previewContent.classList.add('preview-full');
+          }
+        });
+      });
+
+      // Gestion de la synchronisation
+      document.querySelectorAll('.sync-toggle button').forEach(button => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.sync-toggle button').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          
+          const isSynced = button.dataset.sync === 'true';
+          const previewSection = document.querySelector('.preview-section');
+          
+          if (isSynced) {
+            previewSection.classList.add('synced');
+            previewSection.classList.remove('unsynced');
+          } else {
+            previewSection.classList.add('unsynced');
+            previewSection.classList.remove('synced');
           }
         });
       });
