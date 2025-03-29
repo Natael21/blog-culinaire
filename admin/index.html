@@ -385,7 +385,7 @@
       .corrections-list li, .layout-list li {
         margin-bottom: 0.3rem;
       }
-      /* Modal styles */
+      /* Styles pour le modal des restaurants à venir */
       .modal {
         display: none;
         position: fixed;
@@ -395,93 +395,193 @@
         height: 100%;
         background-color: rgba(0,0,0,0.5);
         z-index: 1000;
+        justify-content: center;
+        align-items: center;
       }
+
       .modal-content {
-        display: flex;
-        flex-direction: column;
-        max-width: 1200px;
-        width: 90%;
-        max-height: 90vh;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        border-radius: 16px;
+        width: 90%;
+        max-width: 1000px;
+        max-height: 90vh;
         overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       }
+
       .modal-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 1.5rem 2rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem;
-        border-bottom: 1px solid #eee;
       }
+
       .modal-header h3 {
         margin: 0;
-        color: var(--primary-color);
         font-size: 1.5rem;
+        font-family: 'Playfair Display', serif;
       }
+
       .close-modal {
         background: none;
         border: none;
+        color: white;
         font-size: 1.5rem;
-        color: #666;
         cursor: pointer;
         padding: 0.5rem;
-        transition: color 0.3s ease;
+        transition: transform 0.3s ease;
       }
+
       .close-modal:hover {
-        color: var(--accent-color);
+        transform: rotate(90deg);
       }
+
       .modal-body {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 2rem;
-        padding: 1.5rem;
+        padding: 2rem;
+        max-height: calc(90vh - 80px);
         overflow-y: auto;
       }
+
       .form-container {
-        flex: 1;
-        min-width: 0;
-      }
-      .preview-container {
-        flex: 1;
-        min-width: 0;
-        border-left: 1px solid #eee;
-        padding-left: 2rem;
-      }
-      .preview-header {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
+        flex-direction: column;
+        gap: 1.5rem;
       }
-      .preview-toggle {
+
+      .form-group {
         display: flex;
+        flex-direction: column;
         gap: 0.5rem;
       }
-      .preview-toggle button {
-        padding: 0.5rem 1rem;
-        border: 1px solid #ddd;
-        background: white;
-        border-radius: 6px;
-        cursor: pointer;
+
+      .form-group label {
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .form-input {
+        padding: 0.8rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
         transition: all 0.3s ease;
       }
-      .preview-toggle button.active {
+
+      .form-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+        outline: none;
+      }
+
+      textarea.form-input {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .form-actions button {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .form-actions .edit-btn {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .form-actions .delete-btn {
+        background-color: #f8f9fa;
+        color: #666;
+      }
+
+      .form-actions button:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Style pour la prévisualisation */
+      .preview-container {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+      }
+
+      .preview-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .preview-header h3 {
+        color: var(--primary-color);
+        margin: 0;
+        font-family: 'Playfair Display', serif;
+      }
+
+      .preview-content {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
+      /* Style pour la liste des restaurants à venir */
+      .upcoming-item {
+        position: relative;
+        padding-left: 3rem;
+      }
+
+      .drag-handle {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        cursor: grab;
+        background: #f8f9fa;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+      }
+
+      .drag-handle:hover {
+        background: #e9ecef;
+        color: var(--primary-color);
+      }
+
+      .drag-handle:active {
+        cursor: grabbing;
+      }
+
+      .upcoming-item.dragging {
+        opacity: 0.5;
+      }
+
+      .upcoming-item.dragging .drag-handle {
         background: var(--primary-color);
         color: white;
-        border-color: var(--primary-color);
       }
-      @media (max-width: 1024px) {
-        .modal-body {
-          flex-direction: column;
-        }
-        
-        .preview-container {
-          border-left: none;
-          border-top: 1px solid #eee;
-          padding-left: 0;
-          padding-top: 2rem;
-        }
-      }
+
       /* Styles pour la section Médias */
       .section-header {
         display: flex;
@@ -1384,7 +1484,10 @@
           restaurants.sort((a, b) => parseInt(a.order || 999) - parseInt(b.order || 999));
           
           list.innerHTML = restaurants.map(restaurant => `
-            <div class="upcoming-item">
+            <div class="upcoming-item" data-id="${restaurant.id}" data-path="${restaurant.path}">
+              <div class="drag-handle">
+                <i class="fas fa-grip-vertical"></i>
+              </div>
               <div class="upcoming-info">
                 <h3>${restaurant.title}</h3>
                 <p>${restaurant.description || ''}</p>
@@ -1541,6 +1644,79 @@ order: ${formData.order}
           Swal.fire('Erreur', 'Une erreur est survenue lors de la suppression du restaurant', 'error');
         }
       }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const upcomingList = document.getElementById('upcoming-list');
+        if (upcomingList) {
+          new Sortable(upcomingList, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'dragging',
+            onStart: function(evt) {
+              evt.item.classList.add('dragging');
+            },
+            onEnd: async function(evt) {
+              evt.item.classList.remove('dragging');
+              const items = Array.from(upcomingList.children);
+              const updates = items.map((item, index) => ({
+                path: item.dataset.path,
+                order: index + 1
+              }));
+
+              try {
+                const token = netlifyIdentity.currentUser()?.token?.access_token;
+                if (!token) {
+                  Swal.fire('Erreur', 'Vous devez être connecté pour effectuer cette action', 'error');
+                  return;
+                }
+
+                for (const update of updates) {
+                  if (!update.path) continue;
+
+                  const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
+                    method: 'GET',
+                    headers: {
+                      'Authorization': `token ${token}`,
+                      'Content-Type': 'application/json'
+                    }
+                  });
+                  
+                  if (!response.ok) continue;
+                  
+                  const file = await response.json();
+                  const content = atob(file.content);
+                  const newContent = content.replace(/order: \d+/, `order: ${update.order}`);
+
+                  await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
+                    method: 'PUT',
+                    headers: {
+                      'Authorization': `token ${token}`,
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      message: `Mise à jour de l'ordre à ${update.order}`,
+                      content: btoa(newContent),
+                      sha: file.sha
+                    })
+                  });
+                }
+
+                await loadUpcomingRestaurants();
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Ordre mis à jour',
+                  text: 'L\'ordre des restaurants a été mis à jour avec succès',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              } catch (error) {
+                console.error('Erreur lors de la mise à jour de l\'ordre:', error);
+                Swal.fire('Erreur', 'Une erreur est survenue lors de la mise à jour de l\'ordre', 'error');
+              }
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>
