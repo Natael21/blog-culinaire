@@ -1045,6 +1045,14 @@ function saveCurrentView(event) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Vérifier si nous sommes sur la page admin
+  const isAdminPage = window.location.pathname.includes('/admin');
+  
+  // Si nous sommes sur la page admin, ne rien faire
+  if (isAdminPage) {
+    return;
+  }
+
   const viewButtons = document.querySelectorAll('.view-btn');
   const restaurantGrid = document.getElementById('restaurant-grid');
   const mapContainer = document.getElementById('map-container');
@@ -1052,7 +1060,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Vérifier si nous sommes sur la page d'accueil
   const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
-  const isAdminPage = window.location.pathname.includes('/admin');
   
   // Vérifier si nous revenons d'une page de restaurant
   const returningFromRestaurant = document.referrer.includes(window.location.host);
@@ -1066,17 +1073,14 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('selectedView', currentView);
   }
   
-  // Si aucune vue n'est définie et que nous ne sommes pas sur la page admin, utiliser la vue en pastilles
-  if (!currentView && !isAdminPage) {
+  // Si aucune vue n'est définie, utiliser la vue en pastilles
+  if (!currentView) {
     currentView = 'grid';
     localStorage.setItem('selectedView', currentView);
   }
 
   // Fonction pour mettre à jour l'interface selon la vue
   async function updateView(view) {
-    // Ne mettre à jour la vue que si nous sommes sur la page d'accueil
-    if (!isHomePage) return;
-
     // Mettre à jour les classes des boutons
     viewButtons.forEach(btn => {
       btn.classList.remove('active');
@@ -1105,10 +1109,7 @@ document.addEventListener('DOMContentLoaded', function() {
   viewButtons.forEach(button => {
     button.addEventListener('click', async () => {
       const view = button.dataset.view;
-      // Ne sauvegarder la vue que si nous sommes sur la page d'accueil
-      if (isHomePage) {
-        localStorage.setItem('selectedView', view);
-      }
+      localStorage.setItem('selectedView', view);
       await updateView(view);
     });
   });
@@ -1120,10 +1121,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Appliquer la vue actuelle seulement si nous sommes sur la page d'accueil
-  if (isHomePage) {
-    updateView(currentView);
-  }
+  // Appliquer la vue actuelle
+  updateView(currentView);
 
   // Fonction pour attendre un certain temps
   function sleep(ms) {
