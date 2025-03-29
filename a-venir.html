@@ -39,18 +39,6 @@ permalink: /a-venir/
           this.page.url = "{{ site.url }}/a-venir/";
           this.page.identifier = "upcoming-suggestions";
           this.page.title = "Suggestions de restaurants à Sherbrooke";
-          // Désactiver les réactions
-          this.callbacks = {
-            onReady: function() {
-              // Cacher la section des réactions
-              var styles = document.createElement('style');
-              styles.innerHTML = `
-                .reaction-items, .align-items { display: none !important; }
-                iframe#dsq-app2 { height: auto !important; }
-              `;
-              document.head.appendChild(styles);
-            }
-          };
         };
 
         (function() {
@@ -59,6 +47,32 @@ permalink: /a-venir/
           s.setAttribute('data-timestamp', +new Date());
           (d.head || d.body).appendChild(s);
         })();
+
+        // Attendre que Disqus soit chargé
+        var checkDisqus = setInterval(function() {
+          if (document.getElementById('disqus_thread').children.length > 0) {
+            var styles = document.createElement('style');
+            styles.innerHTML = `
+              #disqus_thread iframe:first-child {
+                height: auto !important;
+              }
+              .what-do-you-think,
+              [data-role="reaction-bar"],
+              [data-tracking-area="reaction-buttons"],
+              .align-items-center,
+              .reaction-items__container,
+              .align-items {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+              }
+            `;
+            document.head.appendChild(styles);
+            clearInterval(checkDisqus);
+          }
+        }, 100);
       </script>
       <noscript>Veuillez activer JavaScript pour voir les <a href="https://disqus.com/?ref_noscript">commentaires propulsés par Disqus.</a></noscript>
     </div>
