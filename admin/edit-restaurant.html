@@ -500,6 +500,13 @@
         font-weight: 600;
         color: #2c3e50;
       }
+      .preview-full .preview-date {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #666;
+        margin: 1rem 0;
+        font-weight: 500;
+      }
     </style>
   </head>
   <body>
@@ -588,11 +595,11 @@
       <div class="preview-section">
         <h2>Aperçu</h2>
         <div class="preview-toggle">
-          <button class="active" data-preview="card">Vue carte</button>
-          <button data-preview="full">Vue complète</button>
+          <button data-preview="card">Vue carte</button>
+          <button class="active" data-preview="full">Vue complète</button>
         </div>
 
-        <div class="preview-card active">
+        <div class="preview-card">
           <div class="preview-date">14 Mar 2024</div>
           <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-card-content">
@@ -615,7 +622,7 @@
           </div>
         </div>
 
-        <div class="preview-full">
+        <div class="preview-full active">
           <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-content">
             <h3>Nom du Restaurant</h3>
@@ -1167,8 +1174,8 @@
           updatePreview();
           updateGalleryPreview(false);
 
-          // Activer la vue carte par défaut
-          document.querySelector('.preview-toggle button[data-preview="card"]').click();
+          // Activer la vue complète par défaut
+          document.querySelector('.preview-toggle button[data-preview="full"]').click();
 
           // Sauvegarder l'état initial après le chargement complet
           setTimeout(() => {
@@ -1201,15 +1208,16 @@
       // Fonction pour mettre à jour l'aperçu
       function updatePreview() {
         const name = document.getElementById('name').value || 'Nom du Restaurant';
-        const date = document.getElementById('date').value ? new Date(document.getElementById('date').value).toLocaleDateString('fr-FR', { 
+        const dateInput = document.getElementById('date').value;
+        const date = dateInput ? new Date(dateInput).toLocaleDateString('fr-FR', { 
           day: '2-digit',
           month: 'short',
           year: 'numeric'
-        }) : new Date().toLocaleDateString('fr-FR', { 
+        }).replace('.', '') : new Date().toLocaleDateString('fr-FR', { 
           day: '2-digit',
           month: 'short',
           year: 'numeric'
-        });
+        }).replace('.', '');
         const cuisine = document.getElementById('cuisine').value || 'Style de cuisine';
         const price = document.getElementById('price').value || '$';
         const rating = document.getElementById('rating').value || '4.5';
@@ -1219,13 +1227,6 @@
 
         // Mise à jour de la vue carte
         document.querySelectorAll('.preview-card').forEach(card => {
-          // Ajouter la date si elle n'existe pas
-          if (!card.querySelector('.preview-date')) {
-            const dateDiv = document.createElement('div');
-            dateDiv.className = 'preview-date';
-            card.appendChild(dateDiv);
-          }
-          
           card.querySelector('.preview-date').textContent = date;
           card.querySelector('h3').textContent = name;
           card.querySelector('.style').textContent = cuisine;
@@ -1239,22 +1240,22 @@
         });
 
         // Mise à jour de la vue complète
-        document.querySelectorAll('.preview-full h3').forEach(el => el.textContent = name);
-        document.querySelectorAll('.preview-full .style').forEach(el => el.textContent = cuisine);
-        document.querySelectorAll('.preview-full .note').forEach(el => el.textContent = rating);
-        document.querySelectorAll('.preview-full .price-value').forEach(el => el.textContent = price);
-        document.querySelectorAll('.preview-full .address').forEach(el => el.textContent = address);
-        document.querySelectorAll('.preview-full .summary-text').forEach(el => {
-          el.innerHTML = summary;
-          el.querySelectorAll('p').forEach(p => {
-            p.style.marginBottom = '1.2rem';
-          });
-        });
-        document.querySelectorAll('.preview-full .description-text').forEach(el => {
-          el.innerHTML = descriptionEditor.root.innerHTML;
-          el.querySelectorAll('p').forEach(p => {
-            p.style.marginBottom = '1.2rem';
-          });
+        document.querySelectorAll('.preview-full').forEach(full => {
+          // Ajouter la date si elle n'existe pas
+          if (!full.querySelector('.preview-date')) {
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'preview-date';
+            full.querySelector('.preview-content').insertBefore(dateDiv, full.querySelector('.preview-meta'));
+          }
+          
+          full.querySelector('.preview-date').textContent = date;
+          full.querySelector('h3').textContent = name;
+          full.querySelector('.style').textContent = cuisine;
+          full.querySelector('.note').textContent = rating;
+          full.querySelector('.price-value').textContent = price;
+          full.querySelector('.address').textContent = address;
+          full.querySelector('.summary-text').innerHTML = summary;
+          full.querySelector('.description-text').innerHTML = description;
         });
 
         // Mise à jour du résumé dans la vue carte avec limitation de longueur
