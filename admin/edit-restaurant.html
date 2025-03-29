@@ -55,12 +55,15 @@
         max-width: 1800px;
         margin: 2rem auto;
         padding: 0 2rem;
+        min-height: 100vh;
+        overflow-y: auto;
       }
       .form-section {
         background: white;
         padding: 2rem;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        height: fit-content;
       }
       .preview-section {
         position: static;
@@ -81,9 +84,9 @@
       }
       .preview-section.unsynced {
         position: static;
-        height: auto;
-        overflow-y: visible;
-        margin-bottom: 2rem;
+        height: calc(100vh - 4rem);
+        overflow-y: auto;
+        z-index: 100;
       }
       .preview-section .preview-full {
         position: relative;
@@ -145,25 +148,25 @@
       }
       .preview-toggle {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
       }
       .preview-toggle button {
-        padding: 0.8rem 1.5rem;
-        border: 2px solid #3498db;
-        background: white;
-        color: #3498db;
-        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
         cursor: pointer;
-        font-weight: 500;
         transition: all 0.3s ease;
+        background: #f8f9fa;
+        color: #2c3e50;
       }
       .preview-toggle button.active {
         background: #3498db;
         color: white;
       }
-      .preview-toggle button:hover {
-        transform: translateY(-2px);
+      .preview-toggle button:not(.active) {
+        background: #f8f9fa;
+        color: #2c3e50;
       }
       .form-group {
         margin-bottom: 1.5rem;
@@ -438,22 +441,14 @@
         background: white;
         transform: translateY(-2px);
       }
-      @media (max-width: 1200px) {
+      @media (max-width: 1024px) {
         .container {
           grid-template-columns: 1fr;
         }
-        .preview-section {
-          position: static;
+        
+        .preview-section.unsynced {
           height: auto;
-          overflow-y: visible;
-        }
-        .preview-section.synced {
-          position: static;
-          height: auto;
-          overflow-y: visible;
-        }
-        .scroll-toggle {
-          display: none;
+          max-height: none;
         }
       }
       
@@ -724,8 +719,12 @@
       <div class="preview-section">
         <h2>Aperçu</h2>
         <div class="preview-toggle">
-          <button class="active" data-preview="full">Vue complète</button>
-          <button data-preview="card">Vue carte</button>
+          <button class="active" id="sync-preview">
+            <i class="fas fa-link"></i> Synchroniser
+          </button>
+          <button id="unsync-preview">
+            <i class="fas fa-unlink"></i> Désynchroniser
+          </button>
         </div>
 
         <div class="preview-card">
