@@ -1244,7 +1244,11 @@
         
         if (content) {
           try {
-            const decodedContent = decodeURIComponent(content);
+            const decodedContent = decodeURIComponent(content)
+              .replace(/title: "([^"]+)"/g, (match, title) => {
+                // Remplacer "and" par "&" dans le titre
+                return `title: "${title.replace(/\band\b/g, '&')}"`;
+              });
             console.log("Contenu décodé:", decodedContent);
             
             // Extraire les images avant de séparer le contenu
