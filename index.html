@@ -1008,6 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const restaurantGrid = document.getElementById('restaurant-grid');
   const mapContainer = document.getElementById('map-container');
   let map = null;
+  let geocodedCoordinates = new Map(); // Pour stocker les coordonnées
   
   // S'assurer que tous les boutons sont visibles
   viewButtons.forEach(btn => {
@@ -1029,6 +1030,41 @@ document.addEventListener('DOMContentLoaded', function() {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  // Précharger les coordonnées en arrière-plan
+  async function preloadCoordinates() {
+    const restaurants = document.querySelectorAll('.post-card');
+    let geocodingCount = 0;
+    
+    for (const restaurant of restaurants) {
+      const address = restaurant.dataset.address;
+      let lat = parseFloat(restaurant.dataset.lat);
+      let lng = parseFloat(restaurant.dataset.lng);
+      
+      // Si on n'a pas déjà les coordonnées
+      if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && address) {
+        // Attendre 1 seconde entre chaque requête
+        if (geocodingCount > 0) {
+          await sleep(1000);
+        }
+        geocodingCount++;
+        
+        const coords = await geocodeAddress(address);
+        if (coords) {
+          geocodedCoordinates.set(address, coords);
+          // Mettre à jour le dataset du restaurant
+          restaurant.dataset.lat = coords.lat;
+          restaurant.dataset.lng = coords.lng;
+        }
+      } else if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        // Stocker les coordonnées existantes
+        geocodedCoordinates.set(address, { lat, lng });
+      }
+    }
+  }
+
+  // Lancer le préchargement en arrière-plan
+  preloadCoordinates();
+
   // Fonction pour initialiser la carte
   async function initMap() {
     if (!map) {
@@ -1044,39 +1080,28 @@ document.addEventListener('DOMContentLoaded', function() {
       // Ajouter les marqueurs pour chaque restaurant
       const restaurants = document.querySelectorAll('.post-card');
       const bounds = L.latLngBounds();
-      let geocodingCount = 0;
       
       for (const restaurant of restaurants) {
-        let lat = parseFloat(restaurant.dataset.lat);
-        let lng = parseFloat(restaurant.dataset.lng);
+        const address = restaurant.dataset.address;
+        let coords = geocodedCoordinates.get(address);
         
-        // Si pas de coordonnées, essayer de géocoder l'adresse
-        if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && restaurant.dataset.address) {
-          // Attendre 1 seconde entre chaque requête pour respecter les limites
-          if (geocodingCount > 0) {
-            await sleep(1000);
-          }
-          geocodingCount++;
-          
-          const coords = await geocodeAddress(restaurant.dataset.address);
-          if (coords) {
-            lat = coords.lat;
-            lng = coords.lng;
-            // Sauvegarder les coordonnées dans le dataset
-            restaurant.dataset.lat = lat;
-            restaurant.dataset.lng = lng;
+        // Si on n'a pas les coordonnées en mémoire, utiliser celles du dataset
+        if (!coords) {
+          const lat = parseFloat(restaurant.dataset.lat);
+          const lng = parseFloat(restaurant.dataset.lng);
+          if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+            coords = { lat, lng };
           }
         }
         
-        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-          console.log('Ajout du marqueur pour:', restaurant.querySelector('h2').textContent);
+        if (coords) {
           // Créer un marqueur personnalisé
-          const marker = L.marker([lat, lng], {
+          const marker = L.marker([coords.lat, coords.lng], {
             title: restaurant.querySelector('h2').textContent
           }).addTo(map);
           
           // Étendre les limites de la carte
-          bounds.extend([lat, lng]);
+          bounds.extend([coords.lat, coords.lng]);
           
           // Créer le contenu de la popup
           const popupContent = `
@@ -1117,8 +1142,6 @@ document.addEventListener('DOMContentLoaded', function() {
           marker.on('mouseover', function() {
             this.openPopup();
           });
-        } else {
-          console.warn('Coordonnées manquantes pour:', restaurant.querySelector('h2').textContent);
         }
       }
       
