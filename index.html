@@ -148,7 +148,7 @@ title: Accueil
 .main-content {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 
 .filters-container {
@@ -344,28 +344,50 @@ title: Accueil
 }
 
 @media (max-width: 768px) {
+  .main-content {
+    padding: 0 0.5rem;
+  }
+
   .filters-container {
-    padding: 1.5rem;
-    margin: 1rem;
+    padding: 1rem;
+    margin: 1rem 0.5rem;
+    border-radius: 8px;
   }
   
+  .filter-group {
+    gap: 1rem;
+  }
+
   .search-and-view {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
   }
   
   .search-input-wrapper {
     flex: 1;
     max-width: 100%;
+    margin: 0;
+  }
+  
+  .search-input {
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    font-size: 0.95rem;
+  }
+
+  .search-input-wrapper i {
+    left: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .advanced-filters-btn {
+    padding: 0.8rem;
+    font-size: 0.95rem;
   }
   
   /* Masquer les boutons de vue sur mobile */
   .view-buttons {
     display: none !important;
-  }
-  
-  .search-input {
-    padding: 0.9rem 1rem 0.9rem 2.8rem;
   }
   
   /* Forcer la vue en pastilles sur mobile */
