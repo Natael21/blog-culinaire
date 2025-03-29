@@ -70,12 +70,78 @@
         background: white;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
       }
       .preview-section.synced {
         position: sticky;
         top: 4rem;
         height: calc(100vh - 4rem);
-        overflow-y: hidden;
+        overflow-y: auto;
+        z-index: 100;
+      }
+      .preview-section.unsynced {
+        position: static;
+        height: auto;
+        overflow-y: visible;
+        margin-bottom: 2rem;
+      }
+      .preview-section .preview-full {
+        position: relative;
+        height: 100%;
+        overflow-y: auto;
+        transition: all 0.3s ease;
+      }
+      .preview-section.unsynced .preview-full {
+        height: auto;
+        overflow-y: visible;
+      }
+      .preview-section .preview-full .preview-meta {
+        position: relative;
+        z-index: 1;
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      .preview-section .preview-full .preview-meta .date-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #2c3e50;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        z-index: 2;
+        transition: all 0.3s ease;
+      }
+      .preview-section.unsynced .preview-full .preview-meta .date-badge {
+        position: static;
+        display: inline-block;
+        margin-bottom: 1rem;
+      }
+      .preview-section .preview-content {
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+      }
+      .preview-section.unsynced .preview-content {
+        padding: 1rem;
+        box-shadow: none;
+      }
+      .preview-section .preview-gallery {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+      }
+      .preview-section.unsynced .preview-gallery {
+        box-shadow: none;
+        padding: 0;
       }
       .preview-toggle {
         display: flex;
@@ -378,6 +444,16 @@
         }
         .preview-section {
           position: static;
+          height: auto;
+          overflow-y: visible;
+        }
+        .preview-section.synced {
+          position: static;
+          height: auto;
+          overflow-y: visible;
+        }
+        .scroll-toggle {
+          display: none;
         }
       }
       
@@ -531,11 +607,13 @@
         gap: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         transition: all 0.3s ease;
+        opacity: 0.9;
       }
 
       .scroll-toggle:hover {
         background: #2980b9;
         transform: translateY(-2px);
+        opacity: 1;
       }
 
       .scroll-toggle.unsynced {
@@ -553,12 +631,6 @@
       .scroll-toggle.unsynced i {
         transform: rotate(90deg);
       }
-
-      .preview-section.unsynced {
-        position: static;
-        height: auto;
-        overflow-y: visible;
-      }
     </style>
   </head>
   <body>
@@ -568,8 +640,8 @@
     </header>
 
     <button class="scroll-toggle" id="scrollToggle">
-      <i class="fas fa-unlink"></i>
-      <span>Synchroniser</span>
+      <i class="fas fa-link"></i>
+      <span>Désynchroniser</span>
     </button>
 
     <div class="container">
@@ -1502,23 +1574,6 @@
         }
       });
 
-      // Gestion de la galerie d'images
-      document.getElementById('gallery-upload').addEventListener('click', () => {
-        document.getElementById('gallery-input').click();
-      });
-
-      document.getElementById('gallery-input').addEventListener('change', function(e) {
-        if (e.target.files) {
-          Array.from(e.target.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              addGalleryImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
-          });
-        }
-      });
-
       // Gestion du toggle des previews
       document.querySelectorAll('.preview-toggle button').forEach(button => {
         button.addEventListener('click', () => {
@@ -1665,17 +1720,27 @@
         if (isSynced) {
           previewSection.style.position = 'sticky';
           previewSection.style.height = 'calc(100vh - 4rem)';
-          previewSection.style.overflowY = 'hidden';
+          previewSection.style.overflowY = 'auto';
           previewSection.classList.add('synced');
           previewSection.classList.remove('unsynced');
-          scrollToggleBtn.innerHTML = '<i class="fas fa-link"></i> Désynchroniser';
+          scrollToggleBtn.innerHTML = '<i class="fas fa-unlink"></i> Désynchroniser';
+          scrollToggleBtn.classList.remove('unsynced');
+          
+          // Restaurer la position de défilement
+          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
+          previewSection.scrollTop = previewScrollHeight * scrollRatio;
         } else {
           previewSection.style.position = 'static';
           previewSection.style.height = 'auto';
           previewSection.style.overflowY = 'visible';
           previewSection.classList.remove('synced');
           previewSection.classList.add('unsynced');
-          scrollToggleBtn.innerHTML = '<i class="fas fa-unlink"></i> Synchroniser';
+          scrollToggleBtn.innerHTML = '<i class="fas fa-link"></i> Synchroniser';
+          scrollToggleBtn.classList.add('unsynced');
+          
+          // Réinitialiser la position de défilement
+          previewSection.scrollTop = 0;
         }
       }
 
@@ -1683,13 +1748,6 @@
       scrollToggleBtn.addEventListener('click', () => {
         isSynced = !isSynced;
         updatePreviewSectionPosition();
-        
-        if (isSynced) {
-          // Synchroniser la position actuelle lors du retour en mode synchronisé
-          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-          previewSection.scrollTop = previewScrollHeight * scrollRatio;
-        }
       });
 
       // Gestionnaire du scroll pour la synchronisation
@@ -1709,20 +1767,24 @@
           requestAnimationFrame(() => {
             const scrollRatio = previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight);
             const windowScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-            window.scrollTo(0, windowScrollHeight * scrollRatio);
+            window.scrollTo({
+              top: windowScrollHeight * scrollRatio,
+              behavior: 'auto'
+            });
           });
         }
       });
 
-      // Mise à jour de la position lors du redimensionnement de la fenêtre
+      // Ajouter un gestionnaire de redimensionnement optimisé
+      let resizeTimeout;
       window.addEventListener('resize', () => {
-        if (isSynced) {
-          updatePreviewSectionPosition();
-        }
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          if (isSynced) {
+            updatePreviewSectionPosition();
+          }
+        }, 250);
       });
-
-      // Initialisation de la position
-      updatePreviewSectionPosition();
     </script>
   </body>
 </html> 
