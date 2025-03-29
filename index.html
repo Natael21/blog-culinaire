@@ -413,6 +413,27 @@ title: Accueil
   }
 }
 
+/* Spécifique pour l'orientation portrait sur mobile */
+@media (max-width: 768px) and (orientation: portrait) {
+  .search-and-view {
+    max-width: 250px;
+  }
+
+  .advanced-filters-btn {
+    max-width: 250px;
+  }
+
+  .search-input {
+    font-size: 0.9rem;
+    padding: 0.7rem 2.2rem 0.7rem 2.2rem;
+  }
+
+  .search-input-wrapper i {
+    left: 0.7rem;
+    font-size: 0.9rem;
+  }
+}
+
 .post-card .meta {
   display: flex;
   justify-content: space-between;
