@@ -63,19 +63,19 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
       .preview-section {
-        position: sticky;
-        top: 4rem;
-        height: calc(100vh - 4rem);
-        overflow-y: hidden;
+        position: static;
+        height: auto;
+        overflow-y: visible;
         padding: 1rem;
         background: white;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
-      .preview-section.unsynced {
-        position: static;
-        height: auto;
-        overflow-y: visible;
+      .preview-section.synced {
+        position: sticky;
+        top: 4rem;
+        height: calc(100vh - 4rem);
+        overflow-y: hidden;
       }
       .preview-toggle {
         display: flex;
@@ -568,8 +568,8 @@
     </header>
 
     <button class="scroll-toggle" id="scrollToggle">
-      <i class="fas fa-link"></i>
-      <span>Défilement synchronisé</span>
+      <i class="fas fa-unlink"></i>
+      <span>Synchroniser</span>
     </button>
 
     <div class="container">
@@ -1656,7 +1656,7 @@
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
 
       // Gestion de la synchronisation du scroll
-      let isSynced = true;
+      let isSynced = false;
       const previewSection = document.querySelector('.preview-section');
       const scrollToggleBtn = document.querySelector('.scroll-toggle');
       let lastScrollTop = 0;
@@ -1666,12 +1666,14 @@
           previewSection.style.position = 'sticky';
           previewSection.style.height = 'calc(100vh - 4rem)';
           previewSection.style.overflowY = 'hidden';
+          previewSection.classList.add('synced');
           previewSection.classList.remove('unsynced');
           scrollToggleBtn.innerHTML = '<i class="fas fa-link"></i> Désynchroniser';
         } else {
           previewSection.style.position = 'static';
           previewSection.style.height = 'auto';
           previewSection.style.overflowY = 'visible';
+          previewSection.classList.remove('synced');
           previewSection.classList.add('unsynced');
           scrollToggleBtn.innerHTML = '<i class="fas fa-unlink"></i> Synchroniser';
         }
