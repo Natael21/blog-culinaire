@@ -179,9 +179,9 @@ title: Accueil
 }
 
 .search-input-wrapper {
+  flex: 0.7;
   position: relative;
-  flex: 1;
-  max-width: 400px;
+  min-width: 0;
 }
 
 .search-input {
@@ -358,13 +358,14 @@ title: Accueil
   }
 
   .search-and-view {
-    width: 100%;
-    max-width: 100%;
+    flex-direction: row;
+    align-items: center;
+    max-width: 300px;
+    margin: 0 auto;
   }
   
   .search-input-wrapper {
-    width: 100%;
-    max-width: none;
+    flex: 1;
   }
   
   .search-input {
@@ -379,6 +380,7 @@ title: Accueil
   .advanced-filters-btn {
     padding: 0.8rem;
     font-size: 0.95rem;
+    max-width: 300px;
   }
   
   /* Masquer les boutons de vue sur mobile */
