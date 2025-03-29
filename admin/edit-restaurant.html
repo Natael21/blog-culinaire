@@ -944,17 +944,32 @@
       // Fonction pour standardiser le chemin des images
       function standardizeImagePath(path) {
         if (!path) return '/images/header.jpg';
-        path = path.trim();
-        // Enlever les guillemets si présents
-        path = path.replace(/^["'](.*)["']$/, '$1');
-        // Assurer que le chemin commence par /images/
-        if (!path.startsWith('/')) {
-          path = '/' + path;
+        
+        try {
+          // Si c'est une image en base64, la retourner telle quelle
+          if (path.startsWith('data:image')) {
+            return path;
+          }
+          
+          // Nettoyer le chemin
+          path = path.trim()
+            .replace(/^["'](.*)["']$/, '$1')  // Enlever les guillemets
+            .replace(/^\.\.\//, '')  // Enlever les ../ au début
+            .replace(/^\.\//, '');   // Enlever les ./ au début
+          
+          // Standardiser le chemin
+          if (!path.startsWith('/')) {
+            path = '/' + path;
+          }
+          if (!path.startsWith('/images/')) {
+            path = '/images/' + path.replace(/^\//, '');
+          }
+          
+          return path;
+        } catch (error) {
+          console.error('Erreur lors de la standardisation du chemin d\'image:', error);
+          return '/images/header.jpg';
         }
-        if (!path.startsWith('/images/')) {
-          path = '/images/' + path.replace(/^\//, '');
-        }
-        return path;
       }
 
       // Fonction pour standardiser le prix
@@ -1007,29 +1022,22 @@
         try {
           const images = [];
           // Extraire l'image principale
-          const mainImageMatch = content.match(/image:\s*"([^"]+)"/);
+          const mainImageMatch = content.match(/image:\s*["']([^"'\n]+)["']?/);
           const mainImage = mainImageMatch ? mainImageMatch[1] : null;
 
-          // Extraire la liste des images si elle existe
+          // Extraire la liste des images
           const imagesSection = content.match(/images:([\s\S]*?)(?=---|\n\n|$)/);
           if (imagesSection) {
-            const imageMatches = imagesSection[1].matchAll(/- image:\s*"([^"]+)"/g);
+            const imageMatches = imagesSection[1].matchAll(/- image:\s*["']([^"'\n]+)["']?/g);
             for (const match of imageMatches) {
               const src = match[1];
-              if (src && (!mainImage || src !== mainImage)) {
+              if (src) {
                 images.push({
-                  src: cleanImagePath(src),
+                  src: standardizeImagePath(src),
                   alt: getImageAlt(src)
                 });
               }
             }
-          } else if (mainImage) {
-            // Si pas de section images mais une image principale existe,
-            // utiliser l'image principale comme seule image de la galerie
-            images.push({
-              src: cleanImagePath(mainImage),
-              alt: getImageAlt(mainImage)
-            });
           }
 
           console.log("Images extraites:", { mainImage, galleryImages: images });
@@ -1037,63 +1045,6 @@
         } catch (error) {
           console.error('Erreur lors de l\'extraction des images:', error);
           return [];
-        }
-      }
-
-      // Fonction pour nettoyer les chemins d'images
-      function cleanImagePath(path) {
-        try {
-          if (!path) return '';
-          
-          // Si c'est une image en base64, la retourner telle quelle
-          if (path.startsWith('data:image')) {
-            return path;
-          }
-          
-          // Nettoyer le chemin
-          path = path.trim()
-            .replace(/^["'](.*)["']$/, '$1')  // Enlever les guillemets
-            .replace(/^\.\.\//, '')  // Enlever les ../ au début
-            .replace(/^\.\//, '');   // Enlever les ./ au début
-          
-          // Standardiser le chemin
-          if (!path.startsWith('/')) {
-            path = '/' + path;
-          }
-          if (!path.startsWith('/images/')) {
-            path = '/images/' + path.replace(/^\//, '');
-          }
-          
-          // Séparer le chemin en parties
-          const pathParts = path.split('/');
-          const fileName = pathParts.pop();
-          
-          // Standardiser l'extension (garder l'extension originale)
-          const fileNameParts = fileName.split('.');
-          const extension = fileNameParts.pop().toLowerCase();
-          const baseName = fileNameParts.join('.');
-          
-          // Liste des extensions d'image valides
-          const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-          const finalExtension = validExtensions.includes(extension) ? extension : 'jpg';
-          
-          // Encoder le nom de fichier en préservant certains caractères
-          const encodedFileName = encodeURIComponent(baseName)
-            .replace(/%20/g, ' ')    // Garder les espaces lisibles
-            .replace(/'/g, '%27')    // Encoder les apostrophes
-            .replace(/&/g, '%26')    // Encoder les &
-            .replace(/\(/g, '%28')   // Encoder les parenthèses
-            .replace(/\)/g, '%29')   // Encoder les parenthèses
-            .replace(/é/g, '%C3%A9') // Encoder les accents
-            .replace(/è/g, '%C3%A8')
-            .replace(/à/g, '%C3%A0')
-            .replace(/ë/g, '%C3%AB');
-          
-          // Reconstruire le chemin
-          return pathParts.join('/') + '/' + encodedFileName + '.' + finalExtension;
-        } catch (error) {
-          console.error('Erreur lors du nettoyage du chemin d\'image:', error);
-          return path; // Retourner le chemin original en cas d'erreur
         }
       }
 
@@ -1205,7 +1156,7 @@
                 item.className = 'restaurant-item';
                 
                 // Nettoyer et encoder le chemin de l'image
-                const imagePath = metadata.image ? cleanImagePath(metadata.image) : '/images/header.jpg';
+                const imagePath = metadata.image ? standardizeImagePath(metadata.image) : '/images/header.jpg';
                 
                 // Encoder le contenu pour l'URL
                 const encodedContent = encodeURIComponent(content);
@@ -1273,63 +1224,42 @@
       // Fonction pour charger les données du restaurant
       async function loadRestaurantData() {
         try {
-          // Récupérer les paramètres de l'URL
           const urlParams = new URLSearchParams(window.location.search);
           const filePath = urlParams.get('file');
           
           if (!filePath) {
-            // Nouveau restaurant
             console.log('Création d\'un nouveau restaurant');
-            document.getElementById('name').value = '';
-            document.getElementById('cuisine').value = '';
-            document.getElementById('price').value = '$';
-            document.getElementById('rating').value = '5';
-            document.getElementById('address').value = '';
-            if (window.summaryEditor) {
-              window.summaryEditor.root.innerHTML = '';
-            }
-            if (window.descriptionEditor) {
-              window.descriptionEditor.root.innerHTML = '**Nataël** :\n\n**Nicolas** :';
-            }
             return;
           }
 
-          // Si on édite un restaurant existant
           console.log('Chargement du restaurant:', filePath);
           
           try {
-            // Tenter de récupérer le contenu depuis l'URL
             const encodedContent = urlParams.get('content');
-            let content;
+            let content = encodedContent ? decodeURIComponent(encodedContent) : null;
             
-            if (encodedContent) {
-              // Si le contenu est dans l'URL, le décoder
-              content = decodeURIComponent(encodedContent);
-            } else {
-              // Si le contenu n'est pas dans l'URL, le récupérer via l'API GitHub
+            if (!content) {
               const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${filePath}`);
               const data = await response.json();
               content = atob(data.content);
             }
             
-            // Séparer le frontmatter du contenu
             const parts = content.split('---').filter(part => part.trim());
             if (parts.length < 2) {
               throw new Error('Format de fichier invalide');
             }
 
-            // Extraire les métadonnées
             const frontmatter = parts[1];
             const mainContent = parts.slice(2).join('---').trim();
 
-            // Extraire les champs du frontmatter
-            const title = frontmatter.match(/title:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
-            const style = frontmatter.match(/style:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
-            const price = frontmatter.match(/price:\s*["']?([^"'\n]+)["']?/)?.[1] || '$';
+            // Extraire les champs avec une meilleure gestion des erreurs
+            const title = frontmatter.match(/title:\s*["']([^"'\n]+)["']?/)?.[1] || '';
+            const style = frontmatter.match(/style:\s*["']([^"'\n]+)["']?/)?.[1] || '';
+            const price = frontmatter.match(/price:\s*["']([^"'\n]+)["']?/)?.[1] || '$';
             const note = frontmatter.match(/note:\s*(\d+\.?\d*)/)?.[1] || '5';
-            const description = frontmatter.match(/description:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
-            const address = frontmatter.match(/address:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
-            const image = frontmatter.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '/images/header.jpg';
+            const description = frontmatter.match(/description:\s*["']([^"'\n]+)["']?/)?.[1] || '';
+            const address = frontmatter.match(/address:\s*["']([^"'\n]+)["']?/)?.[1] || '';
+            const image = frontmatter.match(/image:\s*["']([^"'\n]+)["']?/)?.[1] || '/images/header.jpg';
 
             // Remplir le formulaire
             document.getElementById('name').value = title;
@@ -1359,7 +1289,7 @@
             const galleryGrid = document.getElementById('gallery-grid');
             galleryGrid.innerHTML = '';
             galleryImages.forEach(img => {
-              addGalleryImage(standardizeImagePath(img.src), img.alt || '', false);
+              addGalleryImage(img.src, img.alt || '', false);
             });
 
             // Mettre à jour l'aperçu
@@ -1379,11 +1309,7 @@
 
           } catch (error) {
             console.error('Erreur lors du chargement du contenu:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erreur',
-              text: 'Une erreur est survenue lors du chargement du restaurant. Veuillez réessayer ou contacter l\'administrateur.'
-            });
+            throw error;
           }
 
         } catch (error) {
