@@ -527,4 +527,69 @@ body {
 
 .gallery-item.drag-over {
   border: 2px dashed #3498db;
+}
+
+/* Styles pour le drag and drop des restaurants à venir */
+.upcoming-item {
+  cursor: move;
+  user-select: none;
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.upcoming-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #666;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.upcoming-item.sortable-ghost {
+  opacity: 0.5;
+  background: #f8f9fa;
+}
+
+.upcoming-item.sortable-chosen {
+  background: #f8f9fa;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.upcoming-info {
+  flex: 1;
+}
+
+.upcoming-meta {
+  display: flex;
+  gap: 1.5rem;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.upcoming-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upcoming-meta i {
+  color: var(--accent-color);
 } 
