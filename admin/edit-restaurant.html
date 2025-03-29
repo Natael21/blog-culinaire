@@ -542,7 +542,7 @@
             <div class="main-image-upload">
               <input type="file" id="main-image" accept="image/*" style="display: none;">
               <div class="upload-preview" id="main-image-preview">
-                <img src="/images/restaurant-test.jpg" alt="Preview">
+                <img src="/images/header.jpg" alt="Preview">
                 <button type="button" class="change-image-btn">
                   <i class="fas fa-camera"></i> Changer l'image
                 </button>
@@ -591,7 +591,7 @@
 
         <div class="preview-card active">
           <div class="preview-date">14 Mar 2024</div>
-          <img src="/images/restaurant-test.jpg" alt="Restaurant">
+          <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-card-content">
             <h3>Nom du Restaurant</h3>
             <p></p>
@@ -613,7 +613,7 @@
         </div>
 
         <div class="preview-full">
-          <img src="/images/restaurant-test.jpg" alt="Restaurant">
+          <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-content">
             <h3>Nom du Restaurant</h3>
             <div class="preview-meta">
@@ -919,7 +919,124 @@
         return images;
       }
 
-      // Fonction pour charger les données du restaurant
+      // Fonction pour valider les données du restaurant
+      async function validateRestaurantData(metadata, fullContent) {
+        try {
+          // Récupérer le nom du restaurant pour construire l'URL
+          const restaurantName = metadata.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          
+          // Construire l'URL du post original
+          const postUrl = `/_posts/${metadata.date}-${restaurantName}.markdown`;
+          
+          // Récupérer le contenu original du post
+          const response = await fetch(postUrl);
+          if (!response.ok) {
+            console.warn(`Impossible de trouver le post original pour ${restaurantName}`);
+            return;
+          }
+          
+          const originalContent = await response.text();
+          const originalParts = originalContent.split('---');
+          const originalFrontmatter = originalParts[1];
+          const originalFullContent = originalParts[2] || '';
+          
+          // Extraire les métadonnées originales
+          const originalMetadata = {};
+          originalFrontmatter.split('\n').forEach(line => {
+            const match = line.match(/^(\w+):\s*(.+)$/);
+            if (match) {
+              const [_, key, value] = match;
+              originalMetadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
+            }
+          });
+          
+          // Comparer les métadonnées
+          const missingFields = [];
+          const fieldsToCheck = ['title', 'date', 'style', 'price', 'note', 'address', 'description', 'image'];
+          
+          fieldsToCheck.forEach(field => {
+            if (!metadata[field] && originalMetadata[field]) {
+              missingFields.push(field);
+            }
+          });
+          
+          // Si des champs sont manquants, afficher une alerte
+          if (missingFields.length > 0) {
+            await Swal.fire({
+              title: 'Données manquantes détectées',
+              html: `Les champs suivants sont présents dans le post original mais manquants dans l'édition :<br><br>
+                     ${missingFields.map(field => `<strong>${field}</strong>`).join('<br>')}<br><br>
+                     Voulez-vous restaurer ces données ?`,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Oui, restaurer',
+              cancelButtonText: 'Non, garder les changements',
+              confirmButtonColor: '#2ecc71',
+              cancelButtonColor: '#e74c3c'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                // Restaurer les données manquantes
+                missingFields.forEach(field => {
+                  metadata[field] = originalMetadata[field];
+                  // Mettre à jour les champs du formulaire
+                  switch(field) {
+                    case 'title':
+                      document.getElementById('name').value = originalMetadata[field];
+                      break;
+                    case 'style':
+                      document.getElementById('cuisine').value = originalMetadata[field];
+                      break;
+                    case 'price':
+                      document.getElementById('price').value = originalMetadata[field];
+                      break;
+                    case 'note':
+                      document.getElementById('rating').value = originalMetadata[field];
+                      break;
+                    case 'address':
+                      document.getElementById('address').value = originalMetadata[field];
+                      break;
+                    case 'description':
+                      summaryEditor.root.innerHTML = originalMetadata[field];
+                      break;
+                    case 'image':
+                      const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+                      previewImages.forEach(img => {
+                        img.src = originalMetadata[field];
+                      });
+                      break;
+                  }
+                });
+                updatePreview();
+              }
+            });
+          }
+          
+          // Vérifier si le contenu de la description est différent
+          if (fullContent.trim() !== originalFullContent.trim()) {
+            await Swal.fire({
+              title: 'Contenu de la description différent',
+              html: 'Le contenu de la description est différent de celui du post original.<br><br>Voulez-vous restaurer le contenu original ?',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Oui, restaurer',
+              cancelButtonText: 'Non, garder les changements',
+              confirmButtonColor: '#2ecc71',
+              cancelButtonColor: '#e74c3c'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                const formattedContent = formatDescription(originalFullContent.trim());
+                descriptionEditor.root.innerHTML = formattedContent;
+                updatePreview();
+              }
+            });
+          }
+          
+        } catch (error) {
+          console.error('Erreur lors de la validation des données:', error);
+        }
+      }
+
+      // Modifier la fonction loadRestaurantData pour inclure la validation
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
         const content = urlParams.get('content');
@@ -936,8 +1053,19 @@
           const frontmatter = parts[1];
           const fullContent = parts[2] || '';
 
-          // Extraire les métadonnées
-          const metadata = {};
+          // Extraire les métadonnées avec des valeurs par défaut
+          const metadata = {
+            title: '',
+            date: new Date().toISOString().split('T')[0],
+            style: '',
+            price: '$$',
+            note: '4.5',
+            address: '',
+            description: '',
+            image: '/images/header.jpg',
+            state: 'draft'
+          };
+
           frontmatter.split('\n').forEach(line => {
             const match = line.match(/^(\w+):\s*(.+)$/);
             if (match) {
@@ -946,68 +1074,80 @@
             }
           });
 
-          // Remplir les champs du formulaire
+          // Remplir les champs du formulaire avec les métadonnées ou les valeurs par défaut
           document.getElementById('name').value = metadata.title || '';
           document.getElementById('cuisine').value = metadata.style || '';
           document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
           document.getElementById('address').value = metadata.address || '';
 
-          // Gérer le prix
-          const priceValue = metadata.price ? metadata.price.replace(/"/g, '').trim() : '$';
+          // Gérer le prix avec une valeur par défaut
           const priceSelect = document.getElementById('price');
+          const priceValue = metadata.price || '$$';
           Array.from(priceSelect.options).forEach((option, index) => {
             if (option.value === priceValue) {
               priceSelect.selectedIndex = index;
             }
           });
 
-          // Mettre à jour les affichages du prix
-          document.querySelectorAll('.preview-card-meta .price-value, .preview-full .price-value').forEach(el => {
-            el.textContent = priceValue;
-          });
-
-          // Remplir les éditeurs
-          summaryEditor.root.innerHTML = metadata.description || '';
-          const formattedContent = formatDescription(fullContent.trim());
+          // Remplir les éditeurs avec des valeurs par défaut si nécessaire
+          summaryEditor.root.innerHTML = metadata.description || 'Entrez une brève description du restaurant...';
+          
+          // Formater le contenu de la description
+          const formattedContent = formatDescription(fullContent.trim() || '**Nataël** :\n\n\n\n**Nicolas** :\n');
           descriptionEditor.root.innerHTML = formattedContent;
 
-          // Gérer l'image principale
-          if (metadata.image) {
-            const mainImageUrl = metadata.image.replace(/^"(.*)"$/, '$1');
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
-            previewImages.forEach(img => {
-              img.style.display = 'block';
-              img.src = mainImageUrl;
-            });
-          }
+          // Gérer l'image principale avec une image par défaut si nécessaire
+          const mainImageUrl = metadata.image || '/images/header.jpg';
+          const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+          previewImages.forEach(img => {
+            img.style.display = 'block';
+            img.src = mainImageUrl;
+          });
 
           // Vider les galeries existantes
           document.getElementById('gallery-grid').innerHTML = '';
           document.querySelector('.gallery-preview').innerHTML = '';
 
-          // Ajouter les images à la galerie
+          // Ajouter les images à la galerie en excluant l'image principale
           galleryImages.forEach(({ src, alt }) => {
-            if (src !== metadata.image) {
+            if (src !== mainImageUrl) {
               console.log("Ajout de l'image à la galerie:", src);
-              addGalleryImage(src, alt, false); // Ajout du paramètre false pour ne pas marquer comme changement
+              addGalleryImage(src, alt, false);
             }
           });
 
           // Mettre à jour les prévisualisations
           updatePreview();
-          updateGalleryPreview(false); // Ajout du paramètre false pour ne pas marquer comme changement
+          updateGalleryPreview(false);
 
           // Activer la vue carte par défaut
           document.querySelector('.preview-toggle button[data-preview="card"]').click();
 
-          // IMPORTANT: Sauvegarder l'état initial APRÈS avoir tout chargé
+          // Sauvegarder l'état initial après le chargement complet
           setTimeout(() => {
             saveInitialState();
             console.log('État initial sauvegardé après chargement complet');
             setupChangeDetection();
+            
+            // Valider les données avec le post original
+            validateRestaurantData(metadata, fullContent);
           }, 100);
         } else {
-          // Nouveau post
+          // Nouveau post avec des valeurs par défaut
+          document.getElementById('name').value = '';
+          document.getElementById('cuisine').value = '';
+          document.getElementById('price').value = '$$';
+          document.getElementById('rating').value = '4.5';
+          document.getElementById('address').value = '';
+          summaryEditor.root.innerHTML = 'Entrez une brève description du restaurant...';
+          descriptionEditor.root.innerHTML = '**Nataël** :\n\n\n\n**Nicolas** :\n';
+          
+          const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+          previewImages.forEach(img => {
+            img.style.display = 'block';
+            img.src = '/images/header.jpg';
+          });
+
           saveInitialState();
           setupChangeDetection();
         }
