@@ -1158,14 +1158,16 @@
       <section id="restaurants" class="content-section active">
         <div class="section-header">
           <h2>Gestion des Restaurants</h2>
-          <button class="add-restaurant-btn" onclick="window.location.href='/admin/edit-restaurant.html'">
+          <a href="/admin/edit-restaurant.html" class="add-restaurant-btn">
             <i class="fas fa-plus"></i> Créer un nouveau restaurant
-          </button>
+          </a>
         </div>
         <div class="restaurant-list">
           {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
           {% for post in sorted_posts %}
-            <div class="restaurant-item">
+            {% assign post_url_parts = post.path | split: '/' %}
+            {% assign filename = post_url_parts | last %}
+            <div class="restaurant-item" data-id="{{ filename }}">
               <div class="restaurant-info">
                 <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}" class="restaurant-image">
                 <div class="restaurant-details">
@@ -1174,14 +1176,15 @@
                     <span><i class="fas fa-star"></i> {{ post.rating | default: '0' }}</span>
                     <span><i class="fas fa-utensils"></i> {{ post.cuisine | default: 'Non spécifié' }}</span>
                     <span><i class="fas fa-dollar-sign"></i> {{ post.price | default: '$' }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
                   </div>
                 </div>
               </div>
               <div class="restaurant-actions">
-                <button class="action-btn edit-btn" onclick="window.location.href='/admin/edit-restaurant.html?id={{ post.id }}'">
+                <a href="/admin/edit-restaurant.html?file={{ filename }}" class="action-btn edit-btn">
                   <i class="fas fa-edit"></i> Modifier
-                </button>
-                <button class="action-btn delete-btn" data-id="{{ post.id }}" onclick="deleteRestaurant('{{ post.id }}')">
+                </a>
+                <button class="action-btn delete-btn" data-file="{{ filename }}" onclick="deleteRestaurant('{{ filename }}')">
                   <i class="fas fa-trash"></i> Supprimer
                 </button>
               </div>
@@ -1496,25 +1499,34 @@
       });
 
       // Gestion de la suppression des restaurants
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const restaurantId = btn.dataset.id;
-          const restaurantName = btn.closest('.restaurant-item').querySelector('h3').textContent;
-          
-          if (confirm(`Êtes-vous sûr de vouloir supprimer le restaurant "${restaurantName}" ?`)) {
-            try {
-              // Ici, ajouter la logique pour supprimer le restaurant via l'API
-              const restaurantItem = btn.closest('.restaurant-item');
-              restaurantItem.style.opacity = '0';
+      async function deleteRestaurant(filename) {
+        const item = document.querySelector(`[data-id="${filename}"]`);
+        const restaurantName = item.querySelector('h3').textContent;
+        
+        if (confirm(`Êtes-vous sûr de vouloir supprimer le restaurant "${restaurantName}" ?`)) {
+          try {
+            // Envoyer une requête pour supprimer le fichier
+            const response = await fetch('/api/delete-post', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ filename })
+            });
+
+            if (response.ok) {
+              item.style.opacity = '0';
               await new Promise(resolve => setTimeout(resolve, 300));
-              restaurantItem.remove();
-            } catch (error) {
-              alert('Une erreur est survenue lors de la suppression du restaurant.');
-              console.error('Erreur:', error);
+              item.remove();
+            } else {
+              throw new Error('Erreur lors de la suppression');
             }
+          } catch (error) {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue lors de la suppression du restaurant.');
           }
-        });
-      });
+        }
+      }
 
       // Gestion du drag and drop pour le workflow
       let draggedItem = null;
