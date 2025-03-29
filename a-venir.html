@@ -29,7 +29,27 @@ permalink: /a-venir/
 
   <div class="suggestion-section">
     <h2>Une suggestion ?</h2>
-    <p>Vous connaissez un restaurant à Sherbrooke que nous devrions absolument essayer ? N'hésitez pas à nous en faire part sur nos réseaux sociaux !</p>
+    <p>Vous connaissez un restaurant à Sherbrooke que nous devrions absolument essayer ? N'hésitez pas à nous le suggérer ci-dessous !</p>
+    
+    <!-- Section Commentaires -->
+    <div class="comments-section">
+      <div id="disqus_thread"></div>
+      <script>
+        var disqus_config = function () {
+          this.page.url = "{{ site.url }}/a-venir/";
+          this.page.identifier = "upcoming-suggestions";
+          this.page.title = "Suggestions de restaurants à Sherbrooke";
+        };
+
+        (function() {
+          var d = document, s = d.createElement('script');
+          s.src = 'https://appreciationrestaurantssherbrooke.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+      </script>
+      <noscript>Veuillez activer JavaScript pour voir les <a href="https://disqus.com/?ref_noscript">commentaires propulsés par Disqus.</a></noscript>
+    </div>
   </div>
 </div>
 
@@ -150,7 +170,16 @@ permalink: /a-venir/
   font-size: 1.2rem;
   line-height: 1.6;
   max-width: 600px;
-  margin: 0 auto;
+  margin: 0 auto 2rem;
+}
+
+.comments-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 768px) {
