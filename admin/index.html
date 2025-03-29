@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gérer les Recettes | Blog Culinaire</title>
+    <title>Administration du Blog Culinaire | Gestion des Restaurants</title>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -49,176 +49,1888 @@
         background-color: #2c3e50;
         transform: translateY(-2px);
       }
-      .form-section {
+      .admin-nav {
+        display: flex;
+        gap: 1rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+      }
+      .admin-nav button {
+        flex: 1;
+        min-width: 200px;
+        padding: 1rem;
+        border: none;
+        border-radius: 8px;
+        background-color: #2c3e50;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .admin-nav button:hover {
+        background-color: #34495e;
+        transform: translateY(-2px);
+      }
+      .admin-nav button.active {
+        background-color: #3498db;
+      }
+      .admin-nav button i {
+        font-size: 1.2rem;
+      }
+      .content-section {
+        display: none;
         background: white;
         padding: 2rem;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        margin-top: 2rem;
       }
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
-      .form-group label {
+      .content-section.active {
         display: block;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
       }
-      .form-group input, .form-group select, .form-group textarea {
-        width: 100%;
-        padding: 0.8rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 1rem;
-      }
-      .form-group textarea {
-        resize: vertical;
-        height: 150px;
-      }
-      .submit-btn {
-        background-color: #2c3e50;
-        color: white;
-        padding: 0.8rem 1.5rem;
-        border: none;
-        border-radius: 4px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-      .submit-btn:hover {
-        background-color: #34495e;
-      }
-      .recipe-list {
-        margin-top: 2rem;
-      }
-      .recipe-item {
+      /* Styles pour la section Restaurants */
+      .section-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
-        background: #fff;
+        margin-bottom: 2rem;
+      }
+      .section-header h2 {
+        margin: 0;
+        color: #2c3e50;
+      }
+      .restaurant-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .restaurant-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem;
+        background: white;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 1rem;
+        transition: all 0.3s ease;
       }
-      .recipe-item h3 {
-        margin: 0;
+      .restaurant-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+      .restaurant-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex: 1;
+      }
+      .restaurant-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+      .restaurant-details {
+        flex: 1;
+      }
+      .restaurant-details h3 {
+        margin: 0 0 0.5rem 0;
         font-size: 1.2rem;
+        color: #2c3e50;
       }
-      .recipe-actions {
+      .restaurant-meta {
+        display: flex;
+        gap: 1.5rem;
+        color: #666;
+        font-size: 0.9rem;
+      }
+      .restaurant-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .restaurant-actions {
         display: flex;
         gap: 0.5rem;
       }
-      .edit-btn, .delete-btn {
-        background-color: #e74c3c;
-        color: white;
+      .action-btn {
         padding: 0.5rem 1rem;
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        text-decoration: none;
+      }
+      .edit-btn {
+        background-color: #3498db;
+        color: white;
+      }
+      .delete-btn {
+        background-color: #e74c3c;
+        color: white;
+      }
+      .action-btn:hover {
+        transform: translateY(-2px);
+      }
+      .add-restaurant-btn {
+        background-color: #2ecc71;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        text-decoration: none;
+      }
+      .add-restaurant-btn:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+      }
+      @media (max-width: 768px) {
+        .admin-nav {
+          flex-direction: column;
+        }
+        .admin-nav button {
+          width: 100%;
+        }
+        .restaurant-item {
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .restaurant-info {
+          width: 100%;
+        }
+        .restaurant-actions {
+          width: 100%;
+          justify-content: flex-end;
+        }
+      }
+      /* Styles pour la section Workflow */
+      .workflow-columns {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+      .column {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        min-height: 500px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+      }
+      .column.draft {
+        border-color: #ffd700;
+      }
+      .column.review {
+        border-color: #3498db;
+      }
+      .column.ready {
+        border-color: #2ecc71;
+      }
+      .column h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid;
+        color: #2c3e50;
+        font-size: 1.2rem;
+      }
+      .column.draft h3 {
+        border-color: #ffd700;
+      }
+      .column.review h3 {
+        border-color: #3498db;
+      }
+      .column.ready h3 {
+        border-color: #2ecc71;
+      }
+      .workflow-items {
+        min-height: 400px;
         transition: background-color 0.3s ease;
       }
-      .edit-btn:hover {
-        background-color: #c0392b;
+      .workflow-items.drag-over {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-radius: 8px;
       }
-      .delete-btn:hover {
-        background-color: #c0392b;
+      .workflow-item {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: move;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
       }
-      .status-select {
-        padding: 0.5rem;
+      .workflow-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      .workflow-item img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+      .workflow-item h4 {
+        margin: 0 0 0.5rem 0;
+        color: #2c3e50;
+        font-size: 1.1rem;
+      }
+      .workflow-item p {
+        margin: 0 0 1rem 0;
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+      .workflow-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .draft .status-badge {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .review .status-badge {
+        background-color: #cce5ff;
+        color: #004085;
+      }
+      .ready .status-badge {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .workflow-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .workflow-actions button {
+        flex: 1;
+        padding: 0.6rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .edit-btn {
+        background-color: #3498db;
+        color: white;
+      }
+      .check-btn {
+        background-color: #f1c40f;
+        color: #2c3e50;
+      }
+      .publish-btn {
+        background-color: #2ecc71;
+        color: white;
+      }
+      .move-btn {
+        background-color: #95a5a6;
+        color: white;
+      }
+      .check-results {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+      .check-results h5 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .corrections-list, .layout-list {
+        margin: 0;
+        padding-left: 1.5rem;
+        font-size: 0.85rem;
+        color: #666;
+      }
+      .corrections-list li, .layout-list li {
+        margin-bottom: 0.3rem;
+      }
+      /* Modal styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+      }
+      .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        min-width: 300px;
+      }
+      .state-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .state-option {
+        padding: 1rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .state-option[data-state="draft"] {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .state-option[data-state="review"] {
+        background-color: #cce5ff;
+        color: #004085;
+      }
+      .state-option[data-state="ready"] {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      @media (max-width: 1024px) {
+        .workflow-columns {
+          grid-template-columns: 1fr;
+        }
+      }
+      /* Styles pour la section Médias */
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .media-filters {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .media-search {
+        padding: 0.8rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        min-width: 250px;
+        transition: all 0.3s ease;
+      }
+      .media-search:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+      .media-filter {
+        padding: 0.8rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .media-filter:focus {
+        border-color: #3498db;
+        outline: none;
+      }
+      .upload-section {
+        background: white;
+        border: 2px dashed #e9ecef;
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+      }
+      .upload-section:hover, .upload-section.drag-over {
+        border-color: #3498db;
+        background-color: #f8f9fa;
+      }
+      .upload-section i {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+      }
+      .upload-section h3 {
+        margin: 0 0 0.5rem 0;
+        color: #2c3e50;
+      }
+      .upload-info {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+      }
+      .upload-progress {
+        margin-top: 1.5rem;
+      }
+      .progress-bar {
+        height: 8px;
+        background-color: #e9ecef;
         border-radius: 4px;
-        border: 1px solid #ddd;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+      }
+      .progress-fill {
+        height: 100%;
+        background-color: #2ecc71;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+      .progress-text {
+        color: #2c3e50;
+        font-size: 0.9rem;
+        margin: 0;
+      }
+      .media-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .stat-item {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .stat-item i {
+        font-size: 2rem;
+        color: #3498db;
+        margin-bottom: 0.5rem;
+      }
+      .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+      .media-library {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+      .media-item {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+      }
+      .media-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+      .media-preview {
+        position: relative;
+        padding-top: 100%;
+      }
+      .media-preview img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .media-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .media-preview:hover .media-overlay {
+        opacity: 1;
+      }
+      .media-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: white;
+        color: #2c3e50;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      .media-action:hover {
+        transform: scale(1.1);
+      }
+      .media-action.view-btn:hover {
+        background-color: #3498db;
+        color: white;
+      }
+      .media-action.copy-btn:hover {
+        background-color: #f1c40f;
+        color: white;
+      }
+      .media-action.edit-btn:hover {
+        background-color: #2ecc71;
+        color: white;
+      }
+      .media-action.delete-btn:hover {
+        background-color: #e74c3c;
+        color: white;
+      }
+      .media-info {
+        padding: 1rem;
+      }
+      .media-info h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .media-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: #6c757d;
+      }
+      .media-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      /* Modal styles */
+      .image-preview-modal {
+        max-width: 90%;
+        max-height: 90vh;
+        display: flex;
+        gap: 2rem;
+        padding: 2rem;
+      }
+      .image-preview-modal img {
+        max-width: 60%;
+        max-height: 70vh;
+        object-fit: contain;
+      }
+      .image-info {
+        flex: 1;
+        min-width: 300px;
+      }
+      .image-details {
+        margin: 1.5rem 0;
+      }
+      .image-actions {
+        display: flex;
+        gap: 1rem;
+      }
+      .action-btn {
+        flex: 1;
+        padding: 0.8rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .action-btn.download-btn {
+        background-color: #2ecc71;
+        color: white;
+      }
+      .action-btn.copy-btn {
+        background-color: #3498db;
+        color: white;
+      }
+      .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #2c3e50;
+      }
+      @media (max-width: 768px) {
+        .image-preview-modal {
+          flex-direction: column;
+        }
+        .image-preview-modal img {
+          max-width: 100%;
+        }
+        .image-info {
+          min-width: 100%;
+        }
+      }
+      /* Styles pour la section À venir */
+      .upcoming-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .upcoming-editor {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .upcoming-preview {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 2rem;
+      }
+
+      .upcoming-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        padding: 0.8rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+
+      .upcoming-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .upcoming-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: move;
+        transition: all 0.3s ease;
+      }
+
+      .upcoming-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+
+      .upcoming-item.dragging {
+        opacity: 0.5;
+        background: #e9ecef;
+      }
+
+      .upcoming-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+      }
+
+      .upcoming-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+
+      .upcoming-details {
+        flex: 1;
+      }
+
+      .upcoming-details h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        color: #2c3e50;
+      }
+
+      .upcoming-meta {
+        display: flex;
+        gap: 1rem;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .upcoming-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .upcoming-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .upcoming-actions button {
+        padding: 0.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .edit-upcoming-btn {
+        background-color: #3498db;
+        color: white;
+      }
+
+      .delete-upcoming-btn {
+        background-color: #e74c3c;
+        color: white;
+      }
+
+      .move-upcoming-btn {
+        background-color: #95a5a6;
+        color: white;
+        cursor: move;
+      }
+
+      .add-upcoming-btn {
+        background-color: #2ecc71;
+        color: white;
+        padding: 1rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+      }
+
+      .add-upcoming-btn:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+      }
+
+      .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .preview-toggle {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .preview-toggle button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        color: #2c3e50;
+      }
+
+      .preview-toggle button.active {
+        background: #3498db;
+        color: white;
+      }
+
+      @media (max-width: 1024px) {
+        .upcoming-section {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .upcoming-item {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .upcoming-info {
+          width: 100%;
+        }
+
+        .upcoming-actions {
+          width: 100%;
+          justify-content: flex-end;
+        }
+      }
+
+      /* Styles pour la prévisualisation des restaurants à venir */
+      .upcoming-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .upcoming-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+
+      .upcoming-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+      }
+
+      .upcoming-card h3 {
+        margin: 1rem;
+        color: #2c3e50;
+        font-size: 1.2rem;
+      }
+
+      .upcoming-card .upcoming-meta {
+        padding: 0 1rem 1rem;
+        display: flex;
+        gap: 1rem;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .upcoming-full {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .upcoming-full img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+      }
+
+      .upcoming-full .upcoming-content {
+        padding: 1.5rem;
+      }
+
+      .upcoming-full h3 {
+        margin: 0 0 1rem 0;
+        color: #2c3e50;
+        font-size: 1.4rem;
+      }
+
+      .upcoming-full .upcoming-meta {
+        display: flex;
+        gap: 1.5rem;
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+
+      .upcoming-full p {
+        color: #666;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      @media (max-width: 768px) {
+        .upcoming-full {
+          flex-direction: column;
+        }
+
+        .upcoming-full img {
+          height: 200px;
+        }
       }
     </style>
   </head>
   <body>
     <header class="header">
-      <h1>Gérer les Recettes</h1>
+      <h1>Administration du Blog Culinaire</h1>
       <a href="/" class="back-to-site"><i class="fas fa-arrow-left"></i> Retour au site</a>
     </header>
     <main class="container">
-      <section class="form-section">
-        <form>
-          <div class="form-group">
-            <label for="title">Nom du Restaurant</label>
-            <input type="text" id="title" name="title" placeholder="Entrez le nom du restaurant" required />
+      <nav class="admin-nav">
+        <button class="active" data-section="restaurants">
+          <i class="fas fa-utensils"></i>
+          Restaurants existants
+        </button>
+        <button data-section="workflow">
+          <i class="fas fa-tasks"></i>
+          Workflow de publication
+        </button>
+        <button data-section="media">
+          <i class="fas fa-images"></i>
+          Gestion des images
+        </button>
+        <button data-section="upcoming">
+          <i class="fas fa-calendar"></i>
+          Restaurants à venir
+        </button>
+      </nav>
+
+      <!-- Section Restaurants -->
+      <section id="restaurants" class="content-section active">
+        <div class="section-header">
+          <h2>Gestion des Restaurants</h2>
+          <a href="/admin/edit-restaurant.html" class="add-restaurant-btn">
+            <i class="fas fa-plus"></i> Créer un nouveau restaurant
+          </a>
+        </div>
+        <div class="restaurant-list">
+          {% for post in site.posts %}
+          <div class="restaurant-item">
+            <div class="restaurant-info">
+              <img src="{{ post.image }}" alt="{{ post.title }}" class="restaurant-image">
+              <div class="restaurant-details">
+                <h3>{{ post.title }}</h3>
+                <div class="restaurant-meta">
+                  <span><i class="fas fa-star"></i> {{ post.rating }}</span>
+                  <span><i class="fas fa-utensils"></i> {{ post.cuisine }}</span>
+                  <span><i class="fas fa-dollar-sign"></i> {{ post.price }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="restaurant-actions">
+              <a href="/admin/edit-restaurant.html?id={{ post.id }}" class="action-btn edit-btn">
+                <i class="fas fa-edit"></i> Modifier
+              </a>
+              <button class="action-btn delete-btn" data-id="{{ post.id }}">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="date">Date de la Visite</label>
-            <input type="date" id="date" name="date" required />
-          </div>
-          <div class="form-group">
-            <label for="rating">Note</label>
-            <select id="rating" name="rating" required>
-              <option value="">Sélectionnez une note</option>
-              <option value="1">1 étoile</option>
-              <option value="2">2 étoiles</option>
-              <option value="3">3 étoiles</option>
-              <option value="4">4 étoiles</option>
-              <option value="5">5 étoiles</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="style">Style de Cuisine</label>
-            <select id="style" name="style" required>
-              <option value="">Sélectionnez un style</option>
-              <option value="Asiatique">Asiatique</option>
-              <option value="Italien">Italien</option>
-              <option value="Mexicain">Mexicain</option>
-              <option value="Bistro">Bistro</option>
-              <option value="Américain">Américain</option>
-              <option value="Libano-Marocain">Libano-Marocain</option>
-              <option value="Iranien">Iranien</option>
-              <option value="Vietnamien">Vietnamien</option>
-              <option value="Indien">Indien</option>
-              <option value="Café-Bistro">Café-Bistro</option>
-              <option value="Microbrasserie">Microbrasserie</option>
-              <option value="Pub">Pub</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="price">Fourchette de Prix</label>
-            <select id="price" name="price" required>
-              <option value="">Sélectionnez une fourchette</option>
-              <option value="budget">Budget ($)</option>
-              <option value="medium">Moyen ($$)</option>
-              <option value="expensive">Luxe ($$$)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="description">Description Courte</label>
-            <textarea id="description" name="description" placeholder="Entrez une brève description" maxlength="150" required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="image">Image Principale</label>
-            <input type="file" id="image" name="image" accept="image/*" required />
-          </div>
-          <div class="form-group">
-            <label for="gallery">Galerie d'Images</label>
-            <input type="file" id="gallery" name="gallery" accept="image/*" multiple />
-          </div>
-          <div class="form-group">
-            <label for="content">Contenu de l'Article</label>
-            <textarea id="content" name="content" placeholder="Rédigez vos impressions sur le restaurant" required></textarea>
-          </div>
-          <button type="submit" class="submit-btn">Soumettre</button>
-        </form>
+          {% endfor %}
+        </div>
       </section>
-      <section class="recipe-list">
-        <div class="recipe-item">
-          <h3>Nom du Restaurant</h3>
-          <div class="recipe-actions">
-            <select class="status-select">
-              <option value="draft">Brouillon</option>
-              <option value="review">En review</option>
-              <option value="ready">Prêt</option>
-            </select>
-            <button class="edit-btn">Modifier</button>
-            <button class="delete-btn">Supprimer</button>
+
+      <!-- Section Workflow -->
+      <section id="workflow" class="content-section">
+        <h2>Workflow de Publication</h2>
+        <div class="workflow-columns">
+          <div class="column draft">
+            <h3><i class="fas fa-pencil-alt"></i> Brouillons</h3>
+            <div class="workflow-items" data-state="draft">
+              {% for post in site.posts %}
+                {% if post.status == 'draft' %}
+                <div class="workflow-item" draggable="true" data-id="{{ post.id }}">
+                  <img src="{{ post.image }}" alt="{{ post.title }}">
+                  <h4>{{ post.title }}</h4>
+                  <p>{{ post.description | truncate: 100 }}</p>
+                  <div class="workflow-meta">
+                    <span class="status-badge">Brouillon</span>
+                    <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
+                  </div>
+                  <div class="workflow-actions">
+                    <button class="edit-btn" onclick="editPost('{{ post.id }}')">
+                      <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button class="move-btn" onclick="showStateSelector(this)">
+                      <i class="fas fa-exchange-alt"></i> Changer l'état
+                    </button>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="column review">
+            <h3><i class="fas fa-spell-check"></i> En Review</h3>
+            <div class="workflow-items" data-state="review">
+              {% for post in site.posts %}
+                {% if post.status == 'review' %}
+                <div class="workflow-item" draggable="true" data-id="{{ post.id }}">
+                  <img src="{{ post.image }}" alt="{{ post.title }}">
+                  <h4>{{ post.title }}</h4>
+                  <p>{{ post.description | truncate: 100 }}</p>
+                  <div class="workflow-meta">
+                    <span class="status-badge">En Review</span>
+                    <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
+                  </div>
+                  <div class="workflow-actions">
+                    <button class="edit-btn" onclick="editPost('{{ post.id }}')">
+                      <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button class="check-btn" onclick="runChecks('{{ post.id }}')">
+                      <i class="fas fa-check-double"></i> Vérifier
+                    </button>
+                    <button class="move-btn" onclick="showStateSelector(this)">
+                      <i class="fas fa-exchange-alt"></i> Changer l'état
+                    </button>
+                  </div>
+                  <div class="check-results" style="display: none;">
+                    <div class="spelling-check">
+                      <h5><i class="fas fa-spell-check"></i> Correction orthographique</h5>
+                      <ul class="corrections-list"></ul>
+                    </div>
+                    <div class="layout-check">
+                      <h5><i class="fas fa-th-large"></i> Vérification de la mise en page</h5>
+                      <ul class="layout-list"></ul>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="column ready">
+            <h3><i class="fas fa-check-circle"></i> Prêt</h3>
+            <div class="workflow-items" data-state="ready">
+              {% for post in site.posts %}
+                {% if post.status == 'ready' %}
+                <div class="workflow-item" draggable="true" data-id="{{ post.id }}">
+                  <img src="{{ post.image }}" alt="{{ post.title }}">
+                  <h4>{{ post.title }}</h4>
+                  <p>{{ post.description | truncate: 100 }}</p>
+                  <div class="workflow-meta">
+                    <span class="status-badge">Prêt</span>
+                    <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
+                  </div>
+                  <div class="workflow-actions">
+                    <button class="edit-btn" onclick="editPost('{{ post.id }}')">
+                      <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button class="publish-btn" onclick="publishPost('{{ post.id }}')">
+                      <i class="fas fa-upload"></i> Publier
+                    </button>
+                    <button class="move-btn" onclick="showStateSelector(this)">
+                      <i class="fas fa-exchange-alt"></i> Changer l'état
+                    </button>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
           </div>
         </div>
-        <!-- Repeat for each recipe -->
+        <!-- Modal pour le changement d'état -->
+        <div id="stateModal" class="modal">
+          <div class="modal-content">
+            <h3>Changer l'état</h3>
+            <div class="state-options">
+              <button data-state="draft" class="state-option">
+                <i class="fas fa-pencil-alt"></i> Brouillon
+              </button>
+              <button data-state="review" class="state-option">
+                <i class="fas fa-spell-check"></i> En Review
+              </button>
+              <button data-state="ready" class="state-option">
+                <i class="fas fa-check-circle"></i> Prêt
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Médias -->
+      <section id="media" class="content-section">
+        <div class="section-header">
+          <h2>Gestion des Médias</h2>
+          <div class="media-filters">
+            <input type="text" id="media-search" placeholder="Rechercher une image..." class="media-search">
+            <select id="media-filter" class="media-filter">
+              <option value="all">Tous les médias</option>
+              <option value="restaurant">Photos de restaurants</option>
+              <option value="food">Photos de plats</option>
+              <option value="profile">Photos de profil</option>
+              <option value="other">Autres</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="upload-section" id="upload-zone">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <h3>Déposez vos images ici</h3>
+          <p>ou</p>
+          <button class="upload-btn">
+            <i class="fas fa-plus"></i> Sélectionner des fichiers
+          </button>
+          <p class="upload-info">Formats acceptés : JPG, PNG, WEBP - Max 5MB par image</p>
+          <div class="upload-progress" style="display: none;">
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+            <p class="progress-text">Téléversement en cours... <span class="progress-percent">0%</span></p>
+          </div>
+        </div>
+
+        <div class="media-stats">
+          <div class="stat-item">
+            <i class="fas fa-image"></i>
+            <span class="stat-value">{{ site.static_files | where: "image", true | size }}</span>
+            <span class="stat-label">Images totales</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-hdd"></i>
+            <span class="stat-value">{{ total_size | divided_by: 1048576.0 | round: 2 }}</span>
+            <span class="stat-label">Mo utilisés</span>
+          </div>
+        </div>
+
+        <div class="media-library">
+          {% for image in site.static_files %}
+            {% if image.path contains 'images' %}
+            <div class="media-item" data-name="{{ image.name | downcase }}" data-type="{{ image.extname | downcase }}">
+              <div class="media-preview">
+                <img src="{{ image.path }}" alt="{{ image.name }}" loading="lazy">
+                <div class="media-overlay">
+                  <button class="media-action view-btn" onclick="viewImage('{{ image.path }}')">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="media-action copy-btn" onclick="copyImagePath('{{ image.path }}')">
+                    <i class="fas fa-link"></i>
+                  </button>
+                  <button class="media-action edit-btn" onclick="editImage('{{ image.path }}')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="media-action delete-btn" onclick="deleteImage('{{ image.path }}')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="media-info">
+                <h4 title="{{ image.name }}">{{ image.name | truncate: 20 }}</h4>
+                <div class="media-meta">
+                  <span><i class="fas fa-file-image"></i> {{ image.extname | upcase }}</span>
+                  <span><i class="fas fa-weight-hanging"></i> {{ image.size | divided_by: 1024 | round }}Ko</span>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Modal de prévisualisation -->
+        <div id="imageModal" class="modal">
+          <div class="modal-content image-preview-modal">
+            <span class="close-modal">&times;</span>
+            <img id="modalImage" src="" alt="Prévisualisation">
+            <div class="image-info">
+              <h3 id="modalImageName"></h3>
+              <div class="image-details">
+                <p><strong>Dimensions:</strong> <span id="modalImageDimensions"></span></p>
+                <p><strong>Taille:</strong> <span id="modalImageSize"></span></p>
+                <p><strong>Type:</strong> <span id="modalImageType"></span></p>
+              </div>
+              <div class="image-actions">
+                <button onclick="downloadImage()" class="action-btn download-btn">
+                  <i class="fas fa-download"></i> Télécharger
+                </button>
+                <button onclick="copyImagePath(currentImagePath)" class="action-btn copy-btn">
+                  <i class="fas fa-link"></i> Copier le chemin
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section À venir -->
+      <section id="upcoming" class="content-section">
+        <h2>Restaurants à Venir</h2>
+        <div class="upcoming-section">
+          <!-- Éditeur -->
+          <div class="upcoming-editor">
+            <div class="upcoming-form">
+              <div class="form-group">
+                <label for="restaurant-name">Nom du restaurant</label>
+                <input type="text" id="restaurant-name" placeholder="Entrez le nom du restaurant">
+              </div>
+              <div class="form-group">
+                <label for="visit-date">Date de visite</label>
+                <input type="date" id="visit-date">
+              </div>
+              <div class="form-group">
+                <label for="location">Lieu</label>
+                <input type="text" id="location" placeholder="Adresse du restaurant">
+              </div>
+              <div class="form-group">
+                <label for="restaurant-image">Image du restaurant</label>
+                <input type="file" id="restaurant-image" accept="image/*">
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" rows="4" placeholder="Brève description du restaurant"></textarea>
+              </div>
+              <button class="add-upcoming-btn" id="save-restaurant">
+                <i class="fas fa-plus"></i> Ajouter le restaurant
+              </button>
+            </div>
+
+            <div class="upcoming-list" id="upcoming-list">
+              <!-- Les restaurants à venir seront ajoutés ici dynamiquement -->
+            </div>
+          </div>
+
+          <!-- Prévisualisation -->
+          <div class="upcoming-preview">
+            <div class="preview-header">
+              <h3>Prévisualisation</h3>
+              <div class="preview-toggle">
+                <button class="active" data-view="card">Vue carte</button>
+                <button data-view="full">Vue complète</button>
+              </div>
+            </div>
+            <div class="preview-content" id="preview-content">
+              <!-- Le contenu de la prévisualisation sera mis à jour dynamiquement -->
+            </div>
+          </div>
+        </div>
       </section>
     </main>
+
+    <script>
+      // Gestion des boutons de navigation
+      document.querySelectorAll('.admin-nav button').forEach(button => {
+        button.addEventListener('click', () => {
+          // Retirer la classe active de tous les boutons
+          document.querySelectorAll('.admin-nav button').forEach(btn => btn.classList.remove('active'));
+          // Ajouter la classe active au bouton cliqué
+          button.classList.add('active');
+          
+          // Masquer toutes les sections
+          document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+          // Afficher la section correspondante
+          document.getElementById(button.dataset.section).classList.add('active');
+        });
+      });
+
+      // Gestion de la suppression des restaurants
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const restaurantId = btn.dataset.id;
+          const restaurantName = btn.closest('.restaurant-item').querySelector('h3').textContent;
+          
+          if (confirm(`Êtes-vous sûr de vouloir supprimer le restaurant "${restaurantName}" ?`)) {
+            try {
+              // Ici, ajouter la logique pour supprimer le restaurant via l'API
+              const restaurantItem = btn.closest('.restaurant-item');
+              restaurantItem.style.opacity = '0';
+              await new Promise(resolve => setTimeout(resolve, 300));
+              restaurantItem.remove();
+            } catch (error) {
+              alert('Une erreur est survenue lors de la suppression du restaurant.');
+              console.error('Erreur:', error);
+            }
+          }
+        });
+      });
+
+      // Gestion du drag and drop pour le workflow
+      let draggedItem = null;
+      
+      document.querySelectorAll('.workflow-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          e.dataTransfer.setData('text/plain', item.dataset.id);
+          item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+          draggedItem.classList.remove('dragging');
+          draggedItem = null;
+        });
+      });
+
+      document.querySelectorAll('.workflow-items').forEach(container => {
+        container.addEventListener('dragenter', (e) => {
+          e.preventDefault();
+          container.classList.add('drag-over');
+        });
+
+        container.addEventListener('dragover', (e) => {
+          e.preventDefault();
+        });
+
+        container.addEventListener('dragleave', () => {
+          container.classList.remove('drag-over');
+        });
+
+        container.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          container.classList.remove('drag-over');
+          const postId = e.dataTransfer.getData('text/plain');
+          const newState = container.dataset.state;
+          
+          try {
+            // Simuler l'appel API pour changer l'état
+            await changePostState(postId, newState);
+            container.appendChild(draggedItem);
+            
+            // Si on passe en review, lancer les vérifications
+            if (newState === 'review') {
+              runChecks(postId);
+            }
+            
+            // Si on passe en ready, vérifier si le post était déjà publié
+            if (newState === 'ready') {
+              const publishBtn = draggedItem.querySelector('.publish-btn');
+              if (publishBtn) {
+                publishBtn.style.display = 'block';
+              }
+            }
+          } catch (error) {
+            console.error('Erreur lors du changement d\'état:', error);
+            alert('Une erreur est survenue lors du changement d\'état.');
+          }
+        });
+      });
+
+      // Fonction pour changer l'état d'un post
+      async function changePostState(postId, newState) {
+        // Simuler un appel API
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            console.log(`État changé pour ${postId}: ${newState}`);
+            resolve();
+          }, 500);
+        });
+      }
+
+      // Fonction pour lancer les vérifications
+      async function runChecks(postId) {
+        const item = document.querySelector(`[data-id="${postId}"]`);
+        const checkResults = item.querySelector('.check-results');
+        const spellingList = checkResults.querySelector('.corrections-list');
+        const layoutList = checkResults.querySelector('.layout-list');
+        
+        // Simuler les vérifications
+        checkResults.style.display = 'block';
+        spellingList.innerHTML = `
+          <li>Vérification de la grammaire en cours...</li>
+          <li>Vérification de l'orthographe en cours...</li>
+        `;
+        layoutList.innerHTML = `
+          <li>Vérification de la structure HTML...</li>
+          <li>Vérification de la mise en page...</li>
+        `;
+        
+        // Simuler un délai pour les vérifications
+        setTimeout(() => {
+          spellingList.innerHTML = `
+            <li class="success"><i class="fas fa-check"></i> Grammaire : OK</li>
+            <li class="warning"><i class="fas fa-exclamation-triangle"></i> 2 fautes d'orthographe trouvées</li>
+          `;
+          layoutList.innerHTML = `
+            <li class="success"><i class="fas fa-check"></i> Structure HTML valide</li>
+            <li class="success"><i class="fas fa-check"></i> Mise en page conforme</li>
+          `;
+        }, 2000);
+      }
+
+      // Fonction pour publier un post
+      async function publishPost(postId) {
+        try {
+          // Simuler l'appel API pour publier
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Simuler le commit et push vers GitHub
+          console.log(`Publication du post ${postId} sur GitHub...`);
+          
+          alert('Post publié avec succès !');
+          
+          // Rafraîchir la page après publication
+          location.reload();
+        } catch (error) {
+          console.error('Erreur lors de la publication:', error);
+          alert('Une erreur est survenue lors de la publication.');
+        }
+      }
+
+      // Fonction pour éditer un post
+      function editPost(postId) {
+        window.location.href = `/admin/edit-restaurant.html?id=${postId}`;
+      }
+
+      // Gestion du modal de changement d'état
+      const modal = document.getElementById('stateModal');
+      let currentItem = null;
+
+      function showStateSelector(button) {
+        currentItem = button.closest('.workflow-item');
+        modal.style.display = 'block';
+      }
+
+      document.querySelectorAll('.state-option').forEach(option => {
+        option.addEventListener('click', async () => {
+          const newState = option.dataset.state;
+          const postId = currentItem.dataset.id;
+          
+          try {
+            await changePostState(postId, newState);
+            const targetContainer = document.querySelector(`.workflow-items[data-state="${newState}"]`);
+            targetContainer.appendChild(currentItem);
+            
+            if (newState === 'review') {
+              runChecks(postId);
+            }
+            
+            modal.style.display = 'none';
+          } catch (error) {
+            console.error('Erreur lors du changement d\'état:', error);
+            alert('Une erreur est survenue lors du changement d\'état.');
+          }
+        });
+      });
+
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+
+      // Variables globales pour la gestion des médias
+      let currentImagePath = '';
+      const imageModal = document.getElementById('imageModal');
+      const modalImage = document.getElementById('modalImage');
+      const modalImageName = document.getElementById('modalImageName');
+      const modalImageDimensions = document.getElementById('modalImageDimensions');
+      const modalImageSize = document.getElementById('modalImageSize');
+      const modalImageType = document.getElementById('modalImageType');
+
+      // Gestion de la recherche et du filtrage
+      const mediaSearch = document.getElementById('media-search');
+      const mediaFilter = document.getElementById('media-filter');
+      const mediaItems = document.querySelectorAll('.media-item');
+
+      function filterMediaItems() {
+        const searchTerm = mediaSearch.value.toLowerCase();
+        const filterType = mediaFilter.value;
+
+        mediaItems.forEach(item => {
+          const name = item.dataset.name;
+          const type = item.dataset.type;
+          const matchesSearch = name.includes(searchTerm);
+          const matchesFilter = filterType === 'all' || type === filterType;
+
+          item.style.display = matchesSearch && matchesFilter ? 'block' : 'none';
+        });
+      }
+
+      mediaSearch.addEventListener('input', filterMediaItems);
+      mediaFilter.addEventListener('change', filterMediaItems);
+
+      // Gestion du drag & drop
+      const uploadZone = document.getElementById('upload-zone');
+      const uploadBtn = document.querySelector('.upload-btn');
+      const progressBar = document.querySelector('.progress-fill');
+      const progressText = document.querySelector('.progress-percent');
+      const uploadProgress = document.querySelector('.upload-progress');
+
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, highlight, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, unhighlight, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      function highlight(e) {
+        uploadZone.classList.add('drag-over');
+      }
+
+      function unhighlight(e) {
+        uploadZone.classList.remove('drag-over');
+      }
+
+      uploadZone.addEventListener('drop', handleDrop, false);
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+      }
+
+      uploadBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = 'image/*';
+        input.onchange = (e) => handleFiles(e.target.files);
+        input.click();
+      });
+
+      function handleFiles(files) {
+        uploadProgress.style.display = 'block';
+        [...files].forEach((file, index) => {
+          if (file.type.startsWith('image/')) {
+            uploadFile(file, index, files.length);
+          }
+        });
+      }
+
+      function uploadFile(file, index, total) {
+        const progress = (index + 1) / total * 100;
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `${Math.round(progress)}%`;
+
+        // Simuler un upload
+        setTimeout(() => {
+          if (index === total - 1) {
+            uploadProgress.style.display = 'none';
+            progressBar.style.width = '0%';
+            alert('Images téléversées avec succès !');
+            location.reload();
+          }
+        }, 1000);
+      }
+
+      // Gestion des actions sur les images
+      function viewImage(path) {
+        currentImagePath = path;
+        modalImage.src = path;
+        modalImageName.textContent = path.split('/').pop();
+        
+        // Simuler le chargement des détails de l'image
+        const img = new Image();
+        img.onload = function() {
+          modalImageDimensions.textContent = `${this.width} x ${this.height}px`;
+        };
+        img.src = path;
+        
+        const size = Math.round(Math.random() * 1000) + 'Ko';
+        modalImageSize.textContent = size;
+        modalImageType.textContent = path.split('.').pop().toUpperCase();
+        
+        imageModal.style.display = 'block';
+      }
+
+      function copyImagePath(path) {
+        navigator.clipboard.writeText(path).then(() => {
+          alert('Chemin de l\'image copié !');
+        });
+      }
+
+      function editImage(path) {
+        // Implémenter l'édition d'image
+        console.log('Édition de l\'image:', path);
+      }
+
+      function deleteImage(path) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
+          // Implémenter la suppression d'image
+          console.log('Suppression de l\'image:', path);
+        }
+      }
+
+      function downloadImage() {
+        const link = document.createElement('a');
+        link.href = currentImagePath;
+        link.download = currentImagePath.split('/').pop();
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Fermeture du modal
+      document.querySelector('.close-modal').addEventListener('click', () => {
+        imageModal.style.display = 'none';
+      });
+
+      window.addEventListener('click', (e) => {
+        if (e.target === imageModal) {
+          imageModal.style.display = 'none';
+        }
+      });
+
+      // Gestion des restaurants à venir
+      const upcomingList = document.getElementById('upcoming-list');
+      const saveRestaurantBtn = document.getElementById('save-restaurant');
+      const restaurantForm = document.querySelector('.upcoming-form');
+
+      // Fonction pour créer un nouvel élément de restaurant
+      function createUpcomingItem(restaurant) {
+        const item = document.createElement('div');
+        item.className = 'upcoming-item';
+        item.draggable = true;
+        item.dataset.id = restaurant.id;
+
+        const imageUrl = restaurant.image ? URL.createObjectURL(restaurant.image) : '/images/restaurant-test.jpg';
+
+        item.innerHTML = `
+          <div class="upcoming-info">
+            <img src="${imageUrl}" alt="${restaurant.name}" class="upcoming-image">
+            <div class="upcoming-details">
+              <h3>${restaurant.name}</h3>
+              <div class="upcoming-meta">
+                <span><i class="fas fa-calendar"></i> ${restaurant.date}</span>
+                <span><i class="fas fa-map-marker-alt"></i> ${restaurant.location}</span>
+              </div>
+            </div>
+          </div>
+          <div class="upcoming-actions">
+            <button class="edit-upcoming-btn" onclick="editUpcomingRestaurant('${restaurant.id}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="delete-upcoming-btn" onclick="deleteUpcomingRestaurant('${restaurant.id}')">
+              <i class="fas fa-trash"></i>
+            </button>
+            <button class="move-upcoming-btn">
+              <i class="fas fa-arrows-alt"></i>
+            </button>
+          </div>
+        `;
+
+        return item;
+      }
+
+      // Gestion de l'ajout d'un nouveau restaurant
+      saveRestaurantBtn.addEventListener('click', () => {
+        const name = document.getElementById('restaurant-name').value;
+        const date = document.getElementById('visit-date').value;
+        const location = document.getElementById('location').value;
+        const image = document.getElementById('restaurant-image').files[0];
+        const description = document.getElementById('description').value;
+
+        if (!name || !date || !location) {
+          alert('Veuillez remplir tous les champs obligatoires');
+          return;
+        }
+
+        const restaurant = {
+          id: Date.now().toString(),
+          name,
+          date,
+          location,
+          image,
+          description
+        };
+
+        const item = createUpcomingItem(restaurant);
+        upcomingList.appendChild(item);
+        updatePreview();
+
+        // Réinitialiser le formulaire
+        restaurantForm.reset();
+      });
+
+      // Fonction pour mettre à jour la prévisualisation
+      function updatePreview() {
+        const previewContent = document.getElementById('preview-content');
+        const viewType = document.querySelector('.preview-toggle button.active').dataset.view;
+        const items = Array.from(upcomingList.children);
+
+        if (viewType === 'card') {
+          previewContent.innerHTML = items.map(item => {
+            const name = item.querySelector('h3').textContent;
+            const date = item.querySelector('.upcoming-meta span:first-child').textContent;
+            const location = item.querySelector('.upcoming-meta span:last-child').textContent;
+            const image = item.querySelector('img').src;
+
+            return `
+              <div class="upcoming-card">
+                <img src="${image}" alt="${name}">
+                <h3>${name}</h3>
+                <div class="upcoming-meta">
+                  <span>${date}</span>
+                  <span>${location}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          previewContent.innerHTML = items.map(item => {
+            const name = item.querySelector('h3').textContent;
+            const date = item.querySelector('.upcoming-meta span:first-child').textContent;
+            const location = item.querySelector('.upcoming-meta span:last-child').textContent;
+            const image = item.querySelector('img').src;
+            const description = item.dataset.description || '';
+
+            return `
+              <div class="upcoming-full">
+                <img src="${image}" alt="${name}">
+                <div class="upcoming-content">
+                  <h3>${name}</h3>
+                  <div class="upcoming-meta">
+                    <span>${date}</span>
+                    <span>${location}</span>
+                  </div>
+                  <p>${description}</p>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Gestion du changement de vue
+      document.querySelectorAll('.preview-toggle button').forEach(button => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          updatePreview();
+        });
+      });
+
+      // Gestion du drag & drop pour la réorganisation
+      let draggedUpcomingItem = null;
+
+      upcomingList.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('upcoming-item')) {
+          draggedUpcomingItem = e.target;
+          e.target.classList.add('dragging');
+        }
+      });
+
+      upcomingList.addEventListener('dragend', (e) => {
+        if (e.target.classList.contains('upcoming-item')) {
+          e.target.classList.remove('dragging');
+          draggedUpcomingItem = null;
+        }
+      });
+
+      upcomingList.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!draggedUpcomingItem) return;
+
+        const afterElement = getDragAfterElement(upcomingList, e.clientY);
+        const draggable = document.querySelector('.dragging');
+
+        if (afterElement) {
+          upcomingList.insertBefore(draggable, afterElement);
+        } else {
+          upcomingList.appendChild(draggable);
+        }
+
+        updatePreview();
+      });
+
+      function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.upcoming-item:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else {
+            return closest;
+          }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+      }
+
+      // Fonctions pour la gestion des actions (modifier, supprimer)
+      function editUpcomingRestaurant(id) {
+        const item = document.querySelector(`.upcoming-item[data-id="${id}"]`);
+        if (!item) return;
+
+        const name = item.querySelector('h3').textContent;
+        const date = item.querySelector('.upcoming-meta span:first-child').textContent.replace('📅 ', '');
+        const location = item.querySelector('.upcoming-meta span:last-child').textContent.replace('📍 ', '');
+        const description = item.dataset.description || '';
+
+        // Remplir le formulaire avec les données existantes
+        document.getElementById('restaurant-name').value = name;
+        document.getElementById('visit-date').value = date;
+        document.getElementById('location').value = location;
+        document.getElementById('description').value = description;
+
+        // Supprimer l'ancien élément
+        item.remove();
+        updatePreview();
+      }
+
+      function deleteUpcomingRestaurant(id) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) {
+          const item = document.querySelector(`.upcoming-item[data-id="${id}"]`);
+          if (item) {
+            item.remove();
+            updatePreview();
+          }
+        }
+      }
+    </script>
   </body>
 </html>
