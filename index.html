@@ -359,28 +359,37 @@ title: Accueil
     max-width: 100%;
   }
   
+  /* Masquer les boutons de vue sur mobile */
   .view-buttons {
-    margin: 1rem 0;
-    justify-content: center;
+    display: none !important;
   }
   
   .search-input {
     padding: 0.9rem 1rem 0.9rem 2.8rem;
   }
   
-  .view-btn {
-    width: 40px;
-    height: 40px;
+  /* Forcer la vue en pastilles sur mobile */
+  .post-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
   }
   
-  .restaurant-grid.list-view .post-card {
-    flex-direction: column;
-    height: auto;
+  .post-card {
+    height: auto !important;
   }
-  
-  .restaurant-grid.list-view .post-card .post-image {
-    width: 100%;
-    height: 200px;
+
+  .post-card .post-image {
+    width: 100% !important;
+    height: 200px !important;
+  }
+
+  .post-card .content {
+    padding: 1.2rem !important;
+  }
+
+  .post-card .post-link {
+    flex-direction: column !important;
   }
 }
 
