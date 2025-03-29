@@ -1339,6 +1339,11 @@
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '';
           
+          // Récupérer les valeurs des filtres actuels
+          const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
+          const sortBy = document.getElementById('sort-by').value;
+          const restaurantItems = [];
+          
           for (const post of posts) {
             if (post.name.endsWith('.markdown')) {
               try {
@@ -1354,6 +1359,13 @@
                     metadata[match[1]] = match[2];
                   }
                 });
+
+                // Vérifier si le restaurant correspond aux critères de recherche
+                const title = metadata.title.toLowerCase();
+                const style = metadata.style.toLowerCase();
+                if (searchTerm && !(title.includes(searchTerm) || style.includes(searchTerm))) {
+                  continue; // Passer au restaurant suivant si ne correspond pas à la recherche
+                }
 
                 const item = document.createElement('div');
                 item.className = 'restaurant-item';
@@ -1378,7 +1390,33 @@
                     </button>
                   </div>
                 `;
-                restaurantList.appendChild(item);
+                
+                // Ajouter les données nécessaires pour le tri
+                item.dataset.title = metadata.title;
+                item.dataset.date = metadata.date;
+                
+                restaurantItems.push(item);
+                
+                // Trier et ajouter les éléments au fur et à mesure
+                restaurantItems.sort((a, b) => {
+                  switch(sortBy) {
+                    case 'date-desc':
+                      return new Date(b.dataset.date) - new Date(a.dataset.date);
+                    case 'date-asc':
+                      return new Date(a.dataset.date) - new Date(b.dataset.date);
+                    case 'name-asc':
+                      return a.dataset.title.localeCompare(b.dataset.title, 'fr');
+                    case 'name-desc':
+                      return b.dataset.title.localeCompare(a.dataset.title, 'fr');
+                    default:
+                      return 0;
+                  }
+                });
+                
+                // Mettre à jour la liste avec les éléments triés
+                restaurantList.innerHTML = '';
+                restaurantItems.forEach(item => restaurantList.appendChild(item));
+                
               } catch (error) {
                 console.error('Erreur lors du chargement du contenu du restaurant:', error);
               }
@@ -1391,56 +1429,72 @@
         }
       }
 
-      // Fonction pour filtrer et trier les restaurants
+      // Optimiser la fonction de filtrage pour qu'elle soit plus réactive
       function filterAndSortRestaurants() {
         const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
         const sortBy = document.getElementById('sort-by').value;
         const restaurantItems = Array.from(document.querySelectorAll('.restaurant-item'));
-
-        // Filtrer
-        restaurantItems.forEach(item => {
-          const title = item.querySelector('h3').textContent.toLowerCase();
-          const cuisine = item.querySelector('.restaurant-meta span').textContent.toLowerCase();
-          item.style.display = (title.includes(searchTerm) || cuisine.includes(searchTerm)) ? 'flex' : 'none';
-        });
-
-        // Trier
-        const sortedItems = restaurantItems.sort((a, b) => {
-          const titleA = a.querySelector('h3').textContent;
-          const titleB = b.querySelector('h3').textContent;
-          const dateA = new Date(a.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
-          const dateB = new Date(b.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
-
-          switch(sortBy) {
-            case 'date-desc':
-              return dateB - dateA;
-            case 'date-asc':
-              return dateA - dateB;
-            case 'name-asc':
-              return titleA.localeCompare(titleB, 'fr');
-            case 'name-desc':
-              return titleB.localeCompare(titleA, 'fr');
-            default:
-              return 0;
-          }
-        });
-
         const restaurantList = document.getElementById('restaurant-list');
-        restaurantList.innerHTML = '';
-        sortedItems.forEach(item => restaurantList.appendChild(item));
+
+        // Créer un fragment pour optimiser les manipulations DOM
+        const fragment = document.createDocumentFragment();
+        
+        // Filtrer et trier en une seule passe
+        restaurantItems
+          .filter(item => {
+            const title = item.querySelector('h3').textContent.toLowerCase();
+            const style = item.querySelector('.restaurant-meta span:nth-child(2)').textContent.toLowerCase();
+            return title.includes(searchTerm) || style.includes(searchTerm);
+          })
+          .sort((a, b) => {
+            const titleA = a.querySelector('h3').textContent;
+            const titleB = b.querySelector('h3').textContent;
+            const dateA = new Date(a.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
+            const dateB = new Date(b.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
+
+            switch(sortBy) {
+              case 'date-desc':
+                return dateB - dateA;
+              case 'date-asc':
+                return dateA - dateB;
+              case 'name-asc':
+                return titleA.localeCompare(titleB, 'fr');
+              case 'name-desc':
+                return titleB.localeCompare(titleA, 'fr');
+              default:
+                return 0;
+            }
+          })
+          .forEach(item => fragment.appendChild(item));
+
+        // Mettre à jour la liste en une seule opération
+        requestAnimationFrame(() => {
+          restaurantList.innerHTML = '';
+          restaurantList.appendChild(fragment);
+        });
       }
 
-      // Ajouter les écouteurs d'événements pour les filtres
-      document.getElementById('restaurant-search').addEventListener('input', filterAndSortRestaurants);
+      // Optimiser les écouteurs d'événements avec debounce pour la recherche
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      // Ajouter les écouteurs d'événements optimisés
+      document.getElementById('restaurant-search').addEventListener('input', 
+        debounce(filterAndSortRestaurants, 300)
+      );
       document.getElementById('sort-by').addEventListener('change', filterAndSortRestaurants);
 
       // Charger les restaurants au chargement de la page
-      document.addEventListener('DOMContentLoaded', () => {
-        loadRestaurants().then(() => {
-          // Appliquer le tri par défaut après le chargement
-          filterAndSortRestaurants();
-        });
-      });
+      document.addEventListener('DOMContentLoaded', loadRestaurants);
 
       // Gestion des boutons de navigation
       document.querySelectorAll('.admin-nav button').forEach(button => {
