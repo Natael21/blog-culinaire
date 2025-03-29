@@ -1293,8 +1293,30 @@
           button.classList.add('active');
           
           document.querySelectorAll('.admin-content-section').forEach(section => section.classList.remove('active'));
-          document.getElementById(button.dataset.section).classList.add('active');
+          const targetSection = document.getElementById(button.dataset.section);
+          targetSection.classList.add('active');
+          
+          // Charger les données appropriées lors du changement d'onglet
+          if (button.dataset.section === 'upcoming') {
+            loadUpcomingRestaurants();
+          } else if (button.dataset.section === 'restaurants') {
+            loadRestaurants();
+          }
         });
+      });
+
+      // Charger les données initiales
+      document.addEventListener('DOMContentLoaded', () => {
+        // Charger les restaurants
+        loadRestaurants().then(() => {
+          filterAndSortRestaurants();
+        });
+        
+        // Charger les restaurants à venir si c'est la section active
+        const activeSection = document.querySelector('.admin-content-section.active');
+        if (activeSection && activeSection.id === 'upcoming') {
+          loadUpcomingRestaurants();
+        }
       });
 
       // Fonction de suppression
@@ -1379,14 +1401,18 @@
                 if (!contentResponse.ok) continue;
                 
                 const content = await contentResponse.text();
-                const frontmatter = content.split('---')[1];
-                if (!frontmatter) continue;
+                // Extraire le frontmatter entre les marqueurs ---
+                const matches = content.match(/^---([\s\S]*?)---/);
+                if (!matches || !matches[1]) continue;
 
+                const frontmatter = matches[1].trim();
                 const metadata = {};
+                
+                // Parser chaque ligne du frontmatter
                 frontmatter.split('\n').forEach(line => {
-                  const match = line.match(/^(\w+):\s*(.+)$/);
-                  if (match) {
-                    metadata[match[1]] = match[2].trim();
+                  const [key, ...valueParts] = line.split(':').map(part => part.trim());
+                  if (key && valueParts.length > 0) {
+                    metadata[key] = valueParts.join(':').trim();
                   }
                 });
 
@@ -1407,6 +1433,9 @@
 
           localUpcomingRestaurants = restaurants;
           renderUpcomingRestaurants();
+          
+          // Log pour le débogage
+          console.log('Restaurants chargés:', restaurants);
         } catch (error) {
           console.error('Erreur lors du chargement des restaurants:', error);
           document.getElementById('upcoming-list').innerHTML = 
