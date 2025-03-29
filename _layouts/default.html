@@ -120,9 +120,23 @@
     <script>
       // Chargement différé du JavaScript non critique
       document.addEventListener('DOMContentLoaded', function() {
+        const loginButton = document.getElementById('login-button');
+        
+        // Fonction pour gérer le clic sur le bouton
+        function handleLoginClick(e) {
+          e.preventDefault();
+          if (window.netlifyIdentity) {
+            window.netlifyIdentity.open();
+          } else {
+            window.location.href = '/admin/';
+          }
+        }
+
+        // Initialisation du bouton
+        loginButton.addEventListener('click', handleLoginClick);
+
+        // Gestion des événements Netlify Identity
         if (window.netlifyIdentity) {
-          const loginButton = document.getElementById('login-button');
-          
           window.netlifyIdentity.on("init", user => {
             if (user) {
               loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
@@ -132,10 +146,7 @@
               };
             } else {
               loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
-              loginButton.onclick = () => {
-                window.netlifyIdentity.open();
-                return false;
-              };
+              loginButton.onclick = handleLoginClick;
             }
           });
 
@@ -149,10 +160,7 @@
 
           window.netlifyIdentity.on("logout", () => {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
-            loginButton.onclick = () => {
-              window.netlifyIdentity.open();
-              return false;
-            };
+            loginButton.onclick = handleLoginClick;
             window.location.href = "/";
           });
         }
