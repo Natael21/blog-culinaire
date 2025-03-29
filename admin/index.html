@@ -1536,30 +1536,57 @@
           new Sortable(upcomingList, {
             animation: 150,
             handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
             onEnd: async function(evt) {
-              const items = Array.from(upcomingList.children);
-              const updates = items.map((item, index) => ({
-                path: item.dataset.path,
-                order: index + 1
-              }));
-
               try {
-                const token = netlifyIdentity.currentUser().token.access_token;
+                const user = netlifyIdentity.currentUser();
+                if (!user || !user.token || !user.token.access_token) {
+                  Swal.fire({
+                    title: 'Erreur d\'authentification',
+                    text: 'Veuillez vous connecter pour effectuer cette action.',
+                    icon: 'error'
+                  });
+                  await loadUpcomingRestaurants(); // Recharger la liste pour annuler le changement
+                  return;
+                }
+
+                const token = user.token.access_token;
+                const items = Array.from(upcomingList.children);
+                const updates = items.map((item, index) => ({
+                  path: item.dataset.path,
+                  order: index + 1
+                }));
+
+                // Afficher un indicateur de chargement
+                Swal.fire({
+                  title: 'Mise à jour en cours...',
+                  text: 'Veuillez patienter pendant la mise à jour de l\'ordre des restaurants.',
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                  showConfirmButton: false,
+                  willOpen: () => {
+                    Swal.showLoading();
+                  }
+                });
+
                 for (const update of updates) {
                   const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
                     method: 'GET',
                     headers: {
-                      'Authorization': `token ${token}`
+                      'Authorization': `token ${token}`,
+                      'Accept': 'application/vnd.github.v3+json'
                     }
                   });
 
-                  if (!response.ok) throw new Error('Erreur lors de la récupération du fichier');
+                  if (!response.ok) {
+                    throw new Error(`Erreur lors de la récupération du fichier: ${response.statusText}`);
+                  }
                   
                   const file = await response.json();
                   const content = atob(file.content);
-                  const frontmatter = content.split('---')[1];
                   const newContent = content.replace(
-                    /order: \d+/,
+                    /order:\s*\d+/,
                     `order: ${update.order}`
                   );
 
@@ -1567,7 +1594,8 @@
                     method: 'PUT',
                     headers: {
                       'Authorization': `token ${token}`,
-                      'Content-Type': 'application/json'
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify({
                       message: `Mise à jour de l'ordre: ${update.order}`,
@@ -1576,13 +1604,27 @@
                     })
                   });
 
-                  if (!updateResponse.ok) throw new Error('Erreur lors de la mise à jour du fichier');
+                  if (!updateResponse.ok) {
+                    throw new Error(`Erreur lors de la mise à jour du fichier: ${updateResponse.statusText}`);
+                  }
                 }
 
-                Swal.fire('Succès', 'L\'ordre des restaurants a été mis à jour', 'success');
+                await loadUpcomingRestaurants(); // Recharger la liste pour refléter les changements
+                Swal.fire({
+                  title: 'Succès',
+                  text: 'L\'ordre des restaurants a été mis à jour',
+                  icon: 'success',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
               } catch (error) {
                 console.error('Erreur lors de la mise à jour de l\'ordre:', error);
-                Swal.fire('Erreur', 'Une erreur est survenue lors de la mise à jour de l\'ordre', 'error');
+                Swal.fire({
+                  title: 'Erreur',
+                  text: 'Une erreur est survenue lors de la mise à jour de l\'ordre. Veuillez réessayer.',
+                  icon: 'error'
+                });
+                await loadUpcomingRestaurants(); // Recharger la liste pour revenir à l'état précédent
               }
             }
           });
