@@ -19,8 +19,8 @@ title: Accueil
           <input type="text" id="title-search" class="search-input" placeholder="Rechercher un restaurant...">
         </div>
         <div class="view-buttons">
-          <button class="view-btn active" data-view="grid" title="Vue en grille">
-            <i class="fas fa-th"></i>
+          <button class="view-btn active" data-view="grid" title="Vue en pastilles">
+            <i class="fas fa-grip-vertical"></i>
           </button>
           <button class="view-btn" data-view="list" title="Vue en liste">
             <i class="fas fa-list"></i>
@@ -418,6 +418,86 @@ title: Accueil
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
 }
+
+/* Modification du style par défaut pour la vue en liste */
+.post-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-card {
+  display: flex;
+  flex-direction: row;
+  height: 150px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post-card .post-image {
+  width: 200px;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.post-card .content {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.post-card h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.post-card .description {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Style pour la vue en pastilles */
+.post-grid.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.post-grid.grid-view .post-card {
+  flex-direction: column;
+  height: auto;
+}
+
+.post-grid.grid-view .post-card .post-image {
+  width: 100%;
+  height: 200px;
+}
+
+.post-grid.grid-view .post-card .content {
+  padding: 1.5rem;
+}
+
+.post-grid.grid-view .post-card h2 {
+  font-size: 1.4rem;
+}
+
+@media (max-width: 768px) {
+  .post-card {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .post-card .post-image {
+    width: 100%;
+    height: 200px;
+  }
+}
 </style>
 
 <script>
@@ -495,26 +575,25 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Ajout du code JavaScript pour la gestion des vues
+// Modification de la gestion des vues
 document.addEventListener('DOMContentLoaded', function() {
   const viewButtons = document.querySelectorAll('.view-btn');
   const restaurantGrid = document.getElementById('restaurant-grid');
   
+  // Appliquer la vue en pastilles par défaut
+  restaurantGrid.classList.add('grid-view');
+  
   viewButtons.forEach(button => {
     button.addEventListener('click', () => {
-      // Retirer la classe active de tous les boutons
       viewButtons.forEach(btn => btn.classList.remove('active'));
-      // Ajouter la classe active au bouton cliqué
       button.classList.add('active');
       
-      // Gérer les différentes vues
       const view = button.dataset.view;
       if (view === 'grid') {
-        restaurantGrid.classList.remove('list-view');
+        restaurantGrid.classList.add('grid-view');
       } else if (view === 'list') {
-        restaurantGrid.classList.add('list-view');
+        restaurantGrid.classList.remove('grid-view');
       } else if (view === 'map') {
-        // La fonctionnalité de carte sera implémentée plus tard
         console.log('Vue carte à implémenter');
       }
     });
