@@ -1023,6 +1023,110 @@
           height: 200px;
         }
       }
+
+      .custom-file-upload {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #3498db;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+      .custom-file-upload:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+      }
+      .upload-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+      /* Styles pour les formulaires */
+      .form-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
+      
+      .form-input:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+      
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      .image-preview {
+        margin-top: 1rem;
+        position: relative;
+        width: 200px;
+        height: 200px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      
+      .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      .remove-image {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #e74c3c;
+        transition: all 0.3s ease;
+      }
+      
+      .remove-image:hover {
+        background: white;
+        transform: scale(1.1);
+      }
+      
+      .preview-toggle button {
+        padding: 8px 16px;
+        border: 2px solid #3498db;
+        background: white;
+        color: #3498db;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .preview-toggle button.active {
+        background: #3498db;
+        color: white;
+      }
+      
+      .preview-toggle button:hover {
+        transform: translateY(-2px);
+      }
     </style>
   </head>
   <body>
@@ -1054,33 +1158,34 @@
       <section id="restaurants" class="content-section active">
         <div class="section-header">
           <h2>Gestion des Restaurants</h2>
-          <a href="/admin/edit-restaurant.html" class="add-restaurant-btn">
+          <button class="add-restaurant-btn" onclick="window.location.href='/admin/edit-restaurant.html'">
             <i class="fas fa-plus"></i> Créer un nouveau restaurant
-          </a>
+          </button>
         </div>
         <div class="restaurant-list">
-          {% for post in site.posts %}
-          <div class="restaurant-item">
-            <div class="restaurant-info">
-              <img src="{{ post.image }}" alt="{{ post.title }}" class="restaurant-image">
-              <div class="restaurant-details">
-                <h3>{{ post.title }}</h3>
-                <div class="restaurant-meta">
-                  <span><i class="fas fa-star"></i> {{ post.rating }}</span>
-                  <span><i class="fas fa-utensils"></i> {{ post.cuisine }}</span>
-                  <span><i class="fas fa-dollar-sign"></i> {{ post.price }}</span>
+          {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
+          {% for post in sorted_posts %}
+            <div class="restaurant-item">
+              <div class="restaurant-info">
+                <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}" class="restaurant-image">
+                <div class="restaurant-details">
+                  <h3>{{ post.title }}</h3>
+                  <div class="restaurant-meta">
+                    <span><i class="fas fa-star"></i> {{ post.rating | default: '0' }}</span>
+                    <span><i class="fas fa-utensils"></i> {{ post.cuisine | default: 'Non spécifié' }}</span>
+                    <span><i class="fas fa-dollar-sign"></i> {{ post.price | default: '$' }}</span>
+                  </div>
                 </div>
               </div>
+              <div class="restaurant-actions">
+                <button class="action-btn edit-btn" onclick="window.location.href='/admin/edit-restaurant.html?id={{ post.id }}'">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+                <button class="action-btn delete-btn" data-id="{{ post.id }}" onclick="deleteRestaurant('{{ post.id }}')">
+                  <i class="fas fa-trash"></i> Supprimer
+                </button>
+              </div>
             </div>
-            <div class="restaurant-actions">
-              <a href="/admin/edit-restaurant.html?id={{ post.id }}" class="action-btn edit-btn">
-                <i class="fas fa-edit"></i> Modifier
-              </a>
-              <button class="action-btn delete-btn" data-id="{{ post.id }}">
-                <i class="fas fa-trash"></i> Supprimer
-              </button>
-            </div>
-          </div>
           {% endfor %}
         </div>
       </section>
@@ -1089,13 +1194,14 @@
       <section id="workflow" class="content-section">
         <h2>Workflow de Publication</h2>
         <div class="workflow-columns">
+          <!-- Colonne Brouillons -->
           <div class="column draft">
             <h3><i class="fas fa-pencil-alt"></i> Brouillons</h3>
             <div class="workflow-items" data-state="draft">
-              {% for post in site.posts %}
-                {% if post.status == 'draft' %}
-                <div class="workflow-item" draggable="true" data-id="{{ post.id }}">
-                  <img src="{{ post.image }}" alt="{{ post.title }}">
+              {% assign draft_posts = site.posts | where: "status", "draft" %}
+              {% for post in draft_posts %}
+                <div class="workflow-item" draggable="true" data-id="{{ post.path }}">
+                  <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}">
                   <h4>{{ post.title }}</h4>
                   <p>{{ post.description | truncate: 100 }}</p>
                   <div class="workflow-meta">
@@ -1103,7 +1209,7 @@
                     <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
                   </div>
                   <div class="workflow-actions">
-                    <button class="edit-btn" onclick="editPost('{{ post.id }}')">
+                    <button class="edit-btn" onclick="editPost('{{ post.path }}')">
                       <i class="fas fa-edit"></i> Modifier
                     </button>
                     <button class="move-btn" onclick="showStateSelector(this)">
@@ -1111,17 +1217,18 @@
                     </button>
                   </div>
                 </div>
-                {% endif %}
               {% endfor %}
             </div>
           </div>
+
+          <!-- Colonne Review -->
           <div class="column review">
             <h3><i class="fas fa-spell-check"></i> En Review</h3>
             <div class="workflow-items" data-state="review">
-              {% for post in site.posts %}
-                {% if post.status == 'review' %}
-                <div class="workflow-item" draggable="true" data-id="{{ post.id }}">
-                  <img src="{{ post.image }}" alt="{{ post.title }}">
+              {% assign review_posts = site.posts | where: "status", "review" %}
+              {% for post in review_posts %}
+                <div class="workflow-item" draggable="true" data-id="{{ post.path }}">
+                  <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}">
                   <h4>{{ post.title }}</h4>
                   <p>{{ post.description | truncate: 100 }}</p>
                   <div class="workflow-meta">
@@ -1129,38 +1236,29 @@
                     <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
                   </div>
                   <div class="workflow-actions">
-                    <button class="edit-btn" onclick="editPost('{{ post.id }}')">
+                    <button class="edit-btn" onclick="editPost('{{ post.path }}')">
                       <i class="fas fa-edit"></i> Modifier
                     </button>
-                    <button class="check-btn" onclick="runChecks('{{ post.id }}')">
+                    <button class="check-btn" onclick="runChecks('{{ post.path }}')">
                       <i class="fas fa-check-double"></i> Vérifier
                     </button>
                     <button class="move-btn" onclick="showStateSelector(this)">
                       <i class="fas fa-exchange-alt"></i> Changer l'état
                     </button>
                   </div>
-                  <div class="check-results" style="display: none;">
-                    <div class="spelling-check">
-                      <h5><i class="fas fa-spell-check"></i> Correction orthographique</h5>
-                      <ul class="corrections-list"></ul>
-                    </div>
-                    <div class="layout-check">
-                      <h5><i class="fas fa-th-large"></i> Vérification de la mise en page</h5>
-                      <ul class="layout-list"></ul>
-                    </div>
-                  </div>
                 </div>
-                {% endif %}
               {% endfor %}
             </div>
           </div>
+
+          <!-- Colonne Prêt -->
           <div class="column ready">
             <h3><i class="fas fa-check-circle"></i> Prêt</h3>
             <div class="workflow-items" data-state="ready">
-              {% for post in site.posts %}
-                {% if post.status == 'ready' %}
-                <div class="workflow-item" draggable="true" data-id="{{ post.id }}">
-                  <img src="{{ post.image }}" alt="{{ post.title }}">
+              {% assign ready_posts = site.posts | where: "status", "ready" %}
+              {% for post in ready_posts %}
+                <div class="workflow-item" draggable="true" data-id="{{ post.path }}">
+                  <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}">
                   <h4>{{ post.title }}</h4>
                   <p>{{ post.description | truncate: 100 }}</p>
                   <div class="workflow-meta">
@@ -1168,10 +1266,10 @@
                     <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
                   </div>
                   <div class="workflow-actions">
-                    <button class="edit-btn" onclick="editPost('{{ post.id }}')">
+                    <button class="edit-btn" onclick="editPost('{{ post.path }}')">
                       <i class="fas fa-edit"></i> Modifier
                     </button>
-                    <button class="publish-btn" onclick="publishPost('{{ post.id }}')">
+                    <button class="publish-btn" onclick="publishPost('{{ post.path }}')">
                       <i class="fas fa-upload"></i> Publier
                     </button>
                     <button class="move-btn" onclick="showStateSelector(this)">
@@ -1179,7 +1277,6 @@
                     </button>
                   </div>
                 </div>
-                {% endif %}
               {% endfor %}
             </div>
           </div>
@@ -1223,9 +1320,10 @@
           <i class="fas fa-cloud-upload-alt"></i>
           <h3>Déposez vos images ici</h3>
           <p>ou</p>
-          <button class="upload-btn">
+          <label class="custom-file-upload">
+            <input type="file" multiple accept="image/*" style="display: none;">
             <i class="fas fa-plus"></i> Sélectionner des fichiers
-          </button>
+          </label>
           <p class="upload-info">Formats acceptés : JPG, PNG, WEBP - Max 5MB par image</p>
           <div class="upload-progress" style="display: none;">
             <div class="progress-bar">
@@ -1238,45 +1336,57 @@
         <div class="media-stats">
           <div class="stat-item">
             <i class="fas fa-image"></i>
-            <span class="stat-value">{{ site.static_files | where: "image", true | size }}</span>
+            {% assign image_count = 0 %}
+            {% for file in site.static_files %}
+              {% if file.path contains 'images' %}
+                {% assign image_count = image_count | plus: 1 %}
+              {% endif %}
+            {% endfor %}
+            <span class="stat-value">{{ image_count }}</span>
             <span class="stat-label">Images totales</span>
           </div>
           <div class="stat-item">
             <i class="fas fa-hdd"></i>
-            <span class="stat-value">{{ total_size | divided_by: 1048576.0 | round: 2 }}</span>
-            <span class="stat-label">Mo utilisés</span>
+            {% assign total_size = 0 %}
+            {% for file in site.static_files %}
+              {% if file.path contains 'images' %}
+                {% assign total_size = total_size | plus: file.size %}
+              {% endif %}
+            {% endfor %}
+            <span class="stat-value">{{ total_size | divided_by: 1048576.0 | round: 2 }} Mo</span>
+            <span class="stat-label">Espace utilisé</span>
           </div>
         </div>
 
         <div class="media-library">
-          {% for image in site.static_files %}
-            {% if image.path contains 'images' %}
-            <div class="media-item" data-name="{{ image.name | downcase }}" data-type="{{ image.extname | downcase }}">
-              <div class="media-preview">
-                <img src="{{ image.path }}" alt="{{ image.name }}" loading="lazy">
-                <div class="media-overlay">
-                  <button class="media-action view-btn" onclick="viewImage('{{ image.path }}')">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button class="media-action copy-btn" onclick="copyImagePath('{{ image.path }}')">
-                    <i class="fas fa-link"></i>
-                  </button>
-                  <button class="media-action edit-btn" onclick="editImage('{{ image.path }}')">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="media-action delete-btn" onclick="deleteImage('{{ image.path }}')">
-                    <i class="fas fa-trash"></i>
-                  </button>
+          {% for file in site.static_files %}
+            {% if file.path contains 'images' %}
+              <div class="media-item" data-name="{{ file.name | downcase }}" data-type="{{ file.extname | downcase }}">
+                <div class="media-preview">
+                  <img src="{{ file.path }}" alt="{{ file.name }}" loading="lazy">
+                  <div class="media-overlay">
+                    <button class="media-action view-btn" onclick="viewImage('{{ file.path }}')">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="media-action copy-btn" onclick="copyImagePath('{{ file.path }}')">
+                      <i class="fas fa-link"></i>
+                    </button>
+                    <button class="media-action edit-btn" onclick="editImage('{{ file.path }}')">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="media-action delete-btn" onclick="deleteImage('{{ file.path }}')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="media-info">
+                  <h4 title="{{ file.name }}">{{ file.name | truncate: 20 }}</h4>
+                  <div class="media-meta">
+                    <span><i class="fas fa-file-image"></i> {{ file.extname | upcase }}</span>
+                    <span><i class="fas fa-weight-hanging"></i> {{ file.size | divided_by: 1024 | round }}Ko</span>
+                  </div>
                 </div>
               </div>
-              <div class="media-info">
-                <h4 title="{{ image.name }}">{{ image.name | truncate: 20 }}</h4>
-                <div class="media-meta">
-                  <span><i class="fas fa-file-image"></i> {{ image.extname | upcase }}</span>
-                  <span><i class="fas fa-weight-hanging"></i> {{ image.size | divided_by: 1024 | round }}Ko</span>
-                </div>
-              </div>
-            </div>
             {% endif %}
           {% endfor %}
         </div>
@@ -1315,23 +1425,32 @@
             <div class="upcoming-form">
               <div class="form-group">
                 <label for="restaurant-name">Nom du restaurant</label>
-                <input type="text" id="restaurant-name" placeholder="Entrez le nom du restaurant">
+                <input type="text" id="restaurant-name" class="form-input" placeholder="Entrez le nom du restaurant">
               </div>
               <div class="form-group">
-                <label for="visit-date">Date de visite</label>
-                <input type="date" id="visit-date">
+                <label for="visit-date">Date de visite prévue</label>
+                <input type="date" id="visit-date" class="form-input">
               </div>
               <div class="form-group">
-                <label for="location">Lieu</label>
-                <input type="text" id="location" placeholder="Adresse du restaurant">
+                <label for="location">Adresse</label>
+                <input type="text" id="location" class="form-input" placeholder="Adresse du restaurant">
               </div>
               <div class="form-group">
                 <label for="restaurant-image">Image du restaurant</label>
-                <input type="file" id="restaurant-image" accept="image/*">
+                <label class="custom-file-upload">
+                  <input type="file" id="restaurant-image" accept="image/*" style="display: none;">
+                  <i class="fas fa-upload"></i> Choisir une image
+                </label>
+                <div id="image-preview" class="image-preview" style="display: none;">
+                  <img src="" alt="Aperçu de l'image">
+                  <button class="remove-image" onclick="removeImage()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" rows="4" placeholder="Brève description du restaurant"></textarea>
+                <textarea id="description" class="form-input" rows="4" placeholder="Brève description du restaurant"></textarea>
               </div>
               <button class="add-upcoming-btn" id="save-restaurant">
                 <i class="fas fa-plus"></i> Ajouter le restaurant
@@ -1339,7 +1458,7 @@
             </div>
 
             <div class="upcoming-list" id="upcoming-list">
-              <!-- Les restaurants à venir seront ajoutés ici dynamiquement -->
+              <!-- Les restaurants seront ajoutés ici dynamiquement -->
             </div>
           </div>
 
@@ -1593,7 +1712,7 @@
 
       // Gestion du drag & drop
       const uploadZone = document.getElementById('upload-zone');
-      const uploadBtn = document.querySelector('.upload-btn');
+      const uploadBtn = document.querySelector('.custom-file-upload');
       const progressBar = document.querySelector('.progress-fill');
       const progressText = document.querySelector('.progress-percent');
       const uploadProgress = document.querySelector('.upload-progress');
