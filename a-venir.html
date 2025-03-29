@@ -67,8 +67,8 @@ permalink: /a-venir/
 }
 
 .upcoming-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
   margin-bottom: 4rem;
 }
@@ -80,7 +80,8 @@ permalink: /a-venir/
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  cursor: grab;
+  display: flex;
+  align-items: stretch;
 }
 
 .upcoming-card:hover {
@@ -93,23 +94,23 @@ permalink: /a-venir/
 }
 
 .drag-handle {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  color: #666;
-  cursor: move;
-  opacity: 1;
-  transition: opacity 0.3s ease;
+  position: relative;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #f8f9fa;
-  padding: 0.5rem;
-  border-radius: 4px;
+  cursor: grab;
+  border-right: 1px solid #eee;
 }
 
-.upcoming-card:hover .drag-handle {
-  opacity: 1;
+.drag-handle i {
+  color: #666;
+  font-size: 1.2rem;
 }
 
 .card-content {
+  flex: 1;
   padding: 2rem;
 }
 
@@ -238,12 +239,14 @@ document.addEventListener('DOMContentLoaded', function() {
   if (grid) {
     new Sortable(grid, {
       animation: 150,
+      handle: '.drag-handle',
       ghostClass: 'sortable-ghost',
       chosenClass: 'sortable-chosen',
       dragClass: 'sortable-drag',
-      handle: '.drag-handle',
+      forceFallback: true,
       onStart: function(evt) {
         document.body.style.cursor = 'grabbing';
+        evt.item.classList.add('dragging');
       },
       onEnd: async function(evt) {
         document.body.style.cursor = 'default';
