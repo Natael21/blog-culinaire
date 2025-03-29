@@ -1309,7 +1309,7 @@
       <section id="upcoming" class="content-section">
         <div class="section-header">
           <h2>Restaurants à Venir</h2>
-          <button class="add-upcoming-btn" id="add-upcoming">
+          <button class="add-upcoming-btn" onclick="showUpcomingModal()">
             <i class="fas fa-plus"></i> Ajouter un restaurant
           </button>
         </div>
@@ -1580,139 +1580,69 @@
         return data.sha;
       }
 
-      // Gestion des restaurants à venir
-      let currentUpcomingId = null;
-
-      async function loadUpcomingRestaurants() {
-        try {
-          const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_upcoming');
-          const files = await response.json();
-          
-          const upcomingList = document.getElementById('upcoming-list');
-          upcomingList.innerHTML = '';
-          
-          for (const file of files) {
-            if (file.name.endsWith('.md')) {
-              try {
-                const contentResponse = await fetch(file.download_url);
-                const content = await contentResponse.text();
-                
-                // Extraire les métadonnées du frontmatter
-                const frontmatter = content.split('---')[1];
-                const metadata = {};
-                frontmatter.split('\n').forEach(line => {
-                  const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
-                  if (match) {
-                    metadata[match[1]] = match[2];
-                  }
-                });
-
-                const item = document.createElement('div');
-                item.className = 'upcoming-item';
-                item.innerHTML = `
-                  <div class="upcoming-info">
-                    <div class="upcoming-details">
-                      <h3>${metadata.title}</h3>
-                      <div class="upcoming-meta">
-                        <span><i class="fas fa-utensils"></i> ${metadata.restaurant_type}</span>
-                        <span><i class="fas fa-sort-numeric-down"></i> ${metadata.order || 50}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="upcoming-actions">
-                    <button class="action-btn edit-btn" onclick="editUpcoming('${file.path}', ${JSON.stringify(metadata)})">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete-btn" onclick="deleteUpcoming('${file.path}')">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                `;
-                upcomingList.appendChild(item);
-              } catch (error) {
-                console.error('Erreur lors du chargement du restaurant à venir:', error);
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Erreur lors du chargement des restaurants à venir:', error);
-          const upcomingList = document.getElementById('upcoming-list');
-          upcomingList.innerHTML = '<p class="error-message">Une erreur est survenue lors du chargement des restaurants à venir.</p>';
-        }
-      }
-
-      function showUpcomingModal(metadata = null) {
+      // Fonctions pour gérer le modal des restaurants à venir
+      function showUpcomingModal(restaurant = null) {
         const modal = document.getElementById('upcoming-modal');
         const form = document.getElementById('upcoming-form');
+        const title = modal.querySelector('h3');
         
-        if (metadata) {
-          currentUpcomingId = metadata.path;
-          form.querySelector('#restaurant-type').value = metadata.restaurant_type || '';
-          form.querySelector('#restaurant-title').value = metadata.title || '';
-          form.querySelector('#restaurant-description').value = metadata.description || '';
-          form.querySelector('#restaurant-location').value = metadata.location || '';
-          form.querySelector('#restaurant-order').value = metadata.order || 50;
+        if (restaurant) {
+          title.textContent = 'Modifier le restaurant';
+          form.dataset.id = restaurant.id;
+          document.getElementById('restaurant-type').value = restaurant.restaurant_type;
+          document.getElementById('restaurant-title').value = restaurant.title;
+          document.getElementById('restaurant-description').value = restaurant.description;
+          document.getElementById('restaurant-location').value = restaurant.location;
+          document.getElementById('restaurant-order').value = restaurant.order;
         } else {
-          currentUpcomingId = null;
+          title.textContent = 'Ajouter un restaurant à venir';
           form.reset();
+          delete form.dataset.id;
+          document.getElementById('restaurant-order').value = '50';
         }
         
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
+        updateUpcomingPreview();
       }
 
       function closeUpcomingModal() {
         const modal = document.getElementById('upcoming-modal');
         modal.style.display = 'none';
-        currentUpcomingId = null;
       }
 
-      function editUpcoming(path, metadata) {
-        metadata.path = path;
-        showUpcomingModal(metadata);
+      // Fonction pour mettre à jour la prévisualisation
+      function updateUpcomingPreview() {
+        const previewContent = document.querySelector('.preview-content');
+        const type = document.getElementById('restaurant-type').value;
+        const title = document.getElementById('restaurant-title').value;
+        const description = document.getElementById('restaurant-description').value;
+        const location = document.getElementById('restaurant-location').value;
+        
+        const previewHTML = `
+          <div class="upcoming-card">
+            <div class="card-content">
+              <div class="restaurant-type">${type || 'Type de restaurant'}</div>
+              <h2>${title || 'Nom du restaurant'}</h2>
+              <p class="description">${description || 'Description du restaurant'}</p>
+              <div class="location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>${location || 'Adresse'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        previewContent.innerHTML = previewHTML;
       }
 
-      async function deleteUpcoming(path) {
-        const result = await Swal.fire({
-          title: 'Êtes-vous sûr ?',
-          text: "Cette action est irréversible !",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6',
-          confirmButtonText: 'Oui, supprimer',
-          cancelButtonText: 'Annuler'
-        });
+      // Ajouter les event listeners pour la mise à jour en direct de la prévisualisation
+      document.getElementById('restaurant-type').addEventListener('input', updateUpcomingPreview);
+      document.getElementById('restaurant-title').addEventListener('input', updateUpcomingPreview);
+      document.getElementById('restaurant-description').addEventListener('input', updateUpcomingPreview);
+      document.getElementById('restaurant-location').addEventListener('input', updateUpcomingPreview);
 
-        if (result.isConfirmed) {
-          try {
-            const token = netlifyIdentity.currentUser().token.access_token;
-            const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${path}`, {
-              method: 'DELETE',
-              headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                message: `Suppression du restaurant à venir ${path}`,
-                sha: await getFileSha(path)
-              })
-            });
-
-            if (response.ok) {
-              Swal.fire('Supprimé !', 'Le restaurant a été supprimé avec succès.', 'success');
-              await loadUpcomingRestaurants();
-            } else {
-              throw new Error('Erreur lors de la suppression');
-            }
-          } catch (error) {
-            console.error('Erreur lors de la suppression:', error);
-            Swal.fire('Erreur !', 'Une erreur est survenue lors de la suppression.', 'error');
-          }
-        }
-      }
-
-      // Gestion du formulaire des restaurants à venir
-      document.getElementById('upcoming-form').addEventListener('submit', async (e) => {
+      // Gestion du formulaire
+      document.getElementById('upcoming-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const formData = {
@@ -1722,123 +1652,59 @@
           location: document.getElementById('restaurant-location').value,
           order: parseInt(document.getElementById('restaurant-order').value)
         };
-
+        
         try {
-          const token = netlifyIdentity.currentUser().token.access_token;
-          const content = `---
-restaurant_type: "${formData.restaurant_type}"
-title: "${formData.title}"
-description: "${formData.description}"
-location: "${formData.location}"
-order: ${formData.order}
----`;
-
-          if (currentUpcomingId) {
-            // Mise à jour
-            const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${currentUpcomingId}`, {
-              method: 'PUT',
-              headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                message: `Mise à jour du restaurant à venir ${formData.title}`,
-                content: btoa(content),
-                sha: await getFileSha(currentUpcomingId)
-              })
-            });
-
-            if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+          if (this.dataset.id) {
+            // Mise à jour d'un restaurant existant
+            await updateUpcomingRestaurant(this.dataset.id, formData);
           } else {
-            // Création
-            const filename = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/_upcoming/${filename}.md`, {
-              method: 'PUT',
-              headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                message: `Ajout du restaurant à venir ${formData.title}`,
-                content: btoa(content)
-              })
-            });
-
-            if (!response.ok) throw new Error('Erreur lors de la création');
+            // Création d'un nouveau restaurant
+            await createUpcomingRestaurant(formData);
           }
-
+          
           closeUpcomingModal();
-          await loadUpcomingRestaurants();
-          Swal.fire('Succès !', 'Le restaurant a été enregistré avec succès.', 'success');
+          loadUpcomingRestaurants(); // Recharger la liste
         } catch (error) {
           console.error('Erreur lors de la sauvegarde:', error);
-          Swal.fire('Erreur !', 'Une erreur est survenue lors de la sauvegarde.', 'error');
+          alert('Une erreur est survenue lors de la sauvegarde. Veuillez réessayer.');
         }
       });
 
-      // Gestion des boutons de prévisualisation
-      document.querySelectorAll('.preview-toggle button').forEach(button => {
-        button.addEventListener('click', () => {
-          document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
-          button.classList.add('active');
-          updatePreview(button.dataset.view);
-        });
-      });
-
-      function updatePreview(view) {
-        const previewContent = document.querySelector('.preview-content');
-        const formData = {
-          restaurant_type: document.getElementById('restaurant-type').value,
-          title: document.getElementById('restaurant-title').value,
-          description: document.getElementById('restaurant-description').value,
-          location: document.getElementById('restaurant-location').value
-        };
-
-        if (view === 'card') {
-          previewContent.innerHTML = `
-            <div class="upcoming-card">
-              <div class="card-content">
-                <div class="restaurant-type">${formData.restaurant_type}</div>
-                <h2>${formData.title}</h2>
-                <p class="description">${formData.description}</p>
-                <div class="location">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span>${formData.location}</span>
+      // Fonction pour charger les restaurants à venir
+      async function loadUpcomingRestaurants() {
+        try {
+          const response = await fetch('/api/upcoming');
+          const restaurants = await response.json();
+          
+          const list = document.getElementById('upcoming-list');
+          list.innerHTML = restaurants.map(restaurant => `
+            <div class="upcoming-item">
+              <div class="upcoming-info">
+                <h3>${restaurant.title}</h3>
+                <p>${restaurant.description}</p>
+                <div class="upcoming-meta">
+                  <span class="type">${restaurant.restaurant_type}</span>
+                  <span class="location"><i class="fas fa-map-marker-alt"></i> ${restaurant.location}</span>
+                  <span class="order">Ordre: ${restaurant.order}</span>
                 </div>
               </div>
-            </div>
-          `;
-        } else {
-          previewContent.innerHTML = `
-            <div class="upcoming-full">
-              <div class="upcoming-content">
-                <div class="restaurant-type">${formData.restaurant_type}</div>
-                <h2>${formData.title}</h2>
-                <p class="description">${formData.description}</p>
-                <div class="location">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span>${formData.location}</span>
-                </div>
+              <div class="upcoming-actions">
+                <button class="edit-btn" onclick="showUpcomingModal(${JSON.stringify(restaurant)})">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+                <button class="delete-btn" onclick="deleteUpcomingRestaurant('${restaurant.id}')">
+                  <i class="fas fa-trash"></i> Supprimer
+                </button>
               </div>
             </div>
-          `;
+          `).join('');
+        } catch (error) {
+          console.error('Erreur lors du chargement des restaurants:', error);
         }
       }
 
-      // Mise à jour de la prévisualisation lors des changements de formulaire
-      document.getElementById('upcoming-form').addEventListener('input', () => {
-        updatePreview(document.querySelector('.preview-toggle button.active').dataset.view);
-      });
-
       // Charger les restaurants à venir au chargement de la page
-      document.addEventListener('DOMContentLoaded', () => {
-        loadUpcomingRestaurants();
-      });
-
-      // Gestion du bouton d'ajout de restaurant à venir
-      document.getElementById('add-upcoming').addEventListener('click', () => {
-        showUpcomingModal();
-      });
+      document.addEventListener('DOMContentLoaded', loadUpcomingRestaurants);
     </script>
   </body>
 </html>
