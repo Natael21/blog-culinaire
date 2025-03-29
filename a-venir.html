@@ -13,7 +13,7 @@ permalink: /a-venir/
   <div class="upcoming-grid" id="sortable-grid">
     {% assign sorted_upcoming = site.upcoming | sort: "order" %}
     {% for restaurant in sorted_upcoming %}
-    <div class="upcoming-card" data-order="{{ restaurant.order }}">
+    <div class="upcoming-card" data-order="{{ restaurant.order }}" data-path="_upcoming/{{ restaurant.path }}">
       <div class="drag-handle">
         <i class="fas fa-grip-vertical"></i>
       </div>
@@ -25,13 +25,11 @@ permalink: /a-venir/
           <i class="fas fa-map-marker-alt"></i>
           <span>{{ restaurant.location }}</span>
         </div>
-        {% if jekyll.environment == "development" or site.show_admin_controls %}
         <div class="admin-controls">
           <button class="edit-btn" onclick="window.location.href='/admin/#upcoming'">
             <i class="fas fa-edit"></i> Modifier
           </button>
         </div>
-        {% endif %}
       </div>
     </div>
     {% endfor %}
@@ -82,7 +80,7 @@ permalink: /a-venir/
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  cursor: move;
+  cursor: grab;
 }
 
 .upcoming-card:hover {
@@ -90,14 +88,21 @@ permalink: /a-venir/
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
+.upcoming-card:active {
+  cursor: grabbing;
+}
+
 .drag-handle {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  color: #ccc;
+  color: #666;
   cursor: move;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.3s ease;
+  background: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 4px;
 }
 
 .upcoming-card:hover .drag-handle {
@@ -151,6 +156,8 @@ permalink: /a-venir/
   border-top: 1px solid #eee;
   display: flex;
   gap: 1rem;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
 .edit-btn {
@@ -254,11 +261,15 @@ document.addEventListener('DOMContentLoaded', function() {
               }
             });
             
+            if (!response.ok) {
+              throw new Error('Erreur lors de la récupération du fichier');
+            }
+            
             const file = await response.json();
             const content = atob(file.content);
             const newContent = content.replace(/order: \d+/, `order: ${update.order}`);
 
-            await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
+            const updateResponse = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
               method: 'PUT',
               headers: {
                 'Authorization': `token ${token}`,
@@ -270,9 +281,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 sha: file.sha
               })
             });
+
+            if (!updateResponse.ok) {
+              throw new Error('Erreur lors de la mise à jour du fichier');
+            }
           }
+
+          // Recharger la page après la mise à jour réussie
+          window.location.reload();
         } catch (error) {
           console.error('Error updating orders:', error);
+          alert('Une erreur est survenue lors de la mise à jour de l\'ordre des restaurants');
         }
       }
     });
