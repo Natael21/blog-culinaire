@@ -1134,7 +1134,7 @@
 
       .restaurant-filters {
         display: grid;
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: auto 200px;
         gap: 1rem;
         margin: 1rem 0;
         align-items: center;
@@ -1142,6 +1142,36 @@
 
       .search-filter {
         position: relative;
+        width: fit-content;
+        min-width: 200px;
+        max-width: 400px;
+      }
+
+      .search-filter input {
+        width: 100%;
+        padding: 0.8rem 2.5rem 0.8rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .search-filter i {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+      }
+
+      .filter-select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background-color: white;
+        cursor: pointer;
       }
     </style>
   </head>
