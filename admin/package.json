@@ -1,0 +1,8 @@
+{
+  "name": "blog-culinaire-admin",
+  "version": "1.0.0",
+  "description": "Interface d'administration pour le blog culinaire",
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  }
+} 

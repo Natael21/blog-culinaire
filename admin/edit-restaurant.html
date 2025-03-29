@@ -642,22 +642,15 @@
           <div class="form-group">
             <label for="cuisine">Style de cuisine</label>
             <div class="cuisine-input-container" style="display: flex; gap: 1rem; align-items: center;">
-              <select id="cuisine" name="cuisine" required style="flex: 1;">
-                <option value="">Sélectionner un style</option>
-                <option value="Iranien">Iranien</option>
-                <option value="Libano-Marocain">Libano-Marocain</option>
-                <option value="Indien">Indien</option>
-                <option value="Café-Bistro">Café-Bistro</option>
-                <option value="Bistro">Bistro</option>
-                <option value="Vietnamien">Vietnamien</option>
-                <option value="Thaïlandais">Thaïlandais</option>
-                <option value="Américain">Américain</option>
-                <option value="Mexicain">Mexicain</option>
-                <option value="Pub">Pub</option>
-                <option value="Boulangerie-Café">Boulangerie-Café</option>
-                <option value="Asiatique">Asiatique</option>
-                <option value="nouveau">+ Ajouter un nouveau style</option>
-              </select>
+              <div class="select-wrapper" style="flex: 1; position: relative;">
+                <select id="cuisine" name="cuisine" required style="width: 100%;">
+                  <option value="">Sélectionner un style</option>
+                  <option value="nouveau">+ Ajouter un nouveau style</option>
+                </select>
+                <button type="button" id="supprimer-style" style="display: none; position: absolute; right: 2.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #e74c3c; cursor: pointer; padding: 0.5rem;">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
               <input type="text" id="nouveau-style" placeholder="Entrez un nouveau style" style="flex: 1; display: none;">
               <button type="button" id="confirmer-style" style="display: none; padding: 0.8rem 1.2rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
                 <i class="fas fa-check"></i>
@@ -1736,13 +1729,28 @@
       const cuisineSelect = document.getElementById('cuisine');
       const nouveauStyleInput = document.getElementById('nouveau-style');
       const confirmerStyleBtn = document.getElementById('confirmer-style');
+      const supprimerStyleBtn = document.getElementById('supprimer-style');
+
+      // Fonction pour vérifier si le style sélectionné est personnalisé
+      function isCustomStyle() {
+        const selectedOption = cuisineSelect.options[cuisineSelect.selectedIndex];
+        return selectedOption && !selectedOption.hasAttribute('data-default') && selectedOption.value !== 'nouveau' && selectedOption.value !== '';
+      }
+
+      // Mettre à jour l'affichage du bouton de suppression
+      function updateDeleteButton() {
+        supprimerStyleBtn.style.display = isCustomStyle() ? 'block' : 'none';
+      }
 
       cuisineSelect.addEventListener('change', function() {
         if (this.value === 'nouveau') {
           this.style.display = 'none';
           nouveauStyleInput.style.display = 'block';
           confirmerStyleBtn.style.display = 'block';
+          supprimerStyleBtn.style.display = 'none';
           nouveauStyleInput.focus();
+        } else {
+          updateDeleteButton();
         }
       });
 
@@ -1768,13 +1776,104 @@
           
           // Vider l'input
           nouveauStyleInput.value = '';
+
+          // Mettre à jour le bouton de suppression
+          updateDeleteButton();
+          
+          // Mettre à jour l'aperçu
+          updatePreview();
+        }
+      });
+
+      supprimerStyleBtn.addEventListener('click', function() {
+        const selectedIndex = cuisineSelect.selectedIndex;
+        if (selectedIndex !== -1 && isCustomStyle()) {
+          cuisineSelect.remove(selectedIndex);
+          cuisineSelect.value = '';
+          updateDeleteButton();
+          updatePreview();
         }
       });
 
       nouveauStyleInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
+          e.preventDefault();
           confirmerStyleBtn.click();
         }
+      });
+
+      async function loadCuisineStyles() {
+        try {
+          // Récupérer tous les fichiers markdown du dossier _posts
+          const response = await fetch('/api/posts');
+          const posts = await response.json();
+          
+          // Extraire les styles uniques
+          const styles = new Set();
+          posts.forEach(post => {
+            const content = post.content;
+            const styleMatch = content.match(/style: "([^"]+)"/);
+            if (styleMatch) {
+              styles.add(styleMatch[1]);
+            }
+          });
+          
+          // Trier les styles par ordre alphabétique
+          const sortedStyles = Array.from(styles).sort();
+          
+          // Mettre à jour le select
+          const select = document.getElementById('cuisine');
+          const defaultOption = select.options[0];
+          const newStyleOption = select.options[1];
+          
+          // Vider les options existantes sauf la première et la dernière
+          select.innerHTML = '';
+          select.appendChild(defaultOption);
+          
+          // Ajouter les styles triés
+          sortedStyles.forEach(style => {
+            const option = document.createElement('option');
+            option.value = style;
+            option.textContent = style;
+            option.setAttribute('data-default', '');
+            select.appendChild(option);
+          });
+          
+          // Ajouter l'option "Ajouter un nouveau style" à la fin
+          select.appendChild(newStyleOption);
+          
+        } catch (error) {
+          console.error('Erreur lors du chargement des styles:', error);
+          // En cas d'erreur, charger une liste de styles par défaut
+          const defaultStyles = [
+            "Américain", "Asiatique", "Bistro", "Boulangerie-Café", "Café-Bistro",
+            "Indien", "Iranien", "Italien", "Libano-Marocain", "Mexicain",
+            "Microbrasserie", "Pub", "Thaïlandais", "Vietnamien"
+          ];
+          
+          const select = document.getElementById('cuisine');
+          const defaultOption = select.options[0];
+          const newStyleOption = select.options[1];
+          
+          select.innerHTML = '';
+          select.appendChild(defaultOption);
+          
+          defaultStyles.forEach(style => {
+            const option = document.createElement('option');
+            option.value = style;
+            option.textContent = style;
+            option.setAttribute('data-default', '');
+            select.appendChild(option);
+          });
+          
+          select.appendChild(newStyleOption);
+        }
+      }
+
+      // Appeler la fonction au chargement de la page
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCuisineStyles();
+        loadRestaurantData();
       });
     </script>
   </body>
