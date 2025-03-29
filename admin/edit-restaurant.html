@@ -919,11 +919,26 @@
         return images;
       }
 
+      // Fonction pour nettoyer les chaînes de caractères pour le frontmatter
+      function sanitizeFrontmatterValue(value) {
+        // Échapper les guillemets doubles
+        value = value.replace(/"/g, '\\"');
+        // Échapper les retours à la ligne
+        value = value.replace(/\n/g, ' ');
+        // Échapper les tabulations
+        value = value.replace(/\t/g, ' ');
+        return value;
+      }
+
       // Fonction pour valider les données du restaurant
       async function validateRestaurantData(metadata, fullContent) {
         try {
           // Récupérer le nom du restaurant pour construire l'URL
-          const restaurantName = metadata.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          const restaurantName = metadata.title
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
+            .replace(/[^a-z0-9]+/g, '-'); // Remplacer les caractères spéciaux par des tirets
           
           // Construire l'URL du post original
           const postUrl = `/_posts/${metadata.date}-${restaurantName}.markdown`;
@@ -940,7 +955,7 @@
           const originalFrontmatter = originalParts[1];
           const originalFullContent = originalParts[2] || '';
           
-          // Extraire les métadonnées originales
+          // Extraire les métadonnées originales avec support des accents
           const originalMetadata = {};
           originalFrontmatter.split('\n').forEach(line => {
             const match = line.match(/^(\w+):\s*(.+)$/);
@@ -1065,19 +1080,8 @@
           const frontmatter = parts[1];
           const fullContent = parts[2] || '';
 
-          // Extraire les métadonnées avec des valeurs par défaut
-          const metadata = {
-            title: '',
-            date: new Date().toISOString().split('T')[0],
-            style: '',
-            price: '$$',
-            note: '4.5',
-            address: '',
-            description: '',
-            image: '/images/header.jpg',
-            state: 'draft'
-          };
-
+          // Extraire les métadonnées
+          const metadata = {};
           frontmatter.split('\n').forEach(line => {
             const match = line.match(/^(\w+):\s*(.+)$/);
             if (match) {
@@ -1086,7 +1090,7 @@
             }
           });
 
-          // Remplir les champs du formulaire avec les métadonnées
+          // Remplir les champs du formulaire avec les métadonnées exactes
           document.getElementById('name').value = metadata.title || '';
           document.getElementById('cuisine').value = metadata.style || '';
           document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
@@ -1101,7 +1105,7 @@
             }
           });
 
-          // Remplir les éditeurs avec le contenu original
+          // Remplir les éditeurs avec le contenu exact
           summaryEditor.root.innerHTML = metadata.description || '';
           
           // Formater le contenu de la description
@@ -1348,18 +1352,22 @@
         try {
           const name = document.getElementById('name').value;
           const date = new Date().toISOString().split('T')[0];
-          const fileName = `${date}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.markdown`;
+          const fileName = `${date}-${name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
+            .replace(/[^a-z0-9]+/g, '-')}.markdown`;
           
-          // Construire le contenu du fichier
+          // Construire le contenu du fichier avec traitement des accents
           const frontMatter = [
             '---',
-            `title: "${name}"`,
+            `title: "${sanitizeFrontmatterValue(name)}"`,
             `date: "${date}"`,
-            `style: "${document.getElementById('cuisine').value}"`,
+            `style: "${sanitizeFrontmatterValue(document.getElementById('cuisine').value)}"`,
             `price: "${document.getElementById('price').value}"`,
             `note: ${document.getElementById('rating').value}`,
-            `address: "${document.getElementById('address').value}"`,
-            `description: "${summaryEditor.root.innerHTML.replace(/"/g, '\\"')}"`,
+            `address: "${sanitizeFrontmatterValue(document.getElementById('address').value)}"`,
+            `description: "${sanitizeFrontmatterValue(summaryEditor.root.innerHTML)}"`,
             `image: "${document.querySelector('.preview-card img').src}"`,
             `state: "draft"`,
             '---\n'
@@ -1367,7 +1375,7 @@
 
           const content = frontMatter + descriptionEditor.root.innerHTML;
 
-          // Encoder le contenu en Base64
+          // Encoder le contenu en Base64 avec support des accents
           const contentBase64 = btoa(unescape(encodeURIComponent(content)));
 
           // Créer le fichier via l'API GitHub
