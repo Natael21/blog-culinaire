@@ -167,13 +167,14 @@ title: Accueil
   align-items: center;
   gap: 1rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
 .search-input-wrapper {
-  flex: 1;
+  flex: 0.7;
   position: relative;
+  min-width: 0;
 }
 
 .search-input-wrapper i {
@@ -203,6 +204,7 @@ title: Accueil
   display: flex;
   gap: 0.5rem;
   margin-left: 0.5rem;
+  flex-shrink: 0;
 }
 
 .view-btn {
@@ -336,12 +338,17 @@ title: Accueil
   
   .search-and-view {
     flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-input-wrapper {
+    flex: 1;
+    margin-bottom: 1rem;
   }
   
   .view-buttons {
-    width: 100%;
+    margin-left: 0;
     justify-content: center;
-    margin-top: 1rem;
   }
   
   .restaurant-grid.list-view .post-card {
