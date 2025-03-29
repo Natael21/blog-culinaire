@@ -20,7 +20,7 @@ title: Accueil
         </div>
         <div class="view-buttons">
           <button class="view-btn active" data-view="grid" title="Vue en pastilles">
-            <i class="fas fa-th"></i>
+            <i class="fas fa-grip-vertical"></i>
           </button>
           <button class="view-btn" data-view="list" title="Vue en liste">
             <i class="fas fa-bars"></i>
@@ -202,12 +202,13 @@ title: Accueil
 .view-buttons {
   display: flex;
   gap: 0.5rem;
+  margin-left: 0.5rem;
 }
 
 .view-btn {
   width: 40px;
   height: 40px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   border: 1px solid #ddd;
@@ -216,6 +217,12 @@ title: Accueil
   color: #666;
   cursor: pointer;
   transition: all 0.3s ease;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.view-btn i {
+  font-size: 1.1rem;
 }
 
 .view-btn:hover {
@@ -618,6 +625,13 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
   const viewButtons = document.querySelectorAll('.view-btn');
   const restaurantGrid = document.getElementById('restaurant-grid');
+  
+  // S'assurer que tous les boutons sont visibles
+  viewButtons.forEach(btn => {
+    btn.style.display = 'flex';
+    btn.style.visibility = 'visible';
+    btn.style.opacity = '1';
+  });
   
   // Forcer la vue en pastilles au chargement
   restaurantGrid.classList.remove('list-view');
