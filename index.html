@@ -1015,7 +1015,73 @@ document.addEventListener('DOMContentLoaded', function() {
   const mapContainer = document.getElementById('map-container');
   let map = null;
   let geocodedCoordinates = new Map();
+
+  // Vérifier si nous sommes sur la page d'accueil
+  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
   
+  // Vérifier si nous revenons d'une page de restaurant
+  const returningFromRestaurant = document.referrer.includes(window.location.host);
+  
+  // Récupérer la dernière vue utilisée
+  let currentView = localStorage.getItem('selectedView');
+  
+  // Si nous sommes sur la page d'accueil et que nous ne revenons pas d'une page de restaurant
+  if (isHomePage && !returningFromRestaurant) {
+    currentView = 'grid'; // Vue par défaut
+    localStorage.setItem('selectedView', currentView);
+  }
+  
+  // Si aucune vue n'est définie, utiliser la vue en pastilles
+  if (!currentView) {
+    currentView = 'grid';
+    localStorage.setItem('selectedView', currentView);
+  }
+
+  // Fonction pour mettre à jour l'interface selon la vue
+  function updateView(view) {
+    // Mettre à jour les classes des boutons
+    viewButtons.forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.view === view) {
+        btn.classList.add('active');
+      }
+    });
+
+    // Mettre à jour l'affichage
+    if (view === 'list') {
+      restaurantGrid.classList.add('list-view');
+      restaurantGrid.style.display = 'flex';
+      mapContainer.style.display = 'none';
+    } else if (view === 'grid') {
+      restaurantGrid.classList.remove('list-view');
+      restaurantGrid.style.display = 'grid';
+      mapContainer.style.display = 'none';
+    } else if (view === 'map') {
+      restaurantGrid.style.display = 'none';
+      mapContainer.style.display = 'block';
+      initMap();
+    }
+  }
+
+  // Ajouter les événements de clic sur les boutons de vue
+  viewButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const view = button.dataset.view;
+      localStorage.setItem('selectedView', view);
+      updateView(view);
+    });
+  });
+
+  // Ajouter l'événement de clic sur les liens des restaurants
+  document.querySelectorAll('.post-link').forEach(link => {
+    link.addEventListener('click', () => {
+      // La vue actuelle est déjà sauvegardée dans le localStorage
+    });
+  });
+
+  // Appliquer la vue actuelle
+  updateView(currentView);
+
   // Fonction pour attendre un certain temps
   function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -1216,53 +1282,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
-  
-  // Appliquer la dernière vue utilisée
-  const lastView = localStorage.getItem('selectedView') || 'grid';
-  
-  if (lastView === 'list') {
-    restaurantGrid.classList.add('list-view');
-    restaurantGrid.style.display = 'flex';
-    mapContainer.style.display = 'none';
-    document.querySelector('[data-view="list"]').classList.add('active');
-    document.querySelector('[data-view="grid"]').classList.remove('active');
-  } else if (lastView === 'map') {
-    restaurantGrid.style.display = 'none';
-    mapContainer.style.display = 'block';
-    document.querySelector('[data-view="map"]').classList.add('active');
-    document.querySelector('[data-view="grid"]').classList.remove('active');
-    initMap();
-  } else {
-    restaurantGrid.classList.remove('list-view');
-    restaurantGrid.style.display = 'grid';
-    mapContainer.style.display = 'none';
-    document.querySelector('[data-view="grid"]').classList.add('active');
-    document.querySelector('[data-view="list"]').classList.remove('active');
-  }
-  
-  viewButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      viewButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-      
-      const view = button.dataset.view;
-      localStorage.setItem('selectedView', view);
-      
-      if (view === 'list') {
-        restaurantGrid.classList.add('list-view');
-        restaurantGrid.style.display = 'flex';
-        mapContainer.style.display = 'none';
-      } else if (view === 'grid') {
-        restaurantGrid.classList.remove('list-view');
-        restaurantGrid.style.display = 'grid';
-        mapContainer.style.display = 'none';
-      } else if (view === 'map') {
-        restaurantGrid.style.display = 'none';
-        mapContainer.style.display = 'block';
-        initMap();
-      }
-    });
-  });
   
   // Scroll to last viewed restaurant
   const lastViewedRestaurant = localStorage.getItem('lastViewedRestaurant');
