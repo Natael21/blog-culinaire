@@ -1016,16 +1016,21 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.style.opacity = '1';
   });
   
+  // Forcer la vue en pastilles par défaut sur la page d'accueil
+  if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+    localStorage.setItem('selectedView', 'grid');
+  }
+  
   // Récupérer la dernière vue utilisée depuis le localStorage
   const lastView = localStorage.getItem('selectedView') || 'grid';
   
   // Fonction pour initialiser la carte
-  function initMap() {
+  async function initMap() {
     if (!map) {
       // Centrer sur Sherbrooke
       map = L.map('map-container').setView([45.4040, -71.8929], 13);
       
-      // Ajouter la couche OpenStreetMap avec un style plus moderne
+      // Ajouter la couche OpenStreetMap
       L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
@@ -1035,9 +1040,21 @@ document.addEventListener('DOMContentLoaded', function() {
       const restaurants = document.querySelectorAll('.post-card');
       const bounds = L.latLngBounds();
       
-      restaurants.forEach(restaurant => {
-        const lat = parseFloat(restaurant.dataset.lat);
-        const lng = parseFloat(restaurant.dataset.lng);
+      for (const restaurant of restaurants) {
+        let lat = parseFloat(restaurant.dataset.lat);
+        let lng = parseFloat(restaurant.dataset.lng);
+        
+        // Si pas de coordonnées, essayer de géocoder l'adresse
+        if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && restaurant.dataset.address) {
+          const coords = await geocodeAddress(restaurant.dataset.address);
+          if (coords) {
+            lat = coords.lat;
+            lng = coords.lng;
+            // Sauvegarder les coordonnées dans le dataset
+            restaurant.dataset.lat = lat;
+            restaurant.dataset.lng = lng;
+          }
+        }
         
         if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
           // Créer un marqueur personnalisé
@@ -1045,10 +1062,10 @@ document.addEventListener('DOMContentLoaded', function() {
             title: restaurant.querySelector('h2').textContent
           }).addTo(map);
           
-          // Étendre les limites de la carte pour inclure ce marqueur
+          // Étendre les limites de la carte
           bounds.extend([lat, lng]);
           
-          // Créer le contenu de la popup avec un style amélioré
+          // Créer le contenu de la popup
           const popupContent = `
             <div class="map-popup">
               <div class="popup-content">
@@ -1088,9 +1105,9 @@ document.addEventListener('DOMContentLoaded', function() {
             this.openPopup();
           });
         }
-      });
+      }
       
-      // Ajuster la vue de la carte pour montrer tous les marqueurs
+      // Ajuster la vue de la carte
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, {
           padding: [50, 50],
@@ -1157,4 +1174,23 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.removeItem('lastViewedRestaurant');
   }
 });
+
+async function geocodeAddress(address) {
+  const encodedAddress = encodeURIComponent(address + ', Sherbrooke, QC');
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+  } catch (error) {
+    console.error('Erreur de géocodage:', error);
+  }
+  return null;
+}
 </script>
