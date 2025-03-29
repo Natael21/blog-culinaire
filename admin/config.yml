@@ -147,3 +147,66 @@ collections:
           hint: "Rédigez vos impressions sur le restaurant",
           default: "**Nataël** :\n\n\n\n**Nicolas** :\n"
         }
+
+  - name: "upcoming"
+    label: "Restaurants à venir"
+    folder: "_upcoming"
+    create: true
+    slug: "{{slug}}"
+    editor:
+      preview: true
+    fields:
+      - { 
+          label: "Type de restaurant",
+          name: "restaurant_type",
+          widget: "select",
+          options: [
+            "Café-Boulangerie",
+            "Bistro-Gastronomique",
+            "Végétalien",
+            "Mexicain",
+            "Steakhouse",
+            "Libanais",
+            "Pub & Grill",
+            "Marocain",
+            "Italien",
+            "Asiatique",
+            "Bistro",
+            "Américain",
+            "Fusion",
+            "Méditerranéen",
+            "Fast-food",
+            "Fruits de mer",
+            "Autre"
+          ],
+          hint: "Sélectionnez le type de cuisine"
+        }
+      - {
+          label: "Nom du restaurant",
+          name: "title",
+          widget: "string",
+          hint: "Nom du restaurant"
+        }
+      - {
+          label: "Description",
+          name: "description",
+          widget: "text",
+          hint: "Une brève description du restaurant (max 150 caractères)",
+          pattern: ['.{0,150}', "Maximum 150 caractères"]
+        }
+      - {
+          label: "Adresse",
+          name: "location",
+          widget: "string",
+          hint: "Adresse du restaurant",
+          required: false
+        }
+      - {
+          label: "Ordre d'affichage",
+          name: "order",
+          widget: "number",
+          value_type: "int",
+          min: 1,
+          default: 50,
+          hint: "Position dans la liste (1 = premier)"
+        }
