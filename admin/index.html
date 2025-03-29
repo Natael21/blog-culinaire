@@ -24,14 +24,6 @@
           }
         });
       }
-
-      // Vérification des rôles
-      window.netlifyIdentity.on("init", user => {
-        if (!user || !user.app_metadata || !user.app_metadata.roles || 
-            !user.app_metadata.roles.includes('admin')) {
-          window.location.href = "/";
-        }
-      });
     </script>
     <style>
       body {

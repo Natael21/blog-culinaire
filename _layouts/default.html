@@ -177,7 +177,6 @@
           window.netlifyIdentity.on("logout", () => {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
             loginButton.onclick = handleLoginClick;
-            window.location.href = "/";
           });
         }
       });
