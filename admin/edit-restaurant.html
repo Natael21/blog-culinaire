@@ -153,9 +153,19 @@
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        max-width: 350px;
+        max-width: 400px;
         margin: 0 auto;
+        transform-origin: top center;
+        transform: scale(1);
+        transition: transform 0.3s ease;
       }
+
+      @media (min-width: 1400px) {
+        .preview-card {
+          transform: scale(1.1);
+        }
+      }
+
       .preview-card img {
         width: 100%;
         height: 200px;
@@ -164,17 +174,22 @@
       .preview-card-content {
         padding: 1.5rem;
       }
+      .preview-card p {
+        color: #666;
+        margin: 0.5rem 0;
+        line-height: 1.6;
+        font-size: 0.95rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       .preview-card h3 {
         margin: 0 0 1rem 0;
         font-size: 1.4rem;
         color: #2c3e50;
         font-family: 'Playfair Display', serif;
-      }
-      .preview-card p {
-        color: #666;
-        margin: 0 0 1rem 0;
-        line-height: 1.6;
-        font-size: 0.9rem;
       }
       .preview-card-meta {
         display: flex;
@@ -473,6 +488,22 @@
         placeholder: 'Entrez une description détaillée du restaurant...'
       });
 
+      // Fonction pour extraire les images du contenu Markdown
+      function extractImagesFromMarkdown(content) {
+        const images = [];
+        const regex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+        let match;
+        
+        while ((match = regex.exec(content)) !== null) {
+          const [_, alt, src] = match;
+          if (!src.includes('header.jpg') && !src.includes('favicon')) {
+            images.push({ src, alt });
+          }
+        }
+        
+        return images;
+      }
+
       // Fonction pour charger les données du restaurant
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -535,21 +566,24 @@
             });
           }
 
-          // Charger la galerie d'images depuis le contenu Markdown
-          const galleryRegex = /!\[.*?\]\((.*?)\)/g;
-          const galleryMatches = fullContent.matchAll(galleryRegex);
-          const galleryImages = Array.from(galleryMatches, m => m[1]);
+          // Charger la galerie d'images
+          const images = extractImagesFromMarkdown(fullContent);
+          const mainImageUrl = metadata.image ? metadata.image.replace(/^"(.*)"$/, '$1') : null;
           
-          // Vider la galerie existante
+          // Vider les galeries existantes
           document.getElementById('gallery-grid').innerHTML = '';
           document.querySelector('.gallery-preview').innerHTML = '';
           
-          // Ajouter chaque image trouvée
-          galleryImages.forEach(imgSrc => {
-            if(imgSrc !== metadata.image) { // Ne pas inclure l'image principale dans la galerie
-              addGalleryImage(imgSrc);
+          // Ajouter les images à la galerie
+          images.forEach(({ src, alt }) => {
+            if (src !== mainImageUrl) {
+              addGalleryImage(src, alt);
             }
           });
+
+          // Mettre à jour les prévisualisations
+          updatePreview();
+          updateGalleryPreview();
         } else {
           // Nouveau restaurant : cacher les images par défaut
           document.querySelectorAll('.preview-card img, .preview-full img').forEach(img => {
@@ -574,23 +608,21 @@
         const summary = summaryEditor.root.innerHTML;
         const description = descriptionEditor.root.innerHTML;
 
-        // Vue carte
-        const previewCard = document.querySelector('.preview-card');
-        previewCard.querySelector('h3').textContent = name;
-        previewCard.querySelector('.style').textContent = cuisine;
-        previewCard.querySelector('.note').textContent = rating;
-        previewCard.querySelector('.price-value').textContent = price;
-        previewCard.querySelector('.preview-card-content p').innerHTML = summary;
+        // Mise à jour de la vue carte
+        document.querySelectorAll('.preview-card h3').forEach(el => el.textContent = name);
+        document.querySelectorAll('.preview-card .style').forEach(el => el.textContent = cuisine);
+        document.querySelectorAll('.preview-card .note').forEach(el => el.textContent = rating);
+        document.querySelectorAll('.preview-card .price-value').forEach(el => el.textContent = price);
+        document.querySelectorAll('.preview-card-content p').forEach(el => el.innerHTML = summary);
 
-        // Vue complète
-        const previewFull = document.querySelector('.preview-full');
-        previewFull.querySelector('h3').textContent = name;
-        previewFull.querySelector('.style').textContent = cuisine;
-        previewFull.querySelector('.note').textContent = rating;
-        previewFull.querySelector('.price-value').textContent = price;
-        previewFull.querySelector('.address').textContent = address;
-        previewFull.querySelector('.summary-text').innerHTML = summary;
-        previewFull.querySelector('.description-text').innerHTML = description;
+        // Mise à jour de la vue complète
+        document.querySelectorAll('.preview-full h3').forEach(el => el.textContent = name);
+        document.querySelectorAll('.preview-full .style').forEach(el => el.textContent = cuisine);
+        document.querySelectorAll('.preview-full .note').forEach(el => el.textContent = rating);
+        document.querySelectorAll('.preview-full .price-value').forEach(el => el.textContent = price);
+        document.querySelectorAll('.preview-full .address').forEach(el => el.textContent = address);
+        document.querySelectorAll('.preview-full .summary-text').forEach(el => el.innerHTML = summary);
+        document.querySelectorAll('.preview-full .description-text').forEach(el => el.innerHTML = description);
       }
 
       // Gestionnaire d'événements pour les champs de formulaire
@@ -635,18 +667,25 @@
         }
       });
 
-      function addGalleryImage(src) {
+      function addGalleryImage(src, alt = '') {
+        // Ajouter à la grille d'édition
         const galleryGrid = document.getElementById('gallery-grid');
         const item = document.createElement('div');
         item.className = 'gallery-item';
         item.innerHTML = `
-          <img src="${src}" alt="Image galerie">
-          <button type="button" class="remove-btn" onclick="this.parentElement.remove()">
+          <img src="${src}" alt="${alt}">
+          <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateGalleryPreview();">
             <i class="fas fa-times"></i>
           </button>
         `;
         galleryGrid.appendChild(item);
-        updateGalleryPreview();
+
+        // Ajouter à la prévisualisation
+        const galleryPreview = document.querySelector('.gallery-preview');
+        const previewItem = document.createElement('div');
+        previewItem.className = 'gallery-preview-item';
+        previewItem.innerHTML = `<img src="${src}" alt="${alt}">`;
+        galleryPreview.appendChild(previewItem);
       }
 
       // Initialiser le tri par glisser-déposer
