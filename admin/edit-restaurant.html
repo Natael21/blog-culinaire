@@ -507,6 +507,42 @@
         margin: 1rem 0;
         font-weight: 500;
       }
+
+      .scroll-toggle {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #3498db;
+        color: white;
+        padding: 0.8rem 1.2rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .scroll-toggle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+
+      .scroll-toggle.independent {
+        background: #e74c3c;
+      }
+
+      .scroll-toggle i {
+        transition: transform 0.3s ease;
+      }
+
+      .scroll-toggle.independent i {
+        transform: rotate(90deg);
+      }
     </style>
   </head>
   <body>
@@ -514,6 +550,11 @@
       <h1>Édition Restaurant</h1>
       <a href="#" class="back-to-site" onclick="confirmExit(event)"><i class="fas fa-arrow-left"></i> Retour à l'administration</a>
     </header>
+
+    <button class="scroll-toggle" id="scrollToggle">
+      <i class="fas fa-link"></i>
+      <span>Défilement synchronisé</span>
+    </button>
 
     <div class="container">
       <div class="form-section">
@@ -1502,6 +1543,43 @@
 
       // Charger les données au chargement de la page
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
+
+      // Gestion du défilement synchronisé
+      const scrollToggle = document.getElementById('scrollToggle');
+      const formSection = document.querySelector('.form-section');
+      const previewSection = document.querySelector('.preview-section');
+      let isScrollSynced = true;
+
+      scrollToggle.addEventListener('click', () => {
+        isScrollSynced = !isScrollSynced;
+        scrollToggle.classList.toggle('independent');
+        if (isScrollSynced) {
+          scrollToggle.innerHTML = '<i class="fas fa-link"></i><span>Défilement synchronisé</span>';
+        } else {
+          scrollToggle.innerHTML = '<i class="fas fa-link"></i><span>Défilement indépendant</span>';
+          previewSection.style.position = 'static';
+        }
+      });
+
+      // Synchroniser le défilement
+      window.addEventListener('scroll', () => {
+        if (isScrollSynced) {
+          const scrollPercentage = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+          const maxScroll = previewSection.scrollHeight - window.innerHeight;
+          previewSection.scrollTop = scrollPercentage * maxScroll;
+        }
+      });
+
+      // Mettre à jour la position de la section de prévisualisation en fonction du mode de défilement
+      function updatePreviewSectionPosition() {
+        if (isScrollSynced) {
+          previewSection.style.position = 'sticky';
+        } else {
+          previewSection.style.position = 'static';
+        }
+      }
+
+      window.addEventListener('resize', updatePreviewSectionPosition);
     </script>
   </body>
 </html> 
