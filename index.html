@@ -1039,12 +1039,19 @@ document.addEventListener('DOMContentLoaded', function() {
   // Précharger les coordonnées en arrière-plan
   async function preloadCoordinates() {
     const restaurants = document.querySelectorAll('.post-card');
+    console.log(`Début du géocodage pour ${restaurants.length} restaurants`);
     let geocodingCount = 0;
+    let successCount = 0;
+    let failureCount = 0;
     
     for (const restaurant of restaurants) {
       const address = restaurant.dataset.address;
+      const title = restaurant.querySelector('h2').textContent;
       let lat = parseFloat(restaurant.dataset.lat);
       let lng = parseFloat(restaurant.dataset.lng);
+      
+      console.log(`\nTraitement de: ${title}`);
+      console.log(`Adresse: ${address}`);
       
       // Si on n'a pas déjà les coordonnées
       if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && address) {
@@ -1060,12 +1067,24 @@ document.addEventListener('DOMContentLoaded', function() {
           // Mettre à jour le dataset du restaurant
           restaurant.dataset.lat = coords.lat;
           restaurant.dataset.lng = coords.lng;
+          successCount++;
+          console.log(`✅ Coordonnées obtenues pour ${title}: ${coords.lat}, ${coords.lng}`);
+        } else {
+          failureCount++;
+          console.log(`❌ Échec du géocodage pour ${title}`);
         }
       } else if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
         // Stocker les coordonnées existantes
         geocodedCoordinates.set(address, { lat, lng });
+        successCount++;
+        console.log(`ℹ️ Coordonnées existantes pour ${title}: ${lat}, ${lng}`);
       }
     }
+    
+    console.log(`\nRésumé du géocodage:`);
+    console.log(`Total des restaurants: ${restaurants.length}`);
+    console.log(`Succès: ${successCount}`);
+    console.log(`Échecs: ${failureCount}`);
   }
 
   // Lancer le préchargement en arrière-plan
@@ -1222,12 +1241,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-async function geocodeAddress(address) {
+async function geocodeAddress(address, retryCount = 0) {
+  const maxRetries = 3;
   const encodedAddress = encodeURIComponent(address + ', Sherbrooke, QC');
   const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
   
   try {
-    // Ajouter un User-Agent pour respecter les conditions d'utilisation de Nominatim
+    console.log(`Tentative de géocodage pour: ${address}`);
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'BlogCulinaireSherbrooke/1.0'
@@ -1240,16 +1260,26 @@ async function geocodeAddress(address) {
     
     const data = await response.json();
     if (data && data.length > 0) {
-      console.log('Géocodage réussi pour:', address);
+      console.log('✅ Géocodage réussi pour:', address);
       return {
         lat: parseFloat(data[0].lat),
         lng: parseFloat(data[0].lon)
       };
     } else {
-      console.warn('Aucun résultat trouvé pour:', address);
+      console.warn('❌ Aucun résultat trouvé pour:', address);
+      if (retryCount < maxRetries) {
+        console.log(`Nouvelle tentative (${retryCount + 1}/${maxRetries}) pour:`, address);
+        await sleep(2000); // Attendre 2 secondes avant de réessayer
+        return geocodeAddress(address, retryCount + 1);
+      }
     }
   } catch (error) {
-    console.error('Erreur de géocodage pour', address, ':', error);
+    console.error('❌ Erreur de géocodage pour', address, ':', error);
+    if (retryCount < maxRetries) {
+      console.log(`Nouvelle tentative (${retryCount + 1}/${maxRetries}) pour:`, address);
+      await sleep(2000);
+      return geocodeAddress(address, retryCount + 1);
+    }
   }
   return null;
 }
