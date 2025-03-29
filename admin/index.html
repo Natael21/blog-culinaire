@@ -1384,101 +1384,69 @@
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-      // Fonction pour charger les restaurants depuis le dossier _posts
+      // Fonction pour charger les restaurants depuis le fichier data
       async function loadRestaurants() {
         try {
-          const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts');
-          const posts = await response.json();
-          
           const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = '';
-          
+          restaurantList.innerHTML = '<div class="loading">Chargement des restaurants...</div>';
+
+          // Charger les restaurants depuis le fichier data
+          const response = await fetch('/data/restaurants.json');
+          if (!response.ok) {
+            throw new Error('Impossible de charger les données des restaurants');
+          }
+          const posts = await response.json();
+
           const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
           const sortBy = document.getElementById('sort-by').value;
           const restaurantItems = [];
-          
+
           for (const post of posts) {
-            if (post.name.endsWith('.markdown') || post.name.endsWith('.md')) {
-              try {
-                const contentResponse = await fetch(post.download_url);
-                const content = await contentResponse.text();
-                
-                // Extraire les métadonnées du frontmatter de manière plus robuste
-                const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-                if (!frontmatterMatch) {
-                  console.error(`Format de frontmatter invalide pour ${post.name}`);
-                  continue;
-                }
-
-                const frontmatter = frontmatterMatch[1];
-                const metadata = {};
-                
-                // Extraction plus robuste des métadonnées
-                frontmatter.split('\n').forEach(line => {
-                  const match = line.match(/^(\w+):\s*"?(.*?)"?\s*$/);
-                  if (match) {
-                    const [_, key, value] = match;
-                    metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
-                  }
-                });
-
-                // Vérification des champs requis
-                if (!metadata.title) {
-                  console.error(`Titre manquant pour ${post.name}`);
-                  continue;
-                }
-
-                // Valeurs par défaut pour les champs optionnels
-                metadata.date = metadata.date || new Date().toISOString().split('T')[0];
-                metadata.style = metadata.style || 'Non spécifié';
-                metadata.note = metadata.note || '0';
-                metadata.image = metadata.image || '/images/restaurant-default.jpg';
-
-                // Nettoyage et validation des valeurs
-                const title = metadata.title.replace(/^"(.*)"$/, '$1');
-                const style = metadata.style.replace(/^"(.*)"$/, '$1');
-                const note = parseFloat(metadata.note) || 0;
-                const image = metadata.image.replace(/^"(.*)"$/, '$1');
-
-                // Vérifier si le restaurant correspond aux critères de recherche
-                if (searchTerm && !(title.toLowerCase().includes(searchTerm) || style.toLowerCase().includes(searchTerm))) {
-                  continue;
-                }
-
-                const item = document.createElement('div');
-                item.className = 'restaurant-item';
-                item.innerHTML = `
-                  <div class="restaurant-info">
-                    <img src="${image}" alt="${title}" class="restaurant-image" onerror="this.src='/images/restaurant-default.jpg'">
-                    <div class="restaurant-details">
-                      <h3>${title}</h3>
-                      <div class="restaurant-meta">
-                        <span><i class="fas fa-calendar"></i> ${metadata.date}</span>
-                        <span><i class="fas fa-utensils"></i> ${style}</span>
-                        <span><i class="fas fa-star"></i> ${note}/5</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="restaurant-actions">
-                    <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}" class="action-btn edit-btn">
-                      <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
-                      <i class="fas fa-trash"></i> Supprimer
-                    </button>
-                  </div>
-                `;
-                
-                item.dataset.title = title.toLowerCase();
-                item.dataset.date = metadata.date;
-                
-                restaurantItems.push(item);
-                
-              } catch (error) {
-                console.error(`Erreur lors du chargement du restaurant ${post.name}:`, error);
-                continue;
-              }
+            // Vérification des champs requis
+            if (!post.title) {
+              console.error(`Titre manquant pour ${post.name}`);
+              continue;
             }
+
+            // Valeurs par défaut pour les champs optionnels
+            post.date = post.date || new Date().toISOString().split('T')[0];
+            post.style = post.style || 'Non spécifié';
+            post.note = post.note || 0;
+            post.image = post.image || '/images/restaurant-default.jpg';
+
+            // Vérifier si le restaurant correspond aux critères de recherche
+            if (searchTerm && !(post.title.toLowerCase().includes(searchTerm) || post.style.toLowerCase().includes(searchTerm))) {
+              continue;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'restaurant-item';
+            item.innerHTML = `
+              <div class="restaurant-info">
+                <img src="${post.image}" alt="${post.title}" class="restaurant-image" onerror="this.src='/images/restaurant-default.jpg'">
+                <div class="restaurant-details">
+                  <h3>${post.title}</h3>
+                  <div class="restaurant-meta">
+                    <span><i class="fas fa-calendar"></i> ${post.date}</span>
+                    <span><i class="fas fa-utensils"></i> ${post.style}</span>
+                    <span><i class="fas fa-star"></i> ${post.note}/5</span>
+                  </div>
+                </div>
+              </div>
+              <div class="restaurant-actions">
+                <button class="action-btn edit-btn" onclick="editRestaurant('${post.name}')">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+                <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
+                  <i class="fas fa-trash"></i> Supprimer
+                </button>
+              </div>
+            `;
+            
+            item.dataset.title = post.title.toLowerCase();
+            item.dataset.date = post.date;
+            
+            restaurantItems.push(item);
           }
 
           // Tri des restaurants
@@ -1512,6 +1480,7 @@
             <div class="error-message">
               <i class="fas fa-exclamation-circle"></i>
               <p>Une erreur est survenue lors du chargement des restaurants.</p>
+              <p class="error-details">${error.message}</p>
               <button onclick="loadRestaurants()" class="retry-btn">
                 <i class="fas fa-redo"></i> Réessayer
               </button>
@@ -1585,6 +1554,36 @@
         const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${path}`);
         const data = await response.json();
         return data.sha;
+      }
+
+      // Fonction pour éditer un restaurant
+      async function editRestaurant(fileName) {
+        try {
+          // Récupérer le contenu du fichier via l'API GitHub
+          const token = netlifyIdentity.currentUser().token.access_token;
+          const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts/${fileName}`, {
+            headers: {
+              'Authorization': `token ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Erreur lors de la récupération du contenu du fichier');
+          }
+
+          const data = await response.json();
+          const content = atob(data.content); // Décoder le contenu Base64
+
+          // Rediriger vers la page d'édition avec les paramètres
+          window.location.href = `/admin/edit-restaurant.html?file=${encodeURIComponent(fileName)}&content=${encodeURIComponent(content)}`;
+        } catch (error) {
+          console.error('Erreur lors de l\'édition du restaurant:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de l\'édition du restaurant: ' + error.message
+          });
+        }
       }
     </script>
 

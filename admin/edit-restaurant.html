@@ -1269,6 +1269,7 @@
         try {
           // Récupérer les paramètres de l'URL
           const urlParams = new URLSearchParams(window.location.search);
+          const filePath = urlParams.get('file');
           const fileContent = urlParams.get('content');
           
           if (!fileContent) {
@@ -1291,17 +1292,26 @@
           // Extraire les champs du frontmatter
           const title = frontmatter.match(/title:\s*"([^"]+)"/)?.[1];
           const date = frontmatter.match(/date:\s*(\d{4}-\d{2}-\d{2})/)?.[1];
-          const note = frontmatter.match(/note:\s*(\d+)/)?.[1];
+          const note = frontmatter.match(/note:\s*(\d+\.?\d*)/)?.[1];
           const style = frontmatter.match(/style:\s*"([^"]+)"/)?.[1];
           const description = frontmatter.match(/description:\s*"([^"]+)"/)?.[1];
           const price = frontmatter.match(/price:\s*"([^"]+)"/)?.[1];
           const image = frontmatter.match(/image:\s*"([^"]+)"/)?.[1];
+          const address = frontmatter.match(/address:\s*"([^"]+)"/)?.[1];
 
           // Remplir le formulaire
           document.getElementById('name').value = title || '';
           document.getElementById('cuisine').value = style || '';
           document.getElementById('price').value = price || '';
           document.getElementById('rating').value = note || '';
+          document.getElementById('address').value = address || '';
+          
+          // Mettre à jour l'image principale
+          const mainImagePreview = document.querySelector('#main-image-preview img');
+          if (image) {
+            mainImagePreview.src = image;
+            mainImagePreview.onerror = () => mainImagePreview.src = '/images/restaurant-test.jpg';
+          }
           
           // Mettre à jour les éditeurs de texte
           if (window.summaryEditor) {
@@ -1311,6 +1321,14 @@
             window.descriptionEditor.root.innerHTML = content || '';
           }
 
+          // Extraire et ajouter les images de la galerie
+          const galleryImages = extractImagesFromMarkdown(frontmatter);
+          const galleryGrid = document.getElementById('gallery-grid');
+          galleryGrid.innerHTML = ''; // Vider la galerie existante
+          galleryImages.forEach(img => {
+            addGalleryImage(img.src, img.alt, false);
+          });
+
           // Mettre à jour l'aperçu
           updatePreview({
             title,
@@ -1319,19 +1337,12 @@
             note,
             description,
             content,
-            image
+            image,
+            address
           });
 
           // Sauvegarder l'état initial
-          window.initialState = {
-            title,
-            style,
-            price,
-            note,
-            description,
-            content,
-            image
-          };
+          saveInitialState();
 
         } catch (error) {
           console.error('Erreur lors du chargement du restaurant:', error);
@@ -1346,7 +1357,7 @@
       // Fonction pour mettre à jour l'aperçu
       function updatePreview(data) {
         try {
-          const { title, style, price, note, description, content, image } = data;
+          const { title, style, price, note, description, content, image, address } = data;
           
           // Mise à jour de la vue carte
           const card = document.querySelector('.preview-card');
