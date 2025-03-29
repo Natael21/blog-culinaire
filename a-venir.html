@@ -13,10 +13,7 @@ permalink: /a-venir/
   <div class="upcoming-grid" id="sortable-grid">
     {% assign sorted_upcoming = site.upcoming | sort: "order" %}
     {% for restaurant in sorted_upcoming %}
-    <div class="upcoming-card" data-order="{{ restaurant.order }}" data-path="{{ restaurant.path | remove_first: '_upcoming/' }}">
-      <div class="drag-handle">
-        <i class="fas fa-grip-vertical"></i>
-      </div>
+    <div class="upcoming-card">
       <div class="card-content">
         <div class="restaurant-type">{{ restaurant.restaurant_type }}</div>
         <h2>{{ restaurant.title }}</h2>
@@ -24,11 +21,6 @@ permalink: /a-venir/
         <div class="location">
           <i class="fas fa-map-marker-alt"></i>
           <span>{{ restaurant.location }}</span>
-        </div>
-        <div class="admin-controls">
-          <button class="edit-btn" onclick="window.location.href='/admin/#upcoming'">
-            <i class="fas fa-edit"></i> Modifier
-          </button>
         </div>
       </div>
     </div>
@@ -77,42 +69,11 @@ permalink: /a-venir/
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: flex;
   overflow: hidden;
-  user-select: none;
-}
-
-.drag-handle {
-  width: 40px;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  flex-shrink: 0;
-  border-right: 1px solid #eee;
-  transition: background-color 0.3s ease;
-}
-
-.drag-handle:hover {
-  background: #e9ecef;
-}
-
-.drag-handle:active {
-  cursor: grabbing;
-  background: var(--accent-color);
-  color: white;
-}
-
-.drag-handle i {
-  color: #666;
-  pointer-events: none;
 }
 
 .card-content {
   padding: 1.5rem;
-  flex-grow: 1;
-  cursor: default;
 }
 
 .restaurant-type {
@@ -150,35 +111,6 @@ permalink: /a-venir/
 
 .location i {
   color: var(--accent-color);
-}
-
-.admin-controls {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
-  display: flex;
-  gap: 1rem;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.edit-btn {
-  padding: 0.5rem 1rem;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.edit-btn:hover {
-  background-color: var(--accent-color);
-  transform: translateY(-2px);
 }
 
 .suggestion-section {
@@ -222,90 +154,4 @@ permalink: /a-venir/
     padding: 2rem 1rem;
   }
 }
-
-.sortable-ghost {
-  opacity: 0.5;
-  background: #f8f9fa;
-}
-
-.sortable-drag {
-  cursor: grabbing;
-}
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const grid = document.getElementById('sortable-grid');
-  if (!grid) return;
-
-  new Sortable(grid, {
-    animation: 150,
-    handle: '.drag-handle',
-    ghostClass: 'sortable-ghost',
-    dragClass: 'sortable-drag',
-    onStart: function(evt) {
-      document.body.style.cursor = 'grabbing';
-    },
-    onEnd: async function(evt) {
-      document.body.style.cursor = 'default';
-      
-      try {
-        const token = window.netlifyIdentity?.currentUser()?.token?.access_token;
-        if (!token) {
-          alert('Veuillez vous connecter pour réorganiser les restaurants');
-          window.location.reload();
-          return;
-        }
-
-        const items = Array.from(grid.children);
-        const updates = items.map((item, index) => ({
-          path: item.dataset.path,
-          order: index + 1
-        }));
-
-        for (const update of updates) {
-          const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/_upcoming/${update.path}`, {
-            headers: {
-              'Authorization': `token ${token}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          });
-
-          if (!response.ok) {
-            throw new Error(`Erreur lors de la récupération du fichier: ${response.statusText}`);
-          }
-
-          const file = await response.json();
-          const content = atob(file.content);
-          const newContent = content.replace(/order: \d+/, `order: ${update.order}`);
-
-          const updateResponse = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/_upcoming/${update.path}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-              message: `Mise à jour de l'ordre à ${update.order}`,
-              content: btoa(newContent),
-              sha: file.sha
-            })
-          });
-
-          if (!updateResponse.ok) {
-            throw new Error(`Erreur lors de la mise à jour du fichier: ${updateResponse.statusText}`);
-          }
-        }
-
-        window.location.reload();
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour:', error);
-        alert('Une erreur est survenue lors de la mise à jour de l\'ordre des restaurants');
-        window.location.reload();
-      }
-    }
-  });
-});
-</script> 
+</style> 
