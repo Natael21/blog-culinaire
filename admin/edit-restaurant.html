@@ -720,6 +720,42 @@
         });
       }
 
+      // Fonction pour extraire les images du contenu Markdown
+      function extractImagesFromMarkdown(content) {
+        const images = [];
+        const regex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+        let match;
+
+        while ((match = regex.exec(content)) !== null) {
+          const [_, alt, src] = match;
+          // Nettoyer l'URL de l'image
+          let cleanSrc = src.trim().replace(/^"(.*)"$/, '$1');
+          
+          // S'assurer que le chemin commence par /images/
+          if (!cleanSrc.startsWith('/')) {
+            cleanSrc = `/images/${cleanSrc}`;
+          }
+
+          // Exclure les images spécifiques
+          const excludedImages = [
+            'header.jpg',
+            'favicon',
+            'profil.jpg',
+            'restaurant-test.jpg'
+          ];
+
+          const shouldExclude = excludedImages.some(excluded => 
+            cleanSrc.toLowerCase().includes(excluded.toLowerCase())
+          );
+
+          if (!shouldExclude) {
+            images.push({ src: cleanSrc, alt: alt || '' });
+          }
+        }
+
+        return images;
+      }
+
       // Fonction pour charger les données du restaurant
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -772,34 +808,34 @@
           descriptionEditor.root.innerHTML = formattedContent;
 
           // Gérer l'image principale
+          let mainImageUrl = null;
           if (metadata.image) {
-            const mainImageUrl = metadata.image.replace(/^"(.*)"$/, '$1');
+            mainImageUrl = metadata.image.replace(/^"(.*)"$/, '$1');
+            if (!mainImageUrl.startsWith('/')) {
+              mainImageUrl = `/images/${mainImageUrl}`;
+            }
             const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
             previewImages.forEach(img => {
               img.style.display = 'block';
               img.src = mainImageUrl;
             });
-          } else {
-            document.querySelectorAll('.preview-card img, .preview-full img').forEach(img => {
-              img.style.display = 'none';
-            });
           }
 
-          // Charger la galerie d'images
-          const images = extractImagesFromMarkdown(fullContent);
-          const mainImageUrl = metadata.image ? metadata.image.replace(/^"(.*)"$/, '$1') : null;
-          
+          // Extraire et charger les images de la galerie
+          console.log("Contenu complet:", fullContent); // Debug
+          const galleryImages = extractImagesFromMarkdown(fullContent);
+          console.log("Images extraites:", galleryImages); // Debug
+
           // Vider les galeries existantes
           document.getElementById('gallery-grid').innerHTML = '';
           document.querySelector('.gallery-preview').innerHTML = '';
-          
+
           // Ajouter les images à la galerie
-          images.forEach(({ src, alt }) => {
-            // Vérifier que ce n'est pas l'image principale
+          galleryImages.forEach(({ src, alt }) => {
+            // Ne pas ajouter l'image principale à la galerie
             if (src !== mainImageUrl) {
-              // S'assurer que l'URL de l'image commence par /
-              const imageSrc = src.startsWith('/') ? src : `/images/${src}`;
-              addGalleryImage(imageSrc, alt);
+              console.log("Ajout de l'image à la galerie:", src); // Debug
+              addGalleryImage(src, alt);
             }
           });
 
@@ -941,6 +977,8 @@
       });
 
       function addGalleryImage(src, alt = '') {
+        console.log("Ajout d'une image:", src); // Debug
+
         // Ajouter à la grille d'édition
         const galleryGrid = document.getElementById('gallery-grid');
         const item = document.createElement('div');
@@ -959,6 +997,9 @@
         previewItem.className = 'gallery-preview-item';
         previewItem.innerHTML = `<img src="${src}" alt="${alt}">`;
         galleryPreview.appendChild(previewItem);
+
+        // Mettre à jour hasChanges
+        hasChanges = true;
       }
 
       // Initialiser le tri par glisser-déposer
@@ -970,7 +1011,21 @@
 
       function updateGalleryPreview() {
         const galleryPreview = document.querySelector('.gallery-preview');
-        galleryPreview.innerHTML = document.getElementById('gallery-grid').innerHTML;
+        const galleryGrid = document.getElementById('gallery-grid');
+        
+        galleryPreview.innerHTML = '';
+        Array.from(galleryGrid.children).forEach(item => {
+          const img = item.querySelector('img');
+          if (img) {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'gallery-preview-item';
+            previewItem.innerHTML = `<img src="${img.src}" alt="${img.alt}">`;
+            galleryPreview.appendChild(previewItem);
+          }
+        });
+        
+        // Mettre à jour hasChanges
+        hasChanges = true;
       }
 
       // Gestion du toggle des previews
