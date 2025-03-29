@@ -71,28 +71,3 @@ rss: rss
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
-
-# Permalinks
-permalink: /:year/:month/:day/:title/
-
-# Collections
-collections:
-  restaurants:
-    output: true
-    permalink: /restaurants/:path/
-
-# Default front matter
-defaults:
-  -
-    scope:
-      path: ""
-      type: "posts"
-    values:
-      layout: "restaurant"
-      comments: true
-  -
-    scope:
-      path: "admin"
-    values:
-      layout: null
-      permalink: /:path/

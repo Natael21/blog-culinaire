@@ -154,42 +154,12 @@ body {
   gap: 1.5rem;
   color: #666;
   font-size: 0.9rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
-  margin-top: auto;
 }
 
 .restaurant-meta span {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'Open Sans', sans-serif;
-}
-
-.restaurant-meta .cuisine-style {
-  color: #666;
-}
-
-.restaurant-meta .cuisine-style i {
-  color: #666;
-}
-
-.restaurant-meta .price {
-  color: #2ecc71;
-  font-weight: 600;
-}
-
-.restaurant-meta .price i {
-  color: #2ecc71;
-  margin-right: -2px;
-}
-
-.restaurant-meta .date {
-  color: #666;
-}
-
-.restaurant-meta .date i {
-  color: #666;
 }
 
 .restaurant-actions {
@@ -557,50 +527,4 @@ body {
 
 .gallery-item.drag-over {
   border: 2px dashed #3498db;
-}
-
-/* Style pour le bouton de déconnexion flottant */
-.logout-btn-floating {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  background-color: #e74c3c;
-  color: white;
-  padding: 1rem;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 9999;
-  border: none;
-  font-size: 1.5rem;
-}
-
-.logout-btn-floating:hover {
-  transform: translateY(-3px);
-  background-color: #c0392b;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.logout-btn-floating i {
-  font-size: 1.5rem;
-  color: white;
-}
-
-@media (max-width: 768px) {
-  .logout-btn-floating {
-    bottom: 1rem;
-    right: 1rem;
-    width: 50px;
-    height: 50px;
-  }
-  
-  .logout-btn-floating i {
-    font-size: 1.2rem;
-  }
 } 
