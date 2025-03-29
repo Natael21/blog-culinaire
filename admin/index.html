@@ -1165,9 +1165,7 @@
         <div class="restaurant-list">
           {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
           {% for post in sorted_posts %}
-            {% assign post_url_parts = post.path | split: '/' %}
-            {% assign filename = post_url_parts | last %}
-            <div class="restaurant-item" data-id="{{ filename }}">
+            <div class="restaurant-item">
               <div class="restaurant-info">
                 <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}" class="restaurant-image">
                 <div class="restaurant-details">
@@ -1181,10 +1179,10 @@
                 </div>
               </div>
               <div class="restaurant-actions">
-                <a href="/admin/edit-restaurant.html?file={{ filename }}" class="action-btn edit-btn">
+                <a href="/admin/edit-restaurant.html?id={{ post.path }}" class="action-btn edit-btn">
                   <i class="fas fa-edit"></i> Modifier
                 </a>
-                <button class="action-btn delete-btn" data-file="{{ filename }}" onclick="deleteRestaurant('{{ filename }}')">
+                <button class="action-btn delete-btn" onclick="deleteRestaurant('{{ post.path }}')">
                   <i class="fas fa-trash"></i> Supprimer
                 </button>
               </div>
@@ -1498,33 +1496,32 @@
         });
       });
 
-      // Gestion de la suppression des restaurants
-      async function deleteRestaurant(filename) {
-        const item = document.querySelector(`[data-id="${filename}"]`);
+      // Fonction simplifiée pour la suppression
+      function deleteRestaurant(path) {
+        const item = event.target.closest('.restaurant-item');
         const restaurantName = item.querySelector('h3').textContent;
         
         if (confirm(`Êtes-vous sûr de vouloir supprimer le restaurant "${restaurantName}" ?`)) {
-          try {
-            // Envoyer une requête pour supprimer le fichier
-            const response = await fetch('/api/delete-post', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ filename })
-            });
-
+          // Utiliser l'API Netlify pour supprimer le fichier
+          fetch('/.netlify/functions/delete-post', {
+            method: 'POST',
+            body: JSON.stringify({ path }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => {
             if (response.ok) {
               item.style.opacity = '0';
-              await new Promise(resolve => setTimeout(resolve, 300));
-              item.remove();
+              setTimeout(() => item.remove(), 300);
             } else {
               throw new Error('Erreur lors de la suppression');
             }
-          } catch (error) {
+          })
+          .catch(error => {
             console.error('Erreur:', error);
             alert('Une erreur est survenue lors de la suppression du restaurant.');
-          }
+          });
         }
       }
 
