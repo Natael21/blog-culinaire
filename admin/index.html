@@ -1181,7 +1181,7 @@
         branch: 'master',
         get headers() {
           return {
-            'Authorization': `token ${window.ENV.GITHUB_TOKEN}`,
+            'Authorization': `token ${getGitHubToken()}`,
             'Accept': 'application/vnd.github.v3+json'
           };
         }
@@ -1189,31 +1189,65 @@
 
       // Fonction pour obtenir le token d'authentification GitHub
       function getGitHubToken() {
-        return window.ENV.GITHUB_TOKEN;
+        // Récupérer le token depuis les variables d'environnement Netlify
+        return window.netlifyIdentity?.currentUser()?.token?.access_token;
       }
 
-      // Initialisation des variables d'environnement Netlify
-      window.ENV = {};
+      // Initialisation de Netlify Identity
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on('init', user => {
-          if (user) {
-            window.ENV.GITHUB_TOKEN = user.token.access_token;
+          if (!user) {
+            window.netlifyIdentity.open();
           }
         });
 
-        window.netlifyIdentity.on('login', user => {
-          window.ENV.GITHUB_TOKEN = user.token.access_token;
-          loadRestaurants();
-          if (document.querySelector('.admin-content-section.active').id === 'upcoming') {
-            loadUpcomingRestaurants();
+        window.netlifyIdentity.on('login', () => {
+          // Recharger les données après la connexion
+          const activeSection = document.querySelector('.admin-content-section.active');
+          if (activeSection) {
+            if (activeSection.id === 'restaurants') {
+              loadRestaurants();
+            } else if (activeSection.id === 'upcoming') {
+              loadUpcomingRestaurants();
+            }
           }
         });
 
         window.netlifyIdentity.on('logout', () => {
-          window.ENV = {};
-          location.reload();
+          // Rediriger vers la page de connexion
+          window.location.reload();
         });
       }
+
+      // Initialisation de la page
+      document.addEventListener('DOMContentLoaded', () => {
+        const activeSection = document.querySelector('.admin-content-section.active');
+        if (activeSection) {
+          if (activeSection.id === 'restaurants') {
+            loadRestaurants();
+          } else if (activeSection.id === 'upcoming') {
+            loadUpcomingRestaurants();
+          }
+        }
+
+        // Gestion des onglets
+        document.querySelectorAll('.admin-nav button').forEach(button => {
+          button.addEventListener('click', () => {
+            document.querySelectorAll('.admin-nav button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            document.querySelectorAll('.admin-content-section').forEach(section => section.classList.remove('active'));
+            const targetSection = document.getElementById(button.dataset.section);
+            targetSection.classList.add('active');
+            
+            if (button.dataset.section === 'upcoming') {
+              loadUpcomingRestaurants();
+            } else if (button.dataset.section === 'restaurants') {
+              loadRestaurants();
+            }
+          });
+        });
+      });
 
       // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
@@ -1363,36 +1397,6 @@
           });
         }
       }
-
-      // Initialisation de la page
-      document.addEventListener('DOMContentLoaded', () => {
-        const activeSection = document.querySelector('.admin-content-section.active');
-        if (activeSection) {
-          if (activeSection.id === 'restaurants') {
-            loadRestaurants();
-          } else if (activeSection.id === 'upcoming') {
-            loadUpcomingRestaurants();
-          }
-        }
-
-        // Gestion des onglets
-        document.querySelectorAll('.admin-nav button').forEach(button => {
-          button.addEventListener('click', () => {
-            document.querySelectorAll('.admin-nav button').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            document.querySelectorAll('.admin-content-section').forEach(section => section.classList.remove('active'));
-            const targetSection = document.getElementById(button.dataset.section);
-            targetSection.classList.add('active');
-            
-            if (button.dataset.section === 'upcoming') {
-              loadUpcomingRestaurants();
-            } else if (button.dataset.section === 'restaurants') {
-              loadRestaurants();
-            }
-          });
-        });
-      });
 
       // Fonction de suppression
       async function deleteRestaurant(path) {
