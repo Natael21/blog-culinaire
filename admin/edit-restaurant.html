@@ -561,7 +561,7 @@
             <div class="main-image-upload">
               <input type="file" id="main-image" accept="image/*" style="display: none;">
               <div class="upload-preview" id="main-image-preview">
-                <img src="/images/restaurant-test.jpg" alt="Preview">
+                <img src="/images/header.jpg" alt="Preview">
                 <button type="button" class="change-image-btn">
                   <i class="fas fa-camera"></i> Changer l'image
                 </button>
@@ -610,7 +610,7 @@
 
         <div class="preview-card active">
           <div class="preview-date">14 Mar 2024</div>
-          <img src="/images/restaurant-test.jpg" alt="Restaurant">
+          <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-card-content">
             <h3>Nom du Restaurant</h3>
             <p></p>
@@ -632,7 +632,7 @@
         </div>
 
         <div class="preview-full">
-          <img src="/images/restaurant-test.jpg" alt="Restaurant">
+          <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-content">
             <h3>Nom du Restaurant</h3>
             <div class="preview-meta">
@@ -943,7 +943,7 @@
 
       // Fonction pour standardiser le chemin des images
       function standardizeImagePath(path) {
-        if (!path) return '/images/restaurant-default.jpg';
+        if (!path) return '/images/header.jpg';
         path = path.trim();
         // Enlever les guillemets si présents
         path = path.replace(/^["'](.*)["']$/, '$1');
@@ -1205,14 +1205,14 @@
                 item.className = 'restaurant-item';
                 
                 // Nettoyer et encoder le chemin de l'image
-                const imagePath = metadata.image ? cleanImagePath(metadata.image) : '/images/restaurant-test.jpg';
+                const imagePath = metadata.image ? cleanImagePath(metadata.image) : '/images/header.jpg';
                 
                 // Encoder le contenu pour l'URL
                 const encodedContent = encodeURIComponent(content);
                 
                 item.innerHTML = `
                   <div class="restaurant-info">
-                    <img src="${imagePath}" alt="${metadata.title}" class="restaurant-image" onerror="this.src='/images/restaurant-test.jpg'">
+                    <img src="${imagePath}" alt="${metadata.title}" class="restaurant-image" onerror="this.src='/images/header.jpg'">
                     <div class="restaurant-details">
                       <h3>${metadata.title}</h3>
                       <div class="restaurant-meta">
@@ -1329,7 +1329,7 @@
             const note = frontmatter.match(/note:\s*(\d+\.?\d*)/)?.[1] || '5';
             const description = frontmatter.match(/description:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
             const address = frontmatter.match(/address:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
-            const image = frontmatter.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '/images/restaurant-default.jpg';
+            const image = frontmatter.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '/images/header.jpg';
 
             // Remplir le formulaire
             document.getElementById('name').value = title;
@@ -1343,7 +1343,7 @@
             mainImagePreview.src = standardizeImagePath(image);
             mainImagePreview.onerror = () => {
               console.warn('Erreur de chargement de l\'image:', image);
-              mainImagePreview.src = '/images/restaurant-default.jpg';
+              mainImagePreview.src = '/images/header.jpg';
             };
             
             // Mettre à jour les éditeurs de texte
@@ -1408,7 +1408,7 @@
             const cardImage = card.querySelector('img');
             if (image) {
               cardImage.src = image;
-              cardImage.onerror = () => cardImage.src = '/images/restaurant-default.jpg';
+              cardImage.onerror = () => cardImage.src = '/images/header.jpg';
             }
 
             // Mise à jour des métadonnées
@@ -1431,7 +1431,7 @@
             const fullImage = full.querySelector('img');
             if (image) {
               fullImage.src = image;
-              fullImage.onerror = () => fullImage.src = '/images/restaurant-default.jpg';
+              fullImage.onerror = () => fullImage.src = '/images/header.jpg';
             }
 
             // Mise à jour des métadonnées
@@ -1699,7 +1699,10 @@
       };
 
       // Charger les données au chargement de la page
-      document.addEventListener('DOMContentLoaded', loadRestaurantData);
+      document.addEventListener('DOMContentLoaded', () => {
+        initializeEditors();
+        loadRestaurantData();
+      });
 
       function initializeEditors() {
         // Configuration des éditeurs Quill
@@ -1762,12 +1765,6 @@
           timeout = setTimeout(later, wait);
         };
       }
-
-      // Initialiser les éditeurs au chargement de la page
-      document.addEventListener('DOMContentLoaded', () => {
-        initializeEditors();
-        loadRestaurantData();
-      });
     </script>
     
     <!-- Bouton de déconnexion flottant -->
