@@ -63,20 +63,15 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
       .preview-section {
-        position: static;
-        height: auto;
-        overflow-y: visible;
+        position: sticky;
+        top: 4rem;
+        height: calc(100vh - 4rem);
+        overflow-y: auto;
         padding: 1rem;
         background: white;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
-      }
-      .preview-section.synced {
-        position: sticky;
-        top: 4rem;
-        height: calc(100vh - 4rem);
-        overflow-y: auto;
         z-index: 100;
       }
       .preview-section.unsynced {
@@ -447,14 +442,6 @@
           height: auto;
           overflow-y: visible;
         }
-        .preview-section.synced {
-          position: static;
-          height: auto;
-          overflow-y: visible;
-        }
-        .scroll-toggle {
-          display: none;
-        }
       }
       
       /* Styles pour la galerie */
@@ -638,11 +625,6 @@
       <h1>Édition Restaurant</h1>
       <a href="#" class="back-to-site" onclick="confirmExit(event)"><i class="fas fa-arrow-left"></i> Retour à l'administration</a>
     </header>
-
-    <button class="scroll-toggle" id="scrollToggle">
-      <i class="fas fa-link"></i>
-      <span>Désynchroniser</span>
-    </button>
 
     <div class="container">
       <div class="form-section">
@@ -1711,68 +1693,28 @@
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
 
       // Gestion de la synchronisation du scroll
-      let isSynced = false;
       const previewSection = document.querySelector('.preview-section');
-      const scrollToggleBtn = document.querySelector('.scroll-toggle');
       let lastScrollTop = 0;
-
-      function updatePreviewSectionPosition() {
-        if (isSynced) {
-          previewSection.style.position = 'sticky';
-          previewSection.style.height = 'calc(100vh - 4rem)';
-          previewSection.style.overflowY = 'auto';
-          previewSection.classList.add('synced');
-          previewSection.classList.remove('unsynced');
-          scrollToggleBtn.innerHTML = '<i class="fas fa-unlink"></i> Désynchroniser';
-          scrollToggleBtn.classList.remove('unsynced');
-          
-          // Restaurer la position de défilement
-          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-          previewSection.scrollTop = previewScrollHeight * scrollRatio;
-        } else {
-          previewSection.style.position = 'static';
-          previewSection.style.height = 'auto';
-          previewSection.style.overflowY = 'visible';
-          previewSection.classList.remove('synced');
-          previewSection.classList.add('unsynced');
-          scrollToggleBtn.innerHTML = '<i class="fas fa-link"></i> Synchroniser';
-          scrollToggleBtn.classList.add('unsynced');
-          
-          // Réinitialiser la position de défilement
-          previewSection.scrollTop = 0;
-        }
-      }
-
-      // Gestionnaire du bouton de synchronisation
-      scrollToggleBtn.addEventListener('click', () => {
-        isSynced = !isSynced;
-        updatePreviewSectionPosition();
-      });
 
       // Gestionnaire du scroll pour la synchronisation
       window.addEventListener('scroll', () => {
-        if (isSynced) {
-          requestAnimationFrame(() => {
-            const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-            const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-            previewSection.scrollTop = previewScrollHeight * scrollRatio;
-          });
-        }
+        requestAnimationFrame(() => {
+          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
+          previewSection.scrollTop = previewScrollHeight * scrollRatio;
+        });
       });
 
       // Gestionnaire du scroll pour la section de prévisualisation
       previewSection.addEventListener('scroll', () => {
-        if (isSynced) {
-          requestAnimationFrame(() => {
-            const scrollRatio = previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight);
-            const windowScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-            window.scrollTo({
-              top: windowScrollHeight * scrollRatio,
-              behavior: 'auto'
-            });
+        requestAnimationFrame(() => {
+          const scrollRatio = previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight);
+          const windowScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+          window.scrollTo({
+            top: windowScrollHeight * scrollRatio,
+            behavior: 'auto'
           });
-        }
+        });
       });
 
       // Ajouter un gestionnaire de redimensionnement optimisé
@@ -1780,9 +1722,9 @@
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-          if (isSynced) {
-            updatePreviewSectionPosition();
-          }
+          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
+          previewSection.scrollTop = previewScrollHeight * scrollRatio;
         }, 250);
       });
     </script>
