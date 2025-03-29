@@ -1024,6 +1024,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Récupérer la dernière vue utilisée depuis le localStorage
   const lastView = localStorage.getItem('selectedView') || 'grid';
   
+  // Fonction pour attendre un certain temps
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   // Fonction pour initialiser la carte
   async function initMap() {
     if (!map) {
@@ -1039,6 +1044,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Ajouter les marqueurs pour chaque restaurant
       const restaurants = document.querySelectorAll('.post-card');
       const bounds = L.latLngBounds();
+      let geocodingCount = 0;
       
       for (const restaurant of restaurants) {
         let lat = parseFloat(restaurant.dataset.lat);
@@ -1046,6 +1052,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Si pas de coordonnées, essayer de géocoder l'adresse
         if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && restaurant.dataset.address) {
+          // Attendre 1 seconde entre chaque requête pour respecter les limites
+          if (geocodingCount > 0) {
+            await sleep(1000);
+          }
+          geocodingCount++;
+          
           const coords = await geocodeAddress(restaurant.dataset.address);
           if (coords) {
             lat = coords.lat;
@@ -1057,6 +1069,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+          console.log('Ajout du marqueur pour:', restaurant.querySelector('h2').textContent);
           // Créer un marqueur personnalisé
           const marker = L.marker([lat, lng], {
             title: restaurant.querySelector('h2').textContent
@@ -1104,6 +1117,8 @@ document.addEventListener('DOMContentLoaded', function() {
           marker.on('mouseover', function() {
             this.openPopup();
           });
+        } else {
+          console.warn('Coordonnées manquantes pour:', restaurant.querySelector('h2').textContent);
         }
       }
       
@@ -1180,16 +1195,29 @@ async function geocodeAddress(address) {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
   
   try {
-    const response = await fetch(url);
+    // Ajouter un User-Agent pour respecter les conditions d'utilisation de Nominatim
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'BlogCulinaireSherbrooke/1.0'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
     if (data && data.length > 0) {
+      console.log('Géocodage réussi pour:', address);
       return {
         lat: parseFloat(data[0].lat),
         lng: parseFloat(data[0].lon)
       };
+    } else {
+      console.warn('Aucun résultat trouvé pour:', address);
     }
   } catch (error) {
-    console.error('Erreur de géocodage:', error);
+    console.error('Erreur de géocodage pour', address, ':', error);
   }
   return null;
 }
