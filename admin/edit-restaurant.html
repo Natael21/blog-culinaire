@@ -517,6 +517,10 @@
             <input type="text" id="name" name="name" required>
           </div>
           <div class="form-group">
+            <label for="date">Date de publication</label>
+            <input type="date" id="date" name="date" required>
+          </div>
+          <div class="form-group">
             <label for="cuisine">Style de cuisine</label>
             <input type="text" id="cuisine" name="cuisine" required>
           </div>
@@ -789,6 +793,7 @@
       function saveInitialState() {
         initialState = {
           name: document.getElementById('name').value.trim(),
+          date: document.getElementById('date').value,
           cuisine: document.getElementById('cuisine').value.trim(),
           price: document.getElementById('price').value,
           rating: document.getElementById('rating').value,
@@ -805,6 +810,7 @@
       function checkForChanges() {
         const currentState = {
           name: document.getElementById('name').value.trim(),
+          date: document.getElementById('date').value,
           cuisine: document.getElementById('cuisine').value.trim(),
           price: document.getElementById('price').value,
           rating: document.getElementById('rating').value,
@@ -817,6 +823,7 @@
 
         // Comparer chaque propriété individuellement
         const hasNameChanged = currentState.name !== initialState.name;
+        const hasDateChanged = currentState.date !== initialState.date;
         const hasCuisineChanged = currentState.cuisine !== initialState.cuisine;
         const hasPriceChanged = currentState.price !== initialState.price;
         const hasRatingChanged = currentState.rating !== initialState.rating;
@@ -827,6 +834,7 @@
         const hasGalleryChanged = JSON.stringify(currentState.galleryImages) !== JSON.stringify(initialState.galleryImages);
 
         const hasChanges = hasNameChanged || 
+                          hasDateChanged ||
                           hasCuisineChanged || 
                           hasPriceChanged || 
                           hasRatingChanged || 
@@ -838,6 +846,7 @@
 
         console.log('Changements détectés:', {
           name: hasNameChanged,
+          date: hasDateChanged,
           cuisine: hasCuisineChanged,
           price: hasPriceChanged,
           rating: hasRatingChanged,
@@ -853,7 +862,7 @@
 
       // Mettre à jour les écouteurs d'événements pour détecter les changements
       function setupChangeDetection() {
-        const inputs = ['name', 'cuisine', 'price', 'rating', 'address'];
+        const inputs = ['name', 'date', 'cuisine', 'price', 'rating', 'address'];
         inputs.forEach(id => {
           document.getElementById(id).addEventListener('input', () => {
             console.log(`Changement détecté dans ${id}`);
@@ -959,7 +968,7 @@
             .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
             .replace(/[^a-z0-9]+/g, '-'); // Remplacer les caractères spéciaux par des tirets
           
-          // Construire l'URL du post original
+          // Construire l'URL du post original en utilisant la date du frontmatter
           const postUrl = `/_posts/${metadata.date}-${restaurantName}.markdown`;
           
           // Récupérer le contenu original du post
@@ -1082,7 +1091,7 @@
         }
       }
 
-      // Modifier la fonction loadRestaurantData pour inclure la validation
+      // Modifier la fonction loadRestaurantData pour inclure la date
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
         const content = urlParams.get('content');
@@ -1111,6 +1120,9 @@
 
           // Remplir les champs du formulaire avec les métadonnées exactes
           document.getElementById('name').value = metadata.title || '';
+          // S'assurer que la date est au format YYYY-MM-DD
+          const date = metadata.date ? new Date(metadata.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+          document.getElementById('date').value = date;
           document.getElementById('cuisine').value = metadata.style || '';
           document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
           document.getElementById('address').value = metadata.address || '';
@@ -1167,6 +1179,7 @@
         } else {
           // Nouveau post avec des valeurs par défaut
           document.getElementById('name').value = '';
+          document.getElementById('date').value = new Date().toISOString().split('T')[0];
           document.getElementById('cuisine').value = '';
           document.getElementById('price').value = '$$';
           document.getElementById('rating').value = '4.5';
@@ -1188,17 +1201,21 @@
       // Fonction pour mettre à jour l'aperçu
       function updatePreview() {
         const name = document.getElementById('name').value || 'Nom du Restaurant';
+        const date = document.getElementById('date').value ? new Date(document.getElementById('date').value).toLocaleDateString('fr-FR', { 
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }) : new Date().toLocaleDateString('fr-FR', { 
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
         const cuisine = document.getElementById('cuisine').value || 'Style de cuisine';
         const price = document.getElementById('price').value || '$';
         const rating = document.getElementById('rating').value || '4.5';
         const address = document.getElementById('address').value || 'Adresse du restaurant';
         const summary = summaryEditor.root.innerHTML;
         const description = descriptionEditor.root.innerHTML;
-        const date = new Date().toLocaleDateString('fr-FR', { 
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        });
 
         // Mise à jour de la vue carte
         document.querySelectorAll('.preview-card').forEach(card => {
@@ -1252,6 +1269,7 @@
 
       // Gestionnaire d'événements pour les champs de formulaire
       document.getElementById('name').addEventListener('input', updatePreview);
+      document.getElementById('date').addEventListener('input', updatePreview);
       document.getElementById('cuisine').addEventListener('input', updatePreview);
       document.getElementById('price').addEventListener('input', updatePreview);
       document.getElementById('rating').addEventListener('input', updatePreview);
@@ -1370,7 +1388,7 @@
 
         try {
           const name = document.getElementById('name').value;
-          const date = new Date().toISOString().split('T')[0];
+          const date = document.getElementById('date').value;
           const fileName = `${date}-${name
             .toLowerCase()
             .normalize('NFD')

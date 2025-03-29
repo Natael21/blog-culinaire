@@ -6,7 +6,7 @@ note: 4
 style: "Café-Bistro"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
 price: "medium"
-adress: "123 rue de la bouffe"
+address: "123 rue de la bouffe, J1J1J4, Shebrooke, Québec"
 image: "/images/Caffucino.jpg"
 images:
   - image: "/images/Caffucino.jpg"
