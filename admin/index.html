@@ -820,8 +820,7 @@
       }
 
       .search-filter {
-        flex: 1;
-        min-width: 250px;
+        width: 300px;
         position: relative;
       }
 
@@ -833,6 +832,7 @@
         font-size: 0.95rem;
         transition: all 0.3s ease;
         background-color: white;
+        max-width: 300px;
       }
 
       .filter-input:focus {
@@ -924,7 +924,11 @@
         <div class="restaurant-filters">
           <div class="search-filter">
             <i class="fas fa-search"></i>
-            <input type="text" id="restaurant-search" class="filter-input" placeholder="Rechercher un restaurant...">
+            <input type="text" 
+                   id="restaurant-search" 
+                   class="filter-input" 
+                   placeholder="Rechercher..." 
+                   maxlength="20">
           </div>
           <select id="sort-by" class="filter-select">
             <option value="date-desc">Date (Plus récent)</option>
