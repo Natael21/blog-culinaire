@@ -318,14 +318,78 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .hero {
+    height: 300px;
+    margin-top: 0;
+  }
+
   .hero h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    padding: 0 1rem;
   }
-  
+
   .hero .tagline {
-    font-size: 1.2rem;
+    font-size: 1rem;
+    padding: 0 1rem;
   }
-  
+
+  .main-nav-container {
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+  }
+
+  .main-nav-container ul {
+    gap: 0.5rem;
+    flex-direction: row;
+    padding: 0 1rem;
+  }
+
+  .main-nav-container a {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .container {
+    padding: 1rem;
+  }
+
+  .page-header {
+    padding: 1rem;
+  }
+
+  .page-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .page-header p {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  .filters-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .search-input-wrapper {
+    margin: 0 1rem;
+  }
+
+  .search-input {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+
+  .advanced-filters-btn {
+    margin: 0.5rem 1rem;
+    width: calc(100% - 2rem);
+  }
+
+  .advanced-filters {
+    margin: 0 1rem;
+    padding: 1rem;
+  }
+
   .menu-container {
     flex-direction: column;
     padding: 0;
@@ -349,10 +413,6 @@ footer {
   
   .post-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .page-header h2 {
-    font-size: 2rem;
   }
   
   .post-card .meta {
@@ -988,4 +1048,64 @@ footer {
     height: 35px;
     font-size: 1rem;
   }
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 2.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.search-input-wrapper i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.advanced-filters-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 600px;
+  margin: 1rem auto;
+}
+
+.advanced-filters-btn:hover {
+  background-color: var(--accent-color);
+}
+
+.advanced-filters {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
