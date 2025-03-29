@@ -723,36 +723,41 @@
       // Fonction pour extraire les images du contenu Markdown
       function extractImagesFromMarkdown(content) {
         const images = [];
-        const regex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-        let match;
-
-        while ((match = regex.exec(content)) !== null) {
-          const [_, alt, src] = match;
-          // Nettoyer l'URL de l'image
-          let cleanSrc = src.trim().replace(/^"(.*)"$/, '$1');
+        
+        // Extraire le frontmatter
+        const parts = content.split('---');
+        if (parts.length >= 2) {
+          const frontmatter = parts[1];
           
-          // S'assurer que le chemin commence par /images/
-          if (!cleanSrc.startsWith('/')) {
-            cleanSrc = `/images/${cleanSrc}`;
-          }
+          // Chercher la section images dans le frontmatter
+          const imagesMatch = frontmatter.match(/images:\n((\s*- image: "[^"]+"\n)+)/);
+          
+          if (imagesMatch) {
+            const imagesSection = imagesMatch[1];
+            const imageMatches = imagesSection.matchAll(/- image: "([^"]+)"/g);
+            
+            for (const match of imageMatches) {
+              const src = match[1];
+              // Exclure les images spécifiques
+              const excludedImages = [
+                'header.jpg',
+                'favicon',
+                'profil.jpg',
+                'restaurant-test.jpg'
+              ];
 
-          // Exclure les images spécifiques
-          const excludedImages = [
-            'header.jpg',
-            'favicon',
-            'profil.jpg',
-            'restaurant-test.jpg'
-          ];
+              const shouldExclude = excludedImages.some(excluded => 
+                src.toLowerCase().includes(excluded.toLowerCase())
+              );
 
-          const shouldExclude = excludedImages.some(excluded => 
-            cleanSrc.toLowerCase().includes(excluded.toLowerCase())
-          );
-
-          if (!shouldExclude) {
-            images.push({ src: cleanSrc, alt: alt || '' });
+              if (!shouldExclude) {
+                images.push({ src: src, alt: '' });
+              }
+            }
           }
         }
-
+        
+        console.log("Images extraites:", images); // Debug
         return images;
       }
 
@@ -763,6 +768,12 @@
         
         if (content) {
           const decodedContent = decodeURIComponent(content);
+          console.log("Contenu décodé:", decodedContent); // Debug
+          
+          // Extraire les images avant de séparer le contenu
+          const galleryImages = extractImagesFromMarkdown(decodedContent);
+          console.log("Images de la galerie extraites:", galleryImages); // Debug
+
           const parts = decodedContent.split('---');
           const frontmatter = parts[1];
           const fullContent = parts[2] || '';
@@ -784,11 +795,9 @@
           document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
           document.getElementById('address').value = metadata.address || '';
 
-          // Gérer le prix avec une logique plus robuste
+          // Gérer le prix
           const priceValue = metadata.price ? metadata.price.replace(/"/g, '').trim() : '$';
           const priceSelect = document.getElementById('price');
-          
-          // Trouver l'option correspondante dans le select
           Array.from(priceSelect.options).forEach((option, index) => {
             if (option.value === priceValue) {
               priceSelect.selectedIndex = index;
@@ -800,20 +809,14 @@
             el.textContent = priceValue;
           });
 
-          // Remplir les éditeurs avec le contenu formaté
+          // Remplir les éditeurs
           summaryEditor.root.innerHTML = metadata.description || '';
-          
-          // Formater le contenu de la description
           const formattedContent = formatDescription(fullContent.trim());
           descriptionEditor.root.innerHTML = formattedContent;
 
           // Gérer l'image principale
-          let mainImageUrl = null;
           if (metadata.image) {
-            mainImageUrl = metadata.image.replace(/^"(.*)"$/, '$1');
-            if (!mainImageUrl.startsWith('/')) {
-              mainImageUrl = `/images/${mainImageUrl}`;
-            }
+            const mainImageUrl = metadata.image.replace(/^"(.*)"$/, '$1');
             const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
             previewImages.forEach(img => {
               img.style.display = 'block';
@@ -821,42 +824,21 @@
             });
           }
 
-          // Extraire et charger les images de la galerie
-          console.log("Contenu complet:", fullContent); // Debug
-          const galleryImages = extractImagesFromMarkdown(fullContent);
-          console.log("Images extraites:", galleryImages); // Debug
-
           // Vider les galeries existantes
           document.getElementById('gallery-grid').innerHTML = '';
           document.querySelector('.gallery-preview').innerHTML = '';
 
           // Ajouter les images à la galerie
           galleryImages.forEach(({ src, alt }) => {
-            // Ne pas ajouter l'image principale à la galerie
-            if (src !== mainImageUrl) {
+            if (src !== metadata.image) {
               console.log("Ajout de l'image à la galerie:", src); // Debug
               addGalleryImage(src, alt);
-            }
-          });
-
-          // Mettre à jour la vue carte
-          document.querySelectorAll('.preview-card-meta').forEach(meta => {
-            const priceSpan = meta.querySelector('.price');
-            if (priceSpan) {
-              priceSpan.innerHTML = `<i class="fas fa-dollar-sign"></i> <span class="price-value">${priceValue}</span>`;
             }
           });
 
           // Mettre à jour les prévisualisations
           updatePreview();
           updateGalleryPreview();
-        } else {
-          // Nouveau restaurant : cacher les images par défaut
-          document.querySelectorAll('.preview-card img, .preview-full img').forEach(img => {
-            img.style.display = 'none';
-          });
-          // Sélectionner la première option de prix par défaut
-          document.getElementById('price').selectedIndex = 0;
         }
 
         // Activer la vue carte par défaut
