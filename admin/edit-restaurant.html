@@ -4,9 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Édition Restaurant | Blog Culinaire</title>
-    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.6/quill.snow.css">
+    <link rel="stylesheet" href="style.css" />
     <style>
       body {
         font-family: 'Open Sans', sans-serif;
@@ -203,32 +205,54 @@
           <div class="form-group">
             <label for="price">Prix</label>
             <select id="price" name="price" required>
-              <option value="$">$</option>
-              <option value="$$">$$</option>
-              <option value="$$$">$$$</option>
-              <option value="$$$$">$$$$</option>
+              <option value="$">$ (0-15$)</option>
+              <option value="$$">$$ (15-30$)</option>
+              <option value="$$$">$$$ (30-60$)</option>
+              <option value="$$$$">$$$$ (60$+)</option>
             </select>
           </div>
           <div class="form-group">
             <label for="rating">Note</label>
-            <input type="number" id="rating" name="rating" min="1" max="5" step="0.1" required>
+            <input type="number" id="rating" name="rating" min="1" max="5" step="0.5" required>
           </div>
           <div class="form-group">
             <label for="address">Adresse</label>
             <input type="text" id="address" name="address" required>
           </div>
           <div class="form-group">
-            <label for="description">Description courte (résumé)</label>
-            <textarea id="summary" name="summary" required placeholder="Bref résumé qui apparaîtra sur la page d'accueil"></textarea>
+            <label>Image principale du restaurant</label>
+            <div class="main-image-upload">
+              <input type="file" id="main-image" accept="image/*" style="display: none;">
+              <div class="upload-preview" id="main-image-preview">
+                <img src="/images/restaurant-test.jpg" alt="Preview">
+                <button type="button" class="change-image-btn">
+                  <i class="fas fa-camera"></i> Changer l'image
+                </button>
+              </div>
+            </div>
           </div>
           <div class="form-group">
-            <label for="description">Description complète</label>
-            <textarea id="description" name="description" required placeholder="Description détaillée du restaurant"></textarea>
+            <label>Description courte (résumé)</label>
+            <div id="summary-editor"></div>
           </div>
           <div class="form-group">
-            <label for="images">Images</label>
-            <input type="file" id="images" name="images" multiple accept="image/*">
+            <label>Description complète</label>
+            <div id="description-editor"></div>
           </div>
+          
+          <div class="gallery-section">
+            <h3>Galerie d'images</h3>
+            <p>Faites glisser les images pour réorganiser leur ordre d'apparition</p>
+            <div class="gallery-grid" id="gallery-grid">
+              <!-- Les images seront ajoutées ici -->
+            </div>
+            <div class="gallery-upload" id="gallery-upload">
+              <i class="fas fa-plus"></i>
+              <p>Ajouter des photos à la galerie</p>
+              <input type="file" id="gallery-input" multiple accept="image/*" style="display: none;">
+            </div>
+          </div>
+
           <div class="form-actions">
             <button type="submit" class="save-btn">
               <i class="fas fa-save"></i> Enregistrer
@@ -252,9 +276,9 @@
           <div class="preview-card-content">
             <h3>Nom du Restaurant</h3>
             <div class="preview-card-meta">
-              <span><i class="fas fa-star"></i> 4.5</span>
-              <span><i class="fas fa-utensils"></i> Style de cuisine</span>
-              <span><i class="fas fa-dollar-sign"></i> Prix</span>
+              <span class="rating"><i class="fas fa-star"></i> <span class="note">4.5</span>/5</span>
+              <span class="cuisine"><i class="fas fa-utensils"></i> <span class="style">Style de cuisine</span></span>
+              <span class="price"><i class="fas fa-dollar-sign"></i> <span class="price-value">Prix</span></span>
             </div>
           </div>
         </div>
@@ -265,27 +289,60 @@
             <h3>Nom du Restaurant</h3>
             <div class="preview-meta">
               <span class="rating"><i class="fas fa-star"></i> <span class="note">4.5</span>/5</span>
-              <span class="cuisine"><i class="fas fa-utensils"></i> Style de cuisine</span>
-              <span class="price"><i class="fas fa-dollar-sign"></i> Prix</span>
+              <span class="cuisine"><i class="fas fa-utensils"></i> <span class="style">Style de cuisine</span></span>
+              <span class="price"><i class="fas fa-dollar-sign"></i> <span class="price-value">Prix</span></span>
             </div>
             <div class="preview-address">
               <i class="fas fa-map-marker-alt"></i> <span class="address">Adresse du restaurant</span>
             </div>
             <div class="preview-summary">
               <h4>Résumé</h4>
-              <p class="summary-text"></p>
+              <div class="summary-text"></div>
             </div>
             <div class="preview-description">
               <h4>Description complète</h4>
-              <p class="description-text"></p>
+              <div class="description-text"></div>
+            </div>
+            <div class="preview-gallery">
+              <h4>Galerie photos</h4>
+              <div class="gallery-preview"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
-      // Fonction pour charger les données du restaurant à partir des paramètres d'URL
+      // Configuration de l'éditeur Quill
+      const toolbarOptions = [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['clean']
+      ];
+
+      // Initialiser les éditeurs Quill
+      const summaryEditor = new Quill('#summary-editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: toolbarOptions
+        },
+        placeholder: 'Entrez un bref résumé du restaurant...'
+      });
+
+      const descriptionEditor = new Quill('#description-editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: toolbarOptions
+        },
+        placeholder: 'Entrez une description détaillée du restaurant...'
+      });
+
+      // Fonction pour charger les données du restaurant
       function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
         const content = urlParams.get('content');
@@ -310,12 +367,14 @@
           document.getElementById('price').value = metadata.price || '$';
           document.getElementById('rating').value = metadata.note || '4.5';
           document.getElementById('address').value = metadata.address || '';
-          document.getElementById('summary').value = metadata.description || '';
-          document.getElementById('description').value = fullContent ? fullContent.trim() : '';
+          
+          // Remplir les éditeurs Quill
+          summaryEditor.root.innerHTML = metadata.description || '';
+          descriptionEditor.root.innerHTML = fullContent ? fullContent.trim() : '';
 
-          // Afficher l'image si elle existe
+          // Afficher l'image principale si elle existe
           if (metadata.image) {
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
             previewImages.forEach(img => img.src = metadata.image);
           }
 
@@ -324,9 +383,6 @@
         }
       }
 
-      // Charger les données au chargement de la page
-      document.addEventListener('DOMContentLoaded', loadRestaurantData);
-
       // Fonction pour mettre à jour l'aperçu
       function updatePreview() {
         const name = document.getElementById('name').value || 'Nom du Restaurant';
@@ -334,46 +390,104 @@
         const price = document.getElementById('price').value || '$';
         const rating = document.getElementById('rating').value || '4.5';
         const address = document.getElementById('address').value || 'Adresse du restaurant';
-        const summary = document.getElementById('summary').value || '';
-        const description = document.getElementById('description').value || '';
+        const summary = summaryEditor.root.innerHTML;
+        const description = descriptionEditor.root.innerHTML;
 
-        // Mettre à jour l'aperçu carte
-        document.querySelector('.preview-card h3').textContent = name;
-        document.querySelector('.preview-card .cuisine').textContent = cuisine;
-        document.querySelector('.preview-card .note').textContent = `${rating}/5`;
-        document.querySelector('.preview-card .price').textContent = `${price}`;
+        // Mettre à jour les titres
+        document.querySelectorAll('.preview-card h3, .preview-full h3').forEach(el => el.textContent = name);
 
-        // Mettre à jour l'aperçu complet
-        document.querySelector('.preview-full h3').textContent = name;
-        document.querySelector('.preview-full .note').textContent = rating;
-        document.querySelector('.preview-full .cuisine').textContent = cuisine;
-        document.querySelector('.preview-full .price').textContent = price;
-        document.querySelector('.preview-full .address').textContent = address;
-        document.querySelector('.preview-full .summary-text').textContent = summary;
-        document.querySelector('.preview-full .description-text').textContent = description;
+        // Mettre à jour les métadonnées
+        document.querySelectorAll('.note').forEach(el => el.textContent = rating);
+        document.querySelectorAll('.style').forEach(el => el.textContent = cuisine);
+        document.querySelectorAll('.price-value').forEach(el => el.textContent = price);
+        document.querySelector('.address').textContent = address;
+
+        // Mettre à jour les descriptions
+        document.querySelector('.summary-text').innerHTML = summary;
+        document.querySelector('.description-text').innerHTML = description;
       }
 
-      // Ajouter les écouteurs d'événements pour la mise à jour en temps réel
+      // Gestionnaire d'événements pour les champs de formulaire
       document.getElementById('name').addEventListener('input', updatePreview);
       document.getElementById('cuisine').addEventListener('input', updatePreview);
       document.getElementById('price').addEventListener('input', updatePreview);
       document.getElementById('rating').addEventListener('input', updatePreview);
       document.getElementById('address').addEventListener('input', updatePreview);
-      document.getElementById('summary').addEventListener('input', updatePreview);
-      document.getElementById('description').addEventListener('input', updatePreview);
+      summaryEditor.on('text-change', updatePreview);
+      descriptionEditor.on('text-change', updatePreview);
+
+      // Gestion de l'image principale
+      document.querySelector('.change-image-btn').addEventListener('click', () => {
+        document.getElementById('main-image').click();
+      });
+
+      document.getElementById('main-image').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+            previewImages.forEach(img => img.src = e.target.result);
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        }
+      });
+
+      // Gestion de la galerie d'images
+      document.getElementById('gallery-upload').addEventListener('click', () => {
+        document.getElementById('gallery-input').click();
+      });
+
+      document.getElementById('gallery-input').addEventListener('change', function(e) {
+        if (e.target.files) {
+          Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              addGalleryImage(e.target.result);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      });
+
+      function addGalleryImage(src) {
+        const galleryGrid = document.getElementById('gallery-grid');
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `
+          <img src="${src}" alt="Image galerie">
+          <button type="button" class="remove-btn" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        galleryGrid.appendChild(item);
+        updateGalleryPreview();
+      }
+
+      // Initialiser le tri par glisser-déposer
+      new Sortable(document.getElementById('gallery-grid'), {
+        animation: 150,
+        ghostClass: 'dragging',
+        onEnd: updateGalleryPreview
+      });
+
+      function updateGalleryPreview() {
+        const galleryPreview = document.querySelector('.gallery-preview');
+        galleryPreview.innerHTML = document.getElementById('gallery-grid').innerHTML;
+      }
 
       // Gestion du toggle des previews
       document.querySelectorAll('.preview-toggle button').forEach(button => {
         button.addEventListener('click', () => {
-          // Retirer la classe active de tous les boutons et previews
           document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
           document.querySelectorAll('.preview-card, .preview-full').forEach(preview => preview.classList.remove('active'));
           
-          // Ajouter la classe active au bouton cliqué et au preview correspondant
           button.classList.add('active');
           document.querySelector(`.preview-${button.dataset.preview}`).classList.add('active');
         });
       });
+
+      // Charger les données au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadRestaurantData);
     </script>
   </body>
 </html> 

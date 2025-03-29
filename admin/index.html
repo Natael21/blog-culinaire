@@ -1213,23 +1213,21 @@
       <section id="restaurants" class="content-section active">
         <div class="section-header">
           <h2>Gestion des Restaurants</h2>
-          <div class="restaurant-filters">
-            <div class="search-filter">
-              <input type="text" id="restaurant-search" placeholder="Rechercher un restaurant..." class="filter-input">
-              <i class="fas fa-search"></i>
-            </div>
-            <div class="sort-filters">
-              <select id="sort-by" class="filter-select">
-                <option value="date-desc">Date (Plus récent)</option>
-                <option value="date-asc">Date (Plus ancien)</option>
-                <option value="name-asc">Nom (A-Z)</option>
-                <option value="name-desc">Nom (Z-A)</option>
-              </select>
-            </div>
-          </div>
           <a href="/admin/edit-restaurant.html" class="add-restaurant-btn">
             <i class="fas fa-plus"></i> Créer un nouveau restaurant
           </a>
+        </div>
+        <div class="restaurant-filters">
+          <div class="search-filter">
+            <input type="text" id="restaurant-search" placeholder="Rechercher un restaurant..." class="filter-input">
+            <i class="fas fa-search"></i>
+          </div>
+          <select id="sort-by" class="filter-select">
+            <option value="date-desc" selected>Date (Plus récent)</option>
+            <option value="date-asc">Date (Plus ancien)</option>
+            <option value="name-asc">Nom (A-Z)</option>
+            <option value="name-desc">Nom (Z-A)</option>
+          </select>
         </div>
         <div class="restaurant-list" id="restaurant-list">
           <!-- Les restaurants seront chargés dynamiquement ici -->
@@ -1402,8 +1400,56 @@
         }
       }
 
+      // Fonction pour filtrer et trier les restaurants
+      function filterAndSortRestaurants() {
+        const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
+        const sortBy = document.getElementById('sort-by').value;
+        const restaurantItems = Array.from(document.querySelectorAll('.restaurant-item'));
+
+        // Filtrer
+        restaurantItems.forEach(item => {
+          const title = item.querySelector('h3').textContent.toLowerCase();
+          const cuisine = item.querySelector('.restaurant-meta span').textContent.toLowerCase();
+          item.style.display = (title.includes(searchTerm) || cuisine.includes(searchTerm)) ? 'flex' : 'none';
+        });
+
+        // Trier
+        const sortedItems = restaurantItems.sort((a, b) => {
+          const titleA = a.querySelector('h3').textContent;
+          const titleB = b.querySelector('h3').textContent;
+          const dateA = new Date(a.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
+          const dateB = new Date(b.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
+
+          switch(sortBy) {
+            case 'date-desc':
+              return dateB - dateA;
+            case 'date-asc':
+              return dateA - dateB;
+            case 'name-asc':
+              return titleA.localeCompare(titleB, 'fr');
+            case 'name-desc':
+              return titleB.localeCompare(titleA, 'fr');
+            default:
+              return 0;
+          }
+        });
+
+        const restaurantList = document.getElementById('restaurant-list');
+        restaurantList.innerHTML = '';
+        sortedItems.forEach(item => restaurantList.appendChild(item));
+      }
+
+      // Ajouter les écouteurs d'événements pour les filtres
+      document.getElementById('restaurant-search').addEventListener('input', filterAndSortRestaurants);
+      document.getElementById('sort-by').addEventListener('change', filterAndSortRestaurants);
+
       // Charger les restaurants au chargement de la page
-      document.addEventListener('DOMContentLoaded', loadRestaurants);
+      document.addEventListener('DOMContentLoaded', () => {
+        loadRestaurants().then(() => {
+          // Appliquer le tri par défaut après le chargement
+          filterAndSortRestaurants();
+        });
+      });
 
       // Gestion des boutons de navigation
       document.querySelectorAll('.admin-nav button').forEach(button => {
@@ -1435,47 +1481,6 @@
           }
         }
       }
-
-      // Fonction pour filtrer et trier les restaurants
-      function filterAndSortRestaurants() {
-        const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
-        const sortBy = document.getElementById('sort-by').value;
-        const restaurantItems = Array.from(document.querySelectorAll('.restaurant-item'));
-
-        // Filtrer
-        restaurantItems.forEach(item => {
-          const title = item.querySelector('h3').textContent.toLowerCase();
-          item.style.display = title.includes(searchTerm) ? 'flex' : 'none';
-        });
-
-        // Trier
-        const sortedItems = restaurantItems.sort((a, b) => {
-          const titleA = a.querySelector('h3').textContent;
-          const titleB = b.querySelector('h3').textContent;
-          const dateA = a.querySelector('.restaurant-meta span').textContent;
-          const dateB = b.querySelector('.restaurant-meta span').textContent;
-
-          switch(sortBy) {
-            case 'date-desc':
-              return new Date(dateB) - new Date(dateA);
-            case 'date-asc':
-              return new Date(dateA) - new Date(dateB);
-            case 'name-asc':
-              return titleA.localeCompare(titleB);
-            case 'name-desc':
-              return titleB.localeCompare(titleA);
-            default:
-              return 0;
-          }
-        });
-
-        const restaurantList = document.getElementById('restaurant-list');
-        sortedItems.forEach(item => restaurantList.appendChild(item));
-      }
-
-      // Ajouter les écouteurs d'événements pour les filtres
-      document.getElementById('restaurant-search').addEventListener('input', filterAndSortRestaurants);
-      document.getElementById('sort-by').addEventListener('change', filterAndSortRestaurants);
     </script>
   </body>
 </html>
