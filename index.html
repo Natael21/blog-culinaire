@@ -421,15 +421,15 @@ title: Accueil
 
 /* Modification du style par défaut pour la vue en liste */
 .post-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .post-card {
   display: flex;
-  flex-direction: row;
-  height: 150px;
+  flex-direction: column;
+  height: auto;
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -438,22 +438,21 @@ title: Accueil
 }
 
 .post-card .post-image {
-  width: 200px;
-  height: 100%;
+  width: 100%;
+  height: 200px;
   background-size: cover;
   background-position: center;
 }
 
 .post-card .content {
-  flex: 1;
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .post-card h2 {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   margin-bottom: 0.5rem;
 }
 
@@ -489,13 +488,53 @@ title: Accueil
 
 @media (max-width: 768px) {
   .post-card {
-    flex-direction: column;
     height: auto;
   }
 
   .post-card .post-image {
     width: 100%;
     height: 200px;
+  }
+}
+
+/* Style pour la vue en liste */
+.post-grid.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-grid.list-view .post-card {
+  flex-direction: row;
+  height: 150px;
+}
+
+.post-grid.list-view .post-card .post-image {
+  width: 200px;
+  height: 100%;
+}
+
+.post-grid.list-view .post-card .content {
+  flex: 1;
+  padding: 1rem;
+}
+
+.post-grid.list-view .post-card h2 {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .post-card {
+    height: auto;
+  }
+
+  .post-card .post-image {
+    width: 100%;
+    height: 200px;
+  }
+
+  .post-grid.list-view .post-card {
+    flex-direction: column;
   }
 }
 </style>
@@ -580,8 +619,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const viewButtons = document.querySelectorAll('.view-btn');
   const restaurantGrid = document.getElementById('restaurant-grid');
   
-  // Vue en pastilles par défaut
+  // Forcer la vue en pastilles au chargement
   restaurantGrid.classList.remove('list-view');
+  document.querySelector('[data-view="grid"]').classList.add('active');
+  document.querySelector('[data-view="list"]').classList.remove('active');
   
   viewButtons.forEach(button => {
     button.addEventListener('click', () => {
