@@ -1008,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const restaurantGrid = document.getElementById('restaurant-grid');
   const mapContainer = document.getElementById('map-container');
   let map = null;
-  let geocodedCoordinates = new Map(); // Pour stocker les coordonnées
+  let geocodedCoordinates = new Map();
   
   // S'assurer que tous les boutons sont visibles
   viewButtons.forEach(btn => {
@@ -1017,10 +1017,16 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.style.opacity = '1';
   });
   
-  // Forcer la vue en pastilles par défaut sur la page d'accueil
-  if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+  // Vérifier si nous revenons d'une vue carte
+  const fromMapView = localStorage.getItem('fromMapView') === 'true';
+  
+  // Forcer la vue en pastilles par défaut sur la page d'accueil SAUF si on revient de la carte
+  if ((window.location.pathname === '/' || window.location.pathname === '/index.html') && !fromMapView) {
     localStorage.setItem('selectedView', 'grid');
   }
+  
+  // Nettoyer l'indicateur de retour de la carte
+  localStorage.removeItem('fromMapView');
   
   // Récupérer la dernière vue utilisée depuis le localStorage
   const lastView = localStorage.getItem('selectedView') || 'grid';
@@ -1136,6 +1142,9 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Ajouter les événements
           marker.on('click', () => {
+            // Sauvegarder que nous venons de la vue carte
+            localStorage.setItem('selectedView', 'map');
+            localStorage.setItem('fromMapView', 'true');
             window.location.href = restaurant.querySelector('a').href;
           });
           
