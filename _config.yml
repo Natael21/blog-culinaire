@@ -71,3 +71,9 @@ rss: rss
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+# Collections
+collections:
+  upcoming:
+    output: false
+    permalink: /upcoming/:path/
