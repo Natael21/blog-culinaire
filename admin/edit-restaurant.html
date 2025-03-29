@@ -1097,9 +1097,14 @@
 
       // Fonction pour confirmer la sortie
       async function confirmExit(event) {
-        event.preventDefault();
+        if (event) {
+          event.preventDefault();
+        }
         
-        if (!hasChanges) {
+        // Vérifier s'il y a des changements
+        const hasUnsavedChanges = checkForChanges();
+        
+        if (!hasUnsavedChanges) {
           window.location.href = '/admin/';
           return;
         }
@@ -1120,10 +1125,16 @@
         }
       }
 
-      // Ajouter la confirmation au bouton Annuler aussi
-      document.querySelector('.cancel-btn').onclick = async function(e) {
+      // Ajouter la confirmation au bouton Annuler
+      document.querySelector('.cancel-btn').onclick = function(e) {
         e.preventDefault();
-        await confirmExit(e);
+        confirmExit(e);
+      };
+
+      // Mettre à jour le lien de retour à l'administration
+      document.querySelector('.back-to-site').onclick = function(e) {
+        e.preventDefault();
+        confirmExit(e);
       };
 
       // Charger les données au chargement de la page
