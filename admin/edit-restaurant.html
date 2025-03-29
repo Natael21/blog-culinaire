@@ -601,6 +601,24 @@
       `;
       document.head.appendChild(editorStyles);
 
+      // Styles pour les icônes et le texte dans la vue carte
+      const styleUpdates = document.createElement('style');
+      styleUpdates.textContent = `
+        .preview-card-meta .cuisine {
+          color: #e74c3c;
+        }
+        .preview-card-meta .cuisine i {
+          color: #e74c3c;
+        }
+        .preview-card-meta .price i {
+          color: #2ecc71;
+        }
+        .preview-card-meta .rating i {
+          color: #f1c40f;
+        }
+      `;
+      document.head.appendChild(styleUpdates);
+
       // Initialiser les éditeurs Quill avec les nouvelles options
       const summaryEditor = new Quill('#summary-editor', {
         ...quillOptions,
@@ -612,25 +630,29 @@
         placeholder: 'Entrez une description détaillée du restaurant...'
       });
 
-      // Fonction pour extraire les images du contenu Markdown
-      function extractImagesFromMarkdown(content) {
-        const images = [];
-        const regex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-        let match;
+      // Fonction pour formater le texte de la description
+      function formatDescription(content) {
+        // Séparer le contenu en sections par auteur
+        const sections = content.split(/\*\*(Nataël|Nicolas)\*\* ?:/);
+        let formattedContent = '';
         
-        while ((match = regex.exec(content)) !== null) {
-          const [_, alt, src] = match;
-          // Nettoyer l'URL de l'image
-          const cleanSrc = src.trim().replace(/^"(.*)"$/, '$1');
-          // Ne pas inclure l'image principale ni les images de profil
-          if (!cleanSrc.includes('header.jpg') && 
-              !cleanSrc.includes('favicon') && 
-              !cleanSrc.includes('profil.jpg')) {
-            images.push({ src: cleanSrc, alt: alt || '' });
-          }
+        for (let i = 1; i < sections.length; i += 2) {
+          const author = sections[i];
+          const text = sections[i + 1] || '';
+          
+          // Formater chaque section avec le nom en gras et le texte
+          formattedContent += `<p><strong>${author}</strong> :</p>`;
+          
+          // Séparer et formater les paragraphes
+          const paragraphs = text.trim().split(/\n\n+/);
+          paragraphs.forEach(paragraph => {
+            if (paragraph.trim()) {
+              formattedContent += `<p>${paragraph.trim()}</p>`;
+            }
+          });
         }
         
-        return images;
+        return formattedContent;
       }
 
       // Fonction pour charger les données du restaurant
@@ -677,9 +699,12 @@
             priceSelect.selectedIndex = 0; // Default to first option if not found
           }
 
-          // Remplir les éditeurs
+          // Remplir les éditeurs avec le contenu formaté
           summaryEditor.root.innerHTML = metadata.description || '';
-          descriptionEditor.root.innerHTML = fullContent.trim();
+          
+          // Formater le contenu de la description
+          const formattedContent = formatDescription(fullContent.trim());
+          descriptionEditor.root.innerHTML = formattedContent;
 
           // Gérer l'image principale
           if (metadata.image) {
@@ -708,8 +733,16 @@
             // Vérifier que ce n'est pas l'image principale
             if (src !== mainImageUrl) {
               // S'assurer que l'URL de l'image commence par /
-              const imageSrc = src.startsWith('/') ? src : `/${src}`;
+              const imageSrc = src.startsWith('/') ? src : `/images/${src}`;
               addGalleryImage(imageSrc, alt);
+            }
+          });
+
+          // Mettre à jour la vue carte
+          document.querySelectorAll('.preview-card-meta').forEach(meta => {
+            const priceSpan = meta.querySelector('.price');
+            if (priceSpan) {
+              priceSpan.innerHTML = `<i class="fas fa-dollar-sign"></i> <span class="price-value">${metadata.price || '$'}</span>`;
             }
           });
 
@@ -779,7 +812,7 @@
           });
         });
         document.querySelectorAll('.preview-full .description-text').forEach(el => {
-          el.innerHTML = description;
+          el.innerHTML = descriptionEditor.root.innerHTML;
           el.querySelectorAll('p').forEach(p => {
             p.style.marginBottom = '1.2rem';
           });
@@ -1038,6 +1071,26 @@
         }
       `;
       document.head.appendChild(style);
+
+      // Styles supplémentaires pour le formatage du texte
+      const additionalStyles = document.createElement('style');
+      additionalStyles.textContent = `
+        .ql-editor p {
+          margin-bottom: 1.2rem;
+        }
+        .ql-editor strong {
+          font-weight: 600;
+          color: #2c3e50;
+        }
+        .preview-description .description-text p {
+          margin-bottom: 1.2rem;
+        }
+        .preview-description .description-text strong {
+          font-weight: 600;
+          color: #2c3e50;
+        }
+      `;
+      document.head.appendChild(additionalStyles);
     </script>
   </body>
 </html> 
