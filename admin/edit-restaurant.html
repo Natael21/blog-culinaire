@@ -926,11 +926,11 @@
         
         if (content) {
           const decodedContent = decodeURIComponent(content);
-          console.log("Contenu décodé:", decodedContent); // Debug
+          console.log("Contenu décodé:", decodedContent);
           
           // Extraire les images avant de séparer le contenu
           const galleryImages = extractImagesFromMarkdown(decodedContent);
-          console.log("Images de la galerie extraites:", galleryImages); // Debug
+          console.log("Images de la galerie extraites:", galleryImages);
 
           const parts = decodedContent.split('---');
           const frontmatter = parts[1];
@@ -942,7 +942,6 @@
             const match = line.match(/^(\w+):\s*(.+)$/);
             if (match) {
               const [_, key, value] = match;
-              // Nettoyer les guillemets des valeurs
               metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
             }
           });
@@ -989,24 +988,29 @@
           // Ajouter les images à la galerie
           galleryImages.forEach(({ src, alt }) => {
             if (src !== metadata.image) {
-              console.log("Ajout de l'image à la galerie:", src); // Debug
-              addGalleryImage(src, alt);
+              console.log("Ajout de l'image à la galerie:", src);
+              addGalleryImage(src, alt, false); // Ajout du paramètre false pour ne pas marquer comme changement
             }
           });
 
           // Mettre à jour les prévisualisations
           updatePreview();
-          updateGalleryPreview();
+          updateGalleryPreview(false); // Ajout du paramètre false pour ne pas marquer comme changement
+
+          // Activer la vue carte par défaut
+          document.querySelector('.preview-toggle button[data-preview="card"]').click();
+
+          // IMPORTANT: Sauvegarder l'état initial APRÈS avoir tout chargé
+          setTimeout(() => {
+            saveInitialState();
+            console.log('État initial sauvegardé après chargement complet');
+            setupChangeDetection();
+          }, 100);
+        } else {
+          // Nouveau post
+          saveInitialState();
+          setupChangeDetection();
         }
-
-        // Activer la vue carte par défaut
-        document.querySelector('.preview-toggle button[data-preview="card"]').click();
-        updatePreview();
-
-        // Sauvegarder l'état initial après le chargement
-        saveInitialState();
-        // Configurer la détection des changements
-        setupChangeDetection();
       }
 
       // Fonction pour mettre à jour l'aperçu
@@ -1116,8 +1120,8 @@
         }
       });
 
-      function addGalleryImage(src, alt = '') {
-        console.log("Ajout d'une image:", src); // Debug
+      function addGalleryImage(src, alt = '', trackChanges = true) {
+        console.log("Ajout d'une image:", src);
 
         // Ajouter à la grille d'édition
         const galleryGrid = document.getElementById('gallery-grid');
@@ -1125,7 +1129,7 @@
         item.className = 'gallery-item';
         item.innerHTML = `
           <img src="${src}" alt="${alt}">
-          <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateGalleryPreview();">
+          <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateGalleryPreview(true);">
             <i class="fas fa-times"></i>
           </button>
         `;
@@ -1138,8 +1142,10 @@
         previewItem.innerHTML = `<img src="${src}" alt="${alt}">`;
         galleryPreview.appendChild(previewItem);
 
-        // Mettre à jour hasChanges
-        hasChanges = true;
+        // Mettre à jour hasChanges seulement si trackChanges est true
+        if (trackChanges) {
+          console.log('Changement détecté dans la galerie (ajout)');
+        }
       }
 
       // Initialiser le tri par glisser-déposer
@@ -1149,7 +1155,7 @@
         onEnd: updateGalleryPreview
       });
 
-      function updateGalleryPreview() {
+      function updateGalleryPreview(trackChanges = true) {
         const galleryPreview = document.querySelector('.gallery-preview');
         const galleryGrid = document.getElementById('gallery-grid');
         
@@ -1164,8 +1170,10 @@
           }
         });
         
-        // Mettre à jour hasChanges
-        hasChanges = true;
+        // Mettre à jour hasChanges seulement si trackChanges est true
+        if (trackChanges) {
+          console.log('Changement détecté dans la galerie (réorganisation)');
+        }
       }
 
       // Gestion du toggle des previews
