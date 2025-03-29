@@ -1247,10 +1247,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Fonction pour initialiser la carte
   async function initMap() {
     if (!map) {
-      // Attendre que tous les géocodages soient terminés
-      await preloadCoordinates();
-      
-      // Centrer sur Sherbrooke
+      // Initialiser la carte immédiatement
       map = L.map('map-container').setView([45.4040, -71.8929], 13);
       
       // Ajouter la couche OpenStreetMap
@@ -1259,89 +1256,99 @@ document.addEventListener('DOMContentLoaded', function() {
         maxZoom: 19
       }).addTo(map);
 
-      // Ajouter les marqueurs pour chaque restaurant
-      const restaurants = document.querySelectorAll('.post-card');
       const bounds = new L.LatLngBounds();
       let markersAdded = 0;
-      
-      for (const restaurant of restaurants) {
-        const address = restaurant.dataset.address;
-        let coords = geocodedCoordinates.get(address);
+
+      // Fonction pour ajouter un marqueur
+      function addMarker(restaurant, coords) {
+        const marker = L.marker([coords.lat, coords.lng], {
+          title: restaurant.querySelector('h2').textContent
+        }).addTo(map);
         
-        // Si on n'a pas les coordonnées en mémoire, utiliser celles du dataset
-        if (!coords) {
-          const lat = parseFloat(restaurant.dataset.lat);
-          const lng = parseFloat(restaurant.dataset.lng);
-          if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-            coords = { lat, lng };
-          }
-        }
+        bounds.extend([coords.lat, coords.lng]);
+        markersAdded++;
         
-        if (coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
-          // Créer un marqueur personnalisé
-          const marker = L.marker([coords.lat, coords.lng], {
-            title: restaurant.querySelector('h2').textContent
-          }).addTo(map);
-          
-          // Étendre les limites de la carte
-          bounds.extend([coords.lat, coords.lng]);
-          markersAdded++;
-          
-          // Créer le contenu de la popup
-          const popupContent = `
-            <div class="map-popup">
-              <div class="popup-content">
-                <div class="popup-image" style="background-image: url('${restaurant.dataset.image}')"></div>
-                <div class="popup-info">
-                  <h3>${restaurant.querySelector('h2').textContent}</h3>
-                  <div class="popup-rating">
-                    ${restaurant.querySelector('.rating').innerHTML}
-                  </div>
-                  <div class="popup-meta">
-                    <span class="cuisine-style">
-                      <i class="fas fa-utensils"></i> ${restaurant.dataset.style}
-                    </span>
-                    <span class="price">
-                      ${restaurant.querySelector('.price').innerHTML}
-                    </span>
-                  </div>
+        const popupContent = `
+          <div class="map-popup">
+            <div class="popup-content">
+              <div class="popup-image" style="background-image: url('${restaurant.dataset.image}')"></div>
+              <div class="popup-info">
+                <h3>${restaurant.querySelector('h2').textContent}</h3>
+                <div class="popup-rating">
+                  ${restaurant.querySelector('.rating').innerHTML}
+                </div>
+                <div class="popup-meta">
+                  <span class="cuisine-style">
+                    <i class="fas fa-utensils"></i> ${restaurant.dataset.style}
+                  </span>
+                  <span class="price">
+                    ${restaurant.querySelector('.price').innerHTML}
+                  </span>
                 </div>
               </div>
             </div>
-          `;
-          
-          // Configurer la popup
-          const popup = L.popup({
-            maxWidth: 300,
-            className: 'restaurant-popup'
-          }).setContent(popupContent);
-          
-          marker.bindPopup(popup);
-          
-          // Ajouter les événements
-          marker.on('click', () => {
-            localStorage.setItem('selectedView', 'map');
-            localStorage.setItem('fromView', 'true');
-            window.location.href = restaurant.querySelector('a').href;
+          </div>
+        `;
+        
+        const popup = L.popup({
+          maxWidth: 300,
+          className: 'restaurant-popup'
+        }).setContent(popupContent);
+        
+        marker.bindPopup(popup);
+        
+        marker.on('click', () => {
+          localStorage.setItem('selectedView', 'map');
+          localStorage.setItem('fromView', 'true');
+          window.location.href = restaurant.querySelector('a').href;
+        });
+        
+        marker.on('mouseover', function() {
+          this.openPopup();
+        });
+
+        // Ajuster la vue de la carte après chaque ajout
+        if (markersAdded > 0) {
+          map.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 15
           });
-          
-          marker.on('mouseover', function() {
-            this.openPopup();
-          });
-        } else {
-          console.warn(`⚠️ Pas de coordonnées valides pour: ${restaurant.querySelector('h2').textContent}`);
         }
       }
+
+      // Ajouter d'abord les restaurants avec des coordonnées existantes
+      const restaurants = document.querySelectorAll('.post-card');
+      restaurants.forEach(restaurant => {
+        const lat = parseFloat(restaurant.dataset.lat);
+        const lng = parseFloat(restaurant.dataset.lng);
+        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+          addMarker(restaurant, { lat, lng });
+        }
+      });
+
+      // Lancer le géocodage en arrière-plan pour les restaurants restants
+      const geocodingPromises = Array.from(restaurants).map(async (restaurant) => {
+        const address = restaurant.dataset.address;
+        let lat = parseFloat(restaurant.dataset.lat);
+        let lng = parseFloat(restaurant.dataset.lng);
+        
+        // Si on n'a pas déjà les coordonnées
+        if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && address) {
+          const coords = await geocodeAddress(address);
+          if (coords) {
+            geocodedCoordinates.set(address, coords);
+            restaurant.dataset.lat = coords.lat;
+            restaurant.dataset.lng = coords.lng;
+            // Ajouter le marqueur dès que les coordonnées sont disponibles
+            addMarker(restaurant, coords);
+          }
+        }
+      });
       
-      console.log(`Marqueurs ajoutés: ${markersAdded}/${restaurants.length}`);
-      
-      // Ajuster la vue de la carte si des marqueurs ont été ajoutés
-      if (markersAdded > 0) {
-        map.fitBounds(bounds, {
-          padding: [50, 50],
-          maxZoom: 15
-        });
-      }
+      // Attendre que tous les géocodages soient terminés
+      Promise.all(geocodingPromises).then(() => {
+        console.log(`Marqueurs ajoutés: ${markersAdded}/${restaurants.length}`);
+      });
     }
   }
   
