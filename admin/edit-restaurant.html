@@ -198,8 +198,8 @@
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
+        line-clamp: 3;
         overflow: hidden;
-        text-overflow: ellipsis;
       }
 
       .preview-card-meta {
@@ -1761,6 +1761,32 @@
         initializeEditors();
         loadRestaurantData();
       });
+    </script>
+    
+    <!-- Bouton de déconnexion flottant -->
+    <button class="logout-btn-floating" onclick="handleLogout()" title="Se déconnecter">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+
+    <script>
+      // Fonction de déconnexion
+      function handleLogout() {
+        Swal.fire({
+          title: 'Déconnexion',
+          text: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, me déconnecter',
+          cancelButtonText: 'Annuler',
+          confirmButtonColor: '#e74c3c',
+          cancelButtonColor: '#3498db'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            netlifyIdentity.logout();
+            window.location.href = '/';
+          }
+        });
+      }
     </script>
   </body>
 </html> 
