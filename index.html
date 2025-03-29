@@ -1052,6 +1052,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Vérifier si nous sommes sur la page d'accueil
   const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+  const isAdminPage = window.location.pathname.includes('/admin');
   
   // Vérifier si nous revenons d'une page de restaurant
   const returningFromRestaurant = document.referrer.includes(window.location.host);
@@ -1065,14 +1066,17 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('selectedView', currentView);
   }
   
-  // Si aucune vue n'est définie, utiliser la vue en pastilles
-  if (!currentView) {
+  // Si aucune vue n'est définie et que nous ne sommes pas sur la page admin, utiliser la vue en pastilles
+  if (!currentView && !isAdminPage) {
     currentView = 'grid';
     localStorage.setItem('selectedView', currentView);
   }
 
   // Fonction pour mettre à jour l'interface selon la vue
   async function updateView(view) {
+    // Ne mettre à jour la vue que si nous sommes sur la page d'accueil
+    if (!isHomePage) return;
+
     // Mettre à jour les classes des boutons
     viewButtons.forEach(btn => {
       btn.classList.remove('active');
