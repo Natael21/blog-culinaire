@@ -1390,28 +1390,55 @@
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '<p class="loading">Chargement des restaurants...</p>';
 
-          // Récupérer la liste des fichiers du dossier _posts
-          const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts');
+          // Vérifier si l'utilisateur est connecté
+          const user = netlifyIdentity.currentUser();
+          if (!user) {
+            throw new Error('Utilisateur non connecté');
+          }
+
+          console.log('Récupération de la liste des restaurants...');
+          const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts', {
+            headers: {
+              'Authorization': `token ${user.token.access_token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+
           if (!response.ok) {
-            throw new Error('Erreur lors de la récupération de la liste des restaurants');
+            throw new Error(`Erreur HTTP: ${response.status}`);
           }
           
           const posts = await response.json();
+          console.log('Nombre de posts trouvés:', posts.length);
           restaurantList.innerHTML = '';
           
           // Filtrer pour ne garder que les fichiers markdown
-          const markdownPosts = posts.filter(post => post.name.endsWith('.markdown'));
+          const markdownPosts = posts.filter(post => post.name.endsWith('.markdown') || post.name.endsWith('.md'));
+          console.log('Nombre de posts markdown:', markdownPosts.length);
+          
+          if (markdownPosts.length === 0) {
+            restaurantList.innerHTML = '<p class="no-restaurants">Aucun restaurant trouvé.</p>';
+            return;
+          }
           
           for (const post of markdownPosts) {
             try {
+              console.log('Chargement du post:', post.name);
               // Récupérer le contenu du fichier
-              const contentResponse = await fetch(post.download_url);
+              const contentResponse = await fetch(post.download_url, {
+                headers: {
+                  'Authorization': `token ${user.token.access_token}`,
+                  'Accept': 'application/vnd.github.v3+json'
+                }
+              });
+              
               if (!contentResponse.ok) {
-                console.error(`Erreur lors du chargement du fichier ${post.name}`);
+                console.error(`Erreur lors du chargement du fichier ${post.name}:`, contentResponse.status);
                 continue;
               }
               
               const content = await contentResponse.text();
+              console.log('Contenu récupéré pour:', post.name);
               
               // Extraire le frontmatter
               const parts = content.split('---').filter(part => part.trim());
@@ -1429,6 +1456,8 @@
               const style = frontmatter.match(/style:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
               const image = frontmatter.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '/images/header.jpg';
               
+              console.log('Métadonnées extraites pour', post.name, ':', { title, date, note, style, image });
+              
               // Créer l'élément HTML
               const item = document.createElement('div');
               item.className = 'restaurant-item';
@@ -1438,7 +1467,7 @@
               
               item.innerHTML = `
                 <div class="restaurant-info">
-                  <img src="${imagePath}" alt="${title}" class="restaurant-image" onerror="this.src='/images/restaurant-default.jpg'">
+                  <img src="${imagePath}" alt="${title}" class="restaurant-image" onerror="this.src='/images/header.jpg'">
                   <div class="restaurant-details">
                     <h3>${title}</h3>
                     <div class="restaurant-meta">
@@ -1466,21 +1495,18 @@
             }
           }
           
-          // Si aucun restaurant n'a été chargé
-          if (restaurantList.children.length === 0) {
-            restaurantList.innerHTML = '<p class="no-restaurants">Aucun restaurant trouvé.</p>';
-          }
-          
         } catch (error) {
           console.error('Erreur lors du chargement des restaurants:', error);
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = `
-            <p class="error-message">
-              Une erreur est survenue lors du chargement des restaurants. 
+            <div class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Une erreur est survenue lors du chargement des restaurants.</p>
+              <p class="error-details">${error.message}</p>
               <button onclick="loadRestaurants()" class="retry-btn">
                 <i class="fas fa-sync"></i> Réessayer
               </button>
-            </p>
+            </div>
           `;
         }
       }
