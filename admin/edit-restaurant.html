@@ -951,22 +951,34 @@
           });
           
           // Comparer les métadonnées
-          const missingFields = [];
           const fieldsToCheck = ['title', 'date', 'style', 'price', 'note', 'address', 'description', 'image'];
+          const missingFields = [];
+          const differentFields = [];
           
           fieldsToCheck.forEach(field => {
             if (!metadata[field] && originalMetadata[field]) {
               missingFields.push(field);
+            } else if (metadata[field] !== originalMetadata[field]) {
+              differentFields.push(field);
             }
           });
           
-          // Si des champs sont manquants, afficher une alerte
-          if (missingFields.length > 0) {
+          // Si des champs sont manquants ou différents, afficher une alerte
+          if (missingFields.length > 0 || differentFields.length > 0) {
+            let message = '';
+            if (missingFields.length > 0) {
+              message += `Les champs suivants sont présents dans le post original mais manquants dans l'édition :<br><br>
+                         ${missingFields.map(field => `<strong>${field}</strong>`).join('<br>')}<br><br>`;
+            }
+            if (differentFields.length > 0) {
+              message += `Les champs suivants sont différents du post original :<br><br>
+                         ${differentFields.map(field => `<strong>${field}</strong>`).join('<br>')}<br><br>`;
+            }
+            message += 'Voulez-vous restaurer ces données ?';
+            
             await Swal.fire({
-              title: 'Données manquantes détectées',
-              html: `Les champs suivants sont présents dans le post original mais manquants dans l'édition :<br><br>
-                     ${missingFields.map(field => `<strong>${field}</strong>`).join('<br>')}<br><br>
-                     Voulez-vous restaurer ces données ?`,
+              title: 'Différences détectées',
+              html: message,
               icon: 'warning',
               showCancelButton: true,
               confirmButtonText: 'Oui, restaurer',
@@ -975,8 +987,8 @@
               cancelButtonColor: '#e74c3c'
             }).then((result) => {
               if (result.isConfirmed) {
-                // Restaurer les données manquantes
-                missingFields.forEach(field => {
+                // Restaurer les données manquantes et différentes
+                [...missingFields, ...differentFields].forEach(field => {
                   metadata[field] = originalMetadata[field];
                   // Mettre à jour les champs du formulaire
                   switch(field) {
@@ -1074,13 +1086,13 @@
             }
           });
 
-          // Remplir les champs du formulaire avec les métadonnées ou les valeurs par défaut
+          // Remplir les champs du formulaire avec les métadonnées
           document.getElementById('name').value = metadata.title || '';
           document.getElementById('cuisine').value = metadata.style || '';
           document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
           document.getElementById('address').value = metadata.address || '';
 
-          // Gérer le prix avec une valeur par défaut
+          // Gérer le prix
           const priceSelect = document.getElementById('price');
           const priceValue = metadata.price || '$$';
           Array.from(priceSelect.options).forEach((option, index) => {
@@ -1089,14 +1101,14 @@
             }
           });
 
-          // Remplir les éditeurs avec des valeurs par défaut si nécessaire
-          summaryEditor.root.innerHTML = metadata.description || 'Entrez une brève description du restaurant...';
+          // Remplir les éditeurs avec le contenu original
+          summaryEditor.root.innerHTML = metadata.description || '';
           
           // Formater le contenu de la description
-          const formattedContent = formatDescription(fullContent.trim() || '**Nataël** :\n\n\n\n**Nicolas** :\n');
+          const formattedContent = formatDescription(fullContent.trim());
           descriptionEditor.root.innerHTML = formattedContent;
 
-          // Gérer l'image principale avec une image par défaut si nécessaire
+          // Gérer l'image principale
           const mainImageUrl = metadata.image || '/images/header.jpg';
           const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
           previewImages.forEach(img => {
@@ -1128,9 +1140,6 @@
             saveInitialState();
             console.log('État initial sauvegardé après chargement complet');
             setupChangeDetection();
-            
-            // Valider les données avec le post original
-            validateRestaurantData(metadata, fullContent);
           }, 100);
         } else {
           // Nouveau post avec des valeurs par défaut
