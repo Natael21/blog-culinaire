@@ -187,8 +187,16 @@
           scrollTimeout = setTimeout(() => {
             if (window.pageYOffset > 300) {
               scrollToTopButton.classList.add('show');
+              // Vérifier si on est en bas de la page
+              const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
+              if (isBottom) {
+                scrollToTopButton.classList.add('bottom-page');
+              } else {
+                scrollToTopButton.classList.remove('bottom-page');
+              }
             } else {
               scrollToTopButton.classList.remove('show');
+              scrollToTopButton.classList.remove('bottom-page');
             }
             scrollTimeout = null;
           }, 100);
