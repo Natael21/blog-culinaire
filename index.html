@@ -1384,6 +1384,10 @@ document.addEventListener('DOMContentLoaded', function() {
       this.openPopup();
     });
 
+    marker.on('mouseout', function() {
+      this.closePopup();
+    });
+
     // Stocker le marqueur dans la Map
     markers.set(restaurant.id, marker);
     
