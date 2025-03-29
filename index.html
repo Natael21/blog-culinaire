@@ -349,8 +349,9 @@ title: Accueil
 
   .filters-container {
     padding: 1rem;
-    margin: 1rem;
+    margin: 1rem 0.5rem;
     border-radius: 8px;
+    width: auto;
   }
   
   .filter-group {
@@ -358,14 +359,13 @@ title: Accueil
   }
 
   .search-and-view {
-    flex-direction: row;
-    align-items: center;
-    max-width: 300px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0.5rem;
   }
   
   .search-input-wrapper {
-    flex: 1;
+    width: 100%;
   }
   
   .search-input {
@@ -378,9 +378,9 @@ title: Accueil
   }
 
   .advanced-filters-btn {
-    padding: 0.8rem;
+    padding: 0.7rem;
     font-size: 0.95rem;
-    max-width: 300px;
+    max-width: 200px;
   }
   
   /* Masquer les boutons de vue sur mobile */
@@ -415,21 +415,28 @@ title: Accueil
 
 /* Spécifique pour l'orientation portrait sur mobile */
 @media (max-width: 768px) and (orientation: portrait) {
+  .filters-container {
+    padding: 0.8rem;
+    margin: 0.8rem 0.5rem;
+  }
+
   .search-and-view {
-    max-width: 250px;
+    max-width: 200px;
+    padding: 0;
   }
 
   .advanced-filters-btn {
-    max-width: 250px;
+    max-width: 200px;
+    padding: 0.7rem;
   }
 
   .search-input {
     font-size: 0.9rem;
-    padding: 0.7rem 2.2rem 0.7rem 2.2rem;
+    padding: 0.7rem 2rem 0.7rem 2rem;
   }
 
   .search-input-wrapper i {
-    left: 0.7rem;
+    left: 0.6rem;
     font-size: 0.9rem;
   }
 }
