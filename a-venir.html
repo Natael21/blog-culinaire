@@ -13,7 +13,7 @@ permalink: /a-venir/
   <div class="upcoming-grid" id="sortable-grid">
     {% assign sorted_upcoming = site.upcoming | sort: "order" %}
     {% for restaurant in sorted_upcoming %}
-    <div class="upcoming-card" data-order="{{ restaurant.order }}" data-path="_upcoming/{{ restaurant.path }}">
+    <div class="upcoming-card" data-order="{{ restaurant.order }}" data-path="{{ restaurant.path }}">
       <div class="drag-handle">
         <i class="fas fa-grip-vertical"></i>
       </div>
@@ -240,8 +240,13 @@ document.addEventListener('DOMContentLoaded', function() {
       animation: 150,
       ghostClass: 'sortable-ghost',
       chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
       handle: '.drag-handle',
+      onStart: function(evt) {
+        document.body.style.cursor = 'grabbing';
+      },
       onEnd: async function(evt) {
+        document.body.style.cursor = 'default';
         const cards = Array.from(grid.children);
         const updates = cards.map((card, index) => ({
           path: card.dataset.path,
@@ -250,9 +255,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
           const token = window.netlifyIdentity?.currentUser()?.token?.access_token;
-          if (!token) return;
+          if (!token) {
+            console.error('Token non trouvé');
+            return;
+          }
 
           for (const update of updates) {
+            if (!update.path) {
+              console.error('Chemin non trouvé pour la carte');
+              continue;
+            }
+
+            console.log('Mise à jour du restaurant:', update);
+
             const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
               method: 'GET',
               headers: {
