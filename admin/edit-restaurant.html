@@ -262,6 +262,83 @@
     </div>
 
     <script>
+      // Fonction pour charger les données du restaurant à partir des paramètres d'URL
+      function loadRestaurantData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const content = urlParams.get('content');
+        
+        if (content) {
+          const decodedContent = decodeURIComponent(content);
+          const frontmatter = decodedContent.split('---')[1];
+          const metadata = {};
+          frontmatter.split('\n').forEach(line => {
+            const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
+            if (match) {
+              metadata[match[1]] = match[2];
+            }
+          });
+
+          // Remplir les champs du formulaire
+          document.getElementById('name').value = metadata.title || '';
+          document.getElementById('cuisine').value = metadata.style || '';
+          document.getElementById('price').value = metadata.price || '';
+          document.getElementById('rating').value = metadata.note || '4.5';
+          document.getElementById('address').value = metadata.address || '';
+          document.getElementById('description').value = metadata.description || '';
+
+          // Afficher l'image si elle existe
+          if (metadata.image) {
+            const imagePreview = document.getElementById('images');
+            const previewImg = imagePreview.querySelector('img');
+            previewImg.src = metadata.image;
+            imagePreview.style.display = 'block';
+          }
+
+          // Mettre à jour l'aperçu
+          updatePreview();
+        }
+      }
+
+      // Charger les données au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadRestaurantData);
+
+      // Fonction pour mettre à jour l'aperçu
+      function updatePreview() {
+        const name = document.getElementById('name').value;
+        const cuisine = document.getElementById('cuisine').value;
+        const price = document.getElementById('price').value;
+        const rating = document.getElementById('rating').value;
+        const description = document.getElementById('description').value;
+        const imagePreview = document.getElementById('images');
+        const previewImg = imagePreview.querySelector('img');
+
+        // Mettre à jour l'aperçu carte
+        document.querySelector('.preview-card h3').textContent = name;
+        document.querySelector('.preview-card .cuisine').textContent = cuisine;
+        document.querySelector('.preview-card .note').textContent = `${rating}/5`;
+        document.querySelector('.preview-card .price').textContent = `${price} $`;
+        if (previewImg.src) {
+          document.querySelector('.preview-card img').src = previewImg.src;
+        }
+
+        // Mettre à jour l'aperçu complet
+        document.querySelector('.preview-full h3').textContent = name;
+        document.querySelector('.preview-full .cuisine').textContent = cuisine;
+        document.querySelector('.preview-full .note').textContent = `${rating}/5`;
+        document.querySelector('.preview-full .price').textContent = `${price} $`;
+        document.querySelector('.preview-full .description').textContent = description;
+        if (previewImg.src) {
+          document.querySelector('.preview-full img').src = previewImg.src;
+        }
+      }
+
+      // Ajouter les écouteurs d'événements pour la mise à jour en temps réel
+      document.getElementById('name').addEventListener('input', updatePreview);
+      document.getElementById('cuisine').addEventListener('input', updatePreview);
+      document.getElementById('price').addEventListener('input', updatePreview);
+      document.getElementById('rating').addEventListener('input', updatePreview);
+      document.getElementById('description').addEventListener('input', updatePreview);
+
       // Gestion du toggle des previews
       document.querySelectorAll('.preview-toggle button').forEach(button => {
         button.addEventListener('click', () => {
@@ -274,32 +351,6 @@
           document.querySelector(`.preview-${button.dataset.preview}`).classList.add('active');
         });
       });
-
-      // Mise à jour du preview en temps réel
-      document.getElementById('restaurant-form').addEventListener('input', () => {
-        updatePreview();
-      });
-
-      function updatePreview() {
-        const name = document.getElementById('name').value || 'Nom du Restaurant';
-        const cuisine = document.getElementById('cuisine').value || 'Style de cuisine';
-        const price = document.getElementById('price').value;
-        const rating = document.getElementById('rating').value || '4.5';
-
-        // Mise à jour du preview carte
-        const cardTitle = document.querySelector('.preview-card h3');
-        const cardMeta = document.querySelector('.preview-card-meta');
-        
-        cardTitle.textContent = name;
-        cardMeta.innerHTML = `
-          <span><i class="fas fa-star"></i> ${rating}</span>
-          <span><i class="fas fa-utensils"></i> ${cuisine}</span>
-          <span><i class="fas fa-dollar-sign"></i> ${price}</span>
-        `;
-
-        // Mise à jour du preview complet
-        // À implémenter selon le template de la page restaurant
-      }
     </script>
   </body>
 </html> 

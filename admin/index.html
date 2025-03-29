@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administration du Blog Culinaire | Gestion des Restaurants</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="style.css" />
@@ -1281,32 +1282,51 @@
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '';
           
-          posts.forEach(post => {
+          for (const post of posts) {
             if (post.name.endsWith('.markdown')) {
-              const item = document.createElement('div');
-              item.className = 'restaurant-item';
-              item.innerHTML = `
-                <div class="restaurant-info">
-                  <img src="/images/restaurant-test.jpg" alt="${post.name}" class="restaurant-image">
-                  <div class="restaurant-details">
-                    <h3>${post.name.replace(/^\d{4}-\d{2}-\d{2}-(.+)\.markdown$/, '$1').replace(/-/g, ' ')}</h3>
-                    <div class="restaurant-meta">
-                      <span><i class="fas fa-calendar"></i> ${post.name.substr(0, 10)}</span>
+              try {
+                const contentResponse = await fetch(post.download_url);
+                const content = await contentResponse.text();
+                
+                // Extraire les métadonnées du frontmatter
+                const frontmatter = content.split('---')[1];
+                const metadata = {};
+                frontmatter.split('\n').forEach(line => {
+                  const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
+                  if (match) {
+                    metadata[match[1]] = match[2];
+                  }
+                });
+
+                const item = document.createElement('div');
+                item.className = 'restaurant-item';
+                item.innerHTML = `
+                  <div class="restaurant-info">
+                    <img src="${metadata.image || '/images/restaurant-test.jpg'}" alt="${metadata.title}" class="restaurant-image">
+                    <div class="restaurant-details">
+                      <h3>${metadata.title}</h3>
+                      <div class="restaurant-meta">
+                        <span><i class="fas fa-calendar"></i> ${metadata.date}</span>
+                        <span><i class="fas fa-utensils"></i> ${metadata.style}</span>
+                        <span><i class="fas fa-star"></i> ${metadata.note}/5</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="restaurant-actions">
-                  <a href="/admin/edit-restaurant.html?id=${post.path}" class="action-btn edit-btn">
-                    <i class="fas fa-edit"></i> Modifier
-                  </a>
-                  <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
-                    <i class="fas fa-trash"></i> Supprimer
-                  </button>
-                </div>
-              `;
-              restaurantList.appendChild(item);
+                  <div class="restaurant-actions">
+                    <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}&content=${encodeURIComponent(content)}" class="action-btn edit-btn">
+                      <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
+                      <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                  </div>
+                `;
+                restaurantList.appendChild(item);
+              } catch (error) {
+                console.error('Erreur lors du chargement du contenu du restaurant:', error);
+              }
             }
-          });
+          }
         } catch (error) {
           console.error('Erreur lors du chargement des restaurants:', error);
           const restaurantList = document.getElementById('restaurant-list');
