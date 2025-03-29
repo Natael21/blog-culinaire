@@ -1128,7 +1128,13 @@
             const match = line.match(/^(\w+):\s*(.+)$/);
             if (match) {
               const [_, key, value] = match;
-              originalMetadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
+              originalMetadata[key] = value
+                .replace(/^"(.*)"$/, '$1')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .trim();
             }
           });
           
@@ -1258,7 +1264,14 @@
               const match = line.match(/^(\w+):\s*(.+)$/);
               if (match) {
                 const [_, key, value] = match;
-                metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
+                // Décoder les caractères spéciaux HTML et enlever les guillemets
+                metadata[key] = value
+                  .replace(/^"(.*)"$/, '$1')
+                  .replace(/&amp;/g, '&')
+                  .replace(/&lt;/g, '<')
+                  .replace(/&gt;/g, '>')
+                  .replace(/&quot;/g, '"')
+                  .trim();
               }
             });
 
