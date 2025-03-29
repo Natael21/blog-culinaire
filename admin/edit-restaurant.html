@@ -1364,8 +1364,8 @@
             summaryEditor.root.innerHTML = metadata.description || '';
             
             // Formater le contenu de la description
-            const formattedContent = formatDescription(fullContent.trim());
-            descriptionEditor.root.innerHTML = formattedContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
+            const descriptionContent = fullContent.trim();
+            descriptionEditor.root.innerHTML = descriptionContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
 
             // Gérer l'image principale
             const mainImageUrl = metadata.image || '/images/header.jpg';
