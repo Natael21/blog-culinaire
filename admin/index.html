@@ -13,6 +13,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+
+      // Vérification des rôles
+      window.netlifyIdentity.on("init", user => {
+        if (!user || !user.app_metadata || !user.app_metadata.roles || 
+            !user.app_metadata.roles.includes('admin')) {
+          window.location.href = "/";
+        }
+      });
+    </script>
     <style>
       body {
         font-family: 'Open Sans', sans-serif;
@@ -1172,7 +1192,6 @@
       </div>
     </div>
 
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
       // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
