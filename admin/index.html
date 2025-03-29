@@ -15,17 +15,27 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
+      // Vérification de l'authentification
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", user => {
           if (!user) {
-            window.location.href = "/";
+            window.netlifyIdentity.open('login');
           }
         });
-      }
 
-      // Vérification immédiate de l'authentification
-      if (!window.netlifyIdentity || !window.netlifyIdentity.currentUser()) {
-        window.location.href = "/";
+        window.netlifyIdentity.on("login", () => {
+          // Rafraîchir la page après la connexion
+          window.location.reload();
+        });
+
+        window.netlifyIdentity.on("logout", () => {
+          window.location.href = "/";
+        });
+
+        // Vérification immédiate de l'authentification
+        if (!window.netlifyIdentity.currentUser()) {
+          window.netlifyIdentity.open('login');
+        }
       }
     </script>
     <style>
