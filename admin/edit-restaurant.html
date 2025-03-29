@@ -1303,7 +1303,22 @@
             document.getElementById('name').value = metadata.title || '';
             const date = metadata.date ? new Date(metadata.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
             document.getElementById('date').value = date;
-            document.getElementById('cuisine').value = metadata.style || '';
+
+            // Gérer le style de cuisine
+            const style = metadata.style || '';
+            document.getElementById('cuisine').value = style;
+
+            // Si le style n'existe pas dans la liste, l'ajouter
+            const cuisineSelect = document.getElementById('cuisine');
+            const styleExists = Array.from(cuisineSelect.options).some(option => option.value === style);
+            if (style && !styleExists) {
+              const option = document.createElement('option');
+              option.value = style;
+              option.textContent = style;
+              option.setAttribute('data-default', '');
+              cuisineSelect.insertBefore(option, cuisineSelect.options[cuisineSelect.options.length - 1]);
+            }
+
             document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
             document.getElementById('address').value = metadata.address || '';
 
