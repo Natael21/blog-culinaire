@@ -901,26 +901,16 @@
 
       // Fonction pour formater le texte de la description
       function formatDescription(content) {
-        // Séparer le contenu en sections par auteur
-        const sections = content.split(/\*\*(Nataël|Nicolas)\*\* ?:/);
-        let formattedContent = '';
-        
-        for (let i = 1; i < sections.length; i += 2) {
-          const author = sections[i];
-          const text = sections[i + 1] || '';
-          
-          // Formater chaque section avec le nom en gras et le texte
-          formattedContent += `<p><strong>${author}</strong> :</p>`;
-          
-          // Séparer et formater les paragraphes
-          const paragraphs = text.trim().split(/\n\n+/);
-          paragraphs.forEach(paragraph => {
-            if (paragraph.trim()) {
-              formattedContent += `<p>${paragraph.trim()}</p>`;
-            }
-          });
-        }
-        
+        // Convertir les marqueurs Markdown en HTML
+        let formattedContent = content
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Convertir **texte** en <strong>texte</strong>
+          .replace(/\*(.*?)\*/g, '<em>$1</em>') // Convertir *texte* en <em>texte</em>
+          .replace(/\n\n/g, '</p><p>') // Convertir les doubles sauts de ligne en paragraphes
+          .replace(/\n/g, '<br>'); // Convertir les simples sauts de ligne en <br>
+
+        // Ajouter les balises de paragraphe au début et à la fin
+        formattedContent = `<p>${formattedContent}</p>`;
+
         return formattedContent;
       }
 
@@ -1237,7 +1227,7 @@
         }
       }
 
-      // Modifier la fonction loadRestaurantData pour inclure la date
+      // Modifier la fonction loadRestaurantData pour utiliser formatDescription
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
         const content = urlParams.get('content');
@@ -1365,7 +1355,8 @@
             
             // Formater le contenu de la description
             const descriptionContent = fullContent.trim();
-            descriptionEditor.root.innerHTML = descriptionContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
+            const formattedContent = formatDescription(descriptionContent);
+            descriptionEditor.root.innerHTML = formattedContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
 
             // Gérer l'image principale
             const mainImageUrl = metadata.image || '/images/header.jpg';
