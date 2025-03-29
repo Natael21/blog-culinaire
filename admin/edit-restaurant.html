@@ -1244,11 +1244,22 @@
         
         if (content) {
           try {
-            const decodedContent = decodeURIComponent(content)
-              .replace(/title: "([^"]+)"/g, (match, title) => {
-                // Remplacer "and" par "&" dans le titre
-                return `title: "${title.replace(/\band\b/g, '&')}"`;
-              });
+            // Décoder le contenu en gérant les caractères spéciaux
+            let decodedContent;
+            try {
+              decodedContent = decodeURIComponent(content);
+            } catch (uriError) {
+              // Si le décodage échoue, essayer une autre méthode
+              decodedContent = content.replace(/\+/g, ' ')
+                .replace(/%([0-9A-F]{2})/g,
+                  function toSolidBytes(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                });
+            }
+
+            decodedContent = decodedContent.replace(/title: "([^"]+)"/g, (match, title) => {
+              return `title: "${title.replace(/\band\b/g, '&')}"`;
+            });
             console.log("Contenu décodé:", decodedContent);
             
             // Extraire les images avant de séparer le contenu
@@ -1837,71 +1848,29 @@
       });
 
       async function loadCuisineStyles() {
-        try {
-          // Récupérer tous les fichiers markdown du dossier _posts
-          const response = await fetch('/api/posts');
-          const posts = await response.json();
-          
-          // Extraire les styles uniques
-          const styles = new Set();
-          posts.forEach(post => {
-            const content = post.content;
-            const styleMatch = content.match(/style: "([^"]+)"/);
-            if (styleMatch) {
-              styles.add(styleMatch[1]);
-            }
-          });
-          
-          // Trier les styles par ordre alphabétique
-          const sortedStyles = Array.from(styles).sort();
-          
-          // Mettre à jour le select
-          const select = document.getElementById('cuisine');
-          const defaultOption = select.options[0];
-          const newStyleOption = select.options[1];
-          
-          // Vider les options existantes sauf la première et la dernière
-          select.innerHTML = '';
-          select.appendChild(defaultOption);
-          
-          // Ajouter les styles triés
-          sortedStyles.forEach(style => {
-            const option = document.createElement('option');
-            option.value = style;
-            option.textContent = style;
-            option.setAttribute('data-default', '');
-            select.appendChild(option);
-          });
-          
-          // Ajouter l'option "Ajouter un nouveau style" à la fin
-          select.appendChild(newStyleOption);
-          
-        } catch (error) {
-          console.error('Erreur lors du chargement des styles:', error);
-          // En cas d'erreur, charger une liste de styles par défaut
-          const defaultStyles = [
-            "Américain", "Asiatique", "Bistro", "Boulangerie-Café", "Café-Bistro",
-            "Indien", "Iranien", "Italien", "Libano-Marocain", "Mexicain",
-            "Microbrasserie", "Pub", "Thaïlandais", "Vietnamien"
-          ];
-          
-          const select = document.getElementById('cuisine');
-          const defaultOption = select.options[0];
-          const newStyleOption = select.options[1];
-          
-          select.innerHTML = '';
-          select.appendChild(defaultOption);
-          
-          defaultStyles.forEach(style => {
-            const option = document.createElement('option');
-            option.value = style;
-            option.textContent = style;
-            option.setAttribute('data-default', '');
-            select.appendChild(option);
-          });
-          
-          select.appendChild(newStyleOption);
-        }
+        // Utiliser directement la liste de styles par défaut
+        const defaultStyles = [
+          "Américain", "Asiatique", "Bistro", "Boulangerie-Café", "Café-Bistro",
+          "Indien", "Iranien", "Italien", "Libano-Marocain", "Mexicain",
+          "Microbrasserie", "Pub", "Thaïlandais", "Vietnamien"
+        ];
+        
+        const select = document.getElementById('cuisine');
+        const defaultOption = select.options[0];
+        const newStyleOption = select.options[1];
+        
+        select.innerHTML = '';
+        select.appendChild(defaultOption);
+        
+        defaultStyles.forEach(style => {
+          const option = document.createElement('option');
+          option.value = style;
+          option.textContent = style;
+          option.setAttribute('data-default', '');
+          select.appendChild(option);
+        });
+        
+        select.appendChild(newStyleOption);
       }
 
       // Appeler la fonction au chargement de la page
