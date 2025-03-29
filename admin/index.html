@@ -1384,107 +1384,103 @@
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-      // Fonction pour charger les restaurants depuis le fichier data
+      // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
         try {
           const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = '<div class="loading">Chargement des restaurants...</div>';
+          restaurantList.innerHTML = '<p class="loading">Chargement des restaurants...</p>';
 
-          // Charger les restaurants depuis le fichier data
-          const response = await fetch('/data/restaurants.json');
+          // Récupérer la liste des fichiers du dossier _posts
+          const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts');
           if (!response.ok) {
-            throw new Error('Impossible de charger les données des restaurants');
+            throw new Error('Erreur lors de la récupération de la liste des restaurants');
           }
+          
           const posts = await response.json();
-
-          const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
-          const sortBy = document.getElementById('sort-by').value;
-          const restaurantItems = [];
-
-          for (const post of posts) {
-            // Vérification des champs requis
-            if (!post.title) {
-              console.error(`Titre manquant pour ${post.name}`);
-              continue;
-            }
-
-            // Valeurs par défaut pour les champs optionnels
-            post.date = post.date || new Date().toISOString().split('T')[0];
-            post.style = post.style || 'Non spécifié';
-            post.note = post.note || 0;
-            post.image = post.image || '/images/restaurant-default.jpg';
-
-            // Vérifier si le restaurant correspond aux critères de recherche
-            if (searchTerm && !(post.title.toLowerCase().includes(searchTerm) || post.style.toLowerCase().includes(searchTerm))) {
-              continue;
-            }
-
-            const item = document.createElement('div');
-            item.className = 'restaurant-item';
-            item.innerHTML = `
-              <div class="restaurant-info">
-                <img src="${post.image}" alt="${post.title}" class="restaurant-image" onerror="this.src='/images/restaurant-default.jpg'">
-                <div class="restaurant-details">
-                  <h3>${post.title}</h3>
-                  <div class="restaurant-meta">
-                    <span><i class="fas fa-calendar"></i> ${post.date}</span>
-                    <span><i class="fas fa-utensils"></i> ${post.style}</span>
-                    <span><i class="fas fa-star"></i> ${post.note}/5</span>
+          restaurantList.innerHTML = '';
+          
+          // Filtrer pour ne garder que les fichiers markdown
+          const markdownPosts = posts.filter(post => post.name.endsWith('.markdown'));
+          
+          for (const post of markdownPosts) {
+            try {
+              // Récupérer le contenu du fichier
+              const contentResponse = await fetch(post.download_url);
+              if (!contentResponse.ok) {
+                console.error(`Erreur lors du chargement du fichier ${post.name}`);
+                continue;
+              }
+              
+              const content = await contentResponse.text();
+              
+              // Extraire le frontmatter
+              const parts = content.split('---').filter(part => part.trim());
+              if (parts.length < 2) {
+                console.error(`Format invalide pour ${post.name}`);
+                continue;
+              }
+              
+              const frontmatter = parts[1];
+              
+              // Extraire les métadonnées avec une meilleure gestion des guillemets
+              const title = frontmatter.match(/title:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+              const date = frontmatter.match(/date:\s*(\d{4}-\d{2}-\d{2})/)?.[1] || '';
+              const note = frontmatter.match(/note:\s*(\d+\.?\d*)/)?.[1] || '0';
+              const style = frontmatter.match(/style:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+              const image = frontmatter.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '/images/restaurant-default.jpg';
+              
+              // Créer l'élément HTML
+              const item = document.createElement('div');
+              item.className = 'restaurant-item';
+              
+              // Nettoyer et standardiser le chemin de l'image
+              const imagePath = image.startsWith('/') ? image : `/${image}`;
+              
+              item.innerHTML = `
+                <div class="restaurant-info">
+                  <img src="${imagePath}" alt="${title}" class="restaurant-image" onerror="this.src='/images/restaurant-default.jpg'">
+                  <div class="restaurant-details">
+                    <h3>${title}</h3>
+                    <div class="restaurant-meta">
+                      <span><i class="fas fa-calendar"></i> ${date || 'Date non spécifiée'}</span>
+                      <span><i class="fas fa-utensils"></i> ${style || 'Style non spécifié'}</span>
+                      <span><i class="fas fa-star"></i> ${note || '0'}/5</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="restaurant-actions">
-                <button class="action-btn edit-btn" onclick="editRestaurant('${post.name}')">
-                  <i class="fas fa-edit"></i> Modifier
-                </button>
-                <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
-                  <i class="fas fa-trash"></i> Supprimer
-                </button>
-              </div>
-            `;
-            
-            item.dataset.title = post.title.toLowerCase();
-            item.dataset.date = post.date;
-            
-            restaurantItems.push(item);
-          }
-
-          // Tri des restaurants
-          restaurantItems.sort((a, b) => {
-            switch(sortBy) {
-              case 'date-desc':
-                return new Date(b.dataset.date) - new Date(a.dataset.date);
-              case 'date-asc':
-                return new Date(a.dataset.date) - new Date(b.dataset.date);
-              case 'name-asc':
-                return a.dataset.title.localeCompare(b.dataset.title, 'fr');
-              case 'name-desc':
-                return b.dataset.title.localeCompare(a.dataset.title, 'fr');
-              default:
-                return 0;
+                <div class="restaurant-actions">
+                  <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}&content=${encodeURIComponent(content)}" class="action-btn edit-btn">
+                    <i class="fas fa-edit"></i> Modifier
+                  </a>
+                  <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
+                    <i class="fas fa-trash"></i> Supprimer
+                  </button>
+                </div>
+              `;
+              
+              restaurantList.appendChild(item);
+              
+            } catch (error) {
+              console.error(`Erreur lors du traitement du restaurant ${post.name}:`, error);
+              continue;
             }
-          });
+          }
           
-          // Mise à jour de la liste
-          restaurantList.innerHTML = '';
-          if (restaurantItems.length === 0) {
-            restaurantList.innerHTML = '<p class="no-results">Aucun restaurant trouvé</p>';
-          } else {
-            restaurantItems.forEach(item => restaurantList.appendChild(item));
+          // Si aucun restaurant n'a été chargé
+          if (restaurantList.children.length === 0) {
+            restaurantList.innerHTML = '<p class="no-restaurants">Aucun restaurant trouvé.</p>';
           }
           
         } catch (error) {
           console.error('Erreur lors du chargement des restaurants:', error);
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = `
-            <div class="error-message">
-              <i class="fas fa-exclamation-circle"></i>
-              <p>Une erreur est survenue lors du chargement des restaurants.</p>
-              <p class="error-details">${error.message}</p>
+            <p class="error-message">
+              Une erreur est survenue lors du chargement des restaurants. 
               <button onclick="loadRestaurants()" class="retry-btn">
-                <i class="fas fa-redo"></i> Réessayer
+                <i class="fas fa-sync"></i> Réessayer
               </button>
-            </div>
+            </p>
           `;
         }
       }
