@@ -1333,7 +1333,8 @@
           // Afficher le contenu après la connexion
           loadingOverlay.style.display = 'none';
           adminContainer.classList.add('authenticated');
-          window.location.reload();
+          // Ne pas recharger la page, juste charger les restaurants
+          loadRestaurants();
         });
 
         window.netlifyIdentity.on("logout", () => {
