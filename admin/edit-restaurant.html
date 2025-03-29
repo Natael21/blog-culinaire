@@ -1105,6 +1105,7 @@
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
+            .replace(/&/g, 'and') // Remplacer & par and
             .replace(/[^a-z0-9]+/g, '-'); // Remplacer les caractères spéciaux par des tirets
           
           // Construire l'URL du post original en utilisant la date du frontmatter
@@ -1632,6 +1633,7 @@
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
+            .replace(/&/g, 'and') // Remplacer & par and
             .replace(/[^a-z0-9]+/g, '-')}.markdown`;
           
           // Construire le contenu du fichier avec traitement des accents
