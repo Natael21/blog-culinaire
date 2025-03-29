@@ -1560,6 +1560,8 @@
       const formSection = document.querySelector('.form-section');
       const previewSection = document.querySelector('.preview-section');
       let isSynced = true;
+      let isScrolling = false;
+      let lastScrollTop = 0;
 
       // Fonction pour mettre à jour la position de la section de prévisualisation
       function updatePreviewSectionPosition() {
@@ -1583,6 +1585,10 @@
         
         if (isSynced) {
           scrollToggle.innerHTML = '<i class="fas fa-link"></i><span>Défilement synchronisé</span>';
+          // Synchroniser la position actuelle lors du retour au mode synchronisé
+          const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
+          previewSection.scrollTop = (scrollPercentage / 100) * previewScrollHeight;
         } else {
           scrollToggle.innerHTML = '<i class="fas fa-unlink"></i><span>Défilement indépendant</span>';
         }
@@ -1591,7 +1597,6 @@
       });
 
       // Gestionnaire d'événements pour le défilement synchronisé
-      let isScrolling = false;
       document.addEventListener('scroll', () => {
         if (!isSynced || isScrolling) return;
         
@@ -1601,10 +1606,27 @@
           const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
           const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
           previewSection.scrollTop = (scrollPercentage / 100) * previewScrollHeight;
-          setTimeout(() => {
+          lastScrollTop = previewSection.scrollTop;
+          requestAnimationFrame(() => {
             isScrolling = false;
-          }, 50);
+          });
         }
+      });
+
+      // Gestionnaire d'événements pour le défilement de la section de prévisualisation
+      previewSection.addEventListener('scroll', () => {
+        if (!isSynced || isScrolling) return;
+        
+        isScrolling = true;
+        const scrollPercentage = (previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight)) * 100;
+        window.scrollTo({
+          top: (scrollPercentage / 100) * (document.documentElement.scrollHeight - window.innerHeight),
+          behavior: 'auto'
+        });
+        lastScrollTop = previewSection.scrollTop;
+        requestAnimationFrame(() => {
+          isScrolling = false;
+        });
       });
 
       // Gestionnaire d'événements pour le redimensionnement
