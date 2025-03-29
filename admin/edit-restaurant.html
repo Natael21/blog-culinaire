@@ -63,9 +63,10 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
       .preview-section {
-        position: static;
-        height: auto;
-        overflow-y: visible;
+        position: sticky;
+        top: 4rem;
+        height: calc(100vh - 4rem);
+        overflow-y: auto;
         padding: 1rem;
         background: white;
         border-radius: 8px;
@@ -145,8 +146,7 @@
       }
       .preview-toggle {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 0.5rem;
       }
       .preview-toggle button {
         padding: 0.8rem 1.5rem;
@@ -631,6 +631,12 @@
       .scroll-toggle.unsynced i {
         transform: rotate(90deg);
       }
+
+      .preview-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
     </style>
   </head>
   <body>
@@ -638,11 +644,6 @@
       <h1>Édition Restaurant</h1>
       <a href="#" class="back-to-site" onclick="confirmExit(event)"><i class="fas fa-arrow-left"></i> Retour à l'administration</a>
     </header>
-
-    <button class="scroll-toggle" id="scrollToggle">
-      <i class="fas fa-link"></i>
-      <span>Désynchroniser</span>
-    </button>
 
     <div class="container">
       <div class="form-section">
@@ -722,10 +723,18 @@
       </div>
 
       <div class="preview-section">
-        <h2>Aperçu</h2>
-        <div class="preview-toggle">
-          <button class="active" data-preview="full">Vue complète</button>
-          <button data-preview="card">Vue carte</button>
+        <div class="preview-header">
+          <h2>Aperçu</h2>
+          <div class="preview-controls">
+            <div class="preview-toggle">
+              <button class="active" data-view="card">
+                <i class="fas fa-th-large"></i> Vue carte
+              </button>
+              <button data-view="full">
+                <i class="fas fa-expand"></i> Vue complète
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="preview-card">
@@ -1345,7 +1354,7 @@
             updateGalleryPreview(false);
 
             // Activer la vue complète par défaut
-            document.querySelector('.preview-toggle button[data-preview="full"]').click();
+            document.querySelector('.preview-toggle button[data-view="full"]').click();
 
             // Sauvegarder l'état initial après le chargement complet
             setTimeout(() => {
@@ -1449,7 +1458,26 @@
         });
       }
 
-      // Gestionnaire d'événements pour les champs de formulaire
+      // Gestion des boutons de vue
+      document.querySelectorAll('.preview-toggle button').forEach(button => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          
+          const view = button.dataset.view;
+          const previewContent = document.querySelector('.preview-content');
+          
+          if (view === 'card') {
+            previewContent.classList.remove('preview-full');
+            previewContent.classList.add('preview-card');
+          } else {
+            previewContent.classList.remove('preview-card');
+            previewContent.classList.add('preview-full');
+          }
+        });
+      });
+
+      // Gestionnaires d'événements pour les champs de formulaire
       document.getElementById('name').addEventListener('input', updatePreview);
       document.getElementById('date').addEventListener('input', updatePreview);
       document.getElementById('cuisine').addEventListener('input', updatePreview);
@@ -1547,48 +1575,6 @@
           console.log('Changement détecté dans la galerie (réorganisation)');
         }
       }
-
-      // Gestionnaire d'événements pour les champs de formulaire
-      document.getElementById('name').addEventListener('input', updatePreview);
-      document.getElementById('date').addEventListener('input', updatePreview);
-      document.getElementById('cuisine').addEventListener('input', updatePreview);
-      document.getElementById('price').addEventListener('input', updatePreview);
-      document.getElementById('rating').addEventListener('input', updatePreview);
-      document.getElementById('address').addEventListener('input', updatePreview);
-      summaryEditor.on('text-change', updatePreview);
-      descriptionEditor.on('text-change', updatePreview);
-
-      // Gestion de l'image principale
-      document.querySelector('.change-image-btn').addEventListener('click', () => {
-        document.getElementById('main-image').click();
-      });
-
-      document.getElementById('main-image').addEventListener('change', function(e) {
-        if (e.target.files && e.target.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
-            previewImages.forEach(img => img.src = e.target.result);
-          };
-          reader.readAsDataURL(e.target.files[0]);
-        }
-      });
-
-      // Gestion du toggle des previews
-      document.querySelectorAll('.preview-toggle button').forEach(button => {
-        button.addEventListener('click', () => {
-          // Désactiver tous les boutons et vues
-          document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
-          document.querySelectorAll('.preview-card, .preview-full').forEach(preview => preview.style.display = 'none');
-          
-          // Activer le bouton cliqué et sa vue correspondante
-          button.classList.add('active');
-          const previewToShow = document.querySelector(`.preview-${button.dataset.preview}`);
-          if(previewToShow) {
-            previewToShow.style.display = 'block';
-          }
-        });
-      });
 
       // Gestion de la soumission du formulaire
       document.getElementById('restaurant-form').addEventListener('submit', async function(e) {
@@ -1709,82 +1695,6 @@
 
       // Charger les données au chargement de la page
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
-
-      // Gestion de la synchronisation du scroll
-      let isSynced = false;
-      const previewSection = document.querySelector('.preview-section');
-      const scrollToggleBtn = document.querySelector('.scroll-toggle');
-      let lastScrollTop = 0;
-
-      function updatePreviewSectionPosition() {
-        if (isSynced) {
-          previewSection.style.position = 'sticky';
-          previewSection.style.height = 'calc(100vh - 4rem)';
-          previewSection.style.overflowY = 'auto';
-          previewSection.classList.add('synced');
-          previewSection.classList.remove('unsynced');
-          scrollToggleBtn.innerHTML = '<i class="fas fa-unlink"></i> Désynchroniser';
-          scrollToggleBtn.classList.remove('unsynced');
-          
-          // Restaurer la position de défilement
-          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-          previewSection.scrollTop = previewScrollHeight * scrollRatio;
-        } else {
-          previewSection.style.position = 'static';
-          previewSection.style.height = 'auto';
-          previewSection.style.overflowY = 'visible';
-          previewSection.classList.remove('synced');
-          previewSection.classList.add('unsynced');
-          scrollToggleBtn.innerHTML = '<i class="fas fa-link"></i> Synchroniser';
-          scrollToggleBtn.classList.add('unsynced');
-          
-          // Réinitialiser la position de défilement
-          previewSection.scrollTop = 0;
-        }
-      }
-
-      // Gestionnaire du bouton de synchronisation
-      scrollToggleBtn.addEventListener('click', () => {
-        isSynced = !isSynced;
-        updatePreviewSectionPosition();
-      });
-
-      // Gestionnaire du scroll pour la synchronisation
-      window.addEventListener('scroll', () => {
-        if (isSynced) {
-          requestAnimationFrame(() => {
-            const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-            const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-            previewSection.scrollTop = previewScrollHeight * scrollRatio;
-          });
-        }
-      });
-
-      // Gestionnaire du scroll pour la section de prévisualisation
-      previewSection.addEventListener('scroll', () => {
-        if (isSynced) {
-          requestAnimationFrame(() => {
-            const scrollRatio = previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight);
-            const windowScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-            window.scrollTo({
-              top: windowScrollHeight * scrollRatio,
-              behavior: 'auto'
-            });
-          });
-        }
-      });
-
-      // Ajouter un gestionnaire de redimensionnement optimisé
-      let resizeTimeout;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-          if (isSynced) {
-            updatePreviewSectionPosition();
-          }
-        }, 250);
-      });
     </script>
   </body>
 </html> 
