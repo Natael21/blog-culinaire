@@ -1272,66 +1272,96 @@
           // Récupérer les paramètres de l'URL
           const urlParams = new URLSearchParams(window.location.search);
           const filePath = urlParams.get('file');
-          const fileContent = urlParams.get('content');
           
-          if (!fileContent) {
-            throw new Error('Aucun contenu trouvé');
+          if (!filePath) {
+            // Nouveau restaurant
+            console.log('Création d\'un nouveau restaurant');
+            // Initialiser avec des valeurs par défaut
+            document.getElementById('name').value = '';
+            document.getElementById('cuisine').value = '';
+            document.getElementById('price').value = '$';
+            document.getElementById('rating').value = '5';
+            document.getElementById('address').value = '';
+            if (window.summaryEditor) {
+              window.summaryEditor.root.innerHTML = '';
+            }
+            if (window.descriptionEditor) {
+              window.descriptionEditor.root.innerHTML = '**Nataël** :\n\n**Nicolas** :';
+            }
+            return;
           }
 
-          // Décoder le contenu
-          const decodedContent = decodeURIComponent(fileContent);
+          // Si on édite un restaurant existant
+          console.log('Chargement du restaurant:', filePath);
+          
+          // Récupérer le token d'authentification
+          const user = netlifyIdentity.currentUser();
+          if (!user) {
+            throw new Error('Utilisateur non authentifié');
+          }
+          
+          const token = user.token.access_token;
+          const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${filePath}`, {
+            headers: {
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3.raw'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+
+          const content = await response.text();
           
           // Séparer le frontmatter du contenu
-          const parts = decodedContent.split('---').filter(part => part.trim());
+          const parts = content.split('---').filter(part => part.trim());
           if (parts.length < 2) {
             throw new Error('Format de fichier invalide');
           }
 
           // Extraire les métadonnées
           const frontmatter = parts[1];
-          const content = parts.slice(2).join('---').trim();
+          const mainContent = parts.slice(2).join('---').trim();
 
-          // Extraire les champs du frontmatter avec gestion des guillemets
-          const title = frontmatter.match(/title:\s*["']?([^"'\n]+)["']?/)?.[1];
-          const date = frontmatter.match(/date:\s*(\d{4}-\d{2}-\d{2})/)?.[1];
-          const note = frontmatter.match(/note:\s*(\d+\.?\d*)/)?.[1];
-          const style = frontmatter.match(/style:\s*["']?([^"'\n]+)["']?/)?.[1];
-          const description = frontmatter.match(/description:\s*["']?([^"'\n]+)["']?/)?.[1];
-          const price = frontmatter.match(/price:\s*["']?([^"'\n]+)["']?/)?.[1];
-          const image = frontmatter.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1];
-          const address = frontmatter.match(/address:\s*["']?([^"'\n]+)["']?/)?.[1];
+          // Extraire les champs du frontmatter
+          const title = frontmatter.match(/title:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+          const style = frontmatter.match(/style:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+          const price = frontmatter.match(/price:\s*["']?([^"'\n]+)["']?/)?.[1] || '$';
+          const note = frontmatter.match(/note:\s*(\d+\.?\d*)/)?.[1] || '5';
+          const description = frontmatter.match(/description:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+          const address = frontmatter.match(/address:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+          const image = frontmatter.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '/images/restaurant-default.jpg';
 
           // Remplir le formulaire
-          document.getElementById('name').value = title || '';
-          document.getElementById('cuisine').value = style || '';
-          document.getElementById('price').value = price || '';
-          document.getElementById('rating').value = note || '';
-          document.getElementById('address').value = address || '';
+          document.getElementById('name').value = title;
+          document.getElementById('cuisine').value = style;
+          document.getElementById('price').value = standardizePrice(price);
+          document.getElementById('rating').value = note;
+          document.getElementById('address').value = address;
           
-          // Mettre à jour l'image principale avec gestion d'erreur
+          // Mettre à jour l'image principale
           const mainImagePreview = document.querySelector('#main-image-preview img');
-          const standardizedImagePath = standardizeImagePath(image);
-          mainImagePreview.src = standardizedImagePath;
+          mainImagePreview.src = standardizeImagePath(image);
           mainImagePreview.onerror = () => {
-            console.warn('Erreur de chargement de l\'image:', standardizedImagePath);
+            console.warn('Erreur de chargement de l\'image:', image);
             mainImagePreview.src = '/images/restaurant-default.jpg';
           };
           
           // Mettre à jour les éditeurs de texte
           if (window.summaryEditor) {
-            window.summaryEditor.root.innerHTML = description || '';
+            window.summaryEditor.root.innerHTML = description;
           }
           if (window.descriptionEditor) {
-            window.descriptionEditor.root.innerHTML = content || '';
+            window.descriptionEditor.root.innerHTML = mainContent || '**Nataël** :\n\n**Nicolas** :';
           }
 
           // Extraire et ajouter les images de la galerie
           const galleryImages = extractImagesFromMarkdown(frontmatter);
           const galleryGrid = document.getElementById('gallery-grid');
-          galleryGrid.innerHTML = ''; // Vider la galerie existante
+          galleryGrid.innerHTML = '';
           galleryImages.forEach(img => {
-            const standardizedGalleryPath = standardizeImagePath(img.src);
-            addGalleryImage(standardizedGalleryPath, img.alt || '', false);
+            addGalleryImage(standardizeImagePath(img.src), img.alt || '', false);
           });
 
           // Mettre à jour l'aperçu
@@ -1341,8 +1371,8 @@
             price,
             note,
             description,
-            content,
-            image: standardizedImagePath,
+            content: mainContent,
+            image: standardizeImagePath(image),
             address
           });
 
@@ -1354,7 +1384,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Erreur',
-            text: 'Une erreur est survenue lors du chargement du restaurant: ' + error.message
+            text: 'Une erreur est survenue lors du chargement du restaurant. Veuillez réessayer ou contacter l\'administrateur.'
           });
         }
       }
