@@ -105,7 +105,7 @@ title: Accueil
            data-image="{{ post.image }}"
            data-address="{{ post.address }}"
            id="{{ post.title | slugify }}">
-        <a href="{{ post.url | relative_url }}" class="post-link">
+        <a href="{{ post.url | relative_url }}" class="post-link" onclick="saveCurrentView(event)">
           <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
           <div class="content">
             <div class="content-header">
@@ -1002,7 +1002,13 @@ styleFilter.addEventListener('change', filterRestaurants);
 ratingFilter.addEventListener('change', filterRestaurants);
 priceFilter.addEventListener('change', filterRestaurants);
 
-// Modification de la gestion des vues
+// Fonction pour sauvegarder la vue actuelle
+function saveCurrentView(event) {
+  const currentView = restaurantGrid.classList.contains('list-view') ? 'list' : 'grid';
+  localStorage.setItem('selectedView', currentView);
+  localStorage.setItem('fromView', 'true');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const viewButtons = document.querySelectorAll('.view-btn');
   const restaurantGrid = document.getElementById('restaurant-grid');
@@ -1017,16 +1023,16 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.style.opacity = '1';
   });
   
-  // Vérifier si nous revenons d'une vue carte
-  const fromMapView = localStorage.getItem('fromMapView') === 'true';
+  // Vérifier si nous revenons d'une vue spécifique
+  const fromView = localStorage.getItem('fromView') === 'true';
   
-  // Forcer la vue en pastilles par défaut sur la page d'accueil SAUF si on revient de la carte
-  if ((window.location.pathname === '/' || window.location.pathname === '/index.html') && !fromMapView) {
+  // Forcer la vue en pastilles par défaut sur la page d'accueil SAUF si on revient d'une vue spécifique
+  if ((window.location.pathname === '/' || window.location.pathname === '/index.html') && !fromView) {
     localStorage.setItem('selectedView', 'grid');
   }
   
-  // Nettoyer l'indicateur de retour de la carte
-  localStorage.removeItem('fromMapView');
+  // Nettoyer l'indicateur de retour
+  localStorage.removeItem('fromView');
   
   // Récupérer la dernière vue utilisée depuis le localStorage
   const lastView = localStorage.getItem('selectedView') || 'grid';
