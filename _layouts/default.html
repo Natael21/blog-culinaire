@@ -4,11 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ page.title }} | Blog Culinaire</title>
+    
+    <!-- Préchargement des ressources critiques -->
+    <link rel="preload" href="{{ '/assets/css/style.css' | relative_url }}" as="style">
+    <link rel="preload" href="/images/header.jpg" as="image">
+    
+    <!-- Préconnexion aux domaines externes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Chargement des styles -->
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'" />
+    
+    <!-- Fallback pour le chargement des polices si JavaScript est désactivé -->
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </noscript>
+    
+    <!-- Chargement différé du widget Netlify Identity -->
+    <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    
     <style>
+      /* Styles critiques inlinés */
       .site-return {
         position: fixed;
         top: 20px;
@@ -41,6 +62,13 @@
           padding: 8px 15px;
           font-size: 0.9em;
         }
+      }
+      
+      /* Styles pour éviter le flash de contenu non stylé */
+      .hero {
+        min-height: 400px;
+        position: relative;
+        background-color: #f8f9fa;
       }
     </style>
   </head>
@@ -90,51 +118,60 @@
     </button>
 
     <script>
-      if (window.netlifyIdentity) {
-        const loginButton = document.getElementById('login-button');
-        
-        window.netlifyIdentity.on("init", user => {
-          if (user) {
+      // Chargement différé du JavaScript non critique
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.netlifyIdentity) {
+          const loginButton = document.getElementById('login-button');
+          
+          window.netlifyIdentity.on("init", user => {
+            if (user) {
+              loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
+              loginButton.onclick = () => {
+                window.location.href = '/admin/';
+                return false;
+              };
+            } else {
+              loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
+              loginButton.onclick = () => {
+                window.netlifyIdentity.open();
+                return false;
+              };
+            }
+          });
+
+          window.netlifyIdentity.on("login", () => {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
             loginButton.onclick = () => {
               window.location.href = '/admin/';
               return false;
             };
-          } else {
+          });
+
+          window.netlifyIdentity.on("logout", () => {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
             loginButton.onclick = () => {
               window.netlifyIdentity.open();
               return false;
             };
-          }
-        });
+            window.location.href = "/";
+          });
+        }
+      });
 
-        window.netlifyIdentity.on("login", () => {
-          loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
-          loginButton.onclick = () => {
-            window.location.href = '/admin/';
-            return false;
-          };
-        });
-
-        window.netlifyIdentity.on("logout", () => {
-          loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
-          loginButton.onclick = () => {
-            window.netlifyIdentity.open();
-            return false;
-          };
-          window.location.href = "/";
-        });
-      }
-
-      // Scroll to top functionality
+      // Optimisation du scroll to top avec throttling
+      let scrollTimeout;
       const scrollToTopButton = document.getElementById('scroll-to-top');
       
       window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 300) {
-          scrollToTopButton.classList.add('show');
-        } else {
-          scrollToTopButton.classList.remove('show');
+        if (!scrollTimeout) {
+          scrollTimeout = setTimeout(() => {
+            if (window.pageYOffset > 300) {
+              scrollToTopButton.classList.add('show');
+            } else {
+              scrollToTopButton.classList.remove('show');
+            }
+            scrollTimeout = null;
+          }, 100);
         }
       });
 
