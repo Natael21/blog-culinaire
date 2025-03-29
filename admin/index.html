@@ -1299,10 +1299,13 @@
 
       // Charger les restaurants au chargement de la page
       document.addEventListener('DOMContentLoaded', () => {
-        loadRestaurants().then(() => {
-          // Appliquer le tri par défaut après le chargement
-          filterAndSortRestaurants();
-        });
+        // Charger les restaurants uniquement si nous sommes sur la section restaurants
+        const activeSection = document.querySelector('.admin-content-section.active');
+        if (activeSection && activeSection.id === 'restaurants') {
+          loadRestaurants().then(() => {
+            filterAndSortRestaurants();
+          });
+        }
       });
 
       // Gestion des boutons de navigation
@@ -1319,23 +1322,14 @@
           if (button.dataset.section === 'upcoming') {
             loadUpcomingRestaurants();
           } else if (button.dataset.section === 'restaurants') {
-            loadRestaurants();
+            // Vider la liste avant de recharger
+            const restaurantList = document.getElementById('restaurant-list');
+            restaurantList.innerHTML = '';
+            loadRestaurants().then(() => {
+              filterAndSortRestaurants();
+            });
           }
         });
-      });
-
-      // Charger les données initiales
-      document.addEventListener('DOMContentLoaded', () => {
-        // Charger les restaurants
-        loadRestaurants().then(() => {
-          filterAndSortRestaurants();
-        });
-        
-        // Charger les restaurants à venir si c'est la section active
-        const activeSection = document.querySelector('.admin-content-section.active');
-        if (activeSection && activeSection.id === 'upcoming') {
-          loadUpcomingRestaurants();
-        }
       });
 
       // Fonction de suppression
