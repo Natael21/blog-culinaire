@@ -48,7 +48,7 @@
       }
       .container {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 2rem;
         max-width: 1800px;
         margin: 2rem auto;
@@ -140,11 +140,11 @@
         background-color: #c0392b;
       }
       .preview-card {
-        display: none;
         background: white;
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
       }
       .preview-card.active {
         display: block;
@@ -155,24 +155,124 @@
         object-fit: cover;
       }
       .preview-card-content {
-        padding: 1rem;
+        padding: 1.5rem;
       }
       .preview-card h3 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1.2rem;
+        margin: 0 0 1rem 0;
+        font-size: 1.4rem;
         color: #2c3e50;
+        font-family: 'Playfair Display', serif;
+      }
+      .preview-card p {
+        color: #666;
+        margin: 0 0 1rem 0;
+        line-height: 1.6;
       }
       .preview-card-meta {
         display: flex;
-        gap: 1rem;
+        gap: 1.5rem;
         color: #666;
         font-size: 0.9rem;
+        align-items: center;
       }
       .preview-full {
-        display: none;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
-      .preview-full.active {
-        display: block;
+      .preview-full img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+      }
+      .preview-content {
+        padding: 2rem;
+      }
+      .preview-full h3 {
+        margin: 0 0 1.5rem 0;
+        font-size: 2rem;
+        color: #2c3e50;
+        font-family: 'Playfair Display', serif;
+      }
+      .preview-meta {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        color: #666;
+        font-size: 1.1rem;
+        align-items: center;
+      }
+      .gallery-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .gallery-preview img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+      .form-group select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .form-group select:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+      .main-image-upload {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        border: 2px dashed #e9ecef;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+      }
+      .main-image-upload:hover {
+        border-color: #3498db;
+        background-color: rgba(52, 152, 219, 0.05);
+      }
+      .upload-preview {
+        position: relative;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      .upload-preview img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+      }
+      .change-image-btn {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        padding: 0.8rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+      .change-image-btn:hover {
+        background: white;
+        transform: translateY(-2px);
       }
       @media (max-width: 1200px) {
         .container {
@@ -368,14 +468,20 @@
           document.getElementById('rating').value = metadata.note || '4.5';
           document.getElementById('address').value = metadata.address || '';
           
-          // Remplir les éditeurs Quill
-          summaryEditor.root.innerHTML = metadata.description || '';
-          descriptionEditor.root.innerHTML = fullContent ? fullContent.trim() : '';
+          // Convertir le Markdown en HTML pour les éditeurs Quill
+          const converter = new showdown.Converter();
+          summaryEditor.root.innerHTML = converter.makeHtml(metadata.description || '');
+          descriptionEditor.root.innerHTML = converter.makeHtml(fullContent ? fullContent.trim() : '');
 
           // Afficher l'image principale si elle existe
           if (metadata.image) {
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
             previewImages.forEach(img => img.src = metadata.image);
+          } else {
+            // Cacher l'image par défaut
+            document.querySelectorAll('.preview-card img, .preview-full img').forEach(img => {
+              img.style.display = 'none';
+            });
           }
 
           // Mettre à jour l'aperçu
@@ -403,6 +509,7 @@
         document.querySelector('.address').textContent = address;
 
         // Mettre à jour les descriptions
+        document.querySelector('.preview-card p').innerHTML = summary;
         document.querySelector('.summary-text').innerHTML = summary;
         document.querySelector('.description-text').innerHTML = description;
       }
@@ -425,7 +532,7 @@
         if (e.target.files && e.target.files[0]) {
           const reader = new FileReader();
           reader.onload = function(e) {
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
             previewImages.forEach(img => img.src = e.target.result);
           };
           reader.readAsDataURL(e.target.files[0]);
