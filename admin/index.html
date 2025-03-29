@@ -822,20 +822,21 @@
       .search-filter {
         width: 300px;
         position: relative;
-        margin-left: 0;
-      }
-
-      .sort-filter {
-        width: 200px;
-        margin-left: auto;
       }
 
       .filter-select {
-        width: 100%;
+        width: 300px;
         padding: 0.5rem;
         border: 1px solid #ddd;
         border-radius: 4px;
         background-color: white;
+        font-size: 0.95rem;
+      }
+
+      .filter-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
       }
 
       @media (max-width: 768px) {
