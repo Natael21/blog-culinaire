@@ -1183,6 +1183,7 @@
           for (const post of posts) {
             if (post.name.endsWith('.markdown')) {
               try {
+                // Récupérer le contenu du fichier
                 const contentResponse = await fetch(post.download_url);
                 const content = await contentResponse.text();
                 
@@ -1206,6 +1207,9 @@
                 // Nettoyer et encoder le chemin de l'image
                 const imagePath = metadata.image ? cleanImagePath(metadata.image) : '/images/restaurant-test.jpg';
                 
+                // Encoder le contenu pour l'URL
+                const encodedContent = encodeURIComponent(content);
+                
                 item.innerHTML = `
                   <div class="restaurant-info">
                     <img src="${imagePath}" alt="${metadata.title}" class="restaurant-image" onerror="this.src='/images/restaurant-test.jpg'">
@@ -1219,7 +1223,7 @@
                     </div>
                   </div>
                   <div class="restaurant-actions">
-                    <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}&content=${encodeURIComponent(content)}" class="action-btn edit-btn">
+                    <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}&content=${encodedContent}" class="action-btn edit-btn">
                       <i class="fas fa-edit"></i> Modifier
                     </a>
                     <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
