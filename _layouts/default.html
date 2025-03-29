@@ -156,6 +156,8 @@
               window.location.href = '/admin/';
               return false;
             };
+            // Redirection automatique après la connexion
+            window.location.href = '/admin/';
           });
 
           window.netlifyIdentity.on("logout", () => {
