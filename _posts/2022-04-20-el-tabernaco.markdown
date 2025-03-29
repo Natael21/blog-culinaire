@@ -6,6 +6,7 @@ note: 4
 style: "Mexicain"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui offrait une expérience gastronomique mexicaine authentique, avec des plats savoureux et une ambiance chaleureuse qui transportait ses clients au cœur du Mexique."
 price: "medium"
+address: "243 Rue Alexandre, Sherbrooke, QC J1H 4S8"
 image: "/images/El Tabernaco.jpg"
 images:
   - image: "/images/El Tabernaco Nicolas.jpg"

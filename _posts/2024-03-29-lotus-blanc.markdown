@@ -6,6 +6,7 @@ note: 4
 style: "Vietnamien"
 description: "Cuisine vietnamienne authentique et abordable dans un cadre zen avec aquariums."
 price: "budget"
+address: "1564 Rue Denault, Sherbrooke, QC J1H 2R2"
 image: "/images/lotus blanc.png"
 images:
   - image: "/images/Lotus blanc_wonton.jpg"

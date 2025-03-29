@@ -6,6 +6,7 @@ note: 5
 style: "Italien"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui proposait une cuisine italienne traditionnelle, avec des pizzas et des pâtes authentiques dans une ambiance familiale chaleureuse."
 price: "medium"
+address: "1824 Rue King Ouest, Sherbrooke, QC J1J 2E2"
 image: "/images/la brigade resto.jpg"
 images:
   - image: "/images/la brigade resto.jpg"

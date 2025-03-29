@@ -6,6 +6,7 @@ note: 4
 style: "Mexicain"
 description: "L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !"
 price: "medium"
+address: "297 Rue King Ouest, Sherbrooke, QC J1H 1R2"
 image: "/images/Mexi&co.png"
 images:
   - image: "/images/Mexi&co.png"

@@ -6,6 +6,7 @@ note: 4
 style: "Mexicain"
 description: "Cuisine mexicaine authentique avec tortillas maison et ambiance chaleureuse."
 price: "medium"
+address: "243 Rue Alexandre, Sherbrooke, QC J1H 4S8"
 image: "/images/El Chupa Resto.png"
 images:
   - image: "/images/El Chupa Resto_natael.jpg"

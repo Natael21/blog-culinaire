@@ -4,8 +4,9 @@ title: "Le Tapageur"
 date: 2022-10-08
 note: 5
 style: "Bistro"
-price: "medium"
 description: "Un bistro festif offrant des plats spectaculaires et une ambiance vivante, parfait pour les célébrations"
+price: "medium"
+address: "83 Rue King Ouest, Sherbrooke, QC J1H 1P1"
 image: "/images/Le Tapageur.jpg"
 images:
   - image: "/images/Le Tapageur.jpg"

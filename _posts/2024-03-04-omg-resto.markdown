@@ -6,6 +6,7 @@ note: 4
 style: "Américain"
 description: "Restaurant spacieux et luxueux offrant burgers raffinés et bières artisanales."
 price: "medium"
+address: "1175 Rue King Ouest, Sherbrooke, QC J1H 3H8"
 image: "/images/OMG_Resto.jpg"
 images:
   - image: "/images/OMG_natael.JPG"

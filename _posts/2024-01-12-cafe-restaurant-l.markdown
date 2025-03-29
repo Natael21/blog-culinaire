@@ -6,6 +6,7 @@ note: 4
 style: "Iranien"
 description: "Salaam ! Vous avez besoin d'un coin tranquille pour savourer un repas gastronomique ? La cuisine iranienne saura vous impressionner dans ce restaurant paisible !"
 price: "medium"
+address: "196 Rue Wellington N, Sherbrooke, QC J1H 5C5"
 image: "/images/Café Restaurant L.png"
 images:
   - image: "/images/Café Restaurant L.png"

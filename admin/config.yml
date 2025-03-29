@@ -66,6 +66,12 @@ collections:
           hint: "Évaluez le restaurant de 1 à 5 étoiles"
         }
       - {
+          label: "Adresse",
+          name: "address",
+          widget: "string",
+          hint: "Adresse complète du restaurant"
+        }
+      - {
           label: "Style de cuisine",
           name: "style",
           widget: "select",

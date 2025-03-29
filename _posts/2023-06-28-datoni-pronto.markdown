@@ -4,8 +4,9 @@ title: "Datoni Pronto"
 date: 2023-06-28
 note: 4
 style: "Italien"
-price: "medium"
 description: "Une pizzéria authentique avec des produits d'origine italienne et une ambiance parfaite pour les rendez-vous galants !"
+price: "medium"
+address: "42 Bd Jacques-Cartier N, Sherbrooke, QC J1J 2Z8"
 image: "/images/datoni pronto.jpg"
 images:
   - image: "/images/datoni pronto.jpg"

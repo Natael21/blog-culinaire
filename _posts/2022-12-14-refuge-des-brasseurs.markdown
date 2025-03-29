@@ -4,8 +4,9 @@ title: "Le Refuge des Brasseurs"
 date: 2022-12-14
 note: 5
 style: "Microbrasserie"
-price: "medium"
 description: "Une microbrasserie offrant des plats gastronomiques et une sélection impressionnante de bières artisanales"
+price: "medium"
+address: "2155 Rue Galt O, Sherbrooke, QC J1K 1K3"
 image: "/images/Le Refuge des Brasseurs - Microbrasserie.jpg"
 images:
   - image: "/images/Le Refuge des Brasseurs - Microbrasserie.jpg"
