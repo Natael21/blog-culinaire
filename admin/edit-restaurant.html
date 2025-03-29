@@ -794,12 +794,12 @@
           price: document.getElementById('price').value,
           rating: document.getElementById('rating').value,
           address: document.getElementById('address').value,
-          summary: summaryEditor.root.innerHTML,
-          description: descriptionEditor.root.innerHTML,
-          mainImage: document.querySelector('.preview-card img').src,
+          summary: summaryEditor.root.innerHTML.trim(),
+          description: descriptionEditor.root.innerHTML.trim(),
+          mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
-        hasChanges = false;
+        console.log('État initial sauvegardé:', initialState); // Debug
       }
 
       // Fonction pour vérifier s'il y a eu des changements
@@ -810,13 +810,29 @@
           price: document.getElementById('price').value,
           rating: document.getElementById('rating').value,
           address: document.getElementById('address').value,
-          summary: summaryEditor.root.innerHTML,
-          description: descriptionEditor.root.innerHTML,
-          mainImage: document.querySelector('.preview-card img').src,
+          summary: summaryEditor.root.innerHTML.trim(),
+          description: descriptionEditor.root.innerHTML.trim(),
+          mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
-
-        return JSON.stringify(currentState) !== JSON.stringify(initialState);
+        
+        console.log('État actuel:', currentState); // Debug
+        console.log('État initial:', initialState); // Debug
+        
+        // Comparer chaque propriété individuellement
+        const hasChanges = 
+          currentState.name !== initialState.name ||
+          currentState.cuisine !== initialState.cuisine ||
+          currentState.price !== initialState.price ||
+          currentState.rating !== initialState.rating ||
+          currentState.address !== initialState.address ||
+          currentState.summary !== initialState.summary ||
+          currentState.description !== initialState.description ||
+          currentState.mainImage !== initialState.mainImage ||
+          JSON.stringify(currentState.galleryImages) !== JSON.stringify(initialState.galleryImages);
+        
+        console.log('Des changements détectés:', hasChanges); // Debug
+        return hasChanges;
       }
 
       // Mettre à jour les écouteurs d'événements pour détecter les changements
@@ -824,26 +840,31 @@
         const inputs = ['name', 'cuisine', 'price', 'rating', 'address'];
         inputs.forEach(id => {
           document.getElementById(id).addEventListener('input', () => {
+            console.log(`Changement détecté dans ${id}`); // Debug
             hasChanges = checkForChanges();
           });
         });
 
         summaryEditor.on('text-change', () => {
+          console.log('Changement détecté dans le résumé'); // Debug
           hasChanges = checkForChanges();
         });
 
         descriptionEditor.on('text-change', () => {
+          console.log('Changement détecté dans la description'); // Debug
           hasChanges = checkForChanges();
         });
 
         // Pour l'image principale
         document.getElementById('main-image').addEventListener('change', () => {
-          hasChanges = true;
+          console.log('Changement détecté dans l\'image principale'); // Debug
+          hasChanges = checkForChanges();
         });
 
         // Pour la galerie d'images
         document.getElementById('gallery-input').addEventListener('change', () => {
-          hasChanges = true;
+          console.log('Changement détecté dans la galerie'); // Debug
+          hasChanges = checkForChanges();
         });
       }
 
