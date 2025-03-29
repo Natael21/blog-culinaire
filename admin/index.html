@@ -1194,6 +1194,9 @@
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '';
           
+          // Utiliser un Set pour suivre les titres des restaurants déjà affichés
+          const displayedTitles = new Set();
+          
           for (const post of posts) {
             if (post.name.endsWith('.markdown')) {
               try {
@@ -1210,30 +1213,35 @@
                   }
                 });
 
-                const item = document.createElement('div');
-                item.className = 'restaurant-item';
-                item.innerHTML = `
-                  <div class="restaurant-info">
-                    <img src="${metadata.image || '/images/restaurant-test.jpg'}" alt="${metadata.title}" class="restaurant-image">
-                    <div class="restaurant-details">
-                      <h3>${metadata.title}</h3>
-                      <div class="restaurant-meta">
-                        <span><i class="fas fa-calendar"></i> ${metadata.date}</span>
-                        <span><i class="fas fa-utensils"></i> ${metadata.style}</span>
-                        <span><i class="fas fa-star"></i> ${metadata.note}/5</span>
+                // Vérifier si ce titre a déjà été affiché
+                if (!displayedTitles.has(metadata.title)) {
+                  displayedTitles.add(metadata.title);
+
+                  const item = document.createElement('div');
+                  item.className = 'restaurant-item';
+                  item.innerHTML = `
+                    <div class="restaurant-info">
+                      <img src="${metadata.image || '/images/restaurant-test.jpg'}" alt="${metadata.title}" class="restaurant-image">
+                      <div class="restaurant-details">
+                        <h3>${metadata.title}</h3>
+                        <div class="restaurant-meta">
+                          <span><i class="fas fa-calendar"></i> ${metadata.date}</span>
+                          <span><i class="fas fa-utensils"></i> ${metadata.style}</span>
+                          <span><i class="fas fa-star"></i> ${metadata.note}/5</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="restaurant-actions">
-                    <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}&content=${encodeURIComponent(content)}" class="action-btn edit-btn">
-                      <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
-                      <i class="fas fa-trash"></i> Supprimer
-                    </button>
-                  </div>
-                `;
-                restaurantList.appendChild(item);
+                    <div class="restaurant-actions">
+                      <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}&content=${encodeURIComponent(content)}" class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i> Modifier
+                      </a>
+                      <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
+                        <i class="fas fa-trash"></i> Supprimer
+                      </button>
+                    </div>
+                  `;
+                  restaurantList.appendChild(item);
+                }
               } catch (error) {
                 console.error('Erreur lors du chargement du contenu du restaurant:', error);
               }
