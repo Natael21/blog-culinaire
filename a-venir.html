@@ -39,6 +39,18 @@ permalink: /a-venir/
           this.page.url = "{{ site.url }}/a-venir/";
           this.page.identifier = "upcoming-suggestions";
           this.page.title = "Suggestions de restaurants à Sherbrooke";
+          // Désactiver les réactions
+          this.callbacks = {
+            onReady: function() {
+              // Cacher la section des réactions
+              var styles = document.createElement('style');
+              styles.innerHTML = `
+                .reaction-items, .align-items { display: none !important; }
+                iframe#dsq-app2 { height: auto !important; }
+              `;
+              document.head.appendChild(styles);
+            }
+          };
         };
 
         (function() {
