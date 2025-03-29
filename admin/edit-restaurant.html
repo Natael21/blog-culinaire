@@ -157,7 +157,85 @@
         margin: 0 auto;
         transform-origin: top center;
         transform: scale(1);
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .preview-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+
+      .preview-card img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
         transition: transform 0.3s ease;
+      }
+
+      .preview-card:hover img {
+        transform: scale(1.05);
+      }
+
+      .preview-card-content {
+        padding: 1.5rem;
+        background: white;
+      }
+
+      .preview-card h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.6rem;
+        color: #2c3e50;
+        font-family: 'Playfair Display', serif;
+        line-height: 1.2;
+      }
+
+      .preview-card p {
+        color: #666;
+        margin: 0.5rem 0 1rem 0;
+        line-height: 1.6;
+        font-size: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .preview-card-meta {
+        display: flex;
+        gap: 1.5rem;
+        color: #666;
+        font-size: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: auto;
+      }
+
+      .preview-card-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .preview-card-meta i {
+        color: #3498db;
+      }
+
+      .preview-card .rating i {
+        color: #f1c40f;
+      }
+
+      .preview-date {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        color: #666;
+        backdrop-filter: blur(5px);
       }
 
       @media (min-width: 1400px) {
@@ -166,39 +244,6 @@
         }
       }
 
-      .preview-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-      }
-      .preview-card-content {
-        padding: 1.5rem;
-      }
-      .preview-card p {
-        color: #666;
-        margin: 0.5rem 0;
-        line-height: 1.6;
-        font-size: 0.95rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .preview-card h3 {
-        margin: 0 0 1rem 0;
-        font-size: 1.4rem;
-        color: #2c3e50;
-        font-family: 'Playfair Display', serif;
-      }
-      .preview-card-meta {
-        display: flex;
-        gap: 1rem;
-        color: #666;
-        font-size: 0.9rem;
-        align-items: center;
-        flex-wrap: wrap;
-      }
       .preview-full {
         background: white;
         border-radius: 12px;
@@ -333,7 +378,7 @@
   <body>
     <header class="header">
       <h1>Édition Restaurant</h1>
-      <a href="/admin/" class="back-to-site"><i class="fas fa-arrow-left"></i> Retour à l'administration</a>
+      <a href="#" class="back-to-site" onclick="confirmExit(event)"><i class="fas fa-arrow-left"></i> Retour à l'administration</a>
     </header>
 
     <div class="container">
@@ -418,13 +463,24 @@
         </div>
 
         <div class="preview-card active">
+          <div class="preview-date">14 Mar 2024</div>
           <img src="/images/restaurant-test.jpg" alt="Restaurant">
           <div class="preview-card-content">
             <h3>Nom du Restaurant</h3>
+            <p></p>
             <div class="preview-card-meta">
-              <span class="rating"><i class="fas fa-star"></i> <span class="note">4.5</span>/5</span>
-              <span class="cuisine"><i class="fas fa-utensils"></i> <span class="style">Style de cuisine</span></span>
-              <span class="price"><i class="fas fa-dollar-sign"></i> <span class="price-value">Prix</span></span>
+              <span class="rating">
+                <i class="fas fa-star"></i>
+                <span class="note">4.5</span>/5
+              </span>
+              <span class="cuisine">
+                <i class="fas fa-utensils"></i>
+                <span class="style">Style de cuisine</span>
+              </span>
+              <span class="price">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="price-value">Prix</span>
+              </span>
             </div>
           </div>
         </div>
@@ -461,30 +517,98 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
-      // Configuration de l'éditeur Quill
+      // Configuration de l'éditeur Quill avec des styles personnalisés
+      const fontSizeStyle = Quill.import('attributors/style/size');
+      const Block = Quill.import('blots/block');
+      
+      class CustomBlock extends Block {
+        static create(value) {
+          const node = super.create(value);
+          node.style.fontSize = '1.1rem';
+          node.style.lineHeight = '1.8';
+          node.style.color = '#2c3e50';
+          return node;
+        }
+      }
+      CustomBlock.tagName = 'DIV';
+      Quill.register(CustomBlock);
+
       const toolbarOptions = [
-        ['bold', 'italic', 'underline', 'strike'],
-        ['blockquote'],
+        ['bold', 'italic'],
         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        [{ 'color': [] }, { 'background': [] }],
         ['clean']
       ];
 
-      // Initialiser les éditeurs Quill
-      const summaryEditor = new Quill('#summary-editor', {
+      const quillOptions = {
         theme: 'snow',
         modules: {
           toolbar: toolbarOptions
         },
+        formats: ['bold', 'italic', 'list', 'bullet'],
+      };
+
+      // Styles pour les éditeurs et la prévisualisation
+      const editorStyles = document.createElement('style');
+      editorStyles.textContent = `
+        .ql-editor {
+          font-family: 'Open Sans', sans-serif;
+          font-size: 1.1rem;
+          line-height: 1.8;
+          color: #2c3e50;
+        }
+        .ql-editor p {
+          margin-bottom: 1.2rem;
+        }
+        .ql-editor strong {
+          font-weight: 600;
+        }
+        .preview-summary .summary-text,
+        .preview-description .description-text {
+          font-family: 'Open Sans', sans-serif;
+          font-size: 1.1rem;
+          line-height: 1.8;
+          color: #2c3e50;
+        }
+        .preview-summary .summary-text p,
+        .preview-description .description-text p {
+          margin-bottom: 1.2rem;
+        }
+        .preview-summary .summary-text strong,
+        .preview-description .description-text strong {
+          font-weight: 600;
+        }
+        .preview-card p {
+          font-family: 'Open Sans', sans-serif;
+          font-size: 1rem;
+          line-height: 1.6;
+          color: #2c3e50;
+          margin-bottom: 1rem;
+        }
+        .ql-toolbar.ql-snow {
+          border-top-left-radius: 8px;
+          border-top-right-radius: 8px;
+          border-color: #dee2e6;
+        }
+        .ql-container.ql-snow {
+          border-bottom-left-radius: 8px;
+          border-bottom-right-radius: 8px;
+          border-color: #dee2e6;
+        }
+        .ql-editor.ql-blank::before {
+          font-style: normal;
+          color: #95a5a6;
+        }
+      `;
+      document.head.appendChild(editorStyles);
+
+      // Initialiser les éditeurs Quill avec les nouvelles options
+      const summaryEditor = new Quill('#summary-editor', {
+        ...quillOptions,
         placeholder: 'Entrez un bref résumé du restaurant...'
       });
 
       const descriptionEditor = new Quill('#description-editor', {
-        theme: 'snow',
-        modules: {
-          toolbar: toolbarOptions
-        },
+        ...quillOptions,
         placeholder: 'Entrez une description détaillée du restaurant...'
       });
 
@@ -496,8 +620,13 @@
         
         while ((match = regex.exec(content)) !== null) {
           const [_, alt, src] = match;
-          if (!src.includes('header.jpg') && !src.includes('favicon')) {
-            images.push({ src, alt });
+          // Nettoyer l'URL de l'image
+          const cleanSrc = src.trim().replace(/^"(.*)"$/, '$1');
+          // Ne pas inclure l'image principale ni les images de profil
+          if (!cleanSrc.includes('header.jpg') && 
+              !cleanSrc.includes('favicon') && 
+              !cleanSrc.includes('profil.jpg')) {
+            images.push({ src: cleanSrc, alt: alt || '' });
           }
         }
         
@@ -576,8 +705,11 @@
           
           // Ajouter les images à la galerie
           images.forEach(({ src, alt }) => {
+            // Vérifier que ce n'est pas l'image principale
             if (src !== mainImageUrl) {
-              addGalleryImage(src, alt);
+              // S'assurer que l'URL de l'image commence par /
+              const imageSrc = src.startsWith('/') ? src : `/${src}`;
+              addGalleryImage(imageSrc, alt);
             }
           });
 
@@ -607,13 +739,32 @@
         const address = document.getElementById('address').value || 'Adresse du restaurant';
         const summary = summaryEditor.root.innerHTML;
         const description = descriptionEditor.root.innerHTML;
+        const date = new Date().toLocaleDateString('fr-FR', { 
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
 
         // Mise à jour de la vue carte
-        document.querySelectorAll('.preview-card h3').forEach(el => el.textContent = name);
-        document.querySelectorAll('.preview-card .style').forEach(el => el.textContent = cuisine);
-        document.querySelectorAll('.preview-card .note').forEach(el => el.textContent = rating);
-        document.querySelectorAll('.preview-card .price-value').forEach(el => el.textContent = price);
-        document.querySelectorAll('.preview-card-content p').forEach(el => el.innerHTML = summary);
+        document.querySelectorAll('.preview-card').forEach(card => {
+          // Ajouter la date si elle n'existe pas
+          if (!card.querySelector('.preview-date')) {
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'preview-date';
+            card.appendChild(dateDiv);
+          }
+          
+          card.querySelector('.preview-date').textContent = date;
+          card.querySelector('h3').textContent = name;
+          card.querySelector('.style').textContent = cuisine;
+          card.querySelector('.note').textContent = rating;
+          card.querySelector('.price-value').textContent = price;
+          const summaryP = card.querySelector('.preview-card-content p') || document.createElement('p');
+          summaryP.innerHTML = summary;
+          if (!card.querySelector('.preview-card-content p')) {
+            card.querySelector('.preview-card-content').insertBefore(summaryP, card.querySelector('.preview-card-meta'));
+          }
+        });
 
         // Mise à jour de la vue complète
         document.querySelectorAll('.preview-full h3').forEach(el => el.textContent = name);
@@ -621,8 +772,27 @@
         document.querySelectorAll('.preview-full .note').forEach(el => el.textContent = rating);
         document.querySelectorAll('.preview-full .price-value').forEach(el => el.textContent = price);
         document.querySelectorAll('.preview-full .address').forEach(el => el.textContent = address);
-        document.querySelectorAll('.preview-full .summary-text').forEach(el => el.innerHTML = summary);
-        document.querySelectorAll('.preview-full .description-text').forEach(el => el.innerHTML = description);
+        document.querySelectorAll('.preview-full .summary-text').forEach(el => {
+          el.innerHTML = summary;
+          el.querySelectorAll('p').forEach(p => {
+            p.style.marginBottom = '1.2rem';
+          });
+        });
+        document.querySelectorAll('.preview-full .description-text').forEach(el => {
+          el.innerHTML = description;
+          el.querySelectorAll('p').forEach(p => {
+            p.style.marginBottom = '1.2rem';
+          });
+        });
+
+        // Mise à jour du résumé dans la vue carte avec limitation de longueur
+        document.querySelectorAll('.preview-card-content p').forEach(p => {
+          p.innerHTML = summary;
+          p.style.display = '-webkit-box';
+          p.style.webkitLineClamp = '3';
+          p.style.webkitBoxOrient = 'vertical';
+          p.style.overflow = 'hidden';
+        });
       }
 
       // Gestionnaire d'événements pour les champs de formulaire
@@ -673,7 +843,7 @@
         const item = document.createElement('div');
         item.className = 'gallery-item';
         item.innerHTML = `
-          <img src="${src}" alt="${alt}">
+          <img src="${src}" alt="${alt}" style="width: 200px; height: 150px; object-fit: cover; border-radius: 8px;">
           <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateGalleryPreview();">
             <i class="fas fa-times"></i>
           </button>
@@ -785,8 +955,89 @@
         }
       });
 
+      // Fonction pour confirmer la sortie
+      async function confirmExit(event) {
+        event.preventDefault();
+        
+        const result = await Swal.fire({
+          title: 'Attention !',
+          text: 'Tous les changements non sauvegardés seront perdus. Voulez-vous vraiment quitter la page ?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, quitter',
+          cancelButtonText: 'Non, rester',
+          confirmButtonColor: '#e74c3c',
+          cancelButtonColor: '#3498db'
+        });
+
+        if (result.isConfirmed) {
+          window.location.href = '/admin/';
+        }
+      }
+
+      // Ajouter la confirmation au bouton Annuler aussi
+      document.querySelector('.cancel-btn').onclick = async function(e) {
+        e.preventDefault();
+        await confirmExit(e);
+      };
+
+      // Ajouter la confirmation avant de quitter la page
+      window.addEventListener('beforeunload', function(e) {
+        const confirmationMessage = 'Tous les changements non sauvegardés seront perdus.';
+        e.returnValue = confirmationMessage;
+        return confirmationMessage;
+      });
+
       // Charger les données au chargement de la page
       document.addEventListener('DOMContentLoaded', loadRestaurantData);
+
+      // Ajouter des styles pour la grille de la galerie
+      const style = document.createElement('style');
+      style.textContent = `
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+        .gallery-item {
+          position: relative;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .gallery-item .remove-btn {
+          position: absolute;
+          top: 5px;
+          right: 5px;
+          background: rgba(255, 0, 0, 0.7);
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.3s;
+        }
+        .gallery-item .remove-btn:hover {
+          background: rgba(255, 0, 0, 0.9);
+        }
+        .gallery-upload {
+          border: 2px dashed #ddd;
+          border-radius: 8px;
+          padding: 2rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+        .gallery-upload:hover {
+          border-color: #3498db;
+          background-color: rgba(52, 152, 219, 0.05);
+        }
+      `;
+      document.head.appendChild(style);
     </script>
   </body>
 </html> 
