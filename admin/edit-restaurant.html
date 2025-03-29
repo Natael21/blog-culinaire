@@ -789,49 +789,66 @@
       // Fonction pour sauvegarder l'état initial
       function saveInitialState() {
         initialState = {
-          name: document.getElementById('name').value,
-          cuisine: document.getElementById('cuisine').value,
+          name: document.getElementById('name').value.trim(),
+          cuisine: document.getElementById('cuisine').value.trim(),
           price: document.getElementById('price').value,
           rating: document.getElementById('rating').value,
-          address: document.getElementById('address').value,
+          address: document.getElementById('address').value.trim(),
           summary: summaryEditor.root.innerHTML.trim(),
           description: descriptionEditor.root.innerHTML.trim(),
           mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
-        console.log('État initial sauvegardé:', initialState); // Debug
+        console.log('État initial sauvegardé:', initialState);
       }
 
       // Fonction pour vérifier s'il y a eu des changements
       function checkForChanges() {
         const currentState = {
-          name: document.getElementById('name').value,
-          cuisine: document.getElementById('cuisine').value,
+          name: document.getElementById('name').value.trim(),
+          cuisine: document.getElementById('cuisine').value.trim(),
           price: document.getElementById('price').value,
           rating: document.getElementById('rating').value,
-          address: document.getElementById('address').value,
+          address: document.getElementById('address').value.trim(),
           summary: summaryEditor.root.innerHTML.trim(),
           description: descriptionEditor.root.innerHTML.trim(),
           mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
-        
-        console.log('État actuel:', currentState); // Debug
-        console.log('État initial:', initialState); // Debug
-        
+
         // Comparer chaque propriété individuellement
-        const hasChanges = 
-          currentState.name !== initialState.name ||
-          currentState.cuisine !== initialState.cuisine ||
-          currentState.price !== initialState.price ||
-          currentState.rating !== initialState.rating ||
-          currentState.address !== initialState.address ||
-          currentState.summary !== initialState.summary ||
-          currentState.description !== initialState.description ||
-          currentState.mainImage !== initialState.mainImage ||
-          JSON.stringify(currentState.galleryImages) !== JSON.stringify(initialState.galleryImages);
-        
-        console.log('Des changements détectés:', hasChanges); // Debug
+        const hasNameChanged = currentState.name !== initialState.name;
+        const hasCuisineChanged = currentState.cuisine !== initialState.cuisine;
+        const hasPriceChanged = currentState.price !== initialState.price;
+        const hasRatingChanged = currentState.rating !== initialState.rating;
+        const hasAddressChanged = currentState.address !== initialState.address;
+        const hasSummaryChanged = currentState.summary !== initialState.summary;
+        const hasDescriptionChanged = currentState.description !== initialState.description;
+        const hasMainImageChanged = currentState.mainImage !== initialState.mainImage;
+        const hasGalleryChanged = JSON.stringify(currentState.galleryImages) !== JSON.stringify(initialState.galleryImages);
+
+        const hasChanges = hasNameChanged || 
+                          hasCuisineChanged || 
+                          hasPriceChanged || 
+                          hasRatingChanged || 
+                          hasAddressChanged || 
+                          hasSummaryChanged || 
+                          hasDescriptionChanged || 
+                          hasMainImageChanged || 
+                          hasGalleryChanged;
+
+        console.log('Changements détectés:', {
+          name: hasNameChanged,
+          cuisine: hasCuisineChanged,
+          price: hasPriceChanged,
+          rating: hasRatingChanged,
+          address: hasAddressChanged,
+          summary: hasSummaryChanged,
+          description: hasDescriptionChanged,
+          mainImage: hasMainImageChanged,
+          gallery: hasGalleryChanged
+        });
+
         return hasChanges;
       }
 
@@ -840,31 +857,24 @@
         const inputs = ['name', 'cuisine', 'price', 'rating', 'address'];
         inputs.forEach(id => {
           document.getElementById(id).addEventListener('input', () => {
-            console.log(`Changement détecté dans ${id}`); // Debug
-            hasChanges = checkForChanges();
+            console.log(`Changement détecté dans ${id}`);
           });
         });
 
         summaryEditor.on('text-change', () => {
-          console.log('Changement détecté dans le résumé'); // Debug
-          hasChanges = checkForChanges();
+          console.log('Changement détecté dans le résumé');
         });
 
         descriptionEditor.on('text-change', () => {
-          console.log('Changement détecté dans la description'); // Debug
-          hasChanges = checkForChanges();
+          console.log('Changement détecté dans la description');
         });
 
-        // Pour l'image principale
         document.getElementById('main-image').addEventListener('change', () => {
-          console.log('Changement détecté dans l\'image principale'); // Debug
-          hasChanges = checkForChanges();
+          console.log('Changement détecté dans l\'image principale');
         });
 
-        // Pour la galerie d'images
         document.getElementById('gallery-input').addEventListener('change', () => {
-          console.log('Changement détecté dans la galerie'); // Debug
-          hasChanges = checkForChanges();
+          console.log('Changement détecté dans la galerie');
         });
       }
 
@@ -1249,10 +1259,11 @@
           event.preventDefault();
         }
         
-        // Vérifier s'il y a des changements
         const hasUnsavedChanges = checkForChanges();
+        console.log('Vérification des changements avant sortie:', hasUnsavedChanges);
         
         if (!hasUnsavedChanges) {
+          console.log('Aucun changement détecté, redirection directe');
           window.location.href = '/admin/';
           return;
         }
