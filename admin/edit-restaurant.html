@@ -878,211 +878,134 @@
         });
       }
 
-      // Fonction pour nettoyer les valeurs des métadonnées
-      function cleanMetadataValue(value) {
-        if (!value) return '';
-        return value.replace(/^["'](.*)["']$/, '$1').trim();
-      }
-
-      // Fonction pour standardiser le nom du fichier
-      function standardizeFileName(name, date) {
-        return `${date}-${name
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Enlever les accents
-          .replace(/[^a-z0-9]+/g, '-') // Remplacer les caractères spéciaux par des tirets
-          .replace(/^-+|-+$/g, '') // Enlever les tirets au début et à la fin
-        }.markdown`;
-      }
-
-      // Fonction pour standardiser le chemin des images
-      function standardizeImagePath(path) {
-        if (!path) return '';
-        path = path.trim();
-        // Assurer que le chemin commence par /images/
-        if (!path.startsWith('/')) {
-          path = '/' + path;
-        }
-        if (!path.startsWith('/images/')) {
-          path = '/images/' + path.replace(/^\//, '');
-        }
-        return path;
-      }
-
-      // Fonction pour standardiser le prix
-      function standardizePrice(price) {
-        if (!price) return '$';
-        price = price.toLowerCase().trim();
+      // Fonction pour extraire les images du contenu Markdown
+      function extractImagesFromMarkdown(content) {
+        const images = [];
         
-        const priceMapping = {
-          'low': '$',
-          'medium': '$$',
-          'high': '$$$',
-          'very_high': '$$$$',
-          'budget': '$',
-          'moderate': '$$',
-          'expensive': '$$$',
-          'very-expensive': '$$$$',
-          '$': '$',
-          '$$': '$$',
-          '$$$': '$$$',
-          '$$$$': '$$$$'
-        };
+        // Extraire le frontmatter
+        const parts = content.split('---');
+        if (parts.length >= 2) {
+          const frontmatter = parts[1];
+          
+          // Chercher la section images dans le frontmatter
+          const imagesMatch = frontmatter.match(/images:\n((\s*- image: "[^"]+"\n)+)/);
+          
+          if (imagesMatch) {
+            const imagesSection = imagesMatch[1];
+            const imageMatches = imagesSection.matchAll(/- image: "([^"]+)"/g);
+            
+            for (const match of imageMatches) {
+              const src = match[1];
+              // Exclure les images spécifiques
+              const excludedImages = [
+                'header.jpg',
+                'favicon',
+                'profil.jpg',
+                'restaurant-test.jpg'
+              ];
 
-        return priceMapping[price] || '$';
-      }
+              const shouldExclude = excludedImages.some(excluded => 
+                src.toLowerCase().includes(excluded.toLowerCase())
+              );
 
-      // Fonction pour échapper les guillemets dans les chaînes
-      function escapeString(str) {
-        if (!str) return '';
-        return str.replace(/"/g, '\\"').trim();
+              if (!shouldExclude) {
+                images.push({ src: src, alt: '' });
+              }
+            }
+          }
+        }
+        
+        console.log("Images extraites:", images); // Debug
+        return images;
       }
 
       // Fonction pour charger les données du restaurant
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
-        let content = urlParams.get('content');
+        const content = urlParams.get('content');
         
         if (content) {
-          try {
-            // Première tentative de décodage
-            try {
-              content = decodeURIComponent(content);
-            } catch (e) {
-              // Si le premier décodage échoue, essayer de décoder deux fois
-              // car parfois le contenu est doublement encodé
-              content = decodeURIComponent(decodeURIComponent(content));
+          const decodedContent = decodeURIComponent(content);
+          console.log("Contenu décodé:", decodedContent);
+          
+          // Extraire les images avant de séparer le contenu
+          const galleryImages = extractImagesFromMarkdown(decodedContent);
+          console.log("Images de la galerie extraites:", galleryImages);
+
+          const parts = decodedContent.split('---');
+          const frontmatter = parts[1];
+          const fullContent = parts[2] || '';
+
+          // Extraire les métadonnées
+          const metadata = {};
+          frontmatter.split('\n').forEach(line => {
+            const match = line.match(/^(\w+):\s*(.+)$/);
+            if (match) {
+              const [_, key, value] = match;
+              metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
             }
-            
-            console.log("Contenu décodé:", content);
-            
-            // Vérifier que le contenu est valide
-            if (!content.includes('---')) {
-              throw new Error("Format de fichier invalide: frontmatter manquant");
+          });
+
+          // Remplir les champs du formulaire
+          document.getElementById('name').value = metadata.title || '';
+          document.getElementById('cuisine').value = metadata.style || '';
+          document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
+          document.getElementById('address').value = metadata.address || '';
+
+          // Gérer le prix
+          const priceValue = metadata.price ? metadata.price.replace(/"/g, '').trim() : '$';
+          const priceSelect = document.getElementById('price');
+          Array.from(priceSelect.options).forEach((option, index) => {
+            if (option.value === priceValue) {
+              priceSelect.selectedIndex = index;
             }
+          });
 
-            // Extraire les images avant de séparer le contenu
-            const galleryImages = extractImagesFromMarkdown(content);
-            console.log("Images de la galerie extraites:", galleryImages);
+          // Mettre à jour les affichages du prix
+          document.querySelectorAll('.preview-card-meta .price-value, .preview-full .price-value').forEach(el => {
+            el.textContent = priceValue;
+          });
 
-            const parts = content.split('---').filter(part => part.trim());
-            if (parts.length < 2) {
-              throw new Error("Format de fichier invalide: contenu manquant");
-            }
+          // Remplir les éditeurs
+          summaryEditor.root.innerHTML = metadata.description || '';
+          const formattedContent = formatDescription(fullContent.trim());
+          descriptionEditor.root.innerHTML = formattedContent;
 
-            const frontmatter = parts[1];
-            const fullContent = parts[2] || '';
-
-            // Extraire les métadonnées avec une meilleure gestion des erreurs
-            const metadata = {};
-            frontmatter.split('\n').forEach(line => {
-              const match = line.match(/^(\w+):\s*(.+)$/);
-              if (match) {
-                const [_, key, value] = match;
-                metadata[key] = cleanMetadataValue(value);
-              }
-            });
-
-            console.log("Métadonnées extraites:", metadata);
-
-            if (!metadata.title) {
-              throw new Error("Données invalides: titre manquant");
-            }
-
-            // Remplir les champs du formulaire avec validation
-            document.getElementById('name').value = metadata.title || '';
-            document.getElementById('cuisine').value = metadata.style || '';
-            document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
-            document.getElementById('address').value = metadata.address || '';
-
-            // Gérer le prix avec conversion des formats
-            const priceValue = standardizePrice(metadata.price);
-            const priceSelect = document.getElementById('price');
-            Array.from(priceSelect.options).forEach((option, index) => {
-              if (option.value === priceValue) {
-                priceSelect.selectedIndex = index;
-              }
-            });
-
-            // Mettre à jour les affichages du prix
-            document.querySelectorAll('.preview-card-meta .price-value, .preview-full .price-value').forEach(el => {
-              el.textContent = priceValue;
-            });
-
-            // Remplir les éditeurs avec validation du contenu
-            const sanitizedDescription = metadata.description || '';
-            summaryEditor.root.innerHTML = sanitizedDescription;
-
-            const formattedContent = formatDescription(fullContent.trim());
-            descriptionEditor.root.innerHTML = formattedContent || '';
-
-            // Gérer l'image principale avec validation
-            if (metadata.image) {
-              const mainImageUrl = metadata.image.startsWith('/') ? metadata.image : `/${metadata.image}`;
-              const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
-              previewImages.forEach(img => {
-                img.style.display = 'block';
-                img.src = mainImageUrl;
-                img.onerror = function() {
-                  console.warn("Image principale non chargée:", mainImageUrl);
-                  this.src = '/images/restaurant-test.jpg';
-                };
-              });
-            }
-
-            // Vider les galeries existantes
-            document.getElementById('gallery-grid').innerHTML = '';
-            document.querySelector('.gallery-preview').innerHTML = '';
-
-            // Ajouter les images à la galerie avec validation
-            let validImageCount = 0;
-            for (const { src, alt } of galleryImages) {
-              if (src !== metadata.image) {
-                try {
-                  await new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = resolve;
-                    img.onerror = () => {
-                      console.warn(`Image non chargée: ${src}`);
-                      reject(new Error(`Image non chargée: ${src}`));
-                    };
-                    img.src = src;
-                  });
-                  validImageCount++;
-                  addGalleryImage(src, alt, false);
-                } catch (error) {
-                  console.warn(`Erreur lors du chargement de l'image: ${src}`, error);
-                }
-              }
-            }
-
-            if (validImageCount === 0) {
-              console.warn("Aucune image valide n'a été trouvée dans la galerie");
-            }
-
-            // Mettre à jour les prévisualisations
-            updatePreview();
-            updateGalleryPreview(false);
-
-            // Activer la vue carte par défaut
-            document.querySelector('.preview-toggle button[data-preview="card"]').click();
-
-            // IMPORTANT: Sauvegarder l'état initial APRÈS avoir tout chargé
-            setTimeout(() => {
-              saveInitialState();
-              console.log('État initial sauvegardé après chargement complet');
-              setupChangeDetection();
-            }, 100);
-
-          } catch (error) {
-            console.error("Erreur détaillée lors du chargement des données:", error);
-            Swal.fire({
-              title: 'Erreur',
-              text: `Une erreur est survenue lors du chargement du restaurant: ${error.message}`,
-              icon: 'error',
-              confirmButtonText: 'OK'
+          // Gérer l'image principale
+          if (metadata.image) {
+            const mainImageUrl = metadata.image.replace(/^"(.*)"$/, '$1');
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+            previewImages.forEach(img => {
+              img.style.display = 'block';
+              img.src = mainImageUrl;
             });
           }
+
+          // Vider les galeries existantes
+          document.getElementById('gallery-grid').innerHTML = '';
+          document.querySelector('.gallery-preview').innerHTML = '';
+
+          // Ajouter les images à la galerie
+          galleryImages.forEach(({ src, alt }) => {
+            if (src !== metadata.image) {
+              console.log("Ajout de l'image à la galerie:", src);
+              addGalleryImage(src, alt, false); // Ajout du paramètre false pour ne pas marquer comme changement
+            }
+          });
+
+          // Mettre à jour les prévisualisations
+          updatePreview();
+          updateGalleryPreview(false); // Ajout du paramètre false pour ne pas marquer comme changement
+
+          // Activer la vue carte par défaut
+          document.querySelector('.preview-toggle button[data-preview="card"]').click();
+
+          // IMPORTANT: Sauvegarder l'état initial APRÈS avoir tout chargé
+          setTimeout(() => {
+            saveInitialState();
+            console.log('État initial sauvegardé après chargement complet');
+            setupChangeDetection();
+          }, 100);
         } else {
           // Nouveau post
           saveInitialState();
@@ -1269,47 +1192,31 @@
         });
       });
 
-      // Mise à jour de la gestion de la soumission du formulaire
+      // Gestion de la soumission du formulaire
       document.getElementById('restaurant-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         try {
-          const name = document.getElementById('name').value.trim();
+          const name = document.getElementById('name').value;
           const date = new Date().toISOString().split('T')[0];
-          const fileName = standardizeFileName(name, date);
+          const fileName = `${date}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.markdown`;
           
-          // Standardiser les valeurs
-          const mainImage = standardizeImagePath(document.querySelector('.preview-card img').src);
-          const price = standardizePrice(document.getElementById('price').value);
-          
-          // Construire le contenu du fichier avec des valeurs standardisées
+          // Construire le contenu du fichier
           const frontMatter = [
             '---',
-            `title: "${escapeString(name)}"`,
+            `title: "${name}"`,
             `date: "${date}"`,
-            `style: "${escapeString(document.getElementById('cuisine').value)}"`,
-            `price: "${price}"`,
-            `note: ${parseFloat(document.getElementById('rating').value).toFixed(1)}`,
-            `address: "${escapeString(document.getElementById('address').value)}"`,
-            `description: "${escapeString(summaryEditor.root.innerHTML)}"`,
-            `image: "${mainImage}"`,
-            'images:',
-          ];
+            `style: "${document.getElementById('cuisine').value}"`,
+            `price: "${document.getElementById('price').value}"`,
+            `note: ${document.getElementById('rating').value}`,
+            `address: "${document.getElementById('address').value}"`,
+            `description: "${summaryEditor.root.innerHTML.replace(/"/g, '\\"')}"`,
+            `image: "${document.querySelector('.preview-card img').src}"`,
+            `state: "draft"`,
+            '---\n'
+          ].join('\n');
 
-          // Ajouter les images de la galerie de manière standardisée
-          const galleryImages = Array.from(document.querySelectorAll('.gallery-grid img'))
-            .map(img => standardizeImagePath(img.src))
-            .filter(src => src !== mainImage) // Éviter les doublons avec l'image principale
-            .forEach(src => {
-              frontMatter.push(`  - image: "${src}"`);
-            });
-
-          frontMatter.push('---\n');
-
-          const content = frontMatter.join('\n') + descriptionEditor.root.innerHTML;
-
-          console.log('Contenu du fichier à sauvegarder:', content);
-          console.log('Nom du fichier standardisé:', fileName);
+          const content = frontMatter + descriptionEditor.root.innerHTML;
 
           // Encoder le contenu en Base64
           const contentBase64 = btoa(unescape(encodeURIComponent(content)));
@@ -1335,7 +1242,7 @@
           // Afficher une confirmation
           await Swal.fire({
             title: 'Restaurant sauvegardé !',
-            text: 'Le restaurant a été ajouté avec succès.',
+            text: 'Le restaurant a été ajouté avec succès dans les brouillons.',
             icon: 'success',
             confirmButtonText: 'OK'
           });
@@ -1347,7 +1254,7 @@
           console.error('Erreur lors de la sauvegarde:', error);
           await Swal.fire({
             title: 'Erreur !',
-            text: `Une erreur est survenue lors de la sauvegarde : ${error.message}`,
+            text: 'Une erreur est survenue lors de la sauvegarde du restaurant.',
             icon: 'error',
             confirmButtonText: 'OK'
           });
