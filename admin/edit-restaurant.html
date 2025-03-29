@@ -63,16 +63,15 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
       .preview-section {
-        position: sticky;
-        top: 4rem;
-        height: calc(100vh - 4rem);
-        overflow-y: auto;
+        position: static;
+        height: auto;
+        overflow-y: visible;
         padding: 1rem;
         background: white;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
-        z-index: 100;
+        margin-bottom: 2rem;
       }
       .preview-section.unsynced {
         position: static;
@@ -1694,37 +1693,13 @@
 
       // Gestion de la synchronisation du scroll
       const previewSection = document.querySelector('.preview-section');
-      let lastScrollTop = 0;
-
-      // Gestionnaire du scroll pour la synchronisation
-      window.addEventListener('scroll', () => {
-        requestAnimationFrame(() => {
-          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-          previewSection.scrollTop = previewScrollHeight * scrollRatio;
-        });
-      });
-
-      // Gestionnaire du scroll pour la section de prévisualisation
-      previewSection.addEventListener('scroll', () => {
-        requestAnimationFrame(() => {
-          const scrollRatio = previewSection.scrollTop / (previewSection.scrollHeight - previewSection.clientHeight);
-          const windowScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-          window.scrollTo({
-            top: windowScrollHeight * scrollRatio,
-            behavior: 'auto'
-          });
-        });
-      });
 
       // Ajouter un gestionnaire de redimensionnement optimisé
       let resizeTimeout;
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-          const scrollRatio = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-          const previewScrollHeight = previewSection.scrollHeight - previewSection.clientHeight;
-          previewSection.scrollTop = previewScrollHeight * scrollRatio;
+          // Pas de synchronisation nécessaire
         }, 250);
       });
     </script>
