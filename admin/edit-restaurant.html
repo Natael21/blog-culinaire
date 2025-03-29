@@ -1156,85 +1156,137 @@
         const content = urlParams.get('content');
         
         if (content) {
-          const decodedContent = decodeURIComponent(content);
-          console.log("Contenu décodé:", decodedContent);
-          
-          // Extraire les images avant de séparer le contenu
-          const galleryImages = extractImagesFromMarkdown(decodedContent);
-          console.log("Images de la galerie extraites:", galleryImages);
+          try {
+            const decodedContent = decodeURIComponent(content);
+            console.log("Contenu décodé:", decodedContent);
+            
+            // Extraire les images avant de séparer le contenu
+            const galleryImages = extractImagesFromMarkdown(decodedContent);
+            console.log("Images de la galerie extraites:", galleryImages);
 
-          const parts = decodedContent.split('---');
-          const frontmatter = parts[1];
-          const fullContent = parts[2] || '';
-
-          // Extraire les métadonnées
-          const metadata = {};
-          frontmatter.split('\n').forEach(line => {
-            const match = line.match(/^(\w+):\s*(.+)$/);
-            if (match) {
-              const [_, key, value] = match;
-              metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
+            const parts = decodedContent.split('---');
+            if (parts.length < 3) {
+              throw new Error('Format de fichier invalide');
             }
-          });
+            
+            const frontmatter = parts[1];
+            const fullContent = parts[2] || '';
 
-          // Remplir les champs du formulaire avec les métadonnées exactes
-          document.getElementById('name').value = metadata.title || '';
-          // S'assurer que la date est au format YYYY-MM-DD
-          const date = metadata.date ? new Date(metadata.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-          document.getElementById('date').value = date;
-          document.getElementById('cuisine').value = metadata.style || '';
-          document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
-          document.getElementById('address').value = metadata.address || '';
+            // Extraire les métadonnées avec gestion des erreurs
+            const metadata = {};
+            frontmatter.split('\n').forEach(line => {
+              const match = line.match(/^(\w+):\s*(.+)$/);
+              if (match) {
+                const [_, key, value] = match;
+                metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
+              }
+            });
 
-          // Gérer le prix avec conversion
-          const priceSelect = document.getElementById('price');
-          const priceValue = convertPriceFromFrontmatter(metadata.price) || '$$';
-          Array.from(priceSelect.options).forEach((option, index) => {
-            if (option.value === priceValue) {
-              priceSelect.selectedIndex = index;
+            // Vérifier les champs requis
+            const requiredFields = ['title', 'date', 'style', 'price', 'note', 'address', 'description', 'image'];
+            const missingFields = requiredFields.filter(field => !metadata[field]);
+            
+            if (missingFields.length > 0) {
+              console.warn('Champs manquants:', missingFields);
+              // Remplir avec des valeurs par défaut pour les champs manquants
+              missingFields.forEach(field => {
+                switch(field) {
+                  case 'title':
+                    metadata.title = 'Nouveau Restaurant';
+                    break;
+                  case 'date':
+                    metadata.date = new Date().toISOString().split('T')[0];
+                    break;
+                  case 'style':
+                    metadata.style = 'Non spécifié';
+                    break;
+                  case 'price':
+                    metadata.price = 'medium';
+                    break;
+                  case 'note':
+                    metadata.note = '4.5';
+                    break;
+                  case 'address':
+                    metadata.address = 'Adresse à spécifier';
+                    break;
+                  case 'description':
+                    metadata.description = 'Description à venir...';
+                    break;
+                  case 'image':
+                    metadata.image = '/images/header.jpg';
+                    break;
+                }
+              });
             }
-          });
 
-          // Remplir les éditeurs avec le contenu exact
-          summaryEditor.root.innerHTML = metadata.description || '';
-          
-          // Formater le contenu de la description
-          const formattedContent = formatDescription(fullContent.trim());
-          descriptionEditor.root.innerHTML = formattedContent;
+            // Remplir les champs du formulaire avec les métadonnées
+            document.getElementById('name').value = metadata.title || '';
+            const date = metadata.date ? new Date(metadata.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = date;
+            document.getElementById('cuisine').value = metadata.style || '';
+            document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
+            document.getElementById('address').value = metadata.address || '';
 
-          // Gérer l'image principale
-          const mainImageUrl = metadata.image || '/images/header.jpg';
-          const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
-          previewImages.forEach(img => {
-            img.style.display = 'block';
-            img.src = mainImageUrl;
-          });
+            // Gérer le prix avec conversion
+            const priceSelect = document.getElementById('price');
+            const priceValue = convertPriceFromFrontmatter(metadata.price) || '$$';
+            Array.from(priceSelect.options).forEach((option, index) => {
+              if (option.value === priceValue) {
+                priceSelect.selectedIndex = index;
+              }
+            });
 
-          // Vider les galeries existantes
-          document.getElementById('gallery-grid').innerHTML = '';
-          document.querySelector('.gallery-preview').innerHTML = '';
+            // Remplir les éditeurs avec le contenu
+            summaryEditor.root.innerHTML = metadata.description || '';
+            
+            // Formater le contenu de la description
+            const formattedContent = formatDescription(fullContent.trim());
+            descriptionEditor.root.innerHTML = formattedContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
 
-          // Ajouter les images à la galerie en excluant l'image principale
-          galleryImages.forEach(({ src, alt }) => {
-            if (src !== mainImageUrl) {
-              console.log("Ajout de l'image à la galerie:", src);
-              addGalleryImage(src, alt, false);
-            }
-          });
+            // Gérer l'image principale
+            const mainImageUrl = metadata.image || '/images/header.jpg';
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+            previewImages.forEach(img => {
+              img.style.display = 'block';
+              img.src = mainImageUrl;
+            });
 
-          // Mettre à jour les prévisualisations
-          updatePreview();
-          updateGalleryPreview(false);
+            // Vider les galeries existantes
+            document.getElementById('gallery-grid').innerHTML = '';
+            document.querySelector('.gallery-preview').innerHTML = '';
 
-          // Activer la vue complète par défaut
-          document.querySelector('.preview-toggle button[data-preview="full"]').click();
+            // Ajouter les images à la galerie en excluant l'image principale
+            galleryImages.forEach(({ src, alt }) => {
+              if (src !== mainImageUrl) {
+                console.log("Ajout de l'image à la galerie:", src);
+                addGalleryImage(src, alt, false);
+              }
+            });
 
-          // Sauvegarder l'état initial après le chargement complet
-          setTimeout(() => {
-            saveInitialState();
-            console.log('État initial sauvegardé après chargement complet');
-            setupChangeDetection();
-          }, 100);
+            // Mettre à jour les prévisualisations
+            updatePreview();
+            updateGalleryPreview(false);
+
+            // Activer la vue complète par défaut
+            document.querySelector('.preview-toggle button[data-preview="full"]').click();
+
+            // Sauvegarder l'état initial après le chargement complet
+            setTimeout(() => {
+              saveInitialState();
+              console.log('État initial sauvegardé après chargement complet');
+              setupChangeDetection();
+            }, 100);
+
+          } catch (error) {
+            console.error('Erreur lors du chargement des données:', error);
+            // Afficher une alerte à l'utilisateur
+            await Swal.fire({
+              title: 'Erreur de chargement',
+              text: 'Une erreur est survenue lors du chargement des données du restaurant. Les champs ont été remplis avec des valeurs par défaut.',
+              icon: 'warning',
+              confirmButtonText: 'OK'
+            });
+          }
         } else {
           // Nouveau post avec des valeurs par défaut
           document.getElementById('name').value = '';
@@ -1418,6 +1470,49 @@
           console.log('Changement détecté dans la galerie (réorganisation)');
         }
       }
+
+      // Gestionnaire d'événements pour les champs de formulaire
+      document.getElementById('name').addEventListener('input', updatePreview);
+      document.getElementById('date').addEventListener('input', updatePreview);
+      document.getElementById('cuisine').addEventListener('input', updatePreview);
+      document.getElementById('price').addEventListener('input', updatePreview);
+      document.getElementById('rating').addEventListener('input', updatePreview);
+      document.getElementById('address').addEventListener('input', updatePreview);
+      summaryEditor.on('text-change', updatePreview);
+      descriptionEditor.on('text-change', updatePreview);
+
+      // Gestion de l'image principale
+      document.querySelector('.change-image-btn').addEventListener('click', () => {
+        document.getElementById('main-image').click();
+      });
+
+      document.getElementById('main-image').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
+            previewImages.forEach(img => img.src = e.target.result);
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        }
+      });
+
+      // Gestion de la galerie d'images
+      document.getElementById('gallery-upload').addEventListener('click', () => {
+        document.getElementById('gallery-input').click();
+      });
+
+      document.getElementById('gallery-input').addEventListener('change', function(e) {
+        if (e.target.files) {
+          Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              addGalleryImage(e.target.result);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      });
 
       // Gestion du toggle des previews
       document.querySelectorAll('.preview-toggle button').forEach(button => {
