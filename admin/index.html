@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administration du Blog Culinaire | Gestion des Restaurants</title>
-    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
     <style>
       body {
         font-family: 'Open Sans', sans-serif;
@@ -1162,32 +1162,8 @@
             <i class="fas fa-plus"></i> Créer un nouveau restaurant
           </a>
         </div>
-        <div class="restaurant-list">
-          {% assign sorted_posts = site.posts | sort: 'date' | reverse %}
-          {% for post in sorted_posts %}
-            <div class="restaurant-item">
-              <div class="restaurant-info">
-                <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}" class="restaurant-image">
-                <div class="restaurant-details">
-                  <h3>{{ post.title }}</h3>
-                  <div class="restaurant-meta">
-                    <span><i class="fas fa-star"></i> {{ post.rating | default: '0' }}</span>
-                    <span><i class="fas fa-utensils"></i> {{ post.cuisine | default: 'Non spécifié' }}</span>
-                    <span><i class="fas fa-dollar-sign"></i> {{ post.price | default: '$' }}</span>
-                    <span><i class="fas fa-calendar"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
-                  </div>
-                </div>
-              </div>
-              <div class="restaurant-actions">
-                <a href="/admin/edit-restaurant.html?id={{ post.path }}" class="action-btn edit-btn">
-                  <i class="fas fa-edit"></i> Modifier
-                </a>
-                <button class="action-btn delete-btn" onclick="deleteRestaurant('{{ post.path }}')">
-                  <i class="fas fa-trash"></i> Supprimer
-                </button>
-              </div>
-            </div>
-          {% endfor %}
+        <div class="restaurant-list" id="restaurant-list">
+          <!-- Les restaurants seront chargés dynamiquement ici -->
         </div>
       </section>
 
@@ -1195,107 +1171,24 @@
       <section id="workflow" class="content-section">
         <h2>Workflow de Publication</h2>
         <div class="workflow-columns">
-          <!-- Colonne Brouillons -->
           <div class="column draft">
             <h3><i class="fas fa-pencil-alt"></i> Brouillons</h3>
-            <div class="workflow-items" data-state="draft">
-              {% assign draft_posts = site.posts | where: "status", "draft" %}
-              {% for post in draft_posts %}
-                <div class="workflow-item" draggable="true" data-id="{{ post.path }}">
-                  <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}">
-                  <h4>{{ post.title }}</h4>
-                  <p>{{ post.description | truncate: 100 }}</p>
-                  <div class="workflow-meta">
-                    <span class="status-badge">Brouillon</span>
-                    <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
-                  </div>
-                  <div class="workflow-actions">
-                    <button class="edit-btn" onclick="editPost('{{ post.path }}')">
-                      <i class="fas fa-edit"></i> Modifier
-                    </button>
-                    <button class="move-btn" onclick="showStateSelector(this)">
-                      <i class="fas fa-exchange-alt"></i> Changer l'état
-                    </button>
-                  </div>
-                </div>
-              {% endfor %}
+            <div class="workflow-items" data-state="draft" id="draft-items">
+              <!-- Les brouillons seront chargés dynamiquement ici -->
             </div>
           </div>
 
-          <!-- Colonne Review -->
           <div class="column review">
             <h3><i class="fas fa-spell-check"></i> En Review</h3>
-            <div class="workflow-items" data-state="review">
-              {% assign review_posts = site.posts | where: "status", "review" %}
-              {% for post in review_posts %}
-                <div class="workflow-item" draggable="true" data-id="{{ post.path }}">
-                  <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}">
-                  <h4>{{ post.title }}</h4>
-                  <p>{{ post.description | truncate: 100 }}</p>
-                  <div class="workflow-meta">
-                    <span class="status-badge">En Review</span>
-                    <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
-                  </div>
-                  <div class="workflow-actions">
-                    <button class="edit-btn" onclick="editPost('{{ post.path }}')">
-                      <i class="fas fa-edit"></i> Modifier
-                    </button>
-                    <button class="check-btn" onclick="runChecks('{{ post.path }}')">
-                      <i class="fas fa-check-double"></i> Vérifier
-                    </button>
-                    <button class="move-btn" onclick="showStateSelector(this)">
-                      <i class="fas fa-exchange-alt"></i> Changer l'état
-                    </button>
-                  </div>
-                </div>
-              {% endfor %}
+            <div class="workflow-items" data-state="review" id="review-items">
+              <!-- Les articles en review seront chargés dynamiquement ici -->
             </div>
           </div>
 
-          <!-- Colonne Prêt -->
           <div class="column ready">
             <h3><i class="fas fa-check-circle"></i> Prêt</h3>
-            <div class="workflow-items" data-state="ready">
-              {% assign ready_posts = site.posts | where: "status", "ready" %}
-              {% for post in ready_posts %}
-                <div class="workflow-item" draggable="true" data-id="{{ post.path }}">
-                  <img src="{{ post.image | default: '/images/restaurant-test.jpg' }}" alt="{{ post.title }}">
-                  <h4>{{ post.title }}</h4>
-                  <p>{{ post.description | truncate: 100 }}</p>
-                  <div class="workflow-meta">
-                    <span class="status-badge">Prêt</span>
-                    <span class="date"><i class="far fa-clock"></i> {{ post.date | date: "%d/%m/%Y" }}</span>
-                  </div>
-                  <div class="workflow-actions">
-                    <button class="edit-btn" onclick="editPost('{{ post.path }}')">
-                      <i class="fas fa-edit"></i> Modifier
-                    </button>
-                    <button class="publish-btn" onclick="publishPost('{{ post.path }}')">
-                      <i class="fas fa-upload"></i> Publier
-                    </button>
-                    <button class="move-btn" onclick="showStateSelector(this)">
-                      <i class="fas fa-exchange-alt"></i> Changer l'état
-                    </button>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-        <!-- Modal pour le changement d'état -->
-        <div id="stateModal" class="modal">
-          <div class="modal-content">
-            <h3>Changer l'état</h3>
-            <div class="state-options">
-              <button data-state="draft" class="state-option">
-                <i class="fas fa-pencil-alt"></i> Brouillon
-              </button>
-              <button data-state="review" class="state-option">
-                <i class="fas fa-spell-check"></i> En Review
-              </button>
-              <button data-state="ready" class="state-option">
-                <i class="fas fa-check-circle"></i> Prêt
-              </button>
+            <div class="workflow-items" data-state="ready" id="ready-items">
+              <!-- Les articles prêts seront chargés dynamiquement ici -->
             </div>
           </div>
         </div>
@@ -1326,94 +1219,10 @@
             <i class="fas fa-plus"></i> Sélectionner des fichiers
           </label>
           <p class="upload-info">Formats acceptés : JPG, PNG, WEBP - Max 5MB par image</p>
-          <div class="upload-progress" style="display: none;">
-            <div class="progress-bar">
-              <div class="progress-fill"></div>
-            </div>
-            <p class="progress-text">Téléversement en cours... <span class="progress-percent">0%</span></p>
-          </div>
         </div>
 
-        <div class="media-stats">
-          <div class="stat-item">
-            <i class="fas fa-image"></i>
-            {% assign image_count = 0 %}
-            {% for file in site.static_files %}
-              {% if file.path contains 'images' %}
-                {% assign image_count = image_count | plus: 1 %}
-              {% endif %}
-            {% endfor %}
-            <span class="stat-value">{{ image_count }}</span>
-            <span class="stat-label">Images totales</span>
-          </div>
-          <div class="stat-item">
-            <i class="fas fa-hdd"></i>
-            {% assign total_size = 0 %}
-            {% for file in site.static_files %}
-              {% if file.path contains 'images' %}
-                {% assign total_size = total_size | plus: file.size %}
-              {% endif %}
-            {% endfor %}
-            <span class="stat-value">{{ total_size | divided_by: 1048576.0 | round: 2 }} Mo</span>
-            <span class="stat-label">Espace utilisé</span>
-          </div>
-        </div>
-
-        <div class="media-library">
-          {% for file in site.static_files %}
-            {% if file.path contains 'images' %}
-              <div class="media-item" data-name="{{ file.name | downcase }}" data-type="{{ file.extname | downcase }}">
-                <div class="media-preview">
-                  <img src="{{ file.path }}" alt="{{ file.name }}" loading="lazy">
-                  <div class="media-overlay">
-                    <button class="media-action view-btn" onclick="viewImage('{{ file.path }}')">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="media-action copy-btn" onclick="copyImagePath('{{ file.path }}')">
-                      <i class="fas fa-link"></i>
-                    </button>
-                    <button class="media-action edit-btn" onclick="editImage('{{ file.path }}')">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="media-action delete-btn" onclick="deleteImage('{{ file.path }}')">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="media-info">
-                  <h4 title="{{ file.name }}">{{ file.name | truncate: 20 }}</h4>
-                  <div class="media-meta">
-                    <span><i class="fas fa-file-image"></i> {{ file.extname | upcase }}</span>
-                    <span><i class="fas fa-weight-hanging"></i> {{ file.size | divided_by: 1024 | round }}Ko</span>
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-
-        <!-- Modal de prévisualisation -->
-        <div id="imageModal" class="modal">
-          <div class="modal-content image-preview-modal">
-            <span class="close-modal">&times;</span>
-            <img id="modalImage" src="" alt="Prévisualisation">
-            <div class="image-info">
-              <h3 id="modalImageName"></h3>
-              <div class="image-details">
-                <p><strong>Dimensions:</strong> <span id="modalImageDimensions"></span></p>
-                <p><strong>Taille:</strong> <span id="modalImageSize"></span></p>
-                <p><strong>Type:</strong> <span id="modalImageType"></span></p>
-              </div>
-              <div class="image-actions">
-                <button onclick="downloadImage()" class="action-btn download-btn">
-                  <i class="fas fa-download"></i> Télécharger
-                </button>
-                <button onclick="copyImagePath(currentImagePath)" class="action-btn copy-btn">
-                  <i class="fas fa-link"></i> Copier le chemin
-                </button>
-              </div>
-            </div>
-          </div>
+        <div class="media-library" id="media-library">
+          <!-- Les médias seront chargés dynamiquement ici -->
         </div>
       </section>
 
@@ -1421,7 +1230,6 @@
       <section id="upcoming" class="content-section">
         <h2>Restaurants à Venir</h2>
         <div class="upcoming-section">
-          <!-- Éditeur -->
           <div class="upcoming-editor">
             <div class="upcoming-form">
               <div class="form-group">
@@ -1457,605 +1265,85 @@
                 <i class="fas fa-plus"></i> Ajouter le restaurant
               </button>
             </div>
-
-            <div class="upcoming-list" id="upcoming-list">
-              <!-- Les restaurants seront ajoutés ici dynamiquement -->
-            </div>
-          </div>
-
-          <!-- Prévisualisation -->
-          <div class="upcoming-preview">
-            <div class="preview-header">
-              <h3>Prévisualisation</h3>
-              <div class="preview-toggle">
-                <button class="active" data-view="card">Vue carte</button>
-                <button data-view="full">Vue complète</button>
-              </div>
-            </div>
-            <div class="preview-content" id="preview-content">
-              <!-- Le contenu de la prévisualisation sera mis à jour dynamiquement -->
-            </div>
           </div>
         </div>
       </section>
     </main>
 
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
+      // Fonction pour charger les restaurants depuis le dossier _posts
+      async function loadRestaurants() {
+        try {
+          const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts');
+          const posts = await response.json();
+          
+          const restaurantList = document.getElementById('restaurant-list');
+          restaurantList.innerHTML = '';
+          
+          posts.forEach(post => {
+            if (post.name.endsWith('.markdown')) {
+              const item = document.createElement('div');
+              item.className = 'restaurant-item';
+              item.innerHTML = `
+                <div class="restaurant-info">
+                  <img src="/images/restaurant-test.jpg" alt="${post.name}" class="restaurant-image">
+                  <div class="restaurant-details">
+                    <h3>${post.name.replace(/^\d{4}-\d{2}-\d{2}-(.+)\.markdown$/, '$1').replace(/-/g, ' ')}</h3>
+                    <div class="restaurant-meta">
+                      <span><i class="fas fa-calendar"></i> ${post.name.substr(0, 10)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="restaurant-actions">
+                  <a href="/admin/edit-restaurant.html?id=${post.path}" class="action-btn edit-btn">
+                    <i class="fas fa-edit"></i> Modifier
+                  </a>
+                  <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
+                    <i class="fas fa-trash"></i> Supprimer
+                  </button>
+                </div>
+              `;
+              restaurantList.appendChild(item);
+            }
+          });
+        } catch (error) {
+          console.error('Erreur lors du chargement des restaurants:', error);
+          const restaurantList = document.getElementById('restaurant-list');
+          restaurantList.innerHTML = '<p class="error-message">Une erreur est survenue lors du chargement des restaurants. Veuillez réessayer plus tard.</p>';
+        }
+      }
+
+      // Charger les restaurants au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadRestaurants);
+
       // Gestion des boutons de navigation
       document.querySelectorAll('.admin-nav button').forEach(button => {
         button.addEventListener('click', () => {
-          // Retirer la classe active de tous les boutons
           document.querySelectorAll('.admin-nav button').forEach(btn => btn.classList.remove('active'));
-          // Ajouter la classe active au bouton cliqué
           button.classList.add('active');
           
-          // Masquer toutes les sections
           document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-          // Afficher la section correspondante
           document.getElementById(button.dataset.section).classList.add('active');
         });
       });
 
-      // Fonction simplifiée pour la suppression
-      function deleteRestaurant(path) {
-        const item = event.target.closest('.restaurant-item');
-        const restaurantName = item.querySelector('h3').textContent;
-        
-        if (confirm(`Êtes-vous sûr de vouloir supprimer le restaurant "${restaurantName}" ?`)) {
-          // Utiliser l'API Netlify pour supprimer le fichier
-          fetch('/.netlify/functions/delete-post', {
-            method: 'POST',
-            body: JSON.stringify({ path }),
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          })
-          .then(response => {
-            if (response.ok) {
-              item.style.opacity = '0';
-              setTimeout(() => item.remove(), 300);
-            } else {
-              throw new Error('Erreur lors de la suppression');
-            }
-          })
-          .catch(error => {
-            console.error('Erreur:', error);
-            alert('Une erreur est survenue lors de la suppression du restaurant.');
-          });
-        }
-      }
-
-      // Gestion du drag and drop pour le workflow
-      let draggedItem = null;
-      
-      document.querySelectorAll('.workflow-item').forEach(item => {
-        item.addEventListener('dragstart', (e) => {
-          draggedItem = item;
-          e.dataTransfer.setData('text/plain', item.dataset.id);
-          item.classList.add('dragging');
-        });
-
-        item.addEventListener('dragend', () => {
-          draggedItem.classList.remove('dragging');
-          draggedItem = null;
-        });
-      });
-
-      document.querySelectorAll('.workflow-items').forEach(container => {
-        container.addEventListener('dragenter', (e) => {
-          e.preventDefault();
-          container.classList.add('drag-over');
-        });
-
-        container.addEventListener('dragover', (e) => {
-          e.preventDefault();
-        });
-
-        container.addEventListener('dragleave', () => {
-          container.classList.remove('drag-over');
-        });
-
-        container.addEventListener('drop', async (e) => {
-          e.preventDefault();
-          container.classList.remove('drag-over');
-          const postId = e.dataTransfer.getData('text/plain');
-          const newState = container.dataset.state;
-          
-          try {
-            // Simuler l'appel API pour changer l'état
-            await changePostState(postId, newState);
-            container.appendChild(draggedItem);
-            
-            // Si on passe en review, lancer les vérifications
-            if (newState === 'review') {
-              runChecks(postId);
-            }
-            
-            // Si on passe en ready, vérifier si le post était déjà publié
-            if (newState === 'ready') {
-              const publishBtn = draggedItem.querySelector('.publish-btn');
-              if (publishBtn) {
-                publishBtn.style.display = 'block';
-              }
-            }
-          } catch (error) {
-            console.error('Erreur lors du changement d\'état:', error);
-            alert('Une erreur est survenue lors du changement d\'état.');
-          }
-        });
-      });
-
-      // Fonction pour changer l'état d'un post
-      async function changePostState(postId, newState) {
-        // Simuler un appel API
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            console.log(`État changé pour ${postId}: ${newState}`);
-            resolve();
-          }, 500);
-        });
-      }
-
-      // Fonction pour lancer les vérifications
-      async function runChecks(postId) {
-        const item = document.querySelector(`[data-id="${postId}"]`);
-        const checkResults = item.querySelector('.check-results');
-        const spellingList = checkResults.querySelector('.corrections-list');
-        const layoutList = checkResults.querySelector('.layout-list');
-        
-        // Simuler les vérifications
-        checkResults.style.display = 'block';
-        spellingList.innerHTML = `
-          <li>Vérification de la grammaire en cours...</li>
-          <li>Vérification de l'orthographe en cours...</li>
-        `;
-        layoutList.innerHTML = `
-          <li>Vérification de la structure HTML...</li>
-          <li>Vérification de la mise en page...</li>
-        `;
-        
-        // Simuler un délai pour les vérifications
-        setTimeout(() => {
-          spellingList.innerHTML = `
-            <li class="success"><i class="fas fa-check"></i> Grammaire : OK</li>
-            <li class="warning"><i class="fas fa-exclamation-triangle"></i> 2 fautes d'orthographe trouvées</li>
-          `;
-          layoutList.innerHTML = `
-            <li class="success"><i class="fas fa-check"></i> Structure HTML valide</li>
-            <li class="success"><i class="fas fa-check"></i> Mise en page conforme</li>
-          `;
-        }, 2000);
-      }
-
-      // Fonction pour publier un post
-      async function publishPost(postId) {
-        try {
-          // Simuler l'appel API pour publier
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Simuler le commit et push vers GitHub
-          console.log(`Publication du post ${postId} sur GitHub...`);
-          
-          alert('Post publié avec succès !');
-          
-          // Rafraîchir la page après publication
-          location.reload();
-        } catch (error) {
-          console.error('Erreur lors de la publication:', error);
-          alert('Une erreur est survenue lors de la publication.');
-        }
-      }
-
-      // Fonction pour éditer un post
-      function editPost(postId) {
-        window.location.href = `/admin/edit-restaurant.html?id=${postId}`;
-      }
-
-      // Gestion du modal de changement d'état
-      const modal = document.getElementById('stateModal');
-      let currentItem = null;
-
-      function showStateSelector(button) {
-        currentItem = button.closest('.workflow-item');
-        modal.style.display = 'block';
-      }
-
-      document.querySelectorAll('.state-option').forEach(option => {
-        option.addEventListener('click', async () => {
-          const newState = option.dataset.state;
-          const postId = currentItem.dataset.id;
-          
-          try {
-            await changePostState(postId, newState);
-            const targetContainer = document.querySelector(`.workflow-items[data-state="${newState}"]`);
-            targetContainer.appendChild(currentItem);
-            
-            if (newState === 'review') {
-              runChecks(postId);
-            }
-            
-            modal.style.display = 'none';
-          } catch (error) {
-            console.error('Erreur lors du changement d\'état:', error);
-            alert('Une erreur est survenue lors du changement d\'état.');
-          }
-        });
-      });
-
-      window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-        }
-      });
-
-      // Variables globales pour la gestion des médias
-      let currentImagePath = '';
-      const imageModal = document.getElementById('imageModal');
-      const modalImage = document.getElementById('modalImage');
-      const modalImageName = document.getElementById('modalImageName');
-      const modalImageDimensions = document.getElementById('modalImageDimensions');
-      const modalImageSize = document.getElementById('modalImageSize');
-      const modalImageType = document.getElementById('modalImageType');
-
-      // Gestion de la recherche et du filtrage
-      const mediaSearch = document.getElementById('media-search');
-      const mediaFilter = document.getElementById('media-filter');
-      const mediaItems = document.querySelectorAll('.media-item');
-
-      function filterMediaItems() {
-        const searchTerm = mediaSearch.value.toLowerCase();
-        const filterType = mediaFilter.value;
-
-        mediaItems.forEach(item => {
-          const name = item.dataset.name;
-          const type = item.dataset.type;
-          const matchesSearch = name.includes(searchTerm);
-          const matchesFilter = filterType === 'all' || type === filterType;
-
-          item.style.display = matchesSearch && matchesFilter ? 'block' : 'none';
-        });
-      }
-
-      mediaSearch.addEventListener('input', filterMediaItems);
-      mediaFilter.addEventListener('change', filterMediaItems);
-
-      // Gestion du drag & drop
-      const uploadZone = document.getElementById('upload-zone');
-      const uploadBtn = document.querySelector('.custom-file-upload');
-      const progressBar = document.querySelector('.progress-fill');
-      const progressText = document.querySelector('.progress-percent');
-      const uploadProgress = document.querySelector('.upload-progress');
-
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-      });
-
-      ['dragenter', 'dragover'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, highlight, false);
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, unhighlight, false);
-      });
-
-      function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-
-      function highlight(e) {
-        uploadZone.classList.add('drag-over');
-      }
-
-      function unhighlight(e) {
-        uploadZone.classList.remove('drag-over');
-      }
-
-      uploadZone.addEventListener('drop', handleDrop, false);
-
-      function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFiles(files);
-      }
-
-      uploadBtn.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.accept = 'image/*';
-        input.onchange = (e) => handleFiles(e.target.files);
-        input.click();
-      });
-
-      function handleFiles(files) {
-        uploadProgress.style.display = 'block';
-        [...files].forEach((file, index) => {
-          if (file.type.startsWith('image/')) {
-            uploadFile(file, index, files.length);
-          }
-        });
-      }
-
-      function uploadFile(file, index, total) {
-        const progress = (index + 1) / total * 100;
-        progressBar.style.width = `${progress}%`;
-        progressText.textContent = `${Math.round(progress)}%`;
-
-        // Simuler un upload
-        setTimeout(() => {
-          if (index === total - 1) {
-            uploadProgress.style.display = 'none';
-            progressBar.style.width = '0%';
-            alert('Images téléversées avec succès !');
-            location.reload();
-          }
-        }, 1000);
-      }
-
-      // Gestion des actions sur les images
-      function viewImage(path) {
-        currentImagePath = path;
-        modalImage.src = path;
-        modalImageName.textContent = path.split('/').pop();
-        
-        // Simuler le chargement des détails de l'image
-        const img = new Image();
-        img.onload = function() {
-          modalImageDimensions.textContent = `${this.width} x ${this.height}px`;
-        };
-        img.src = path;
-        
-        const size = Math.round(Math.random() * 1000) + 'Ko';
-        modalImageSize.textContent = size;
-        modalImageType.textContent = path.split('.').pop().toUpperCase();
-        
-        imageModal.style.display = 'block';
-      }
-
-      function copyImagePath(path) {
-        navigator.clipboard.writeText(path).then(() => {
-          alert('Chemin de l\'image copié !');
-        });
-      }
-
-      function editImage(path) {
-        // Implémenter l'édition d'image
-        console.log('Édition de l\'image:', path);
-      }
-
-      function deleteImage(path) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
-          // Implémenter la suppression d'image
-          console.log('Suppression de l\'image:', path);
-        }
-      }
-
-      function downloadImage() {
-        const link = document.createElement('a');
-        link.href = currentImagePath;
-        link.download = currentImagePath.split('/').pop();
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      // Fermeture du modal
-      document.querySelector('.close-modal').addEventListener('click', () => {
-        imageModal.style.display = 'none';
-      });
-
-      window.addEventListener('click', (e) => {
-        if (e.target === imageModal) {
-          imageModal.style.display = 'none';
-        }
-      });
-
-      // Gestion des restaurants à venir
-      const upcomingList = document.getElementById('upcoming-list');
-      const saveRestaurantBtn = document.getElementById('save-restaurant');
-      const restaurantForm = document.querySelector('.upcoming-form');
-
-      // Fonction pour créer un nouvel élément de restaurant
-      function createUpcomingItem(restaurant) {
-        const item = document.createElement('div');
-        item.className = 'upcoming-item';
-        item.draggable = true;
-        item.dataset.id = restaurant.id;
-
-        const imageUrl = restaurant.image ? URL.createObjectURL(restaurant.image) : '/images/restaurant-test.jpg';
-
-        item.innerHTML = `
-          <div class="upcoming-info">
-            <img src="${imageUrl}" alt="${restaurant.name}" class="upcoming-image">
-            <div class="upcoming-details">
-              <h3>${restaurant.name}</h3>
-              <div class="upcoming-meta">
-                <span><i class="fas fa-calendar"></i> ${restaurant.date}</span>
-                <span><i class="fas fa-map-marker-alt"></i> ${restaurant.location}</span>
-              </div>
-            </div>
-          </div>
-          <div class="upcoming-actions">
-            <button class="edit-upcoming-btn" onclick="editUpcomingRestaurant('${restaurant.id}')">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="delete-upcoming-btn" onclick="deleteUpcomingRestaurant('${restaurant.id}')">
-              <i class="fas fa-trash"></i>
-            </button>
-            <button class="move-upcoming-btn">
-              <i class="fas fa-arrows-alt"></i>
-            </button>
-          </div>
-        `;
-
-        return item;
-      }
-
-      // Gestion de l'ajout d'un nouveau restaurant
-      saveRestaurantBtn.addEventListener('click', () => {
-        const name = document.getElementById('restaurant-name').value;
-        const date = document.getElementById('visit-date').value;
-        const location = document.getElementById('location').value;
-        const image = document.getElementById('restaurant-image').files[0];
-        const description = document.getElementById('description').value;
-
-        if (!name || !date || !location) {
-          alert('Veuillez remplir tous les champs obligatoires');
-          return;
-        }
-
-        const restaurant = {
-          id: Date.now().toString(),
-          name,
-          date,
-          location,
-          image,
-          description
-        };
-
-        const item = createUpcomingItem(restaurant);
-        upcomingList.appendChild(item);
-        updatePreview();
-
-        // Réinitialiser le formulaire
-        restaurantForm.reset();
-      });
-
-      // Fonction pour mettre à jour la prévisualisation
-      function updatePreview() {
-        const previewContent = document.getElementById('preview-content');
-        const viewType = document.querySelector('.preview-toggle button.active').dataset.view;
-        const items = Array.from(upcomingList.children);
-
-        if (viewType === 'card') {
-          previewContent.innerHTML = items.map(item => {
-            const name = item.querySelector('h3').textContent;
-            const date = item.querySelector('.upcoming-meta span:first-child').textContent;
-            const location = item.querySelector('.upcoming-meta span:last-child').textContent;
-            const image = item.querySelector('img').src;
-
-            return `
-              <div class="upcoming-card">
-                <img src="${image}" alt="${name}">
-                <h3>${name}</h3>
-                <div class="upcoming-meta">
-                  <span>${date}</span>
-                  <span>${location}</span>
-                </div>
-              </div>
-            `;
-          }).join('');
-        } else {
-          previewContent.innerHTML = items.map(item => {
-            const name = item.querySelector('h3').textContent;
-            const date = item.querySelector('.upcoming-meta span:first-child').textContent;
-            const location = item.querySelector('.upcoming-meta span:last-child').textContent;
-            const image = item.querySelector('img').src;
-            const description = item.dataset.description || '';
-
-            return `
-              <div class="upcoming-full">
-                <img src="${image}" alt="${name}">
-                <div class="upcoming-content">
-                  <h3>${name}</h3>
-                  <div class="upcoming-meta">
-                    <span>${date}</span>
-                    <span>${location}</span>
-                  </div>
-                  <p>${description}</p>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-
-      // Gestion du changement de vue
-      document.querySelectorAll('.preview-toggle button').forEach(button => {
-        button.addEventListener('click', () => {
-          document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
-          button.classList.add('active');
-          updatePreview();
-        });
-      });
-
-      // Gestion du drag & drop pour la réorganisation
-      let draggedUpcomingItem = null;
-
-      upcomingList.addEventListener('dragstart', (e) => {
-        if (e.target.classList.contains('upcoming-item')) {
-          draggedUpcomingItem = e.target;
-          e.target.classList.add('dragging');
-        }
-      });
-
-      upcomingList.addEventListener('dragend', (e) => {
-        if (e.target.classList.contains('upcoming-item')) {
-          e.target.classList.remove('dragging');
-          draggedUpcomingItem = null;
-        }
-      });
-
-      upcomingList.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        if (!draggedUpcomingItem) return;
-
-        const afterElement = getDragAfterElement(upcomingList, e.clientY);
-        const draggable = document.querySelector('.dragging');
-
-        if (afterElement) {
-          upcomingList.insertBefore(draggable, afterElement);
-        } else {
-          upcomingList.appendChild(draggable);
-        }
-
-        updatePreview();
-      });
-
-      function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.upcoming-item:not(.dragging)')];
-
-        return draggableElements.reduce((closest, child) => {
-          const box = child.getBoundingClientRect();
-          const offset = y - box.top - box.height / 2;
-
-          if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-          } else {
-            return closest;
-          }
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-      }
-
-      // Fonctions pour la gestion des actions (modifier, supprimer)
-      function editUpcomingRestaurant(id) {
-        const item = document.querySelector(`.upcoming-item[data-id="${id}"]`);
-        if (!item) return;
-
-        const name = item.querySelector('h3').textContent;
-        const date = item.querySelector('.upcoming-meta span:first-child').textContent.replace('📅 ', '');
-        const location = item.querySelector('.upcoming-meta span:last-child').textContent.replace('📍 ', '');
-        const description = item.dataset.description || '';
-
-        // Remplir le formulaire avec les données existantes
-        document.getElementById('restaurant-name').value = name;
-        document.getElementById('visit-date').value = date;
-        document.getElementById('location').value = location;
-        document.getElementById('description').value = description;
-
-        // Supprimer l'ancien élément
-        item.remove();
-        updatePreview();
-      }
-
-      function deleteUpcomingRestaurant(id) {
+      // Fonction de suppression
+      async function deleteRestaurant(path) {
         if (confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) {
-          const item = document.querySelector(`.upcoming-item[data-id="${id}"]`);
-          if (item) {
-            item.remove();
-            updatePreview();
+          try {
+            // Appel à l'API Netlify pour supprimer le fichier
+            await fetch('/.netlify/functions/delete-post', {
+              method: 'POST',
+              body: JSON.stringify({ path }),
+              headers: { 'Content-Type': 'application/json' }
+            });
+            
+            // Recharger la liste des restaurants
+            loadRestaurants();
+          } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            alert('Une erreur est survenue lors de la suppression du restaurant.');
           }
         }
       }
