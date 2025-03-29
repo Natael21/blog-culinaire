@@ -82,15 +82,13 @@ permalink: /a-venir/
   position: relative;
   display: flex;
   align-items: stretch;
+  cursor: default;
+  user-select: none;
 }
 
 .upcoming-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
-
-.upcoming-card:active {
-  cursor: grabbing;
 }
 
 .drag-handle {
@@ -102,16 +100,26 @@ permalink: /a-venir/
   background: #f8f9fa;
   cursor: grab;
   border-right: 1px solid #eee;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  background: var(--accent-color);
+  color: white;
 }
 
 .drag-handle i {
   color: #666;
   font-size: 1.2rem;
+  pointer-events: none;
 }
 
 .card-content {
   flex: 1;
   padding: 2rem;
+  pointer-events: auto;
+  cursor: default;
 }
 
 .restaurant-type {
@@ -230,6 +238,10 @@ permalink: /a-venir/
 .sortable-chosen {
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
+
+.sortable-drag {
+  cursor: grabbing;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -243,13 +255,19 @@ document.addEventListener('DOMContentLoaded', function() {
       ghostClass: 'sortable-ghost',
       chosenClass: 'sortable-chosen',
       dragClass: 'sortable-drag',
-      forceFallback: true,
+      forceFallback: false,
+      fallbackTolerance: 5,
+      touchStartThreshold: 5,
       onStart: function(evt) {
-        document.body.style.cursor = 'grabbing';
         evt.item.classList.add('dragging');
+        document.body.style.cursor = 'grabbing';
+        evt.item.style.userSelect = 'none';
       },
       onEnd: async function(evt) {
+        evt.item.classList.remove('dragging');
         document.body.style.cursor = 'default';
+        evt.item.style.userSelect = '';
+        
         const cards = Array.from(grid.children);
         const updates = cards.map((card, index) => ({
           path: card.dataset.path,
@@ -269,10 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
               continue;
             }
 
-            console.log('Mise à jour du restaurant:', update);
-
             const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
-              method: 'GET',
               headers: {
                 'Authorization': `token ${token}`,
                 'Content-Type': 'application/json'
@@ -287,25 +302,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const content = atob(file.content);
             const newContent = content.replace(/order: \d+/, `order: ${update.order}`);
 
-            const updateResponse = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
+            await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${update.path}`, {
               method: 'PUT',
               headers: {
                 'Authorization': `token ${token}`,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                message: `Update order to ${update.order}`,
+                message: `Mise à jour de l'ordre à ${update.order}`,
                 content: btoa(newContent),
                 sha: file.sha
               })
             });
-
-            if (!updateResponse.ok) {
-              throw new Error('Erreur lors de la mise à jour du fichier');
-            }
           }
 
-          // Recharger la page après la mise à jour réussie
           window.location.reload();
         } catch (error) {
           console.error('Error updating orders:', error);
