@@ -986,12 +986,52 @@
           width: 100%;
         }
       }
+
+      /* Style pour le bouton de déconnexion */
+      .logout-button {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 0.8rem 1.2rem;
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        z-index: 1000;
+      }
+
+      .logout-button:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      }
+
+      .logout-button i {
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 768px) {
+        .logout-button {
+          bottom: 1rem;
+          right: 1rem;
+          padding: 0.6rem 1rem;
+          font-size: 0.9rem;
+        }
+      }
     </style>
   </head>
   <body>
     <header class="header">
       <h1>Administration du Blog Culinaire</h1>
-      <a href="/" class="back-to-site"><i class="fas fa-arrow-left"></i> Retour au site</a>
+      <a href="/" class="back-to-site"><i class="fas fa-arrow-left"></i> Retour au site et sauvegarde</a>
     </header>
 
     <div class="admin-container">
@@ -1186,6 +1226,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Ajouter le bouton de déconnexion -->
+    <button class="logout-button" onclick="handleLogout()">
+      <i class="fas fa-sign-out-alt"></i>
+      Déconnexion
+    </button>
 
     <script>
       // Fonction pour charger les restaurants depuis le dossier _posts
@@ -1862,6 +1908,16 @@ order: ${formData.order}
           alert('Une erreur est survenue lors de la sauvegarde. Veuillez réessayer.');
         }
       });
+
+      // Fonction de déconnexion
+      function handleLogout() {
+        if (window.netlifyIdentity) {
+          window.netlifyIdentity.logout();
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 300);
+        }
+      }
     </script>
   </body>
 </html>
