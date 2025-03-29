@@ -137,6 +137,11 @@
         height: 100px;
         border-radius: 8px;
         object-fit: cover;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .restaurant-image[src="/images/restaurant-default.jpg"] {
+        opacity: 0.7;
+        filter: grayscale(1);
       }
       .restaurant-details {
         flex: 1;
@@ -1173,6 +1178,55 @@
         background-color: white;
         cursor: pointer;
       }
+
+      .error-message {
+        text-align: center;
+        padding: 2rem;
+        background: #fff3f3;
+        border-radius: 8px;
+        margin: 1rem 0;
+      }
+
+      .error-message i {
+        font-size: 2rem;
+        color: #e74c3c;
+        margin-bottom: 1rem;
+      }
+
+      .error-message p {
+        color: #c0392b;
+        margin: 0.5rem 0;
+      }
+
+      .retry-btn {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .retry-btn:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+        font-size: 1.1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin: 1rem 0;
+      }
     </style>
   </head>
   <body>
@@ -1339,50 +1393,74 @@
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '';
           
-          // Récupérer les valeurs des filtres actuels
           const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
           const sortBy = document.getElementById('sort-by').value;
           const restaurantItems = [];
           
           for (const post of posts) {
-            if (post.name.endsWith('.markdown')) {
+            if (post.name.endsWith('.markdown') || post.name.endsWith('.md')) {
               try {
                 const contentResponse = await fetch(post.download_url);
                 const content = await contentResponse.text();
                 
-                // Extraire les métadonnées du frontmatter
-                const frontmatter = content.split('---')[1];
+                // Extraire les métadonnées du frontmatter de manière plus robuste
+                const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+                if (!frontmatterMatch) {
+                  console.error(`Format de frontmatter invalide pour ${post.name}`);
+                  continue;
+                }
+
+                const frontmatter = frontmatterMatch[1];
                 const metadata = {};
+                
+                // Extraction plus robuste des métadonnées
                 frontmatter.split('\n').forEach(line => {
-                  const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
+                  const match = line.match(/^(\w+):\s*"?(.*?)"?\s*$/);
                   if (match) {
-                    metadata[match[1]] = match[2];
+                    const [_, key, value] = match;
+                    metadata[key] = value.replace(/^"(.*)"$/, '$1').trim();
                   }
                 });
 
+                // Vérification des champs requis
+                if (!metadata.title) {
+                  console.error(`Titre manquant pour ${post.name}`);
+                  continue;
+                }
+
+                // Valeurs par défaut pour les champs optionnels
+                metadata.date = metadata.date || new Date().toISOString().split('T')[0];
+                metadata.style = metadata.style || 'Non spécifié';
+                metadata.note = metadata.note || '0';
+                metadata.image = metadata.image || '/images/restaurant-default.jpg';
+
+                // Nettoyage et validation des valeurs
+                const title = metadata.title.replace(/^"(.*)"$/, '$1');
+                const style = metadata.style.replace(/^"(.*)"$/, '$1');
+                const note = parseFloat(metadata.note) || 0;
+                const image = metadata.image.replace(/^"(.*)"$/, '$1');
+
                 // Vérifier si le restaurant correspond aux critères de recherche
-                const title = metadata.title.toLowerCase();
-                const style = metadata.style.toLowerCase();
-                if (searchTerm && !(title.includes(searchTerm) || style.includes(searchTerm))) {
-                  continue; // Passer au restaurant suivant si ne correspond pas à la recherche
+                if (searchTerm && !(title.toLowerCase().includes(searchTerm) || style.toLowerCase().includes(searchTerm))) {
+                  continue;
                 }
 
                 const item = document.createElement('div');
                 item.className = 'restaurant-item';
                 item.innerHTML = `
                   <div class="restaurant-info">
-                    <img src="${metadata.image || '/images/restaurant-test.jpg'}" alt="${metadata.title}" class="restaurant-image">
+                    <img src="${image}" alt="${title}" class="restaurant-image" onerror="this.src='/images/restaurant-default.jpg'">
                     <div class="restaurant-details">
-                      <h3>${metadata.title}</h3>
+                      <h3>${title}</h3>
                       <div class="restaurant-meta">
                         <span><i class="fas fa-calendar"></i> ${metadata.date}</span>
-                        <span><i class="fas fa-utensils"></i> ${metadata.style}</span>
-                        <span><i class="fas fa-star"></i> ${metadata.note}/5</span>
+                        <span><i class="fas fa-utensils"></i> ${style}</span>
+                        <span><i class="fas fa-star"></i> ${note}/5</span>
                       </div>
                     </div>
                   </div>
                   <div class="restaurant-actions">
-                    <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}&content=${encodeURIComponent(content)}" class="action-btn edit-btn">
+                    <a href="/admin/edit-restaurant.html?file=${encodeURIComponent(post.path)}" class="action-btn edit-btn">
                       <i class="fas fa-edit"></i> Modifier
                     </a>
                     <button class="action-btn delete-btn" onclick="deleteRestaurant('${post.path}')">
@@ -1391,110 +1469,56 @@
                   </div>
                 `;
                 
-                // Ajouter les données nécessaires pour le tri
-                item.dataset.title = metadata.title;
+                item.dataset.title = title.toLowerCase();
                 item.dataset.date = metadata.date;
                 
                 restaurantItems.push(item);
                 
-                // Trier et ajouter les éléments au fur et à mesure
-                restaurantItems.sort((a, b) => {
-                  switch(sortBy) {
-                    case 'date-desc':
-                      return new Date(b.dataset.date) - new Date(a.dataset.date);
-                    case 'date-asc':
-                      return new Date(a.dataset.date) - new Date(b.dataset.date);
-                    case 'name-asc':
-                      return a.dataset.title.localeCompare(b.dataset.title, 'fr');
-                    case 'name-desc':
-                      return b.dataset.title.localeCompare(a.dataset.title, 'fr');
-                    default:
-                      return 0;
-                  }
-                });
-                
-                // Mettre à jour la liste avec les éléments triés
-                restaurantList.innerHTML = '';
-                restaurantItems.forEach(item => restaurantList.appendChild(item));
-                
               } catch (error) {
-                console.error('Erreur lors du chargement du contenu du restaurant:', error);
+                console.error(`Erreur lors du chargement du restaurant ${post.name}:`, error);
+                continue;
               }
             }
           }
-        } catch (error) {
-          console.error('Erreur lors du chargement des restaurants:', error);
-          const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = '<p class="error-message">Une erreur est survenue lors du chargement des restaurants. Veuillez réessayer plus tard.</p>';
-        }
-      }
 
-      // Optimiser la fonction de filtrage pour qu'elle soit plus réactive
-      function filterAndSortRestaurants() {
-        const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
-        const sortBy = document.getElementById('sort-by').value;
-        const restaurantItems = Array.from(document.querySelectorAll('.restaurant-item'));
-        const restaurantList = document.getElementById('restaurant-list');
-
-        // Créer un fragment pour optimiser les manipulations DOM
-        const fragment = document.createDocumentFragment();
-        
-        // Filtrer et trier en une seule passe
-        restaurantItems
-          .filter(item => {
-            const title = item.querySelector('h3').textContent.toLowerCase();
-            const style = item.querySelector('.restaurant-meta span:nth-child(2)').textContent.toLowerCase();
-            return title.includes(searchTerm) || style.includes(searchTerm);
-          })
-          .sort((a, b) => {
-            const titleA = a.querySelector('h3').textContent;
-            const titleB = b.querySelector('h3').textContent;
-            const dateA = new Date(a.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
-            const dateB = new Date(b.querySelector('.restaurant-meta span').textContent.replace('Date: ', ''));
-
+          // Tri des restaurants
+          restaurantItems.sort((a, b) => {
             switch(sortBy) {
               case 'date-desc':
-                return dateB - dateA;
+                return new Date(b.dataset.date) - new Date(a.dataset.date);
               case 'date-asc':
-                return dateA - dateB;
+                return new Date(a.dataset.date) - new Date(b.dataset.date);
               case 'name-asc':
-                return titleA.localeCompare(titleB, 'fr');
+                return a.dataset.title.localeCompare(b.dataset.title, 'fr');
               case 'name-desc':
-                return titleB.localeCompare(titleA, 'fr');
+                return b.dataset.title.localeCompare(a.dataset.title, 'fr');
               default:
                 return 0;
             }
-          })
-          .forEach(item => fragment.appendChild(item));
-
-        // Mettre à jour la liste en une seule opération
-        requestAnimationFrame(() => {
+          });
+          
+          // Mise à jour de la liste
           restaurantList.innerHTML = '';
-          restaurantList.appendChild(fragment);
-        });
+          if (restaurantItems.length === 0) {
+            restaurantList.innerHTML = '<p class="no-results">Aucun restaurant trouvé</p>';
+          } else {
+            restaurantItems.forEach(item => restaurantList.appendChild(item));
+          }
+          
+        } catch (error) {
+          console.error('Erreur lors du chargement des restaurants:', error);
+          const restaurantList = document.getElementById('restaurant-list');
+          restaurantList.innerHTML = `
+            <div class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Une erreur est survenue lors du chargement des restaurants.</p>
+              <button onclick="loadRestaurants()" class="retry-btn">
+                <i class="fas fa-redo"></i> Réessayer
+              </button>
+            </div>
+          `;
+        }
       }
-
-      // Optimiser les écouteurs d'événements avec debounce pour la recherche
-      function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-          const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-          };
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-        };
-      }
-
-      // Ajouter les écouteurs d'événements optimisés
-      document.getElementById('restaurant-search').addEventListener('input', 
-        debounce(filterAndSortRestaurants, 300)
-      );
-      document.getElementById('sort-by').addEventListener('change', filterAndSortRestaurants);
-
-      // Charger les restaurants au chargement de la page
-      document.addEventListener('DOMContentLoaded', loadRestaurants);
 
       // Gestion des boutons de navigation
       document.querySelectorAll('.admin-nav button').forEach(button => {
@@ -1562,6 +1586,79 @@
         const data = await response.json();
         return data.sha;
       }
+    </script>
+
+    <script>
+      // Optimiser la fonction de filtrage pour qu'elle soit plus réactive
+      function filterAndSortRestaurants() {
+        const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
+        const sortBy = document.getElementById('sort-by').value;
+        const restaurantItems = Array.from(document.querySelectorAll('.restaurant-item'));
+        const restaurantList = document.getElementById('restaurant-list');
+
+        // Créer un fragment pour optimiser les manipulations DOM
+        const fragment = document.createDocumentFragment();
+        
+        // Filtrer et trier en une seule passe
+        const filteredItems = restaurantItems
+          .filter(item => {
+            const title = item.querySelector('h3').textContent.toLowerCase();
+            const style = item.querySelector('.restaurant-meta span:nth-child(2)').textContent.toLowerCase();
+            return title.includes(searchTerm) || style.includes(searchTerm);
+          })
+          .sort((a, b) => {
+            const titleA = a.querySelector('h3').textContent;
+            const titleB = b.querySelector('h3').textContent;
+            const dateA = new Date(a.querySelector('.restaurant-meta span').textContent);
+            const dateB = new Date(b.querySelector('.restaurant-meta span').textContent);
+
+            switch(sortBy) {
+              case 'date-desc':
+                return dateB - dateA;
+              case 'date-asc':
+                return dateA - dateB;
+              case 'name-asc':
+                return titleA.localeCompare(titleB, 'fr');
+              case 'name-desc':
+                return titleB.localeCompare(titleA, 'fr');
+              default:
+                return 0;
+            }
+          });
+
+        // Mettre à jour la liste en une seule opération
+        requestAnimationFrame(() => {
+          restaurantList.innerHTML = '';
+          if (filteredItems.length === 0) {
+            restaurantList.innerHTML = '<p class="no-results">Aucun restaurant ne correspond à votre recherche</p>';
+          } else {
+            filteredItems.forEach(item => fragment.appendChild(item));
+            restaurantList.appendChild(fragment);
+          }
+        });
+      }
+
+      // Optimiser les écouteurs d'événements avec debounce pour la recherche
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      // Ajouter les écouteurs d'événements optimisés
+      document.getElementById('restaurant-search').addEventListener('input', 
+        debounce(filterAndSortRestaurants, 300)
+      );
+      document.getElementById('sort-by').addEventListener('change', filterAndSortRestaurants);
+
+      // Charger les restaurants au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadRestaurants);
     </script>
   </body>
 </html>

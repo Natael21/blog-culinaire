@@ -989,7 +989,7 @@
           const mainImageMatch = content.match(/image:\s*"([^"]+)"/);
           const mainImage = mainImageMatch ? mainImageMatch[1] : null;
 
-          // Extraire la liste des images
+          // Extraire la liste des images si elle existe
           const imagesSection = content.match(/images:([\s\S]*?)(?=---|\n\n|$)/);
           if (imagesSection) {
             const imageMatches = imagesSection[1].matchAll(/- image:\s*"([^"]+)"/g);
@@ -1002,8 +1002,16 @@
                 });
               }
             }
+          } else if (mainImage) {
+            // Si pas de section images mais une image principale existe,
+            // utiliser l'image principale comme seule image de la galerie
+            images.push({
+              src: cleanImagePath(mainImage),
+              alt: getImageAlt(mainImage)
+            });
           }
 
+          console.log("Images extraites:", { mainImage, galleryImages: images });
           return images;
         } catch (error) {
           console.error('Erreur lors de l\'extraction des images:', error);
@@ -1039,10 +1047,14 @@
           const pathParts = path.split('/');
           const fileName = pathParts.pop();
           
-          // Standardiser l'extension (convertir PNG en png)
+          // Standardiser l'extension (garder l'extension originale)
           const fileNameParts = fileName.split('.');
           const extension = fileNameParts.pop().toLowerCase();
           const baseName = fileNameParts.join('.');
+          
+          // Liste des extensions d'image valides
+          const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+          const finalExtension = validExtensions.includes(extension) ? extension : 'jpg';
           
           // Encoder le nom de fichier en préservant certains caractères
           const encodedFileName = encodeURIComponent(baseName)
@@ -1057,7 +1069,7 @@
             .replace(/ë/g, '%C3%AB');
           
           // Reconstruire le chemin
-          return pathParts.join('/') + '/' + encodedFileName + '.' + extension;
+          return pathParts.join('/') + '/' + encodedFileName + '.' + finalExtension;
         } catch (error) {
           console.error('Erreur lors du nettoyage du chemin d\'image:', error);
           return path; // Retourner le chemin original en cas d'erreur
@@ -1238,150 +1250,84 @@
         const urlParams = new URLSearchParams(window.location.search);
         let content = urlParams.get('content');
         
-        if (content) {
-          try {
-            // Première tentative de décodage
-            try {
-              content = decodeURIComponent(content);
-            } catch (e) {
-              // Si le premier décodage échoue, essayer de décoder deux fois
-              // car parfois le contenu est doublement encodé
-              content = decodeURIComponent(decodeURIComponent(content));
-            }
-            
-            console.log("Contenu décodé:", content);
-            
-            // Vérifier que le contenu est valide
-            if (!content.includes('---')) {
-              throw new Error("Format de fichier invalide: frontmatter manquant");
-            }
-
-            // Extraire les images avant de séparer le contenu
-            const galleryImages = extractImagesFromMarkdown(content);
-            console.log("Images de la galerie extraites:", galleryImages);
-
-            const parts = content.split('---').filter(part => part.trim());
-            if (parts.length < 2) {
-              throw new Error("Format de fichier invalide: contenu manquant");
-            }
-
-            const frontmatter = parts[1];
-            const fullContent = parts[2] || '';
-
-            // Extraire les métadonnées avec une meilleure gestion des erreurs
-            const metadata = {};
-            frontmatter.split('\n').forEach(line => {
-              const match = line.match(/^(\w+):\s*(.+)$/);
-              if (match) {
-                const [_, key, value] = match;
-                metadata[key] = cleanMetadataValue(value);
-              }
-            });
-
-            console.log("Métadonnées extraites:", metadata);
-
-            if (!metadata.title) {
-              throw new Error("Données invalides: titre manquant");
-            }
-
-            // Remplir les champs du formulaire avec validation
-            document.getElementById('name').value = metadata.title || '';
-            document.getElementById('cuisine').value = metadata.style || '';
-            document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
-            document.getElementById('address').value = metadata.address || '';
-
-            // Gérer le prix avec conversion des formats
-            const priceValue = standardizePrice(metadata.price);
-            const priceSelect = document.getElementById('price');
-            Array.from(priceSelect.options).forEach((option, index) => {
-              if (option.value === priceValue) {
-                priceSelect.selectedIndex = index;
-              }
-            });
-
-            // Mettre à jour les affichages du prix
-            document.querySelectorAll('.preview-card-meta .price-value, .preview-full .price-value').forEach(el => {
-              el.textContent = priceValue;
-            });
-
-            // Remplir les éditeurs avec validation du contenu
-            const sanitizedDescription = metadata.description || '';
-            summaryEditor.root.innerHTML = sanitizedDescription;
-
-            const formattedContent = formatDescription(fullContent.trim());
-            descriptionEditor.root.innerHTML = formattedContent || '';
-
-            // Gérer l'image principale avec validation
-            if (metadata.image) {
-              const mainImageUrl = metadata.image.startsWith('/') ? metadata.image : `/${metadata.image}`;
-              const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
-              previewImages.forEach(img => {
-                img.style.display = 'block';
-                img.src = mainImageUrl;
-                img.onerror = function() {
-                  console.warn("Image principale non chargée:", mainImageUrl);
-                  this.src = '/images/restaurant-test.jpg';
-                };
-              });
-            }
-
-            // Vider les galeries existantes
-            document.getElementById('gallery-grid').innerHTML = '';
-            document.querySelector('.gallery-preview').innerHTML = '';
-
-            // Ajouter les images à la galerie avec validation
-            let validImageCount = 0;
-            for (const { src, alt } of galleryImages) {
-              if (src !== metadata.image) {
-                try {
-                  await new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = resolve;
-                    img.onerror = () => {
-                      console.warn(`Image non chargée: ${src}`);
-                      reject(new Error(`Image non chargée: ${src}`));
-                    };
-                    img.src = src;
-                  });
-                  validImageCount++;
-                  addGalleryImage(src, alt, false);
-                } catch (error) {
-                  console.warn(`Erreur lors du chargement de l'image: ${src}`, error);
-                }
-              }
-            }
-
-            if (validImageCount === 0) {
-              console.warn("Aucune image valide n'a été trouvée dans la galerie");
-            }
-
-            // Mettre à jour les prévisualisations
-            updatePreview();
-            updateGalleryPreview(false);
-
-            // Activer la vue carte par défaut
-            document.querySelector('.preview-toggle button[data-preview="card"]').click();
-
-            // IMPORTANT: Sauvegarder l'état initial APRÈS avoir tout chargé
-            setTimeout(() => {
-              saveInitialState();
-              console.log('État initial sauvegardé après chargement complet');
-              setupChangeDetection();
-            }, 100);
-
-          } catch (error) {
-            console.error("Erreur détaillée lors du chargement des données:", error);
-            Swal.fire({
-              title: 'Erreur',
-              text: `Une erreur est survenue lors du chargement du restaurant: ${error.message}`,
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
-        } else {
-          // Nouveau post
+        if (!content) {
           saveInitialState();
           setupChangeDetection();
+          return;
+        }
+
+        try {
+          // Décoder le contenu
+          content = decodeURIComponent(content);
+          
+          // Séparer le frontmatter du contenu
+          const parts = content.split('---').filter(part => part.trim());
+          if (parts.length < 2) {
+            throw new Error("Format de fichier invalide");
+          }
+
+          // Extraire les métadonnées du frontmatter
+          const metadata = {};
+          const frontmatter = parts[1];
+          const lines = frontmatter.split('\n');
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || trimmedLine.startsWith('#')) continue;
+
+            // Chercher la première occurrence de ':'
+            const colonIndex = trimmedLine.indexOf(':');
+            if (colonIndex === -1) continue;
+
+            const key = trimmedLine.slice(0, colonIndex).trim();
+            let value = trimmedLine.slice(colonIndex + 1).trim();
+
+            // Nettoyer la valeur des guillemets et espaces
+            value = value.replace(/^["']|["']$/g, '').trim();
+
+            // Ignorer les lignes qui commencent par '-' (listes)
+            if (!key.startsWith('-')) {
+              metadata[key] = value;
+            }
+          }
+
+          // Remplir les champs du formulaire avec les valeurs par défaut si nécessaire
+          document.getElementById('name').value = metadata.title || '';
+          document.getElementById('cuisine').value = metadata.style || '';
+          document.getElementById('rating').value = parseFloat(metadata.note) || 4;
+          document.getElementById('address').value = metadata.address || '';
+          document.getElementById('price').value = metadata.price || '$$';
+
+          // Mettre à jour les éditeurs
+          summaryEditor.root.innerHTML = metadata.description || '';
+          descriptionEditor.root.innerHTML = parts[2] ? formatDescription(parts[2].trim()) : '';
+
+          // Gérer l'image principale
+          if (metadata.image) {
+            const mainImageUrl = cleanImagePath(metadata.image);
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
+            previewImages.forEach(img => {
+              img.src = mainImageUrl;
+              img.onerror = () => img.src = '/images/restaurant-test.jpg';
+            });
+          }
+
+          // Mettre à jour les prévisualisations
+          updatePreview();
+          updateGalleryPreview(false);
+
+          // Sauvegarder l'état initial
+          setTimeout(saveInitialState, 100);
+          setupChangeDetection();
+
+        } catch (error) {
+          console.error("Erreur lors du chargement des données:", error);
+          Swal.fire({
+            title: 'Erreur',
+            text: `Une erreur est survenue lors du chargement du restaurant: ${error.message}`,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         }
       }
 
