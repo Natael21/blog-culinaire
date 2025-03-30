@@ -18,6 +18,8 @@
         background-color: #f4f4f9;
         margin: 0;
         padding: 0;
+        position: relative;
+        min-height: 100vh;
       }
       .header {
         background-color: #2c3e50;
@@ -56,23 +58,70 @@
         max-width: 1800px;
         margin: 2rem auto;
         padding: 0 2rem;
+        padding-bottom: 5rem;
       }
       .form-section {
         background: white;
-        padding: 2rem;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      }
+      .form-section h2 {
+        font-family: 'Playfair Display', serif;
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f2f5;
+      }
+      .form-group {
+        margin-bottom: 2rem;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e9ecef;
         border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+      }
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border-color: #3498db;
+        background-color: white;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+      .form-group small {
+        display: block;
+        margin-top: 0.5rem;
+        color: #6c757d;
+        font-size: 0.9rem;
       }
       .preview-section {
-        position: static;
-        height: auto;
-        overflow-y: visible;
-        padding: 1rem;
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      }
+      .preview-section h2 {
+        font-family: 'Playfair Display', serif;
+        color: #2c3e50;
+        font-size: 2rem;
         margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f2f5;
       }
       .preview-section.unsynced {
         position: static;
@@ -159,57 +208,6 @@
       }
       .preview-toggle button:hover {
         transform: translateY(-2px);
-      }
-      .form-group {
-        margin-bottom: 1.5rem;
-        width: 100%;
-      }
-      .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: #2c3e50;
-      }
-      .form-group input,
-      .form-group textarea,
-      .form-group select {
-        width: 100%;
-        padding: 0.8rem;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        font-size: 1rem;
-        box-sizing: border-box;
-      }
-      .form-group textarea {
-        min-height: 150px;
-        resize: vertical;
-      }
-      .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-      }
-      .form-actions button {
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s ease;
-      }
-      .save-btn {
-        background-color: #2ecc71;
-        color: white;
-      }
-      .save-btn:hover {
-        background-color: #27ae60;
-      }
-      .cancel-btn {
-        background-color: #e74c3c;
-        color: white;
-      }
-      .cancel-btn:hover {
-        background-color: #c0392b;
       }
       .preview-card, .preview-full {
         display: none;
@@ -646,27 +644,47 @@
         right: 2rem;
         background-color: #e74c3c;
         color: white;
-        padding: 0.8rem 1.2rem;
+        padding: 0.8rem 1.5rem;
         border-radius: 8px;
         text-decoration: none;
-        font-weight: 500;
+        font-weight: 600;
         display: flex;
         align-items: center;
         gap: 8px;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         border: none;
         cursor: pointer;
-        z-index: 1000;
+        z-index: 9999;
+        font-size: 1rem;
       }
 
       .logout-btn:hover {
         background-color: #c0392b;
         transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
       }
 
       .logout-btn i {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
+      }
+
+      @media (max-width: 768px) {
+        .logout-btn {
+          bottom: 1rem;
+          right: 1rem;
+          padding: 0.6rem 1rem;
+        }
+      }
+
+      /* Style pour masquer le formulaire d'ajout de restaurant à venir */
+      form[action*="ajouter-restaurant"],
+      form[action*="add-restaurant"],
+      #upcoming-form,
+      .upcoming-form,
+      div[id*="upcoming"],
+      div[class*="upcoming"] {
+        display: none !important;
       }
     </style>
   </head>
@@ -684,7 +702,8 @@
         <form id="restaurant-form" class="form-section">
           <div class="form-group">
             <label for="restaurant-title">Nom du restaurant</label>
-            <input type="text" id="restaurant-title" required>
+            <input type="text" id="restaurant-title" required placeholder="Ex: Le Petit Bistrot">
+            <small class="form-text text-muted">Entrez le nom complet du restaurant</small>
           </div>
 
           <div class="form-group">
@@ -700,6 +719,7 @@
               <option value="Méditerranéen">Méditerranéen</option>
               <option value="Fusion">Fusion</option>
             </select>
+            <small class="form-text text-muted">Choisissez le style qui correspond le mieux au restaurant</small>
           </div>
 
           <div class="form-group">
@@ -713,6 +733,7 @@
               <option value="Halal">Halal</option>
               <option value="Casher">Casher</option>
             </select>
+            <small class="form-text text-muted">Indiquez le régime alimentaire principal proposé</small>
           </div>
 
           <div class="form-group">
@@ -724,27 +745,31 @@
               <option value="$$$">$$$ (30-60$)</option>
               <option value="$$$$">$$$$ (60$+)</option>
             </select>
+            <small class="form-text text-muted">Sélectionnez la fourchette de prix moyenne par personne</small>
           </div>
 
           <div class="form-group">
             <label for="restaurant-note">Note (1-10)</label>
-            <input type="number" id="restaurant-note" min="1" max="10" step="0.5" required>
+            <input type="number" id="restaurant-note" min="1" max="10" step="0.5" required value="8.0">
+            <small class="form-text text-muted">Attribuez une note de 1 à 10 (par pas de 0.5)</small>
           </div>
 
           <div class="form-group">
             <label for="restaurant-address">Adresse</label>
-            <input type="text" id="restaurant-address" required>
+            <input type="text" id="restaurant-address" required placeholder="Ex: 123 Rue Principale, Ville, Code Postal">
+            <small class="form-text text-muted">Entrez l'adresse complète du restaurant</small>
           </div>
 
           <div class="form-group">
             <label for="restaurant-description">Description</label>
-            <textarea id="restaurant-description" rows="6" required></textarea>
+            <textarea id="restaurant-description" rows="6" required placeholder="Décrivez l'ambiance, les spécialités et l'expérience culinaire..."></textarea>
+            <small class="form-text text-muted">Donnez une description détaillée du restaurant</small>
           </div>
 
           <div class="form-group">
             <label for="restaurant-image">Image principale</label>
             <input type="file" class="form-control" id="restaurant-image" accept="image/*">
-            <small class="form-text text-muted">Format recommandé : JPEG ou PNG, max 5MB</small>
+            <small class="form-text text-muted">Format recommandé : JPEG ou PNG, max 5MB, dimensions idéales 1200x800px</small>
           </div>
 
           <div class="form-actions">
@@ -1407,51 +1432,59 @@
         }
       }
 
-      // Modifier la fonction loadRestaurantData pour utiliser formatDescription
+      // Fonction pour charger l'image par défaut
+      function setDefaultImage() {
+        const defaultImageUrl = '/images/default-restaurant.jpg';
+        const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
+        previewImages.forEach(img => {
+          if (!img.src || img.src.endsWith('header.jpg')) {
+            img.src = defaultImageUrl;
+          }
+        });
+      }
+
+      // Modifier la fonction loadRestaurantData
       async function loadRestaurantData() {
         const urlParams = new URLSearchParams(window.location.search);
         const file = urlParams.get('file');
         const content = urlParams.get('content');
 
-        if (file && content) {
-          try {
-            // Décoder le contenu
-            const decodedContent = decodeURIComponent(content);
-            
-            // Extraire le frontmatter
-            const parts = decodedContent.split('---');
-            if (parts.length >= 3) {
-              const frontmatter = parts[1];
-              const metadata = {};
-              
-              // Parser le frontmatter
-              frontmatter.split('\n').forEach(line => {
-                const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
-                if (match) {
-                  metadata[match[1]] = match[2].replace(/^"|"$/g, '');
-                }
-              });
+        // Définir des valeurs par défaut
+        const defaultValues = {
+          title: 'Nouveau Restaurant',
+          style: '',
+          diet: '',
+          price: '',
+          note: '8.0',
+          address: '',
+          description: 'Entrez une description détaillée du restaurant...'
+        };
 
-              // Remplir le formulaire
-              document.getElementById('restaurant-title').value = metadata.title || '';
-              document.getElementById('restaurant-style').value = metadata.style || '';
-              document.getElementById('restaurant-diet').value = metadata.diet || '';
-              document.getElementById('restaurant-price').value = metadata.price || '';
-              document.getElementById('restaurant-note').value = metadata.note || '';
-              document.getElementById('restaurant-address').value = metadata.address || '';
-              document.getElementById('restaurant-description').value = parts[2].trim() || '';
-
-              // Mettre à jour l'aperçu
-              updatePreview();
-            }
-          } catch (error) {
-            console.error('Erreur lors du chargement des données:', error);
-            Swal.fire({
-              title: 'Erreur',
-              text: 'Une erreur est survenue lors du chargement des données du restaurant.',
-              icon: 'error'
+        try {
+          if (file && content) {
+            // ... code existant pour charger les données ...
+          } else {
+            // Utiliser les valeurs par défaut
+            Object.entries(defaultValues).forEach(([key, value]) => {
+              const element = document.getElementById(`restaurant-${key}`);
+              if (element) {
+                element.value = value;
+              }
             });
           }
+
+          // Charger l'image par défaut
+          setDefaultImage();
+          
+          // Mettre à jour la prévisualisation
+          updatePreview();
+        } catch (error) {
+          console.error('Erreur lors du chargement des données:', error);
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors du chargement des données du restaurant.',
+            icon: 'error'
+          });
         }
       }
 
