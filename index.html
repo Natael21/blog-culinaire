@@ -822,6 +822,98 @@ advancedFiltersToggle.addEventListener('click', function() {
     '<i class="fas fa-sliders-h"></i> Filtres avancés';
 });
 
+// Fonction pour mettre à jour les marqueurs sur la carte
+function updateMapMarkers() {
+  if (!map) return;
+
+  const searchTitle = titleSearch.value.toLowerCase();
+  const selectedStyle = styleFilter.value;
+  const selectedRating = ratingFilter.value;
+  const selectedPrice = priceFilter.value;
+  const selectedDiet = document.getElementById('diet-filter').value;
+
+  markers.forEach((marker, restaurantId) => {
+    const restaurant = document.getElementById(restaurantId);
+    if (!restaurant) return;
+
+    const title = restaurant.dataset.title;
+    const style = restaurant.dataset.style;
+    const rating = parseFloat(restaurant.dataset.rating);
+    const price = restaurant.dataset.price;
+    const diet = restaurant.dataset.diet;
+    
+    const titleMatch = !searchTitle || title.includes(searchTitle);
+    const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
+    const priceMatch = !selectedPrice || price === selectedPrice;
+    
+    // Nouvelle logique pour le régime alimentaire
+    let dietMatch = true;
+    if (selectedDiet && selectedDiet !== 'all') {
+      switch(selectedDiet) {
+        case 'vegetarian':
+          dietMatch = diet === 'vegetarian';
+          break;
+        case 'vegan':
+          dietMatch = diet === 'vegan';
+          break;
+        case 'vegetarian-friendly':
+          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
+          break;
+        case 'vegan-friendly':
+          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
+          break;
+        case 'standard':
+          dietMatch = diet === 'standard';
+          break;
+      }
+    }
+    
+    let ratingMatch = true;
+    if (selectedRating) {
+      switch(selectedRating) {
+        case "8":
+          ratingMatch = rating >= 8;
+          break;
+        case "6":
+          ratingMatch = rating >= 6 && rating < 8;
+          break;
+        case "5":
+          ratingMatch = rating < 6;
+          break;
+      }
+    }
+
+    if (titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch) {
+      if (!map.hasLayer(marker)) {
+        marker.addTo(map);
+      }
+    } else {
+      if (map.hasLayer(marker)) {
+        marker.remove();
+      }
+    }
+  });
+
+  // Ajuster la vue de la carte aux marqueurs visibles
+  const bounds = new L.LatLngBounds();
+  let hasVisibleMarkers = false;
+
+  markers.forEach(marker => {
+    if (map.hasLayer(marker)) {
+      bounds.extend(marker.getLatLng());
+      hasVisibleMarkers = true;
+    }
+  });
+
+  if (hasVisibleMarkers) {
+    map.fitBounds(bounds, {
+      padding: [50, 50],
+      maxZoom: 15
+    });
+  }
+}
+
+// Modifier la fonction filterRestaurants pour mettre à jour aussi les marqueurs
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
   const selectedStyle = styleFilter.value;
@@ -839,9 +931,29 @@ function filterRestaurants() {
     const titleMatch = !searchTitle || title.includes(searchTitle);
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
-    const dietMatch = selectedDiet === 'all' || selectedDiet === '' || diet === selectedDiet;
     
-    // Logique pour le filtrage des notes
+    // Nouvelle logique pour le régime alimentaire
+    let dietMatch = true;
+    if (selectedDiet && selectedDiet !== 'all') {
+      switch(selectedDiet) {
+        case 'vegetarian':
+          dietMatch = diet === 'vegetarian';
+          break;
+        case 'vegan':
+          dietMatch = diet === 'vegan';
+          break;
+        case 'vegetarian-friendly':
+          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
+          break;
+        case 'vegan-friendly':
+          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
+          break;
+        case 'standard':
+          dietMatch = diet === 'standard';
+          break;
+      }
+    }
+    
     let ratingMatch = true;
     if (selectedRating) {
       switch(selectedRating) {
@@ -863,8 +975,70 @@ function filterRestaurants() {
       restaurant.style.display = 'none';
     }
   });
+
+  // Mettre à jour les marqueurs si on est en vue carte
+  if (map) {
+    updateMapMarkers();
+  }
 }
 
+// Modifier la fonction addMarker pour ajouter simplement le marqueur à la carte
+function addMarker(restaurant, coords) {
+  const marker = L.marker([coords.lat, coords.lng], {
+    title: restaurant.querySelector('h2').textContent
+  });
+  
+  const popupContent = `
+    <div class="map-popup">
+      <div class="popup-content">
+        <div class="popup-image" style="background-image: url('${restaurant.dataset.image}')"></div>
+        <div class="popup-info">
+          <h3>${restaurant.querySelector('h2').textContent}</h3>
+          <div class="popup-rating">
+            <span class="score">${restaurant.dataset.rating}/10</span>
+          </div>
+          <div class="popup-meta">
+            <span class="cuisine-style">
+              <i class="fas fa-utensils"></i> ${restaurant.dataset.style}
+            </span>
+            <span class="price">
+              ${restaurant.querySelector('.price').innerHTML}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  const popup = L.popup({
+    maxWidth: 300,
+    className: 'restaurant-popup'
+  }).setContent(popupContent);
+  
+  marker.bindPopup(popup);
+  
+  marker.on('click', () => {
+    localStorage.setItem('selectedView', 'map');
+    localStorage.setItem('fromView', 'true');
+    window.location.href = restaurant.querySelector('a').href;
+  });
+  
+  marker.on('mouseover', function() {
+    this.openPopup();
+  });
+
+  marker.on('mouseout', function() {
+    this.closePopup();
+  });
+
+  // Stocker le marqueur dans la Map
+  markers.set(restaurant.id, marker);
+  marker.addTo(map);
+  
+  return marker;
+}
+
+// Modifier la fonction resetFilters pour mettre à jour aussi les marqueurs
 function resetFilters() {
   titleSearch.value = '';
   styleFilter.value = 'all';
@@ -878,7 +1052,15 @@ function resetFilters() {
   restaurants.forEach(restaurant => {
     restaurant.style.display = '';
   });
+
+  // Mettre à jour les marqueurs si on est en vue carte
+  if (map) {
+    updateMapMarkers();
+  }
 }
+
+// Ajouter l'event listener pour le filtre de régime alimentaire
+document.getElementById('diet-filter').addEventListener('change', filterRestaurants);
 
 // Ajout des event listeners
 titleSearch.addEventListener('input', filterRestaurants);
@@ -1194,82 +1376,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Marqueurs ajoutés: ${markers.size}/${restaurants.length}`);
       });
     }
-  }
-
-  // Fonction pour ajouter un marqueur
-  function addMarker(restaurant, coords) {
-    const marker = L.marker([coords.lat, coords.lng], {
-      title: restaurant.querySelector('h2').textContent
-    });
-    
-    const popupContent = `
-      <div class="map-popup">
-        <div class="popup-content">
-          <div class="popup-image" style="background-image: url('${restaurant.dataset.image}')"></div>
-          <div class="popup-info">
-            <h3>${restaurant.querySelector('h2').textContent}</h3>
-            <div class="popup-rating">
-              <span class="score">${restaurant.dataset.rating}/10</span>
-            </div>
-            <div class="popup-meta">
-              <span class="cuisine-style">
-                <i class="fas fa-utensils"></i> ${restaurant.dataset.style}
-              </span>
-              <span class="price">
-                ${restaurant.querySelector('.price').innerHTML}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    const popup = L.popup({
-      maxWidth: 300,
-      className: 'restaurant-popup'
-    }).setContent(popupContent);
-    
-    marker.bindPopup(popup);
-    
-    marker.on('click', () => {
-      localStorage.setItem('selectedView', 'map');
-      localStorage.setItem('fromView', 'true');
-      window.location.href = restaurant.querySelector('a').href;
-    });
-    
-    marker.on('mouseover', function() {
-      this.openPopup();
-    });
-
-    marker.on('mouseout', function() {
-      this.closePopup();
-    });
-
-    // Stocker le marqueur dans la Map
-    markers.set(restaurant.id, marker);
-    
-    // Vérifier si le restaurant passe les filtres actuels
-    const searchTitle = titleSearch.value.toLowerCase();
-    const selectedStyle = styleFilter.value;
-    const exactRating = ratingFilter.value;
-    const selectedPrice = priceFilter.value;
-    
-    const title = restaurant.dataset.title;
-    const style = restaurant.dataset.style;
-    const rating = parseFloat(restaurant.dataset.rating);
-    const price = restaurant.dataset.price;
-    
-    const titleMatch = !searchTitle || title.includes(searchTitle);
-    const styleMatch = !selectedStyle || style === selectedStyle;
-    const ratingMatch = !exactRating || rating === parseFloat(exactRating);
-    const priceMatch = !selectedPrice || price === selectedPrice;
-    
-    // N'ajouter le marqueur à la carte que s'il passe les filtres
-    if (titleMatch && styleMatch && ratingMatch && priceMatch) {
-      marker.addTo(map);
-    }
-    
-    return marker;
   }
 
   // Scroll to last viewed restaurant
