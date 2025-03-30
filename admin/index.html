@@ -318,67 +318,40 @@
     </button>
 
     <script>
-      // Fonction pour gérer l'affichage du contenu
-      function showAdminContent() {
-        document.getElementById('loading-overlay').style.display = 'none';
-        document.querySelector('.admin-container').classList.add('authenticated');
-        document.body.classList.add('loaded');
-      }
-
-      // Fonction pour afficher l'erreur
-      function showError() {
-        document.getElementById('loading-overlay').style.display = 'none';
-        document.getElementById('error-message').classList.add('show');
-        document.body.classList.add('loaded');
-      }
-
-      // Initialisation de l'authentification
-      let authInitialized = false;
-
-      function initAuth() {
-        if (authInitialized) return;
-        authInitialized = true;
-
-        if (!window.netlifyIdentity) {
-          showError();
-          return;
-        }
-
-        const currentUser = window.netlifyIdentity.currentUser();
-        
-        if (currentUser) {
-          showAdminContent();
-        } else {
-          window.netlifyIdentity.open('login');
-        }
-
-        window.netlifyIdentity.on('login', () => {
-          showAdminContent();
+      // Initialisation de Netlify Identity
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.open();
+          } else {
+            document.body.classList.add('loaded');
+            document.querySelector('.admin-container').classList.add('authenticated');
+            document.getElementById('loading-overlay').style.display = 'none';
+          }
         });
 
-        window.netlifyIdentity.on('logout', () => {
-          window.location.href = '/';
+        window.netlifyIdentity.on("login", () => {
+          document.body.classList.add('loaded');
+          document.querySelector('.admin-container').classList.add('authenticated');
+          document.getElementById('loading-overlay').style.display = 'none';
         });
 
-        window.netlifyIdentity.on('error', (err) => {
-          console.error('Netlify Identity error:', err);
-          showError();
+        window.netlifyIdentity.on("logout", () => {
+          document.getElementById('error-message').classList.add('show');
+          document.querySelector('.admin-container').classList.remove('authenticated');
         });
-      }
 
-      // Attendre que le DOM soit chargé
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAuth);
+        // Timeout de sécurité
+        setTimeout(() => {
+          if (!document.body.classList.contains('loaded')) {
+            document.getElementById('error-message').classList.add('show');
+            document.getElementById('loading-overlay').style.display = 'none';
+          }
+        }, 5000);
       } else {
-        initAuth();
+        document.getElementById('error-message').classList.add('show');
+        document.getElementById('loading-overlay').style.display = 'none';
       }
-
-      // Timeout de sécurité
-      setTimeout(() => {
-        if (!authInitialized) {
-          showError();
-        }
-      }, 5000);
 
       // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
