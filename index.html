@@ -41,7 +41,7 @@ title: Accueil
         <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
-          <select id="style-filter" class="filter-select" multiple>
+          <select id="style" class="filter-select" multiple>
             <option value="">Tous les styles</option>
             <option value="Américain">Américain</option>
             <option value="Asiatique">Asiatique</option>
@@ -319,14 +319,10 @@ title: Accueil
 
 .filter-select {
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: 0.5rem;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  background-color: var(--white);
-  color: var(--text-color);
-  cursor: pointer;
-  transition: all 0.3s ease;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
 .filter-select:hover {
@@ -524,6 +520,7 @@ title: Accueil
   width: 100%;
   text-decoration: none;
   color: inherit;
+  flex-direction: row;
 }
 
 .post-grid.list-view .post-card .post-image {
@@ -618,8 +615,11 @@ title: Accueil
 
 @media (max-width: 768px) {
   .post-grid.list-view .post-card {
-    flex-direction: column;
     height: auto;
+  }
+
+  .post-grid.list-view .post-link {
+    flex-direction: column;
   }
 
   .post-grid.list-view .post-card .post-image {
@@ -962,7 +962,7 @@ h2 {
 }
 
 .filter-select[multiple] option:checked {
-  background-color: var(--accent-color);
+  background-color: #e74c3c;
   color: white;
 }
 
@@ -977,7 +977,7 @@ h2 {
 
 <script>
 const titleSearch = document.getElementById('title-search');
-const styleFilter = document.getElementById('style-filter');
+const styleFilter = document.getElementById('style');
 const ratingFilter = document.getElementById('rating-filter');
 const priceFilter = document.getElementById('price-filter');
 const advancedFiltersToggle = document.getElementById('advanced-filters-toggle');
@@ -997,88 +997,66 @@ advancedFiltersToggle.addEventListener('click', function() {
 });
 
 function filterRestaurants() {
-  const searchTitle = titleSearch.value.toLowerCase();
-  const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
-  const ratingFilter = document.getElementById('rating-filter').value;
-  const selectedPrice = priceFilter.value;
+    const searchText = titleSearch.value.toLowerCase();
+    const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
+    const selectedRating = ratingFilter.value;
+    const selectedPrice = priceFilter.value;
 
-  let filteredRestaurants = restaurants.filter(restaurant => {
-    const title = restaurant.dataset.title;
-    const style = restaurant.dataset.style;
-    const rating = parseFloat(restaurant.dataset.rating);
-    const price = restaurant.dataset.price;
-    
-    const titleMatch = !searchTitle || title.includes(searchTitle);
-    
-    // Gestion des regroupements de styles
-    let styleMatch = selectedStyles.length === 0;
-    if (!styleMatch) {
-      styleMatch = selectedStyles.some(selectedStyle => {
-        if (selectedStyle === "Asiatique") {
-          return style === "Asiatique" || style === "Thaïlandais" || style === "Vietnamien";
-        } else if (selectedStyle === "Oriental") {
-          return style === "Oriental" || style === "Libano-Marocain" || style === "Iranien" || style === "Indien";
-        } else {
-          return style === selectedStyle;
-        }
-      });
-    }
-    
-    const ratingMatch = !ratingFilter || 
-      (ratingFilter === '4plus' && rating >= 4) || 
-      (ratingFilter === '3minus' && rating <= 3);
-    const priceMatch = !selectedPrice || price === selectedPrice;
-    
-    // Si la carte est initialisée, mettre à jour la visibilité des marqueurs
-    if (map) {
-      const marker = markers.get(restaurant.id);
-      if (marker) {
+    restaurants.forEach(restaurant => {
+        const titleMatch = restaurant.title.toLowerCase().includes(searchText);
+        const styleMatch = selectedStyles.length === 0 || selectedStyles.includes('') || selectedStyles.includes(restaurant.style);
+        const ratingMatch = selectedRating === '' || restaurant.rating >= parseFloat(selectedRating);
+        const priceMatch = selectedPrice === '' || restaurant.price === selectedPrice;
+
+        const marker = markers[restaurant.id];
         if (titleMatch && styleMatch && ratingMatch && priceMatch) {
-          marker.addTo(map);
+            restaurant.element.style.display = '';
+            if (marker) marker.addTo(map);
         } else {
-          marker.remove();
+            restaurant.element.style.display = 'none';
+            if (marker) marker.remove();
         }
-      }
-    }
-    
-    return titleMatch && styleMatch && ratingMatch && priceMatch;
-  });
-
-  // Mettre à jour la grille
-  restaurantGrid.innerHTML = '';
-  filteredRestaurants.forEach(restaurant => {
-    restaurantGrid.appendChild(restaurant);
-  });
-
-  // Si la carte est visible et qu'il y a des marqueurs visibles, ajuster la vue
-  if (map && markers.size > 0) {
-    const bounds = new L.LatLngBounds();
-    let hasVisibleMarkers = false;
-
-    markers.forEach((marker, restaurantId) => {
-      if (map.hasLayer(marker)) {
-        bounds.extend(marker.getLatLng());
-        hasVisibleMarkers = true;
-      }
     });
-
-    if (hasVisibleMarkers) {
-      map.fitBounds(bounds, {
-        padding: [50, 50],
-        maxZoom: 15
-      });
-    }
-  }
 }
 
 function resetFilters() {
+  // Réinitialiser la recherche
   titleSearch.value = '';
-  styleFilter.value = '';
+  
+  // Réinitialiser le select multiple des styles
+  Array.from(styleFilter.options).forEach(option => {
+    option.selected = false;
+  });
+  styleFilter.options[0].selected = true; // Sélectionner "Tous les styles"
+  
+  // Réinitialiser les autres filtres
   ratingFilter.value = '';
   priceFilter.value = '';
+  
+  // Masquer les filtres avancés
   advancedFilters.style.display = 'none';
   advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
-  filterRestaurants();
+  
+  // Réafficher tous les restaurants
+  restaurants.forEach(restaurant => {
+    restaurant.style.display = '';
+    const marker = markers[restaurant.id];
+    if (marker && map) {
+      marker.addTo(map);
+    }
+  });
+
+  // Si la carte est visible et qu'il y a des marqueurs, ajuster la vue
+  if (map && markers.size > 0) {
+    const bounds = new L.LatLngBounds();
+    markers.forEach(marker => {
+      bounds.extend(marker.getLatLng());
+    });
+    map.fitBounds(bounds, {
+      padding: [50, 50],
+      maxZoom: 15
+    });
+  }
 }
 
 // Ajout des event listeners

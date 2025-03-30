@@ -1356,58 +1356,53 @@
       // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
         try {
-          const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts');
-          const posts = await response.json();
-          
           const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = '';
-          
-          // Utiliser un Set pour suivre les titres des restaurants déjà affichés
-          const displayedTitles = new Set();
-          
-          // Appliquer d'abord les changements en attente
-          const deletedPaths = new Set(pendingChanges.restaurants.deleted.map(r => r.path));
-          
-          for (const post of posts) {
-            if (post.name.endsWith('.markdown') && !deletedPaths.has(post.path)) {
-              try {
-                const contentResponse = await fetch(post.download_url);
-                const content = await contentResponse.text();
-                
-                // Extraire les métadonnées du frontmatter
-                const frontmatter = content.split('---')[1];
-                const metadata = {};
-                frontmatter.split('\n').forEach(line => {
-                  const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
-                  if (match) {
-                    metadata[match[1]] = match[2];
-                  }
-                });
+          restaurantList.innerHTML = ''; // Nettoyer la liste avant d'ajouter de nouveaux éléments
+          const displayedTitles = new Set(); // Pour éviter les doublons
 
-                // Vérifier les modifications en attente
-                const updatedRestaurant = pendingChanges.restaurants.updated.find(r => r.path === post.path);
-                if (updatedRestaurant) {
-                  Object.assign(metadata, updatedRestaurant.metadata);
-                }
+          // Charger les restaurants existants
+          const postsRef = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: GITHUB_OWNER,
+            repo: GITHUB_REPO,
+            path: '_posts'
+          });
 
-                // Vérifier si ce titre a déjà été affiché
+          // Collecter tous les restaurants
+          let allRestaurants = [];
+
+          for (const file of postsRef.data) {
+            if (file.name.endsWith('.markdown') || file.name.endsWith('.md')) {
+              const content = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+                owner: GITHUB_OWNER,
+                repo: GITHUB_REPO,
+                path: file.path
+              });
+
+              const decodedContent = atob(content.data.content);
+              const frontMatter = decodedContent.split('---')[1];
+              
+              if (frontMatter) {
+                const metadata = parseFrontMatter(frontMatter);
                 if (!displayedTitles.has(metadata.title)) {
                   displayedTitles.add(metadata.title);
-                  renderRestaurantItem(metadata, post.path);
+                  allRestaurants.push({
+                    metadata,
+                    path: file.path,
+                    date: new Date(metadata.date)
+                  });
                 }
-              } catch (error) {
-                console.error('Erreur lors du chargement du contenu du restaurant:', error);
               }
             }
           }
 
-          // Ajouter les nouveaux restaurants en attente
-          for (const newRestaurant of pendingChanges.restaurants.created) {
-            if (!displayedTitles.has(newRestaurant.metadata.title)) {
-              displayedTitles.add(newRestaurant.metadata.title);
-              renderRestaurantItem(newRestaurant.metadata, newRestaurant.path, true);
-            }
-          }
+          // Trier les restaurants par date (plus récent en premier)
+          allRestaurants.sort((a, b) => b.date - a.date);
+
+          // Afficher les restaurants triés
+          allRestaurants.forEach(restaurant => {
+            renderRestaurantItem(restaurant.metadata, restaurant.path);
+          });
+
         } catch (error) {
           console.error('Erreur lors du chargement des restaurants:', error);
           const restaurantList = document.getElementById('restaurant-list');
@@ -1415,18 +1410,42 @@
         }
       }
 
+      // Fonction pour parser le front matter
+      function parseFrontMatter(frontMatter) {
+        const metadata = {};
+        const lines = frontMatter.trim().split('\n');
+        
+        lines.forEach(line => {
+          const match = line.match(/^(\w+):\s*"?([^"]*)"?$/);
+          if (match) {
+            metadata[match[1]] = match[2];
+          }
+        });
+        
+        return metadata;
+      }
+
       // Fonction pour rendre un élément restaurant
       function renderRestaurantItem(metadata, path, isNew = false) {
         const restaurantList = document.getElementById('restaurant-list');
         const item = document.createElement('div');
         item.className = 'restaurant-item' + (isNew ? ' new-item' : '');
+        
+        // Formater la date
+        const date = new Date(metadata.date);
+        const formattedDate = date.toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
         item.innerHTML = `
           <div class="restaurant-info">
             <img src="${metadata.image || '/images/restaurant-test.jpg'}" alt="${metadata.title}" class="restaurant-image">
             <div class="restaurant-details">
               <h3>${metadata.title}</h3>
               <div class="restaurant-meta">
-                <span><i class="fas fa-calendar"></i> ${metadata.date}</span>
+                <span><i class="fas fa-calendar"></i> ${formattedDate}</span>
                 <span><i class="fas fa-utensils"></i> ${metadata.style}</span>
                 <span><i class="fas fa-star"></i> ${metadata.note}/5</span>
               </div>
