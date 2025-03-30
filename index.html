@@ -109,11 +109,10 @@ title: Accueil
             <div class="content-header">
               <h2>{{ post.title }}</h2>
               <div class="rating">
-                {% assign rating_on_ten = post.note | times: 2 %}
                 <div class="rating-bar">
-                  <div class="rating-fill" style="width: {{ rating_on_ten | times: 10 }}%"></div>
+                  <div class="rating-fill" style="width: {{ post.note | times: 10 }}%"></div>
                 </div>
-                <span class="score">{% if rating_on_ten | modulo: 1 == 0 %}{{ rating_on_ten | floor }}{% else %}{{ rating_on_ten }}{% endif %}/10</span>
+                <span class="score">{{ post.note }}/10</span>
               </div>
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
