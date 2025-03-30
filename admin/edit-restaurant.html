@@ -686,6 +686,65 @@
       div[class*="upcoming"] {
         display: none !important;
       }
+
+      /* Styles pour les boutons d'action */
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f2f5;
+      }
+
+      .action-btn {
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .action-btn i {
+        font-size: 1.1rem;
+      }
+
+      .save-btn {
+        background-color: #2ecc71;
+        color: white;
+      }
+
+      .save-btn:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+
+      .cancel-btn {
+        background-color: #e74c3c;
+        color: white;
+      }
+
+      .cancel-btn:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+
+      @media (max-width: 768px) {
+        .form-actions {
+          flex-direction: column;
+        }
+
+        .action-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
     </style>
   </head>
   <body>
@@ -698,85 +757,92 @@
 
     <div class="container">
       <div class="form-section">
-        <h2>Formulaire d'édition</h2>
-        <form id="restaurant-form" class="form-section">
+        <h2>Édition du Restaurant</h2>
+        <form id="edit-restaurant-form">
           <div class="form-group">
             <label for="restaurant-title">Nom du restaurant</label>
-            <input type="text" id="restaurant-title" required placeholder="Ex: Le Petit Bistrot">
-            <small class="form-text text-muted">Entrez le nom complet du restaurant</small>
+            <input type="text" id="restaurant-title" required>
           </div>
-
+          
           <div class="form-group">
             <label for="restaurant-style">Style de cuisine</label>
             <select id="restaurant-style" required>
               <option value="">Sélectionnez un style</option>
-              <option value="Bistro & Café">Bistro & Café</option>
+              <option value="Bistro">Bistro</option>
               <option value="Gastronomique">Gastronomique</option>
               <option value="Italien">Italien</option>
               <option value="Asiatique">Asiatique</option>
-              <option value="Mexicain & Latino">Mexicain & Latino</option>
+              <option value="Mexicain">Mexicain</option>
               <option value="Fast-Food">Fast-Food</option>
               <option value="Méditerranéen">Méditerranéen</option>
               <option value="Fusion">Fusion</option>
             </select>
-            <small class="form-text text-muted">Choisissez le style qui correspond le mieux au restaurant</small>
           </div>
 
           <div class="form-group">
             <label for="restaurant-diet">Régime alimentaire</label>
-            <select id="restaurant-diet" required>
-              <option value="">Sélectionnez un régime</option>
-              <option value="Traditionnel">Traditionnel</option>
+            <select id="restaurant-diet">
+              <option value="">Tous régimes</option>
               <option value="Végétarien">Végétarien</option>
               <option value="Végétalien">Végétalien</option>
               <option value="Sans Gluten">Sans Gluten</option>
-              <option value="Halal">Halal</option>
-              <option value="Casher">Casher</option>
             </select>
-            <small class="form-text text-muted">Indiquez le régime alimentaire principal proposé</small>
           </div>
 
           <div class="form-group">
-            <label for="restaurant-price">Fourchette de prix</label>
+            <label for="restaurant-price">Gamme de prix</label>
             <select id="restaurant-price" required>
-              <option value="">Sélectionnez une fourchette de prix</option>
-              <option value="$">$ (0-15$)</option>
-              <option value="$$">$$ (15-30$)</option>
-              <option value="$$$">$$$ (30-60$)</option>
-              <option value="$$$$">$$$$ (60$+)</option>
+              <option value="">Sélectionnez une gamme</option>
+              <option value="€">€ - Économique</option>
+              <option value="€€">€€ - Modéré</option>
+              <option value="€€€">€€€ - Élevé</option>
+              <option value="€€€€">€€€€ - Luxe</option>
             </select>
-            <small class="form-text text-muted">Sélectionnez la fourchette de prix moyenne par personne</small>
           </div>
 
           <div class="form-group">
-            <label for="restaurant-note">Note (1-10)</label>
-            <input type="number" id="restaurant-note" min="1" max="10" step="0.5" required value="8.0">
-            <small class="form-text text-muted">Attribuez une note de 1 à 10 (par pas de 0.5)</small>
+            <label for="restaurant-note">Note (sur 10)</label>
+            <input type="number" id="restaurant-note" min="0" max="10" step="0.5" required>
           </div>
 
           <div class="form-group">
             <label for="restaurant-address">Adresse</label>
-            <input type="text" id="restaurant-address" required placeholder="Ex: 123 Rue Principale, Ville, Code Postal">
-            <small class="form-text text-muted">Entrez l'adresse complète du restaurant</small>
+            <input type="text" id="restaurant-address" required>
           </div>
 
           <div class="form-group">
             <label for="restaurant-description">Description</label>
-            <textarea id="restaurant-description" rows="6" required placeholder="Décrivez l'ambiance, les spécialités et l'expérience culinaire..."></textarea>
-            <small class="form-text text-muted">Donnez une description détaillée du restaurant</small>
+            <textarea id="restaurant-description" rows="6" required></textarea>
           </div>
 
           <div class="form-group">
-            <label for="restaurant-image">Image principale</label>
-            <input type="file" class="form-control" id="restaurant-image" accept="image/*">
-            <small class="form-text text-muted">Format recommandé : JPEG ou PNG, max 5MB, dimensions idéales 1200x800px</small>
+            <label>Image principale</label>
+            <div id="main-image-upload" class="main-image-upload">
+              <div id="main-image-preview"></div>
+              <input type="file" id="main-image-input" accept="image/*" style="display: none;">
+              <button type="button" onclick="document.getElementById('main-image-input').click()">
+                <i class="fas fa-upload"></i> Choisir une image
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Galerie photos</label>
+            <div id="gallery-grid" class="gallery-grid">
+              <!-- Les images de la galerie seront ajoutées ici -->
+            </div>
+            <div id="gallery-upload" class="gallery-upload" onclick="document.getElementById('gallery-input').click()">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Cliquez ou glissez des images ici</p>
+              <input type="file" id="gallery-input" accept="image/*" multiple style="display: none;">
+            </div>
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="save-btn">
+            <button type="submit" class="action-btn save-btn">
               <i class="fas fa-save"></i> Enregistrer
             </button>
-            <button type="button" class="cancel-btn" onclick="window.location.href='/admin'">
+            <button type="button" class="action-btn cancel-btn" onclick="confirmExit()">
               <i class="fas fa-times"></i> Annuler
             </button>
           </div>
@@ -784,64 +850,18 @@
       </div>
 
       <div class="preview-section">
-        <h2>Aperçu</h2>
+        <h2>Prévisualisation</h2>
         <div class="preview-toggle">
-          <button class="active" data-preview="full">Vue complète</button>
-          <button data-preview="card">Vue carte</button>
+          <button class="active" data-view="card">Vue carte</button>
+          <button data-view="full">Vue complète</button>
         </div>
 
-        <div class="preview-card">
-          <div class="preview-date">14 Mar 2024</div>
-          <img src="/images/header.jpg" alt="Restaurant">
-          <div class="preview-card-content">
-            <h3>Nom du Restaurant</h3>
-            <p></p>
-            <div class="preview-card-meta">
-              <span class="rating">
-                <i class="fas fa-star"></i>
-                <span class="note">4.5</span>/5
-              </span>
-              <span class="cuisine">
-                <i class="fas fa-utensils"></i>
-                <span class="style">Style de cuisine</span>
-              </span>
-              <span class="price">
-                <i class="fas fa-dollar-sign"></i>
-                <span class="price-value">Prix</span>
-              </span>
-            </div>
-          </div>
+        <div class="preview-card active">
+          <!-- La prévisualisation en mode carte sera mise à jour dynamiquement -->
         </div>
 
-        <div class="preview-full active">
-          <img src="/images/header.jpg" alt="Restaurant">
-          <div class="preview-content">
-            <h3>Nom du Restaurant</h3>
-            <div class="preview-meta">
-              <span class="rating"><i class="fas fa-star"></i> <span class="note">4.5</span>/5</span>
-              <span class="cuisine"><i class="fas fa-utensils"></i> <span class="style">Style de cuisine</span></span>
-              <span class="price"><i class="fas fa-dollar-sign"></i> <span class="price-value">Prix</span></span>
-            </div>
-            <div class="preview-address">
-              <i class="fas fa-map-marker-alt"></i> <span class="address">Adresse du restaurant</span>
-            </div>
-            <div class="preview-summary">
-              <h4>Résumé</h4>
-              <div class="summary-text"></div>
-            </div>
-            <div class="preview-description">
-              <h4>Description complète</h4>
-              <div class="description-text"></div>
-            </div>
-            <div class="preview-gallery">
-              <h4>Galerie photos</h4>
-              <div class="gallery-preview"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="preview-image-container">
-          <img class="preview-image" src="" alt="Prévisualisation de l'image" style="display: none; max-width: 100%; height: auto;">
+        <div class="preview-full">
+          <!-- La prévisualisation en mode complet sera mise à jour dynamiquement -->
         </div>
       </div>
     </div>
@@ -1275,9 +1295,9 @@
       // Fonction pour convertir le prix en format frontmatter
       function convertPriceToFrontmatter(price) {
         const priceMap = {
-          '$': 'budget',
-          '$$': 'medium',
-          '$$$': 'expensive'
+          '€': 'budget',
+          '€€': 'medium',
+          '€€€': 'expensive'
         };
         return priceMap[price] || 'medium';
       }
@@ -1285,11 +1305,11 @@
       // Fonction pour convertir le prix du frontmatter en format affichage
       function convertPriceFromFrontmatter(price) {
         const priceMap = {
-          'budget': '$',
-          'medium': '$$',
-          'expensive': '$$$'
+          'budget': '€',
+          'medium': '€€',
+          'expensive': '€€€'
         };
-        return priceMap[price] || '$$';
+        return priceMap[price] || '€€';
       }
 
       // Fonction pour valider les données du restaurant
@@ -1443,47 +1463,68 @@
         });
       }
 
-      // Modifier la fonction loadRestaurantData
+      // Fonction pour charger les données du restaurant
       async function loadRestaurantData() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const file = urlParams.get('file');
-        const content = urlParams.get('content');
-
-        // Définir des valeurs par défaut
-        const defaultValues = {
-          title: 'Nouveau Restaurant',
-          style: '',
-          diet: '',
-          price: '',
-          note: '8.0',
-          address: '',
-          description: 'Entrez une description détaillée du restaurant...'
-        };
-
         try {
-          if (file && content) {
-            // ... code existant pour charger les données ...
-          } else {
-            // Utiliser les valeurs par défaut
-            Object.entries(defaultValues).forEach(([key, value]) => {
-              const element = document.getElementById(`restaurant-${key}`);
-              if (element) {
-                element.value = value;
-              }
-            });
+          // Récupérer les paramètres de l'URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const fileParam = urlParams.get('file');
+          const contentParam = urlParams.get('content');
+
+          if (!fileParam || !contentParam) {
+            console.error('Paramètres manquants dans l\'URL');
+            return;
           }
 
-          // Charger l'image par défaut
-          setDefaultImage();
+          // Décoder le contenu
+          const content = decodeURIComponent(contentParam);
           
+          // Extraire les métadonnées du frontmatter
+          const frontmatterMatch = content.match(/---([\s\S]*?)---/);
+          if (!frontmatterMatch) {
+            console.error('Frontmatter non trouvé');
+            return;
+          }
+
+          const frontmatter = frontmatterMatch[1];
+          const metadata = {};
+          frontmatter.split('\n').forEach(line => {
+            const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
+            if (match) {
+              metadata[match[1]] = match[2];
+            }
+          });
+
+          // Remplir les champs du formulaire
+          document.getElementById('restaurant-title').value = metadata.title || '';
+          document.getElementById('restaurant-style').value = metadata.style || '';
+          document.getElementById('restaurant-diet').value = metadata.diet || '';
+          document.getElementById('restaurant-price').value = metadata.price || '';
+          document.getElementById('restaurant-note').value = metadata.note || '';
+          document.getElementById('restaurant-address').value = metadata.address || '';
+          document.getElementById('restaurant-description').value = metadata.description || '';
+
           // Mettre à jour la prévisualisation
           updatePreview();
+
+          // Si une image principale est définie, la charger
+          if (metadata.image) {
+            const previewImg = document.createElement('img');
+            previewImg.src = metadata.image;
+            previewImg.alt = metadata.title;
+            document.getElementById('main-image-preview').innerHTML = '';
+            document.getElementById('main-image-preview').appendChild(previewImg);
+          }
+
+          // Sauvegarder le chemin du fichier pour la soumission
+          document.getElementById('edit-restaurant-form').dataset.filePath = fileParam;
+
         } catch (error) {
           console.error('Erreur lors du chargement des données:', error);
           Swal.fire({
+            icon: 'error',
             title: 'Erreur',
-            text: 'Une erreur est survenue lors du chargement des données du restaurant.',
-            icon: 'error'
+            text: 'Impossible de charger les données du restaurant'
           });
         }
       }
@@ -1530,16 +1571,29 @@
       document.getElementById('restaurant-description').addEventListener('input', updatePreview);
 
       // Gestion de l'image principale
-      document.querySelector('.change-image-btn').addEventListener('click', () => {
-        document.getElementById('main-image').click();
-      });
-
-      document.getElementById('main-image').addEventListener('change', function(e) {
+      document.getElementById('main-image-input').addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
           const reader = new FileReader();
           reader.onload = function(e) {
-            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
-            previewImages.forEach(img => img.src = e.target.result);
+            // Mettre à jour l'aperçu de l'image principale
+            const mainPreview = document.getElementById('main-image-preview');
+            mainPreview.innerHTML = `<img src="${e.target.result}" alt="Aperçu">`;
+            
+            // Mettre à jour les images dans les prévisualisations
+            const previewCardImg = document.querySelector('.preview-card img') || document.createElement('img');
+            const previewFullImg = document.querySelector('.preview-full img') || document.createElement('img');
+            
+            previewCardImg.src = e.target.result;
+            previewFullImg.src = e.target.result;
+            
+            if (!document.querySelector('.preview-card img')) {
+              document.querySelector('.preview-card').insertBefore(previewCardImg, document.querySelector('.preview-card-content'));
+            }
+            if (!document.querySelector('.preview-full img')) {
+              document.querySelector('.preview-full').insertBefore(previewFullImg, document.querySelector('.preview-content'));
+            }
+            
+            updatePreview();
           };
           reader.readAsDataURL(e.target.files[0]);
         }
@@ -1647,14 +1701,19 @@
       document.querySelectorAll('.preview-toggle button').forEach(button => {
         button.addEventListener('click', () => {
           // Désactiver tous les boutons et vues
-          document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
-          document.querySelectorAll('.preview-card, .preview-full').forEach(preview => preview.style.display = 'none');
+          document.querySelectorAll('.preview-toggle button').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          document.querySelectorAll('.preview-card, .preview-full').forEach(view => {
+            view.classList.remove('active');
+          });
           
           // Activer le bouton cliqué et sa vue correspondante
           button.classList.add('active');
-          const previewToShow = document.querySelector(`.preview-${button.dataset.preview}`);
-          if(previewToShow) {
-            previewToShow.style.display = 'block';
+          const viewType = button.getAttribute('data-view');
+          const viewToShow = document.querySelector(`.preview-${viewType}`);
+          if (viewToShow) {
+            viewToShow.classList.add('active');
           }
         });
       });
@@ -1679,44 +1738,53 @@
       }
 
       // Gestion de la soumission du formulaire
-      document.getElementById('restaurant-form').addEventListener('submit', async function(e) {
+      document.getElementById('edit-restaurant-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         try {
+          // Récupérer les données du formulaire
           const formData = {
-            id: new URLSearchParams(window.location.search).get('id'),
             title: document.getElementById('restaurant-title').value,
             style: document.getElementById('restaurant-style').value,
             diet: document.getElementById('restaurant-diet').value,
             price: document.getElementById('restaurant-price').value,
             note: document.getElementById('restaurant-note').value,
             address: document.getElementById('restaurant-address').value,
-            description: summaryEditor.root.innerHTML,
-            mainImage: document.querySelector('.preview-card img').src,
-            date: document.getElementById('restaurant-date').value,
-            lastModified: new Date().toLocaleString()
-          };
-
-          // Créer le contenu avec le frontmatter
-          const content = createRestaurantFrontmatter(formData) + summaryEditor.root.innerHTML;
-
-          // Sauvegarder dans le localStorage
-          saveToCache({
-            ...formData,
-            content,
+            description: document.getElementById('restaurant-description').value,
+            mainImage: document.querySelector('#main-image-preview img')?.src || '',
+            date: new Date().toISOString().split('T')[0],
             state: 'draft',
             published: false
-          });
+          };
+
+          // Récupérer les images de la galerie
+          const galleryImages = Array.from(document.querySelectorAll('#gallery-grid img')).map(img => img.src);
+
+          // Créer l'identifiant unique pour le restaurant
+          const restaurantId = formData.title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+          // Sauvegarder dans le localStorage
+          const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '{"restaurants":[]}');
+          pendingChanges.restaurants = pendingChanges.restaurants.filter(r => r[0] !== restaurantId);
+          pendingChanges.restaurants.push([restaurantId, {
+            ...formData,
+            gallery: galleryImages,
+            timestamp: Date.now(),
+            lastModified: new Date().toLocaleString()
+          }]);
+          pendingChanges.lastEdited = restaurantId;
+          localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
 
           // Afficher une confirmation
           await Swal.fire({
-            title: 'Restaurant sauvegardé en brouillon',
-            html: 'Le restaurant a été sauvegardé en tant que brouillon.<br><br>' +
-                  'Il est maintenant visible dans la section "Workflow" → "Brouillons".<br><br>' +
-                  '<strong>Pour le publier</strong>, allez dans le workflow et faites-le glisser vers "Prêt",<br>' +
-                  'puis cliquez sur "Sauvegarder les changements".',
+            title: 'Restaurant sauvegardé !',
+            html: 'Le restaurant a été sauvegardé en brouillon.<br><br>' +
+                  'Vous allez être redirigé vers la section workflow<br>' +
+                  'où vous pourrez le retrouver dans la colonne "Brouillons".',
             icon: 'success',
-            confirmButtonText: 'OK'
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
           });
 
           // Rediriger vers la section workflow
@@ -1724,11 +1792,10 @@
 
         } catch (error) {
           console.error('Erreur lors de la sauvegarde:', error);
-          await Swal.fire({
+          Swal.fire({
             title: 'Erreur !',
-            text: 'Une erreur est survenue lors de la sauvegarde locale des modifications.',
-            icon: 'error',
-            confirmButtonText: 'OK'
+            text: 'Une erreur est survenue lors de la sauvegarde.',
+            icon: 'error'
           });
         }
       });

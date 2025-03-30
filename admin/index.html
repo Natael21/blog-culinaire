@@ -115,9 +115,15 @@
 
     <header class="header">
       <h1>Administration du Blog Culinaire</h1>
-      <button class="save-changes-btn" onclick="saveChanges()">
-        <i class="fas fa-save"></i> Sauvegarder les changements
-      </button>
+      <div class="header-actions">
+        <button class="save-changes-btn" onclick="saveChanges()">
+          <i class="fas fa-save"></i> Sauvegarder les changements
+        </button>
+        <button onclick="handleLogout()" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          Déconnexion
+        </button>
+      </div>
     </header>
 
     <div class="admin-container">
@@ -314,58 +320,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="admin-content-section" id="upcoming-section">
-        <div class="section-header">
-          <h2>Restaurants à venir</h2>
-        </div>
-        <div class="upcoming-form-container">
-          <h3>Ajouter un restaurant à venir</h3>
-          <form id="upcoming-form" class="add-restaurant-form">
-            <div class="form-group">
-              <label for="restaurant-type">Type de restaurant</label>
-              <select id="restaurant-type" required>
-                <option value="">Sélectionnez un type</option>
-                <option value="Bistro & Café">Bistro & Café</option>
-                <option value="Gastronomique">Gastronomique</option>
-                <option value="Italien">Italien</option>
-                <option value="Asiatique">Asiatique</option>
-                <option value="Mexicain & Latino">Mexicain & Latino</option>
-                <option value="Fast-Food">Fast-Food</option>
-                <option value="Méditerranéen">Méditerranéen</option>
-                <option value="Fusion">Fusion</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="restaurant-name">Nom du restaurant</label>
-              <input type="text" id="restaurant-name" required>
-            </div>
-            <div class="form-group">
-              <label for="restaurant-description">Description</label>
-              <textarea id="restaurant-description" rows="4"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="restaurant-address">Adresse</label>
-              <input type="text" id="restaurant-address" required>
-            </div>
-            <div class="form-group">
-              <label for="display-order">Ordre d'affichage</label>
-              <input type="number" id="display-order" value="50">
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="save-btn">
-                <i class="fas fa-save"></i> Enregistrer
-              </button>
-              <button type="button" class="cancel-btn">
-                <i class="fas fa-times"></i> Annuler
-              </button>
-            </div>
-          </form>
-        </div>
-        <div id="upcoming-preview">
-          <h3>Prévisualisation</h3>
         </div>
       </div>
     </div>
