@@ -6,7 +6,7 @@ title: Accueil
 <div class="main-content">
   <div class="page-header">
     <h2>Nos Dernières Découvertes</h2>
-    <p>Explorez nos critiques de restaurants à Sherbrooke plus bas</p>
+    <p>Explorez nos critiques de restaurants à Sherbrooke ci-dessous</p>
   </div>
 
   <!-- Barre de filtres -->
@@ -58,14 +58,11 @@ title: Accueil
 
         <!-- Note -->
         <div class="filter-item">
-          <label for="rating-filter">Note minimale</label>
+          <label for="rating-filter">Note</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="5">5 étoiles</option>
-            <option value="4">4 étoiles et plus</option>
-            <option value="3">3 étoiles et plus</option>
-            <option value="2">2 étoiles et plus</option>
-            <option value="1">1 étoile et plus</option>
+            <option value="4">4 étoiles et +</option>
+            <option value="3">3 étoiles et moins</option>
           </select>
         </div>
 
@@ -342,9 +339,9 @@ title: Accueil
 }
 
 .filter-select[multiple] {
-  height: 45px;
+  height: 42px;
   overflow: hidden;
-  padding-right: 2rem;
+  padding: 0.8rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
@@ -356,25 +353,20 @@ title: Accueil
   min-height: 200px;
   overflow-y: auto;
   background-image: none;
+  padding: 0;
 }
 
 .filter-select[multiple] option {
   padding: 0.8rem;
   border-bottom: 1px solid #eee;
-  transition: all 0.2s ease;
 }
 
-.filter-select[multiple] option:last-child {
-  border-bottom: none;
+.filter-select[multiple]:not(:focus) option {
+  display: none;
 }
 
-.filter-select[multiple] option:checked {
-  background-color: var(--accent-color);
-  color: white;
-}
-
-.filter-select[multiple] option:hover {
-  background-color: rgba(231, 76, 60, 0.1);
+.filter-select[multiple]:not(:focus) option:first-child {
+  display: block;
 }
 
 .reset-filters {
@@ -790,6 +782,7 @@ title: Accueil
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
+  display: block;
 }
 
 .content {
@@ -1004,6 +997,23 @@ title: Accueil
 .filter-select[multiple] option:checked:hover {
   background-color: var(--accent-color);
 }
+
+/* Style pour les prix */
+.price-symbols {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.price-symbols i {
+  margin-right: 0;
+}
+
+.price {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 </style>
 
 <script>
@@ -1029,7 +1039,7 @@ advancedFiltersToggle.addEventListener('click', function() {
 function filterRestaurants() {
     const searchText = titleSearch.value.toLowerCase();
     const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
-    const selectedRating = parseFloat(ratingFilter.value) || 0;
+    const selectedRating = ratingFilter.value;
     const selectedPrice = priceFilter.value;
 
     const restaurantElements = document.querySelectorAll('.post-card');
@@ -1041,7 +1051,15 @@ function filterRestaurants() {
 
         const titleMatch = title.includes(searchText);
         const styleMatch = selectedStyles.length === 0 || selectedStyles.includes('') || selectedStyles.includes(style);
-        const ratingMatch = rating >= selectedRating;
+        
+        // Nouvelle logique pour le filtrage par note
+        let ratingMatch = true;
+        if (selectedRating === '4') {
+            ratingMatch = rating >= 4;
+        } else if (selectedRating === '3') {
+            ratingMatch = rating <= 3;
+        }
+        
         const priceMatch = !selectedPrice || price === selectedPrice;
 
         const marker = markers.get(restaurant.id);

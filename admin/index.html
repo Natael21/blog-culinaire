@@ -114,11 +114,26 @@
       const GITHUB_REPO = 'blog-culinaire';
       let octokit;
 
+      // Fonction pour initialiser Octokit avec le token
+      function initOctokit(token) {
+        octokit = new Octokit({
+          auth: token
+        });
+        // Une fois Octokit initialisé, charger les restaurants
+        loadRestaurants();
+      }
+
       // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
         try {
+          if (!octokit) {
+            console.error('Octokit n\'est pas initialisé');
+            return;
+          }
+
           const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = ''; // Nettoyer la liste avant d'ajouter de nouveaux éléments
+          restaurantList.innerHTML = '<p class="loading">Chargement des restaurants...</p>';
+          
           const displayedTitles = new Set(); // Pour éviter les doublons
 
           // Charger les restaurants existants
@@ -159,6 +174,9 @@
           // Trier les restaurants par date (plus récent en premier)
           allRestaurants.sort((a, b) => b.date - a.date);
 
+          // Nettoyer le message de chargement
+          restaurantList.innerHTML = '';
+
           // Afficher les restaurants triés
           allRestaurants.forEach(restaurant => {
             renderRestaurantItem(restaurant.metadata, restaurant.path);
@@ -167,25 +185,88 @@
         } catch (error) {
           console.error('Erreur lors du chargement des restaurants:', error);
           const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = '<p class="error-message">Une erreur est survenue lors du chargement des restaurants. Veuillez réessayer plus tard.</p>';
+          restaurantList.innerHTML = `
+            <div class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Une erreur est survenue lors du chargement des restaurants.</p>
+              <button onclick="loadRestaurants()" class="retry-btn">
+                <i class="fas fa-redo"></i> Réessayer
+              </button>
+            </div>`;
         }
       }
 
+      // Gestion de l'authentification Netlify Identity
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", user => {
           if (user) {
-            octokit = new Octokit({
-              auth: user.token.access_token
-            });
+            initOctokit(user.token.access_token);
           }
         });
 
         window.netlifyIdentity.on("login", user => {
-          octokit = new Octokit({
-            auth: user.token.access_token
-          });
+          initOctokit(user.token.access_token);
+        });
+
+        window.netlifyIdentity.on("logout", () => {
+          octokit = null;
+          const restaurantList = document.getElementById('restaurant-list');
+          restaurantList.innerHTML = '<p class="login-message">Veuillez vous connecter pour voir les restaurants.</p>';
         });
       }
+
+      // Style CSS pour les messages d'état
+      const styles = `
+        .loading {
+          text-align: center;
+          padding: 2rem;
+          color: #666;
+        }
+
+        .error-message {
+          text-align: center;
+          padding: 2rem;
+          color: #e74c3c;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .error-message i {
+          font-size: 2rem;
+        }
+
+        .retry-btn {
+          background: #3498db;
+          color: white;
+          border: none;
+          padding: 0.8rem 1.5rem;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+          background: #2980b9;
+          transform: translateY(-2px);
+        }
+
+        .login-message {
+          text-align: center;
+          padding: 2rem;
+          color: #666;
+        }
+      `;
+
+      // Ajouter les styles à la page
+      const styleSheet = document.createElement("style");
+      styleSheet.textContent = styles;
+      document.head.appendChild(styleSheet);
     </script>
     
     <script>
