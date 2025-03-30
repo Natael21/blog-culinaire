@@ -322,10 +322,13 @@ title: Accueil
 
 .filter-select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.8rem;
+  border: 2px solid #ddd;
+  border-radius: 10px;
   font-size: 1rem;
+  background-color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .filter-select:hover {
@@ -335,7 +338,43 @@ title: Accueil
 .filter-select:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.filter-select[multiple] {
+  height: 45px;
+  overflow: hidden;
+  padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1em;
+}
+
+.filter-select[multiple]:focus {
+  height: auto;
+  min-height: 200px;
+  overflow-y: auto;
+  background-image: none;
+}
+
+.filter-select[multiple] option {
+  padding: 0.8rem;
+  border-bottom: 1px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.filter-select[multiple] option:last-child {
+  border-bottom: none;
+}
+
+.filter-select[multiple] option:checked {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.filter-select[multiple] option:hover {
+  background-color: rgba(231, 76, 60, 0.1);
 }
 
 .reset-filters {
@@ -728,6 +767,8 @@ title: Accueil
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .post-card:hover {
@@ -739,131 +780,118 @@ title: Accueil
   text-decoration: none;
   color: inherit;
   display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
 .post-image {
+  width: 100%;
+  height: 200px;
   background-size: cover;
   background-position: center;
+  flex-shrink: 0;
 }
 
 .content {
   display: flex;
   flex-direction: column;
+  padding: 1.5rem;
+  flex-grow: 1;
 }
 
 .content-header {
   margin-bottom: 1rem;
 }
 
-h2 {
+.post-card h2 {
   color: var(--primary-color);
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.4rem;
+  line-height: 1.3;
 }
 
 .rating {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.stars {
-  color: #f1c40f;
-  white-space: nowrap;
-}
-
-.stars i {
-  margin-right: 2px;
-}
-
-.stars i:last-child {
-  margin-right: 0;
-}
-
-.fa-star-half-alt {
-  position: relative;
-  display: inline-block;
-}
-
-.score {
-  color: #666;
-  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .description {
   color: #666;
   line-height: 1.5;
+  margin-bottom: 1rem;
   flex-grow: 1;
 }
 
 .meta {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #eee;
   margin-top: auto;
 }
 
-.meta > * {
+/* Style pour la vue en pastilles */
+.post-grid.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.post-grid.grid-view .post-card {
+  height: auto;
+  min-height: 450px;
+}
+
+/* Style pour la vue en liste */
+.post-grid.list-view {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #666;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.meta i {
-  color: #666;
+.post-grid.list-view .post-card {
+  height: auto;
+  min-height: 180px;
 }
 
-.meta .cuisine-style i {
-  color: var(--accent-color);
+.post-grid.list-view .post-link {
+  flex-direction: row;
 }
 
-.meta .price {
-  color: #2ecc71;
-  font-weight: 600;
+.post-grid.list-view .post-image {
+  width: 250px;
+  height: auto;
 }
 
-.meta .price i {
-  color: #2ecc71;
-  margin-right: -2px;
+.post-grid.list-view .content {
+  padding: 1.2rem;
 }
 
-/* Style pour les prix */
-.price {
-  color: #2ecc71;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-}
+@media (max-width: 768px) {
+  .post-grid.list-view .post-card,
+  .post-grid.grid-view .post-card {
+    height: auto;
+    min-height: auto;
+  }
 
-.price-symbols {
-  display: inline-flex;
-  align-items: center;
-}
+  .post-grid.list-view .post-link {
+    flex-direction: column;
+  }
 
-.price-symbols i {
-  color: #2ecc71;
-  margin-right: 4px !important;
-}
+  .post-grid.list-view .post-image {
+    width: 100%;
+    height: 200px;
+  }
 
-.price-symbols i:last-child {
-  margin-right: 0 !important;
-}
-
-.price-range {
-  display: none !important;
-}
-
-/* Masquer les fourchettes de prix en mode grid */
-.post-grid.grid-view .price-range {
-  display: none !important;
-}
-
-/* Afficher les fourchettes de prix en mode liste */
-.post-grid.list-view .price-range {
-  display: inline !important;
+  .meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 /* Style pour la vue carte */
@@ -988,6 +1016,15 @@ const advancedFilters = document.getElementById('advanced-filters');
 const restaurantGrid = document.getElementById('restaurant-grid');
 let map = null;
 let markers = new Map();
+
+// Toggle des filtres avancés
+advancedFiltersToggle.addEventListener('click', function() {
+  const isHidden = advancedFilters.style.display === 'none';
+  advancedFilters.style.display = isHidden ? 'block' : 'none';
+  this.innerHTML = isHidden ? 
+    '<i class="fas fa-times"></i> Masquer les filtres' : 
+    '<i class="fas fa-sliders-h"></i> Filtres avancés';
+});
 
 function filterRestaurants() {
     const searchText = titleSearch.value.toLowerCase();
