@@ -84,6 +84,8 @@
 
     <main class="container">
       {{ content }}
+      <!-- Conteneur Disqus -->
+      <div id="disqus_thread" style="display: none;"></div>
     </main>
 
     <footer>
@@ -118,6 +120,9 @@
             }
           }, 1000);
         }
+
+        // Initialiser les barres de notation
+        initializeRatingBars();
       });
 
       function initializeNetlifyIdentity() {
@@ -175,6 +180,10 @@
 
       // Fonction pour gérer la connexion Disqus
       function handleDisqusLogin() {
+        // Afficher le conteneur Disqus
+        const disqusContainer = document.getElementById('disqus_thread');
+        disqusContainer.style.display = 'block';
+        
         // Vérifier si Disqus est chargé
         if (typeof DISQUS !== 'undefined') {
           DISQUS.reset({
@@ -251,6 +260,73 @@
           behavior: 'smooth'
         });
       });
+
+      // Fonction pour initialiser les barres de notation
+      function initializeRatingBars() {
+        const ratingBars = document.querySelectorAll('.rating-fill');
+        ratingBars.forEach(bar => {
+          const rating = parseFloat(bar.dataset.rating);
+          if (!isNaN(rating)) {
+            bar.style.width = `${(rating / 10) * 100}%`;
+          }
+        });
+      }
+
+      // Gestion des boutons de vue (liste/carte)
+      document.addEventListener('DOMContentLoaded', function() {
+        const viewButtons = document.querySelectorAll('.view-btn');
+        const restaurantGrid = document.querySelector('.restaurant-grid');
+        const mapContainer = document.getElementById('map-container');
+        const mapView = document.querySelector('.map-view');
+
+        viewButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            // Retirer la classe active de tous les boutons
+            viewButtons.forEach(btn => btn.classList.remove('active'));
+            // Ajouter la classe active au bouton cliqué
+            this.classList.add('active');
+
+            if (this.querySelector('.fa-list')) {
+              // Vue liste
+              if (restaurantGrid) restaurantGrid.style.display = 'grid';
+              if (mapContainer) mapContainer.style.display = 'none';
+            } else if (this.querySelector('.fa-map')) {
+              // Vue carte
+              if (restaurantGrid) restaurantGrid.style.display = 'none';
+              if (mapContainer) {
+                mapContainer.style.display = 'block';
+                // Réinitialiser la carte si nécessaire
+                if (mapView && !mapView._leaflet) {
+                  initializeMap();
+                }
+              }
+            }
+          });
+        });
+      });
+
+      // Fonction pour initialiser la carte
+      function initializeMap() {
+        const mapView = document.querySelector('.map-view');
+        if (!mapView) return;
+
+        const map = L.map('map-container').setView([45.4000, -71.8900], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Ajouter les marqueurs pour chaque restaurant
+        const restaurants = document.querySelectorAll('.restaurant-card');
+        restaurants.forEach(restaurant => {
+          const lat = parseFloat(restaurant.dataset.lat);
+          const lng = parseFloat(restaurant.dataset.lng);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            L.marker([lat, lng])
+              .bindPopup(restaurant.querySelector('h2').textContent)
+              .addTo(map);
+          }
+        });
+      }
     </script>
   </body>
 </html>
