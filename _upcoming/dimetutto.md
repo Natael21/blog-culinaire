@@ -1,5 +1,5 @@
 ---
-restaurant_type: Italien
+restaurant_type: Italien & Méditerranéen
 title: Dimetutto
 diet: "vegetarian-friendly"
 description: Un restaurant italien contemporain offrant des pizzas artisanales, des pâtes fraîches et des spécialités italiennes dans une ambiance moderne et décontractée.

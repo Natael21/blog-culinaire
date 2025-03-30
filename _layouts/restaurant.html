@@ -19,6 +19,19 @@ comments: true
           <span class="score">{{ page.note }}/10</span>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+        {% if page.diet %}
+        <span class="diet-type">
+          {% if page.diet == "vegetarian" %}
+          <i class="fas fa-carrot"></i> 100% Végétarien
+          {% elsif page.diet == "vegan" %}
+          <i class="fas fa-leaf"></i> 100% Végétalien
+          {% elsif page.diet == "vegetarian-friendly" %}
+          <i class="fas fa-carrot"></i> Options végétariennes
+          {% elsif page.diet == "vegan-friendly" %}
+          <i class="fas fa-leaf"></i> Options végétaliennes
+          {% endif %}
+        </span>
+        {% endif %}
         <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
         <span class="price">
           {% if page.price == "budget" %}

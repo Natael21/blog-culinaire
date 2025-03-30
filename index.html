@@ -42,19 +42,14 @@ title: Accueil
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
           <select id="style-filter" class="filter-select">
-            <option value="">Tous les styles</option>
+            <option value="all">Tous les styles</option>
             <option value="Asiatique">Asiatique</option>
-            <option value="Italien">Italien</option>
-            <option value="Mexicain">Mexicain</option>
-            <option value="Bistro">Bistro</option>
-            <option value="Américain">Américain</option>
-            <option value="Libano-Marocain">Libano-Marocain</option>
-            <option value="Iranien">Iranien</option>
-            <option value="Vietnamien">Vietnamien</option>
-            <option value="Indien">Indien</option>
-            <option value="Café-Bistro">Café-Bistro</option>
-            <option value="Microbrasserie">Microbrasserie</option>
-            <option value="Pub">Pub</option>
+            <option value="Méditerranéen & Moyen-Orient">Méditerranéen & Moyen-Orient</option>
+            <option value="Mexicain & Latino">Mexicain & Latino</option>
+            <option value="Bistro & Café">Bistro & Café</option>
+            <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
+            <option value="Italien & Méditerranéen">Italien & Méditerranéen</option>
+            <option value="Indien & Épicé">Indien & Épicé</option>
           </select>
         </div>
 
@@ -73,7 +68,7 @@ title: Accueil
         <div class="filter-item">
           <label for="diet-filter">Régime alimentaire</label>
           <select id="diet-filter" class="filter-select">
-            <option value="">Tous les régimes</option>
+            <option value="all">Tous les régimes</option>
             <option value="standard">Standard</option>
             <option value="vegetarian-friendly">Options végétariennes</option>
             <option value="vegetarian">100% Végétarien</option>
@@ -134,19 +129,6 @@ title: Accueil
               <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
               {% if post.style %}
               <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
-              {% endif %}
-              {% if post.diet %}
-              <span class="diet-type">
-                {% if post.diet == "vegetarian" %}
-                <i class="fas fa-carrot"></i> Végétarien
-                {% elsif post.diet == "vegan" %}
-                <i class="fas fa-leaf"></i> Végétalien
-                {% elsif post.diet == "vegetarian-friendly" %}
-                <i class="fas fa-carrot"></i> Options végétariennes
-                {% elsif post.diet == "vegan-friendly" %}
-                <i class="fas fa-leaf"></i> Options végétaliennes
-                {% endif %}
-              </span>
               {% endif %}
               <span class="price">
                 {% if post.price == "budget" %}

@@ -5,7 +5,7 @@ date: 2024-03-04
 note: 7
 style: "Américain"
 diet: "standard"
-description: "Restaurant spacieux et luxueux offrant burgers raffinés et bières artisanales."
+description: "Restaurant spacieux et luxueux offrant burgers, tacos, poutines et tartares, accompagnés d'une sélection de vins et bières artisanales."
 price: "medium"
 address: "1175 Rue King Ouest, Sherbrooke, QC J1H 3H8"
 image: "/images/OMG_Resto.jpg"
