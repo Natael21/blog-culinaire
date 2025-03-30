@@ -630,94 +630,71 @@
     <div class="container">
       <div class="form-section">
         <h2>Formulaire d'édition</h2>
-        <form id="restaurant-form">
+        <form id="restaurant-form" class="form-section">
           <div class="form-group">
-            <label for="name">Nom du restaurant</label>
-            <input type="text" id="name" name="name" required>
+            <label for="restaurant-title">Nom du restaurant</label>
+            <input type="text" id="restaurant-title" required>
           </div>
+
           <div class="form-group">
-            <label for="date">Date de publication</label>
-            <input type="date" id="date" name="date" required>
-          </div>
-          <div class="form-group">
-            <label for="cuisine">Style de cuisine</label>
-            <div class="cuisine-input-container" style="display: flex; gap: 1rem; align-items: center;">
-              <div class="select-wrapper" style="flex: 1; position: relative;">
-                <select id="cuisine" name="cuisine" required style="width: 100%;">
-                  <option value="">Sélectionner un style</option>
-                  <option value="nouveau">+ Ajouter un nouveau style</option>
-                </select>
-                <button type="button" id="supprimer-style" style="display: none; position: absolute; right: 2.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #e74c3c; cursor: pointer; padding: 0.5rem;">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <input type="text" id="nouveau-style" placeholder="Entrez un nouveau style" style="flex: 1; display: none;">
-              <button type="button" id="confirmer-style" style="display: none; padding: 0.8rem 1.2rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                <i class="fas fa-check"></i>
-              </button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="price">Prix</label>
-            <select id="price" name="price" required>
-              <option value="$">$ (0-20$)</option>
-              <option value="$$">$$ (20-50$)</option>
-              <option value="$$$">$$$ (50$ et +)</option>
+            <label for="restaurant-style">Style de cuisine</label>
+            <select id="restaurant-style" required>
+              <option value="">Sélectionnez un style</option>
+              <option value="Bistro & Café">Bistro & Café</option>
+              <option value="Gastronomique">Gastronomique</option>
+              <option value="Italien">Italien</option>
+              <option value="Asiatique">Asiatique</option>
+              <option value="Mexicain & Latino">Mexicain & Latino</option>
+              <option value="Fast-Food">Fast-Food</option>
+              <option value="Méditerranéen">Méditerranéen</option>
+              <option value="Fusion">Fusion</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label for="rating">Note</label>
-            <select id="rating" name="rating" required style="flex: 1;">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
+            <label for="restaurant-diet">Régime alimentaire</label>
+            <select id="restaurant-diet" required>
+              <option value="">Sélectionnez un régime</option>
+              <option value="Traditionnel">Traditionnel</option>
+              <option value="Végétarien">Végétarien</option>
+              <option value="Végétalien">Végétalien</option>
+              <option value="Sans Gluten">Sans Gluten</option>
+              <option value="Halal">Halal</option>
+              <option value="Casher">Casher</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label for="address">Adresse</label>
-            <input type="text" id="address" name="address" required>
+            <label for="restaurant-price">Fourchette de prix</label>
+            <select id="restaurant-price" required>
+              <option value="">Sélectionnez une fourchette de prix</option>
+              <option value="$">$ (0-15$)</option>
+              <option value="$$">$$ (15-30$)</option>
+              <option value="$$$">$$$ (30-60$)</option>
+              <option value="$$$$">$$$$ (60$+)</option>
+            </select>
           </div>
+
           <div class="form-group">
-            <label>Image principale du restaurant</label>
-            <div class="main-image-upload">
-              <input type="file" id="main-image" accept="image/*" style="display: none;">
-              <div class="upload-preview" id="main-image-preview">
-                <img src="/images/header.jpg" alt="Preview">
-                <button type="button" class="change-image-btn">
-                  <i class="fas fa-camera"></i> Changer l'image
-                </button>
-              </div>
-            </div>
+            <label for="restaurant-note">Note (1-10)</label>
+            <input type="number" id="restaurant-note" min="1" max="10" step="0.5" required>
           </div>
+
           <div class="form-group">
-            <label>Description courte (résumé)</label>
-            <div id="summary-editor"></div>
+            <label for="restaurant-address">Adresse</label>
+            <input type="text" id="restaurant-address" required>
           </div>
+
           <div class="form-group">
-            <label>Description complète</label>
-            <div id="description-editor"></div>
-          </div>
-          
-          <div class="gallery-section">
-            <h3>Galerie d'images</h3>
-            <p>Faites glisser les images pour réorganiser leur ordre d'apparition</p>
-            <div class="gallery-grid" id="gallery-grid">
-              <!-- Les images seront ajoutées ici -->
-            </div>
-            <div class="gallery-upload" id="gallery-upload">
-              <i class="fas fa-plus"></i>
-              <p>Ajouter des photos à la galerie</p>
-              <input type="file" id="gallery-input" multiple accept="image/*" style="display: none;">
-            </div>
+            <label for="restaurant-description">Description</label>
+            <textarea id="restaurant-description" rows="6" required></textarea>
           </div>
 
           <div class="form-actions">
             <button type="submit" class="save-btn">
               <i class="fas fa-save"></i> Enregistrer
             </button>
-            <button type="button" class="cancel-btn" onclick="window.location.href='/admin/'">
+            <button type="button" class="cancel-btn" onclick="window.location.href='/admin'">
               <i class="fas fa-times"></i> Annuler
             </button>
           </div>
@@ -889,12 +866,7 @@
       document.head.appendChild(styleUpdates);
 
       // Initialiser les éditeurs Quill avec les nouvelles options
-      const summaryEditor = new Quill('#summary-editor', {
-        ...quillOptions,
-        placeholder: 'Entrez un bref résumé du restaurant...'
-      });
-
-      const descriptionEditor = new Quill('#description-editor', {
+      const summaryEditor = new Quill('#restaurant-description', {
         ...quillOptions,
         placeholder: 'Entrez une description détaillée du restaurant...'
       });
@@ -921,14 +893,13 @@
       // Fonction pour sauvegarder l'état initial
       function saveInitialState() {
         initialState = {
-          name: document.getElementById('name').value.trim(),
-          date: document.getElementById('date').value,
-          cuisine: document.getElementById('cuisine').value.trim(),
-          price: document.getElementById('price').value,
-          rating: document.getElementById('rating').value,
-          address: document.getElementById('address').value.trim(),
-          summary: summaryEditor.root.innerHTML.trim(),
-          description: descriptionEditor.root.innerHTML.trim(),
+          title: document.getElementById('restaurant-title').value.trim(),
+          style: document.getElementById('restaurant-style').value.trim(),
+          diet: document.getElementById('restaurant-diet').value.trim(),
+          price: document.getElementById('restaurant-price').value,
+          note: document.getElementById('restaurant-note').value,
+          address: document.getElementById('restaurant-address').value.trim(),
+          description: summaryEditor.root.innerHTML.trim(),
           mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
@@ -938,49 +909,45 @@
       // Fonction pour vérifier s'il y a eu des changements
       function checkForChanges() {
         const currentState = {
-          name: document.getElementById('name').value.trim(),
-          date: document.getElementById('date').value,
-          cuisine: document.getElementById('cuisine').value.trim(),
-          price: document.getElementById('price').value,
-          rating: document.getElementById('rating').value,
-          address: document.getElementById('address').value.trim(),
-          summary: summaryEditor.root.innerHTML.trim(),
-          description: descriptionEditor.root.innerHTML.trim(),
+          title: document.getElementById('restaurant-title').value.trim(),
+          style: document.getElementById('restaurant-style').value.trim(),
+          diet: document.getElementById('restaurant-diet').value.trim(),
+          price: document.getElementById('restaurant-price').value,
+          note: document.getElementById('restaurant-note').value,
+          address: document.getElementById('restaurant-address').value.trim(),
+          description: summaryEditor.root.innerHTML.trim(),
           mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
 
         // Comparer chaque propriété individuellement
-        const hasNameChanged = currentState.name !== initialState.name;
-        const hasDateChanged = currentState.date !== initialState.date;
-        const hasCuisineChanged = currentState.cuisine !== initialState.cuisine;
+        const hasTitleChanged = currentState.title !== initialState.title;
+        const hasStyleChanged = currentState.style !== initialState.style;
+        const hasDietChanged = currentState.diet !== initialState.diet;
         const hasPriceChanged = currentState.price !== initialState.price;
-        const hasRatingChanged = currentState.rating !== initialState.rating;
+        const hasNoteChanged = currentState.note !== initialState.note;
         const hasAddressChanged = currentState.address !== initialState.address;
-        const hasSummaryChanged = currentState.summary !== initialState.summary;
         const hasDescriptionChanged = currentState.description !== initialState.description;
         const hasMainImageChanged = currentState.mainImage !== initialState.mainImage;
         const hasGalleryChanged = JSON.stringify(currentState.galleryImages) !== JSON.stringify(initialState.galleryImages);
 
-        const hasChanges = hasNameChanged || 
-                          hasDateChanged ||
-                          hasCuisineChanged || 
+        const hasChanges = hasTitleChanged || 
+                          hasStyleChanged ||
+                          hasDietChanged || 
                           hasPriceChanged || 
-                          hasRatingChanged || 
+                          hasNoteChanged || 
                           hasAddressChanged || 
-                          hasSummaryChanged || 
                           hasDescriptionChanged || 
                           hasMainImageChanged || 
                           hasGalleryChanged;
 
         console.log('Changements détectés:', {
-          name: hasNameChanged,
-          date: hasDateChanged,
-          cuisine: hasCuisineChanged,
+          title: hasTitleChanged,
+          style: hasStyleChanged,
+          diet: hasDietChanged,
           price: hasPriceChanged,
-          rating: hasRatingChanged,
+          note: hasNoteChanged,
           address: hasAddressChanged,
-          summary: hasSummaryChanged,
           description: hasDescriptionChanged,
           mainImage: hasMainImageChanged,
           gallery: hasGalleryChanged
@@ -991,7 +958,7 @@
 
       // Mettre à jour les écouteurs d'événements pour détecter les changements
       function setupChangeDetection() {
-        const inputs = ['name', 'date', 'cuisine', 'price', 'rating', 'address'];
+        const inputs = ['restaurant-title', 'restaurant-style', 'restaurant-diet', 'restaurant-price', 'restaurant-note', 'restaurant-address'];
         inputs.forEach(id => {
           document.getElementById(id).addEventListener('input', () => {
             console.log(`Changement détecté dans ${id}`);
@@ -999,10 +966,6 @@
         });
 
         summaryEditor.on('text-change', () => {
-          console.log('Changement détecté dans le résumé');
-        });
-
-        descriptionEditor.on('text-change', () => {
           console.log('Changement détecté dans la description');
         });
 
@@ -1172,19 +1135,19 @@
                   // Mettre à jour les champs du formulaire
                   switch(field) {
                     case 'title':
-                      document.getElementById('name').value = originalMetadata[field];
+                      document.getElementById('restaurant-title').value = originalMetadata[field];
                       break;
                     case 'style':
-                      document.getElementById('cuisine').value = originalMetadata[field];
+                      document.getElementById('restaurant-style').value = originalMetadata[field];
                       break;
                     case 'price':
-                      document.getElementById('price').value = originalMetadata[field];
+                      document.getElementById('restaurant-price').value = originalMetadata[field];
                       break;
                     case 'note':
-                      document.getElementById('rating').value = originalMetadata[field];
+                      document.getElementById('restaurant-note').value = originalMetadata[field];
                       break;
                     case 'address':
-                      document.getElementById('address').value = originalMetadata[field];
+                      document.getElementById('restaurant-address').value = originalMetadata[field];
                       break;
                     case 'description':
                       summaryEditor.root.innerHTML = originalMetadata[field];
@@ -1216,7 +1179,7 @@
             }).then((result) => {
               if (result.isConfirmed) {
                 const formattedContent = formatDescription(originalFullContent.trim());
-                descriptionEditor.root.innerHTML = formattedContent;
+                summaryEditor.root.innerHTML = formattedContent;
                 updatePreview();
               }
             });
@@ -1319,30 +1282,30 @@
             }
 
             // Remplir les champs du formulaire avec les métadonnées
-            document.getElementById('name').value = metadata.title || '';
+            document.getElementById('restaurant-title').value = metadata.title || '';
             const date = metadata.date ? new Date(metadata.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-            document.getElementById('date').value = date;
+            document.getElementById('restaurant-date').value = date;
 
             // Gérer le style de cuisine
             const style = metadata.style || '';
-            document.getElementById('cuisine').value = style;
+            document.getElementById('restaurant-style').value = style;
 
             // Si le style n'existe pas dans la liste, l'ajouter
-            const cuisineSelect = document.getElementById('cuisine');
-            const styleExists = Array.from(cuisineSelect.options).some(option => option.value === style);
+            const styleSelect = document.getElementById('restaurant-style');
+            const styleExists = Array.from(styleSelect.options).some(option => option.value === style);
             if (style && !styleExists) {
               const option = document.createElement('option');
               option.value = style;
               option.textContent = style;
               option.setAttribute('data-default', '');
-              cuisineSelect.insertBefore(option, cuisineSelect.options[cuisineSelect.options.length - 1]);
+              styleSelect.insertBefore(option, styleSelect.options[styleSelect.options.length - 1]);
             }
 
-            document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
-            document.getElementById('address').value = metadata.address || '';
+            document.getElementById('restaurant-note').value = parseFloat(metadata.note) || 4.5;
+            document.getElementById('restaurant-address').value = metadata.address || '';
 
             // Gérer le prix avec conversion
-            const priceSelect = document.getElementById('price');
+            const priceSelect = document.getElementById('restaurant-price');
             const priceValue = convertPriceFromFrontmatter(metadata.price) || '$$';
             Array.from(priceSelect.options).forEach((option, index) => {
               if (option.value === priceValue) {
@@ -1356,7 +1319,7 @@
             // Formater le contenu de la description
             const descriptionContent = fullContent.trim();
             const formattedContent = formatDescription(descriptionContent);
-            descriptionEditor.root.innerHTML = formattedContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
+            summaryEditor.root.innerHTML = formattedContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
 
             // Gérer l'image principale
             const mainImageUrl = metadata.image || '/images/header.jpg';
@@ -1404,14 +1367,13 @@
           }
         } else {
           // Nouveau post avec des valeurs par défaut
-          document.getElementById('name').value = '';
-          document.getElementById('date').value = new Date().toISOString().split('T')[0];
-          document.getElementById('cuisine').value = '';
-          document.getElementById('price').value = '$$';
-          document.getElementById('rating').value = '4.5';
-          document.getElementById('address').value = '';
+          document.getElementById('restaurant-title').value = '';
+          document.getElementById('restaurant-date').value = new Date().toISOString().split('T')[0];
+          document.getElementById('restaurant-style').value = '';
+          document.getElementById('restaurant-price').value = '$$';
+          document.getElementById('restaurant-note').value = '4.5';
+          document.getElementById('restaurant-address').value = '';
           summaryEditor.root.innerHTML = 'Entrez une brève description du restaurant...';
-          descriptionEditor.root.innerHTML = '**Nataël** :\n\n\n\n**Nicolas** :\n';
           
           const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
           previewImages.forEach(img => {
@@ -1426,8 +1388,8 @@
 
       // Fonction pour mettre à jour l'aperçu
       function updatePreview() {
-        const name = document.getElementById('name').value || 'Nom du Restaurant';
-        const dateInput = document.getElementById('date').value;
+        const name = document.getElementById('restaurant-title').value || 'Nom du Restaurant';
+        const dateInput = document.getElementById('restaurant-date').value;
         const date = dateInput ? new Date(new Date(dateInput).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', { 
           day: '2-digit',
           month: 'short',
@@ -1437,12 +1399,12 @@
           month: 'short',
           year: 'numeric'
         }).replace('.', '');
-        const cuisine = document.getElementById('cuisine').value || 'Style de cuisine';
-        const price = document.getElementById('price').value || '$';
-        const rating = document.getElementById('rating').value || '4.5';
-        const address = document.getElementById('address').value || 'Adresse du restaurant';
+        const cuisine = document.getElementById('restaurant-style').value || 'Style de cuisine';
+        const price = document.getElementById('restaurant-price').value || '$';
+        const rating = document.getElementById('restaurant-note').value || '4.5';
+        const address = document.getElementById('restaurant-address').value || 'Adresse du restaurant';
         const summary = summaryEditor.root.innerHTML;
-        const description = descriptionEditor.root.innerHTML;
+        const description = summaryEditor.root.innerHTML;
 
         // Mise à jour de la vue carte
         document.querySelectorAll('.preview-card').forEach(card => {
@@ -1488,14 +1450,13 @@
       }
 
       // Gestionnaire d'événements pour les champs de formulaire
-      document.getElementById('name').addEventListener('input', updatePreview);
-      document.getElementById('date').addEventListener('input', updatePreview);
-      document.getElementById('cuisine').addEventListener('input', updatePreview);
-      document.getElementById('price').addEventListener('input', updatePreview);
-      document.getElementById('rating').addEventListener('input', updatePreview);
-      document.getElementById('address').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-title').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-date').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-style').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-price').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-note').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-address').addEventListener('input', updatePreview);
       summaryEditor.on('text-change', updatePreview);
-      descriptionEditor.on('text-change', updatePreview);
 
       // Gestion de l'image principale
       document.querySelector('.change-image-btn').addEventListener('click', () => {
@@ -1587,14 +1548,13 @@
       }
 
       // Gestionnaire d'événements pour les champs de formulaire
-      document.getElementById('name').addEventListener('input', updatePreview);
-      document.getElementById('date').addEventListener('input', updatePreview);
-      document.getElementById('cuisine').addEventListener('input', updatePreview);
-      document.getElementById('price').addEventListener('input', updatePreview);
-      document.getElementById('rating').addEventListener('input', updatePreview);
-      document.getElementById('address').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-title').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-date').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-style').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-price').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-note').addEventListener('input', updatePreview);
+      document.getElementById('restaurant-address').addEventListener('input', updatePreview);
       summaryEditor.on('text-change', updatePreview);
-      descriptionEditor.on('text-change', updatePreview);
 
       // Gestion de l'image principale
       document.querySelector('.change-image-btn').addEventListener('click', () => {
@@ -1633,8 +1593,8 @@
         e.preventDefault();
 
         try {
-          const name = document.getElementById('name').value;
-          const date = document.getElementById('date').value;
+          const name = document.getElementById('restaurant-title').value;
+          const date = document.getElementById('restaurant-date').value;
           const fileName = `${date}-${name
             .toLowerCase()
             .normalize('NFD')
@@ -1648,17 +1608,17 @@
             `layout: restaurant`,
             `title: "${sanitizeFrontmatterValue(name)}"`,
             `date: "${date}"`,
-            `style: "${sanitizeFrontmatterValue(document.getElementById('cuisine').value)}"`,
-            `price: "${convertPriceToFrontmatter(document.getElementById('price').value)}"`,
-            `note: ${document.getElementById('rating').value}`,
-            `address: "${sanitizeFrontmatterValue(document.getElementById('address').value)}"`,
+            `style: "${sanitizeFrontmatterValue(document.getElementById('restaurant-style').value)}"`,
+            `price: "${convertPriceToFrontmatter(document.getElementById('restaurant-price').value)}"`,
+            `note: ${document.getElementById('restaurant-note').value}`,
+            `address: "${sanitizeFrontmatterValue(document.getElementById('restaurant-address').value)}"`,
             `description: "${sanitizeFrontmatterValue(summaryEditor.root.innerHTML)}"`,
             `image: "${document.querySelector('.preview-card img').src}"`,
             `state: "draft"`,
             '---\n'
           ].join('\n');
 
-          const content = frontMatter + descriptionEditor.root.innerHTML;
+          const content = frontMatter + summaryEditor.root.innerHTML;
 
           // Encoder le contenu en Base64 avec support des accents
           const contentBase64 = btoa(unescape(encodeURIComponent(content)));
@@ -1762,14 +1722,14 @@
       });
 
       // Gestion du style de cuisine personnalisé
-      const cuisineSelect = document.getElementById('cuisine');
+      const styleSelect = document.getElementById('restaurant-style');
       const nouveauStyleInput = document.getElementById('nouveau-style');
       const confirmerStyleBtn = document.getElementById('confirmer-style');
       const supprimerStyleBtn = document.getElementById('supprimer-style');
 
       // Fonction pour vérifier si le style sélectionné est personnalisé
       function isCustomStyle() {
-        const selectedOption = cuisineSelect.options[cuisineSelect.selectedIndex];
+        const selectedOption = styleSelect.options[styleSelect.selectedIndex];
         return selectedOption && !selectedOption.hasAttribute('data-default') && selectedOption.value !== 'nouveau' && selectedOption.value !== '';
       }
 
@@ -1778,7 +1738,7 @@
         supprimerStyleBtn.style.display = isCustomStyle() ? 'block' : 'none';
       }
 
-      cuisineSelect.addEventListener('change', function() {
+      styleSelect.addEventListener('change', function() {
         if (this.value === 'nouveau') {
           this.style.display = 'none';
           nouveauStyleInput.style.display = 'block';
@@ -1799,16 +1759,16 @@
           option.textContent = nouveauStyle;
           
           // Insérer avant l'option "Ajouter un nouveau style"
-          const dernierIndex = cuisineSelect.options.length - 1;
-          cuisineSelect.insertBefore(option, cuisineSelect.options[dernierIndex]);
+          const dernierIndex = styleSelect.options.length - 1;
+          styleSelect.insertBefore(option, styleSelect.options[dernierIndex]);
           
           // Sélectionner le nouveau style
-          cuisineSelect.value = nouveauStyle;
+          styleSelect.value = nouveauStyle;
           
           // Cacher les éléments d'ajout
           nouveauStyleInput.style.display = 'none';
           confirmerStyleBtn.style.display = 'none';
-          cuisineSelect.style.display = 'block';
+          styleSelect.style.display = 'block';
           
           // Vider l'input
           nouveauStyleInput.value = '';
@@ -1822,10 +1782,10 @@
       });
 
       supprimerStyleBtn.addEventListener('click', function() {
-        const selectedIndex = cuisineSelect.selectedIndex;
+        const selectedIndex = styleSelect.selectedIndex;
         if (selectedIndex !== -1 && isCustomStyle()) {
-          cuisineSelect.remove(selectedIndex);
-          cuisineSelect.value = '';
+          styleSelect.remove(selectedIndex);
+          styleSelect.value = '';
           updateDeleteButton();
           updatePreview();
         }
@@ -1846,7 +1806,7 @@
           "Microbrasserie", "Pub", "Thaïlandais", "Vietnamien"
         ];
         
-        const select = document.getElementById('cuisine');
+        const select = document.getElementById('restaurant-style');
         const defaultOption = select.options[0];
         const newStyleOption = select.options[1];
         
@@ -1869,6 +1829,82 @@
         loadCuisineStyles();
         loadRestaurantData();
       });
+
+      // Variable globale pour stocker les modifications en attente
+      let pendingChanges = {
+        restaurants: new Map()
+      };
+
+      // Fonction pour sauvegarder les modifications en cache
+      function saveToCache(formData) {
+        const restaurantId = formData.id || 'new_' + Date.now();
+        pendingChanges.restaurants.set(restaurantId, {
+          title: formData.title,
+          style: formData.style,
+          diet: formData.diet,
+          price: formData.price,
+          note: formData.note,
+          address: formData.address,
+          description: formData.description,
+          timestamp: Date.now()
+        });
+        
+        // Sauvegarder dans le localStorage
+        localStorage.setItem('pendingChanges', JSON.stringify(Array.from(pendingChanges.restaurants.entries())));
+        
+        // Activer le bouton de sauvegarde global
+        document.querySelector('.save-changes-btn').classList.add('has-changes');
+      }
+
+      // Fonction pour charger les modifications en cache
+      function loadFromCache() {
+        const cached = localStorage.getItem('pendingChanges');
+        if (cached) {
+          pendingChanges.restaurants = new Map(JSON.parse(cached));
+          
+          // Restaurer les données si on est sur la page d'édition du restaurant correspondant
+          const urlParams = new URLSearchParams(window.location.search);
+          const currentId = urlParams.get('id');
+          if (currentId && pendingChanges.restaurants.has(currentId)) {
+            const data = pendingChanges.restaurants.get(currentId);
+            document.getElementById('restaurant-title').value = data.title;
+            document.getElementById('restaurant-style').value = data.style;
+            document.getElementById('restaurant-diet').value = data.diet;
+            document.getElementById('restaurant-price').value = data.price;
+            document.getElementById('restaurant-note').value = data.note;
+            document.getElementById('restaurant-address').value = data.address;
+            document.getElementById('restaurant-description').value = data.description;
+          }
+        }
+      }
+
+      // Écouteur d'événements pour le formulaire
+      document.getElementById('restaurant-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+          id: new URLSearchParams(window.location.search).get('id'),
+          title: document.getElementById('restaurant-title').value,
+          style: document.getElementById('restaurant-style').value,
+          diet: document.getElementById('restaurant-diet').value,
+          price: document.getElementById('restaurant-price').value,
+          note: document.getElementById('restaurant-note').value,
+          address: document.getElementById('restaurant-address').value,
+          description: document.getElementById('restaurant-description').value
+        };
+        
+        saveToCache(formData);
+        
+        Swal.fire({
+          title: 'Modifications enregistrées',
+          text: 'Les modifications ont été sauvegardées localement. Cliquez sur "Sauvegarder les changements" dans la barre supérieure pour les publier.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      });
+
+      // Charger les modifications en cache au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadFromCache);
     </script>
   </body>
 </html> 
