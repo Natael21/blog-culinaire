@@ -6,6 +6,9 @@
     <title>Administration du Blog Culinaire | Gestion des Restaurants</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     
+    <!-- Script Netlify Identity -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    
     <!-- Préchargement des ressources critiques -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" as="style">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
@@ -65,6 +68,21 @@
       .admin-container.authenticated {
         opacity: 1;
       }
+      .error-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: none;
+      }
+      .error-message.show {
+        display: block;
+      }
     </style>
 
     <!-- Chargement asynchrone des styles non critiques -->
@@ -83,1011 +101,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" defer></script>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    
-    <script>
-      // Marquer le body comme chargé une fois que tout est prêt
-      window.addEventListener('load', function() {
-        document.body.classList.add('loaded');
-      });
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <style>
-      body {
-        font-family: 'Open Sans', sans-serif;
-        background-color: #f4f4f9;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-      }
-      .header {
-        background-color: #2c3e50;
-        color: white;
-        padding: 1rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .header h1 {
-        font-family: 'Playfair Display', serif;
-        margin: 0;
-      }
-      .back-to-site {
-        background-color: #34495e;
-        color: white;
-        padding: 0.8rem 1.2rem;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .back-to-site:hover {
-        background-color: #2c3e50;
-        transform: translateY(-2px);
-      }
-      .admin-nav {
-        display: flex;
-        gap: 1rem;
-        margin: 2rem 0;
-        flex-wrap: wrap;
-      }
-      .admin-nav button {
-        flex: 1;
-        min-width: 200px;
-        padding: 1rem;
-        border: none;
-        border-radius: 8px;
-        background-color: #2c3e50;
-        color: white;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .admin-nav button:hover {
-        background-color: #34495e;
-        transform: translateY(-2px);
-      }
-      .admin-nav button.active {
-        background-color: #3498db;
-      }
-      .admin-nav button i {
-        font-size: 1.2rem;
-      }
-      .admin-content-section {
-        display: none;
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      }
-      .admin-content-section.active {
-        display: block;
-      }
-      /* Styles pour la section Restaurants */
-      .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-      }
-      .section-header h2 {
-        margin: 0;
-        color: #2c3e50;
-      }
-      .restaurant-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-      .restaurant-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.5rem;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-      }
-      .restaurant-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      }
-      .restaurant-info {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        flex: 1;
-      }
-      .restaurant-image {
-        width: 100px;
-        height: 100px;
-        border-radius: 8px;
-        object-fit: cover;
-      }
-      .restaurant-details {
-        flex: 1;
-      }
-      .restaurant-details h3 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1.2rem;
-        color: #2c3e50;
-      }
-      .restaurant-meta {
-        display: flex;
-        gap: 1.5rem;
-        color: #666;
-        font-size: 0.9rem;
-      }
-      .restaurant-meta span {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      .restaurant-actions {
-        display: flex;
-        gap: 0.5rem;
-      }
-      .action-btn {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        text-decoration: none;
-      }
-      .edit-btn {
-        background-color: #3498db;
-        color: white;
-      }
-      .delete-btn {
-        background-color: #e74c3c;
-        color: white;
-      }
-      .action-btn:hover {
-        transform: translateY(-2px);
-      }
-      .add-restaurant-btn {
-        background-color: #2ecc71;
-        color: white;
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1rem;
-        text-decoration: none;
-      }
-      .add-restaurant-btn:hover {
-        background-color: #27ae60;
-        transform: translateY(-2px);
-      }
-      .add-restaurant-btn i {
-        font-size: 1.1rem;
-      }
-      /* Styles pour la section Workflow */
-      .workflow-columns {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
-        margin-top: 2rem;
-      }
-      .column {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.5rem;
-        min-height: 500px;
-        border: 2px solid transparent;
-        transition: all 0.3s ease;
-      }
-      .column.draft {
-        border-color: #ffd700;
-      }
-      .column.review {
-        border-color: #3498db;
-      }
-      .column.ready {
-        border-color: #2ecc71;
-      }
-      .column h3 {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin: 0 0 1.5rem 0;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid;
-        color: #2c3e50;
-        font-size: 1.2rem;
-      }
-      .column.draft h3 {
-        border-color: #ffd700;
-      }
-      .column.review h3 {
-        border-color: #3498db;
-      }
-      .column.ready h3 {
-        border-color: #2ecc71;
-      }
-      .workflow-items {
-        min-height: 400px;
-        transition: background-color 0.3s ease;
-      }
-      .workflow-items.drag-over {
-        background-color: rgba(52, 152, 219, 0.1);
-        border-radius: 8px;
-      }
-      .workflow-item {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        cursor: move;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-      }
-      .workflow-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      }
-      .workflow-item img {
-        width: 100%;
-        height: 160px;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-      }
-      .workflow-item h4 {
-        margin: 0 0 0.5rem 0;
-        color: #2c3e50;
-        font-size: 1.1rem;
-      }
-      .workflow-item p {
-        margin: 0 0 1rem 0;
-        color: #666;
-        font-size: 0.9rem;
-        line-height: 1.4;
-      }
-      .workflow-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-      .status-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-      }
-      .draft .status-badge {
-        background-color: #fff3cd;
-        color: #856404;
-      }
-      .review .status-badge {
-        background-color: #cce5ff;
-        color: #004085;
-      }
-      .ready .status-badge {
-        background-color: #d4edda;
-        color: #155724;
-      }
-      .workflow-actions {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 1rem;
-      }
-      .workflow-actions button {
-        flex: 1;
-        padding: 0.6rem;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-      }
-      .edit-btn {
-        background-color: #3498db;
-        color: white;
-      }
-      .check-btn {
-        background-color: #f1c40f;
-        color: #2c3e50;
-      }
-      .publish-btn {
-        background-color: #2ecc71;
-        color: white;
-      }
-      .move-btn {
-        background-color: #95a5a6;
-        color: white;
-      }
-      .check-results {
-        margin-top: 1rem;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-      }
-      .check-results h5 {
-        margin: 0 0 0.5rem 0;
-        font-size: 0.9rem;
-        color: #2c3e50;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      .corrections-list, .layout-list {
-        margin: 0;
-        padding-left: 1.5rem;
-        font-size: 0.85rem;
-        color: #666;
-      }
-      .corrections-list li, .layout-list li {
-        margin-bottom: 0.3rem;
-      }
-      /* Styles pour le modal des restaurants à venir */
-      .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .modal-content {
-        background: white;
-        border-radius: 16px;
-        width: 90%;
-        max-width: 1000px;
-        max-height: 90vh;
-        overflow: hidden;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      }
-
-      .modal-header {
-        background: var(--primary-color);
-        color: white;
-        padding: 1.5rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .modal-header h3 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-family: 'Playfair Display', serif;
-      }
-
-      .close-modal {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 0.5rem;
-        transition: transform 0.3s ease;
-      }
-
-      .close-modal:hover {
-        transform: rotate(90deg);
-      }
-
-      .modal-body {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        padding: 2rem;
-        max-height: calc(90vh - 80px);
-        overflow-y: auto;
-      }
-
-      .form-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .form-group label {
-        font-weight: 600;
-        color: var(--primary-color);
-      }
-
-      .form-input {
-        padding: 0.8rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-      }
-
-      .form-input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-        outline: none;
-      }
-
-      textarea.form-input {
-        min-height: 120px;
-        resize: vertical;
-      }
-
-      .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-      }
-
-      .form-actions button {
-        flex: 1;
-        padding: 1rem;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-      }
-
-      .form-actions .edit-btn {
-        background-color: var(--primary-color);
-        color: white;
-      }
-
-      .form-actions .delete-btn {
-        background-color: #f8f9fa;
-        color: #666;
-      }
-
-      .form-actions button:hover {
-        transform: translateY(-2px);
-      }
-
-      .action-btn.save-btn:hover {
-        background-color: #27ae60 !important;
-      }
-
-      .action-btn.cancel-btn:hover {
-        background-color: #c0392b !important;
-      }
-
-      /* Style pour la prévisualisation */
-      .preview-container {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.5rem;
-      }
-
-      .preview-header {
-        margin-bottom: 1.5rem;
-      }
-
-      .preview-header h3 {
-        color: var(--primary-color);
-        margin: 0;
-        font-family: 'Playfair Display', serif;
-      }
-
-      .preview-content {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      }
-
-      /* Style pour la liste des restaurants à venir */
-      .upcoming-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .upcoming-item {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem 1.5rem 1.5rem 4rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-        transition: all 0.3s ease;
-        cursor: move;
-      }
-
-      .upcoming-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      }
-
-      .drag-handle {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 2rem;
-        height: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #666;
-        cursor: grab;
-        background: #f8f9fa;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-      }
-
-      .drag-handle:hover {
-        background: #e9ecef;
-        color: var(--primary-color);
-      }
-
-      .drag-handle:active {
-        cursor: grabbing;
-      }
-
-      .upcoming-item.dragging {
-        opacity: 0.5;
-        background: #f8f9fa;
-      }
-
-      .upcoming-info {
-        flex: 1;
-        min-width: 0;
-        padding-right: 1rem;
-      }
-
-      .upcoming-info h3 {
-        color: var(--primary-color);
-        font-size: 1.4rem;
-        margin: 0 0 0.5rem 0;
-      }
-
-      .upcoming-info p {
-        color: #666;
-        margin: 0 0 1rem 0;
-        line-height: 1.5;
-      }
-
-      .upcoming-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        color: #666;
-        font-size: 0.95rem;
-      }
-
-      .upcoming-meta span {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .upcoming-meta i {
-        color: var(--accent-color);
-      }
-
-      .upcoming-actions {
-        display: flex;
-        gap: 0.8rem;
-        flex-shrink: 0;
-      }
-
-      /* Styles pour la section Médias */
-      .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-      }
-      .media-filters {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-      }
-      .media-search {
-        padding: 0.8rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        min-width: 250px;
-        transition: all 0.3s ease;
-      }
-      .media-search:focus {
-        border-color: #3498db;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-      }
-      .media-filter {
-        padding: 0.8rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        background-color: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-      .media-filter:focus {
-        border-color: #3498db;
-        outline: none;
-      }
-      .upload-section {
-        background: white;
-        border: 2px dashed #e9ecef;
-        border-radius: 12px;
-        padding: 3rem 2rem;
-        text-align: center;
-        margin-bottom: 2rem;
-        transition: all 0.3s ease;
-      }
-      .upload-section:hover, .upload-section.drag-over {
-        border-color: #3498db;
-        background-color: #f8f9fa;
-      }
-      .upload-section i {
-        font-size: 3rem;
-        color: #6c757d;
-        margin-bottom: 1rem;
-      }
-      .upload-section h3 {
-        margin: 0 0 0.5rem 0;
-        color: #2c3e50;
-      }
-      .upload-info {
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin-top: 1rem;
-      }
-      .upload-progress {
-        margin-top: 1.5rem;
-      }
-      .progress-bar {
-        height: 8px;
-        background-color: #e9ecef;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 0.5rem;
-      }
-      .progress-fill {
-        height: 100%;
-        background-color: #2ecc71;
-        width: 0%;
-        transition: width 0.3s ease;
-      }
-      .progress-text {
-        color: #2c3e50;
-        font-size: 0.9rem;
-        margin: 0;
-      }
-      .media-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-      }
-      .stat-item {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .stat-item i {
-        font-size: 2rem;
-        color: #3498db;
-        margin-bottom: 0.5rem;
-      }
-      .stat-value {
-        display: block;
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #2c3e50;
-      }
-      .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-      }
-      .media-library {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1.5rem;
-      }
-      .media-item {
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-      }
-      .media-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      }
-      .media-preview {
-        position: relative;
-        padding-top: 100%;
-      }
-      .media-preview img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .media-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.5rem;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-      .media-preview:hover .media-overlay {
-        opacity: 1;
-      }
-      .media-action {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border: none;
-        background: white;
-        color: #2c3e50;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-      }
-      .media-action:hover {
-        transform: scale(1.1);
-      }
-      .media-action.view-btn:hover {
-        background-color: #3498db;
-        color: white;
-      }
-      .media-action.copy-btn:hover {
-        background-color: #f1c40f;
-        color: white;
-      }
-      .media-action.edit-btn:hover {
-        background-color: #2ecc71;
-        color: white;
-      }
-      .media-action.delete-btn:hover {
-        background-color: #e74c3c;
-        color: white;
-      }
-      .media-info {
-        padding: 1rem;
-      }
-      .media-info h4 {
-        margin: 0 0 0.5rem 0;
-        font-size: 0.9rem;
-        color: #2c3e50;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .media-meta {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        color: #6c757d;
-      }
-      .media-meta span {
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-      }
-      /* Styles pour la section À venir */
-      .upcoming-section {
-        margin-top: 2rem;
-      }
-
-      .upcoming-actions {
-        display: flex;
-        gap: 0.8rem;
-      }
-
-      .upcoming-actions button {
-        padding: 0.6rem 1.2rem;
-        border: none;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-      }
-
-      .upcoming-actions .edit-btn {
-        background-color: var(--primary-color);
-        color: white;
-      }
-
-      .upcoming-actions .edit-btn:hover {
-        background-color: #1a252f;
-      }
-
-      .upcoming-actions .delete-btn {
-        background-color: #e74c3c;
-        color: white;
-      }
-
-      .upcoming-actions .delete-btn:hover {
-        background-color: #c0392b;
-      }
-
-      /* Style du bouton d'ajout */
-      .action-btn.add-btn {
-        background-color: #2ecc71;
-        color: white;
-        border: none;
-        padding: 0.8rem 1.5rem;
-        border-radius: 8px;
-        font-size: 1rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-      }
-
-      .action-btn.add-btn:hover {
-        background-color: #27ae60;
-        transform: translateY(-2px);
-      }
-
-      .action-btn.add-btn i {
-        font-size: 1.1rem;
-      }
-
-      /* Styles pour les filtres de restaurants */
-      .restaurant-filters {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .search-filter {
-        width: 300px;
-        position: relative;
-      }
-
-      .filter-select {
-        width: 300px;
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background-color: white;
-        font-size: 0.95rem;
-      }
-
-      .filter-select:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
-      }
-
-      @media (max-width: 768px) {
-        .restaurant-filters {
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .search-filter {
-          width: 100%;
-        }
-
-        .filter-select {
-          width: 100%;
-        }
-      }
-
-      /* Style pour le bouton de déconnexion */
-      .logout-button {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        padding: 0.8rem 1.2rem;
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        z-index: 1000;
-      }
-
-      .logout-button:hover {
-        background-color: #c0392b;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      }
-
-      .logout-button i {
-        font-size: 1.1rem;
-      }
-
-      @media (max-width: 768px) {
-        .logout-button {
-          bottom: 1rem;
-          right: 1rem;
-          padding: 0.6rem 1rem;
-          font-size: 0.9rem;
-        }
-      }
-    </style>
   </head>
   <body>
-    <!-- Ajout de l'overlay de chargement -->
     <div class="loading-overlay" id="loading-overlay">
       <div class="loading-spinner"></div>
+    </div>
+
+    <div class="error-message" id="error-message">
+      <h2>Erreur d'authentification</h2>
+      <p>Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+      <button onclick="window.location.href='/'">Retour à l'accueil</button>
     </div>
 
     <header class="header">
@@ -1297,49 +320,65 @@
     <script>
       // Fonction pour gérer l'affichage du contenu
       function showAdminContent() {
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const adminContainer = document.querySelector('.admin-container');
-        
-        loadingOverlay.style.display = 'none';
-        adminContainer.classList.add('authenticated');
-        
-        // Charger les restaurants si nous sommes sur la section restaurants
-        const activeSection = document.querySelector('.admin-content-section.active');
-        if (activeSection && activeSection.id === 'restaurants') {
-          loadRestaurants();
-        }
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.querySelector('.admin-container').classList.add('authenticated');
+        document.body.classList.add('loaded');
       }
 
-      // Vérification de l'authentification
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion Netlify
-            window.netlifyIdentity.open('login');
-          } else {
-            showAdminContent();
-          }
-        });
+      // Fonction pour afficher l'erreur
+      function showError() {
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('error-message').classList.add('show');
+        document.body.classList.add('loaded');
+      }
 
-        window.netlifyIdentity.on("login", () => {
-          showAdminContent();
-        });
+      // Initialisation de l'authentification
+      let authInitialized = false;
 
-        window.netlifyIdentity.on("logout", () => {
-          window.location.href = "/";
-        });
+      function initAuth() {
+        if (authInitialized) return;
+        authInitialized = true;
 
-        // Vérification immédiate de l'authentification
+        if (!window.netlifyIdentity) {
+          showError();
+          return;
+        }
+
         const currentUser = window.netlifyIdentity.currentUser();
-        if (!currentUser) {
-          window.netlifyIdentity.open('login');
-        } else {
+        
+        if (currentUser) {
           showAdminContent();
+        } else {
+          window.netlifyIdentity.open('login');
         }
-      } else {
-        // Si Netlify Identity n'est pas chargé, rediriger vers la page d'accueil
-        window.location.href = "/";
+
+        window.netlifyIdentity.on('login', () => {
+          showAdminContent();
+        });
+
+        window.netlifyIdentity.on('logout', () => {
+          window.location.href = '/';
+        });
+
+        window.netlifyIdentity.on('error', (err) => {
+          console.error('Netlify Identity error:', err);
+          showError();
+        });
       }
+
+      // Attendre que le DOM soit chargé
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAuth);
+      } else {
+        initAuth();
+      }
+
+      // Timeout de sécurité
+      setTimeout(() => {
+        if (!authInitialized) {
+          showError();
+        }
+      }, 5000);
 
       // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
