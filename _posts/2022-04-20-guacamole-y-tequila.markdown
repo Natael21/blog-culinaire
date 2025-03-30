@@ -1,11 +1,11 @@
 ---
 layout: restaurant
-title: "Guacamole y tequila (Sherbrooke)"
-date: 2023-05-14
+title: "Guacamole y Tequila"
+date: 2022-04-20
 note: 6
 style: "Mexicain & Latino"
-diet: "vegetarian-friendly"
-description: "Belle ambiance mexicaine, ce restaurant offre des classiques mexicains ainsi qu'une grande variété de cocktails."
+diet: "standard"
+description: "Un restaurant mexicain avec une ambiance festive et des plats traditionnels"
 price: "medium"
 address: "2340 Rue King Ouest, Sherbrooke, QC J1J 2E8"
 image: "/images/Guacamole y tequila.png"
@@ -20,4 +20,4 @@ Pour cette occasion, j'ai décidé d'être aventurier et d'y aller avec des ench
 
 **Nicolas** :
 
-J'ai opté pour un burrito au poulet qui était bon, mais pas exceptionnel. La sauce était un peu trop piquante pour mon goût. Le service était correct et l'ambiance était agréable. C'est un endroit correct pour manger de la nourriture mexicaine, mais il y a probablement de meilleures options en ville. 
+J'ai opté pour un burrito au poulet qui était bon, mais pas exceptionnel. La sauce était un peu trop piquante pour mon goût. Le service était correct et l'ambiance était agréable. C'est un endroit correct pour manger de la nourriture mexicaine, mais il y a probablement de meilleures options en ville.

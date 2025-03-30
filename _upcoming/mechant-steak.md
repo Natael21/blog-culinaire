@@ -1,7 +1,8 @@
 ---
-restaurant_type: Américain
+restaurant_type: Bistro & Café
 title: Méchant Steak
-description: Un steakhouse moderne spécialisé dans les viandes de qualité supérieure, grillées à la perfection et servies dans une ambiance décontractée.
-location: 66 rue Wellington Nord, Sherbrooke
-order: 5
+diet: "standard"
+description: Un bistro spécialisé dans les steaks et la viande, offrant une ambiance chaleureuse.
+location: 321 rue Wellington Nord, Sherbrooke
+order: 7
 --- 

@@ -63,9 +63,22 @@ title: Accueil
           <label for="rating-filter">Note</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="8">Recommandés (8/10 et +)</option>
-            <option value="6">Corrects (6 à 8/10)</option>
-            <option value="5">Non recommandés (moins de 6/10)</option>
+            <option value="8">Recommandés (8 à 10/10)</option>
+            <option value="6">Corrects (6 à 7/10)</option>
+            <option value="5">Non recommandés (5/10 et moins)</option>
+          </select>
+        </div>
+
+        <!-- Régime alimentaire -->
+        <div class="filter-item">
+          <label for="diet-filter">Régime alimentaire</label>
+          <select id="diet-filter" class="filter-select">
+            <option value="">Tous les régimes</option>
+            <option value="standard">Standard</option>
+            <option value="vegetarian-friendly">Options végétariennes</option>
+            <option value="vegetarian">100% Végétarien</option>
+            <option value="vegan-friendly">Options végétaliennes</option>
+            <option value="vegan">100% Végétalien</option>
           </select>
         </div>
 
@@ -98,6 +111,7 @@ title: Accueil
            data-style="{{ post.style }}"
            data-title="{{ post.title | downcase }}"
            data-price="{{ post.price | default: 'medium' }}"
+           data-diet="{{ post.diet | default: 'standard' }}"
            data-lat="{{ post.latitude }}"
            data-lng="{{ post.longitude }}"
            data-image="{{ post.image }}"
@@ -120,6 +134,19 @@ title: Accueil
               <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
               {% if post.style %}
               <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
+              {% endif %}
+              {% if post.diet %}
+              <span class="diet-type">
+                {% if post.diet == "vegetarian" %}
+                <i class="fas fa-carrot"></i> Végétarien
+                {% elsif post.diet == "vegan" %}
+                <i class="fas fa-leaf"></i> Végétalien
+                {% elsif post.diet == "vegetarian-friendly" %}
+                <i class="fas fa-carrot"></i> Options végétariennes
+                {% elsif post.diet == "vegan-friendly" %}
+                <i class="fas fa-leaf"></i> Options végétaliennes
+                {% endif %}
+              </span>
               {% endif %}
               <span class="price">
                 {% if post.price == "budget" %}
@@ -986,30 +1013,32 @@ function filterRestaurants() {
   const selectedStyle = styleFilter.value;
   const selectedRating = ratingFilter.value;
   const selectedPrice = priceFilter.value;
+  const selectedDiet = document.getElementById('diet-filter').value;
 
   let filteredRestaurants = restaurants.filter(restaurant => {
     const title = restaurant.dataset.title;
     const style = restaurant.dataset.style;
     const rating = parseFloat(restaurant.dataset.rating);
     const price = restaurant.dataset.price;
+    const diet = restaurant.dataset.diet;
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
     const styleMatch = !selectedStyle || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
+    const dietMatch = !selectedDiet || diet === selectedDiet;
     
-    // Nouvelle logique pour le filtrage des notes
+    // Logique pour le filtrage des notes
     let ratingMatch = true;
     if (selectedRating) {
-      const ratingOnTen = rating * 2; // Convertir la note sur 5 en note sur 10
       switch(selectedRating) {
         case "8":
-          ratingMatch = ratingOnTen >= 8;
+          ratingMatch = rating >= 8 && rating <= 10;
           break;
         case "6":
-          ratingMatch = ratingOnTen >= 6 && ratingOnTen < 8;
+          ratingMatch = rating >= 6 && rating <= 7;
           break;
         case "5":
-          ratingMatch = ratingOnTen < 6;
+          ratingMatch = rating <= 5;
           break;
       }
     }
@@ -1018,7 +1047,7 @@ function filterRestaurants() {
     if (map) {
       const marker = markers.get(restaurant.id);
       if (marker) {
-        if (titleMatch && styleMatch && ratingMatch && priceMatch) {
+        if (titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch) {
           marker.addTo(map);
         } else {
           marker.remove();
@@ -1026,7 +1055,7 @@ function filterRestaurants() {
       }
     }
     
-    return titleMatch && styleMatch && ratingMatch && priceMatch;
+    return titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch;
   });
 
   // Mettre à jour la grille
@@ -1395,9 +1424,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="popup-info">
             <h3>${restaurant.querySelector('h2').textContent}</h3>
             <div class="popup-rating">
-              <div class="rating-bar">
-                <div class="rating-fill" style="width: {{ rating_on_ten | times: 10 }}%"></div>
-              </div>
+              <span class="score">${restaurant.dataset.rating}/10</span>
             </div>
             <div class="popup-meta">
               <span class="cuisine-style">

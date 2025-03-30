@@ -3,7 +3,8 @@ layout: restaurant
 title: "El Tabernaco (Fermé)"
 date: 2022-04-20
 note: 10
-style: "Mexicain"
+style: "Mexicain & Latino"
+diet: "vegetarian-friendly"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui offrait une expérience gastronomique mexicaine authentique, avec des plats savoureux et une ambiance chaleureuse qui transportait ses clients au cœur du Mexique."
 price: "medium"
 address: "243 Rue Alexandre, Sherbrooke, QC J1H 4S8"

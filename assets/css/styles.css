@@ -30,6 +30,20 @@
   font-size: 0.9rem;
 }
 
+/* Style pour le popup de la carte */
+.map-popup .popup-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.8rem;
+}
+
+.map-popup .popup-rating .score {
+  color: #f39c12;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
 /* Ajustements pour la vue en liste */
 .post-grid.list-view .rating-bar {
   max-width: 150px;
@@ -48,4 +62,34 @@
 /* Ajustements pour la page détaillée du restaurant */
 .restaurant-detail .rating-bar {
   max-width: 200px;
+}
+
+.diet-type {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #27ae60;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.diet-type i {
+  color: #27ae60;
+}
+
+/* Ajustement pour la vue en carte */
+.map-popup .diet-type {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+/* Ajustement pour les filtres */
+.filter-item select option[value="vegetarian"],
+.filter-item select option[value="vegan"] {
+  color: #27ae60;
+}
+
+.filter-item select option[value="vegetarian-friendly"],
+.filter-item select option[value="vegan-friendly"] {
+  color: #2ecc71;
 } 

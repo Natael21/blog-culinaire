@@ -3,7 +3,8 @@ layout: restaurant
 title: "Brasserie Daniel Lapointe"
 date: 2024-01-18
 note: 9
-style: "Microbrasserie"
+style: "Pub & Microbrasserie"
+diet: "standard"
 description: "Une brasserie réputée pour ses délicieuses crevettes à volonté les jeudis soirs !"
 price: "medium"
 address: "2660 Rue King Ouest, Sherbrooke, QC J1L 1C5"

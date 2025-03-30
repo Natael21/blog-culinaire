@@ -3,7 +3,8 @@ layout: restaurant
 title: "Le Dauphin"
 date: 2023-08-29
 note: 7
-style: "Bistro"
+style: "Bistro & Café"
+diet: "standard"
 description: "Un bistro offrant des plats classiques comme des côtes levées et des frites dans une ambiance chaleureuse"
 price: "medium"
 address: "1269 Rue King E, Sherbrooke, QC J1G 1E7"

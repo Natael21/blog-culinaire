@@ -3,7 +3,8 @@ layout: restaurant
 title: "Lotus Blanc Vietnamien"
 date: 2024-03-29
 note: 8
-style: "Vietnamien"
+style: "Asiatique"
+diet: "vegetarian-friendly"
 description: "Cuisine vietnamienne authentique et abordable dans un cadre zen avec aquariums."
 price: "budget"
 address: "1564 Rue Denault, Sherbrooke, QC J1H 2R2"

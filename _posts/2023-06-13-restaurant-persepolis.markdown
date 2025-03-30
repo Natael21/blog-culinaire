@@ -3,7 +3,8 @@ layout: restaurant
 title: "Restaurant Persépolis"
 date: 2023-06-13
 note: 10
-style: "Iranien"
+style: "Méditerranéen & Moyen-Orient"
+diet: "vegetarian-friendly"
 description: "Une authentique cuisine iranienne servie dans un cadre chaleureux et décoré avec soin"
 price: "medium"
 address: "305 Rue King Ouest, Sherbrooke, QC J1H 1R2"

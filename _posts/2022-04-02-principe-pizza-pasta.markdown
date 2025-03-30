@@ -4,6 +4,7 @@ title: "Principe Pizza Pasta (Fermé)"
 date: 2022-04-02
 note: 10
 style: "Italien"
+diet: "vegetarian-friendly"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui proposait une cuisine italienne traditionnelle, avec des pizzas et des pâtes authentiques dans une ambiance familiale chaleureuse."
 price: "medium"
 address: "1824 Rue King Ouest, Sherbrooke, QC J1J 2E2"

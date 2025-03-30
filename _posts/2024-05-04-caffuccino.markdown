@@ -4,6 +4,7 @@ title: "Caffuccino"
 date: 2024-05-04
 note: 8
 style: "Bistro"
+diet: "vegetarian-friendly"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
 price: "medium"
 address: "1700 Rue King Ouest, Sherbrooke, QC J1J 2C9"

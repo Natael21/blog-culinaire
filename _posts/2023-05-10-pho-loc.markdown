@@ -3,7 +3,8 @@ layout: restaurant
 title: "Pho Loc"
 date: 2023-05-10
 note: 9
-style: "Vietnamien"
+style: "Asiatique"
+diet: "vegetarian-friendly"
 description: "Une authentique cuisine vietnamienne dans un cadre pittoresque et intime"
 price: "budget"
 address: "1425 Rue King Ouest, Sherbrooke, QC J1J 2C1"

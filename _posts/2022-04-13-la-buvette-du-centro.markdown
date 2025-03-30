@@ -3,7 +3,8 @@ layout: restaurant
 title: "La Buvette du Centro"
 date: 2022-04-13
 note: 10
-style: "Café-Bistro"
+style: "Bistro & Café"
+diet: "vegetarian"
 description: "Un restaurant végétarien offrant des burgers créatifs et une sélection impressionnante de boissons locales"
 price: "medium"
 address: "117 Rue Wellington N, Sherbrooke, QC J1H 5B9"

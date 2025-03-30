@@ -4,6 +4,7 @@ title: "OMG Resto"
 date: 2024-03-04
 note: 7
 style: "Américain"
+diet: "standard"
 description: "Restaurant spacieux et luxueux offrant burgers raffinés et bières artisanales."
 price: "medium"
 address: "1175 Rue King Ouest, Sherbrooke, QC J1H 3H8"

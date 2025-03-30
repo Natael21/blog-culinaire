@@ -3,7 +3,8 @@ layout: restaurant
 title: "El Chupa Resto"
 date: 2024-03-16
 note: 7
-style: "Mexicain"
+style: "Mexicain & Latino"
+diet: "standard"
 description: "Cuisine mexicaine authentique avec tortillas maison et ambiance chaleureuse."
 price: "medium"
 address: "243 Rue Alexandre, Sherbrooke, QC J1H 4S8"

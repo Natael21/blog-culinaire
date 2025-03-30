@@ -1,7 +1,8 @@
 ---
-restaurant_type: Café-Boulangerie
+restaurant_type: Bistro & Café
 title: Pain Voyageur
-description: Une boulangerie artisanale offrant des pains au levain, des viennoiseries et des pâtisseries faits maison dans une ambiance chaleureuse et authentique.
-location: 369 rue King Est, Sherbrooke
-order: 1
+diet: "vegetarian-friendly"
+description: Une boulangerie-café artisanale offrant des viennoiseries et des repas légers.
+location: 234 rue King Ouest, Sherbrooke
+order: 4
 --- 

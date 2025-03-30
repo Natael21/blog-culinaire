@@ -3,7 +3,8 @@ layout: restaurant
 title: "Mexi & Co"
 date: 2024-05-13
 note: 9
-style: "Mexicain"
+style: "Mexicain & Latino"
+diet: "vegetarian-friendly"
 description: "L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !"
 price: "medium"
 address: "297 Rue King Ouest, Sherbrooke, QC J1H 1R2"

@@ -1,7 +1,8 @@
 ---
-restaurant_type: Moyen-Oriental
+restaurant_type: Méditerranéen & Moyen-Orient
 title: Resto Amir
-description: Un restaurant moyen-oriental proposant des grillades, des falafels et des mezzés traditionnels dans une atmosphère authentique et accueillante.
-location: 2832 rue King Ouest, Sherbrooke
-order: 6
+diet: "vegetarian-friendly"
+description: Un restaurant offrant une cuisine méditerranéenne et du Moyen-Orient dans une ambiance chaleureuse.
+location: 567 rue Wellington Nord, Sherbrooke
+order: 3
 ---

@@ -4,6 +4,7 @@ title: "Saveur et Délice"
 date: 2024-11-15
 note: 8
 style: "Asiatique"
+diet: "vegetarian-friendly"
 description: "Fusion asiatique-québécoise avec ambiance musicale douce et prix abordables."
 price: "budget"
 address: "70 Rue Wellington N, Sherbrooke, QC J1H 5B9"

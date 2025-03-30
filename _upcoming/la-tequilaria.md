@@ -1,7 +1,8 @@
 ---
-restaurant_type: Mexicain
+restaurant_type: Mexicain & Latino
 title: La Tequilaria
-description: Un restaurant mexicain authentique proposant des tacos, des enchiladas et une impressionnante sélection de tequilas dans une ambiance festive.
-location: 130 rue Wellington Nord, Sherbrooke
-order: 4
+diet: "vegetarian-friendly"
+description: Un restaurant mexicain authentique offrant des tacos, burritos et une sélection impressionnante de tequilas.
+location: 123 rue Wellington Nord, Sherbrooke
+order: 8
 --- 

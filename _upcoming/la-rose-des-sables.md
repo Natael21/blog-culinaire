@@ -1,7 +1,8 @@
 ---
-restaurant_type: Oriental
+restaurant_type: Méditerranéen & Moyen-Orient
 title: La Rose des Sables
-description: Un restaurant tunisien authentique proposant des couscous, des tajines et des pâtisseries orientales dans un cadre aux couleurs du Maghreb.
-location: 505 rue Papineau, Sherbrooke
-order: 8
+diet: "vegetarian-friendly"
+description: Un restaurant offrant une cuisine méditerranéenne et du Moyen-Orient dans une ambiance chaleureuse.
+location: 789 rue King Ouest, Sherbrooke
+order: 6
 --- 
