@@ -34,41 +34,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <style>
-      /* Styles critiques inlinés */
-      .site-return {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 10px 20px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .site-return:hover {
-        background-color: #34495e;
-        transform: translateY(-2px);
-      }
-      .site-return i {
-        font-size: 0.9em;
-      }
-      @media (max-width: 768px) {
-        .site-return {
-          top: 10px;
-          right: 10px;
-          padding: 8px 15px;
-          font-size: 0.9em;
-        }
-      }
-      
       /* Styles pour éviter le flash de contenu non stylé */
       .hero {
         min-height: 400px;
@@ -128,7 +93,6 @@
     </button>
 
     <script>
-      // Chargement différé du JavaScript non critique
       document.addEventListener('DOMContentLoaded', function() {
         const loginButton = document.getElementById('login-button');
         const loginDropdown = document.getElementById('login-dropdown');
@@ -137,11 +101,7 @@
         function handleLoginClick(e) {
           e.preventDefault();
           e.stopPropagation();
-          if (!window.netlifyIdentity.currentUser()) {
-            loginDropdown.classList.toggle('show');
-          } else {
-            window.location.href = '/admin/';
-          }
+          loginDropdown.classList.toggle('show');
         }
 
         // Fermer le dropdown si on clique en dehors

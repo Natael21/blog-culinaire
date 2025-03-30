@@ -14,7 +14,7 @@ comments: true
       <div class="restaurant-meta">
         <div class="rating">
           <div class="rating-bar">
-            <div class="rating-fill" style="width: {{ page.note | times: 10 }}%"></div>
+            <div class="rating-fill" data-rating="{{ page.note }}"></div>
           </div>
           <span class="score">{{ page.note }}/10</span>
         </div>
