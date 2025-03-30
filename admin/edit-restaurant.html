@@ -852,11 +852,11 @@
       <div class="preview-section">
         <h2>Prévisualisation</h2>
         <div class="preview-toggle">
-          <button class="active" data-view="card">Vue carte</button>
-          <button data-view="full">Vue complète</button>
+          <button data-view="card">Vue carte</button>
+          <button data-view="full" class="active">Vue complète</button>
         </div>
 
-        <div class="preview-card active">
+        <div class="preview-card">
           <h3></h3>
           <div class="preview-card-content">
             <div class="preview-card-meta">
@@ -867,7 +867,7 @@
           </div>
         </div>
 
-        <div class="preview-full">
+        <div class="preview-full active">
           <h3></h3>
           <div class="preview-content">
             <div class="preview-meta">
@@ -1737,22 +1737,16 @@
 
       // Gestion du toggle des previews
       document.querySelectorAll('.preview-toggle button').forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', function() {
+          const viewType = this.getAttribute('data-view');
+          
           // Désactiver tous les boutons et vues
-          document.querySelectorAll('.preview-toggle button').forEach(btn => {
-            btn.classList.remove('active');
-          });
-          document.querySelectorAll('.preview-card, .preview-full').forEach(view => {
-            view.classList.remove('active');
-          });
+          document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.preview-card, .preview-full').forEach(view => view.classList.remove('active'));
           
           // Activer le bouton cliqué et sa vue correspondante
-          button.classList.add('active');
-          const viewType = button.getAttribute('data-view');
-          const viewToShow = document.querySelector(`.preview-${viewType}`);
-          if (viewToShow) {
-            viewToShow.classList.add('active');
-          }
+          this.classList.add('active');
+          document.querySelector(`.preview-${viewType}`).classList.add('active');
         });
       });
 
