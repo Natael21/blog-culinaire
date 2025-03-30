@@ -63,8 +63,11 @@ title: Accueil
           <label for="rating-filter">Note</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="4plus">4 étoiles et plus</option>
-            <option value="3minus">3 étoiles et moins</option>
+            <option value="5">5 étoiles</option>
+            <option value="4">4 étoiles</option>
+            <option value="3">3 étoiles</option>
+            <option value="2">2 étoiles</option>
+            <option value="1">1 étoile</option>
           </select>
         </div>
 
@@ -73,9 +76,9 @@ title: Accueil
           <label for="price-filter">Fourchette de prix</label>
           <select id="price-filter" class="filter-select">
             <option value="">Tous les prix</option>
-            <option value="budget">$ (0-20$)</option>
-            <option value="medium">$$ (20-40$)</option>
-            <option value="expensive">$$$ (40$ et +)</option>
+            <option value="budget">Budget ($)</option>
+            <option value="medium">Moyen ($$)</option>
+            <option value="expensive">Luxe ($$$)</option>
           </select>
         </div>
 
@@ -110,20 +113,15 @@ title: Accueil
               <div class="rating">
                 <span class="stars">
                   {% assign rating = post.note | plus: 0.0 %}
-                  {% assign whole_stars = rating | floor %}
-                  {% assign has_half_star = rating | minus: whole_stars | times: 10 | floor | divided_by: 5 %}
-                  
                   {% for i in (1..5) %}
-                    {% if i <= whole_stars %}
+                    {% if rating >= i %}
                       <i class="fas fa-star"></i>
-                    {% elsif i == whole_stars | plus: 1 and has_half_star == 1 %}
-                      <i class="fas fa-star-half-alt"></i>
                     {% else %}
                       <i class="far fa-star"></i>
                     {% endif %}
                   {% endfor %}
                 </span>
-                <span class="score">{% if rating | modulo: 1 == 0 %}{{ rating | floor }}{% else %}{{ rating }}{% endif %}/5</span>
+                <span class="score">{{ rating | floor }}/5</span>
               </div>
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
@@ -134,11 +132,11 @@ title: Accueil
               {% endif %}
               <span class="price">
                 {% if post.price == "budget" %}
-                  <i class="fas fa-dollar-sign"></i><span class="price-range"> (0-20$)</span>
+                  <i class="fas fa-dollar-sign"></i>
                 {% elsif post.price == "medium" %}
-                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (20-40$)</span>
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
                 {% elsif post.price == "expensive" %}
-                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (40$ et +)</span>
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
                 {% endif %}
               </span>
             </div>
@@ -795,18 +793,151 @@ h2 {
 }
 
 /* Style pour la vue en pastilles */
-.post-grid.grid-view .price-range {
-  display: none !important;
+.post-grid.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
-/* Afficher les fourchettes de prix en mode liste */
-.post-grid.list-view .price-range {
-  display: inline !important;
+.post-grid.grid-view .post-card {
+  height: auto;
+}
+
+.post-grid.grid-view .post-link {
+  flex-direction: column;
+}
+
+.post-grid.grid-view .post-image {
+  width: 100%;
+  height: 200px;
+}
+
+.post-grid.grid-view .content {
+  padding: 1.5rem;
+}
+
+/* Style pour la vue en liste */
+.post-grid.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.post-grid.list-view .post-card {
+  height: 200px;
+}
+
+.post-grid.list-view .post-link {
+  flex-direction: row;
+}
+
+.post-grid.list-view .post-image {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.post-grid.list-view .content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.post-grid.list-view h2 {
+  font-size: 1.4rem;
+}
+
+@media (max-width: 768px) {
+  .post-grid.list-view .post-card {
+    height: auto;
+  }
+
+  .post-grid.list-view .post-link {
+    flex-direction: column;
+  }
+
+  .post-grid.list-view .post-image {
+    width: 100%;
+    height: 200px;
+  }
+
+  .post-grid.list-view .meta {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
 }
 
 /* Style pour la vue carte */
-.map-popup .price-range {
-  display: inline !important;
+.map-view {
+  width: 100%;
+  height: 700px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Style pour les popups de la carte */
+.map-popup {
+  padding: 0;
+  max-width: 300px;
+}
+
+.map-popup .popup-content {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-popup .popup-image {
+  width: 100%;
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+}
+
+.map-popup .popup-info {
+  padding: 1rem;
+  background: white;
+}
+
+.map-popup h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+.map-popup .popup-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.map-popup .popup-rating .stars {
+  color: #f1c40f;
+  font-size: 0.9rem;
+}
+
+.map-popup .popup-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.map-popup .popup-meta i {
+  color: var(--accent-color);
+}
+
+.map-popup .popup-meta .price {
+  color: #2ecc71;
+}
+
+/* Ajustements responsive pour la carte */
+@media (max-width: 768px) {
+  .map-view {
+    height: calc(100vh - 250px);
+    border-radius: 0;
+    margin: 0 -0.5rem;
+  }
 }
 </style>
 
@@ -834,7 +965,7 @@ advancedFiltersToggle.addEventListener('click', function() {
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
   const selectedStyle = styleFilter.value;
-  const ratingFilter = document.getElementById('rating-filter').value;
+  const exactRating = ratingFilter.value;
   const selectedPrice = priceFilter.value;
 
   let filteredRestaurants = restaurants.filter(restaurant => {
@@ -845,9 +976,7 @@ function filterRestaurants() {
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
     const styleMatch = !selectedStyle || style === selectedStyle;
-    const ratingMatch = !ratingFilter || 
-      (ratingFilter === '4plus' && rating >= 4) || 
-      (ratingFilter === '3minus' && rating <= 3);
+    const ratingMatch = !exactRating || rating === parseFloat(exactRating);
     const priceMatch = !selectedPrice || price === selectedPrice;
     
     // Si la carte est initialisée, mettre à jour la visibilité des marqueurs

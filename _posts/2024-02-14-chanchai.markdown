@@ -3,7 +3,7 @@ layout: restaurant
 title: "Chanchai"
 date: 2024-02-14
 note: 4
-style: "Asiatique"
+style: "Thaïlandais"
 description: "Saveurs thaïlandaises authentiques et portions généreuses dans un cadre tranquille."
 price: "medium"
 address: "11 Rue Wellington N, Sherbrooke, QC J1H 5A9"
