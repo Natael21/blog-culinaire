@@ -1082,6 +1082,285 @@ order: ${formData.order}
           }, 300);
         }
       }
+
+      // Système global de gestion des modifications
+      const pendingChanges = {
+        workflow: new Map(),
+        images: new Map(),
+        upcoming: new Map(),
+        restaurants: new Map()
+      };
+
+      // Fonction pour sauvegarder les modifications en local
+      function saveToLocalStorage() {
+        localStorage.setItem('pendingChanges', JSON.stringify({
+          workflow: Array.from(pendingChanges.workflow.entries()),
+          images: Array.from(pendingChanges.images.entries()),
+          upcoming: Array.from(pendingChanges.upcoming.entries()),
+          restaurants: Array.from(pendingChanges.restaurants.entries())
+        }));
+        updatePendingChangesBadge();
+      }
+
+      // Fonction pour charger les modifications depuis le stockage local
+      function loadFromLocalStorage() {
+        const saved = localStorage.getItem('pendingChanges');
+        if (saved) {
+          const data = JSON.parse(saved);
+          pendingChanges.workflow = new Map(data.workflow);
+          pendingChanges.images = new Map(data.images);
+          pendingChanges.upcoming = new Map(data.upcoming);
+          pendingChanges.restaurants = new Map(data.restaurants);
+          updatePendingChangesBadge();
+        }
+      }
+
+      // Fonction pour mettre à jour le badge des modifications en attente
+      function updatePendingChangesBadge() {
+        const totalChanges = 
+          pendingChanges.workflow.size + 
+          pendingChanges.images.size + 
+          pendingChanges.upcoming.size + 
+          pendingChanges.restaurants.size;
+
+        const saveButton = document.querySelector('.save-changes-btn');
+        const badge = saveButton.querySelector('.pending-changes-badge') || document.createElement('span');
+        badge.className = 'pending-changes-badge';
+        
+        if (totalChanges > 0) {
+          badge.textContent = totalChanges;
+          badge.style.display = 'inline-flex';
+          saveButton.classList.add('has-changes');
+          saveButton.disabled = false;
+        } else {
+          badge.style.display = 'none';
+          saveButton.classList.remove('has-changes');
+          saveButton.disabled = true;
+        }
+
+        if (!saveButton.contains(badge)) {
+          saveButton.appendChild(badge);
+        }
+      }
+
+      // Fonction pour sauvegarder les modifications du workflow
+      async function saveWorkflowChanges() {
+        const changes = Array.from(pendingChanges.workflow.values());
+        if (changes.length === 0) return;
+
+        for (const change of changes) {
+          const { path, content, action } = change;
+          const token = netlifyIdentity.currentUser().token.access_token;
+
+          if (action === 'update') {
+            await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${path}`, {
+              method: 'PUT',
+              headers: {
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                message: `Mise à jour du statut: ${path}`,
+                content: btoa(content),
+                sha: await getFileSha(path)
+              })
+            });
+          }
+        }
+      }
+
+      // Fonction pour sauvegarder les modifications des images
+      async function saveImageChanges() {
+        const changes = Array.from(pendingChanges.images.values());
+        if (changes.length === 0) return;
+
+        for (const change of changes) {
+          const { path, content, action } = change;
+          const token = netlifyIdentity.currentUser().token.access_token;
+
+          if (action === 'delete') {
+            await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${path}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                message: `Suppression de l'image: ${path}`,
+                sha: await getFileSha(path)
+              })
+            });
+          } else if (action === 'update' || action === 'create') {
+            await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${path}`, {
+              method: 'PUT',
+              headers: {
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                message: `${action === 'create' ? 'Ajout' : 'Mise à jour'} de l'image: ${path}`,
+                content: content,
+                sha: action === 'update' ? await getFileSha(path) : undefined
+              })
+            });
+          }
+        }
+      }
+
+      // Fonction pour mettre à jour le statut d'un article dans le workflow
+      function updateWorkflowStatus(itemId, newState) {
+        const item = document.querySelector(`[data-id="${itemId}"]`);
+        if (!item) return;
+
+        const oldState = item.parentElement.dataset.state;
+        if (oldState === newState) return;
+
+        // Sauvegarder la modification en local
+        pendingChanges.workflow.set(itemId, {
+          path: item.dataset.path,
+          content: item.dataset.content.replace(/state:\s*"[^"]*"/, `state: "${newState}"`),
+          action: 'update'
+        });
+
+        // Ajouter la classe modified-item
+        item.classList.add('modified-item');
+        
+        // Mettre à jour le badge et sauvegarder en local
+        saveToLocalStorage();
+        
+        // Déplacer visuellement l'élément
+        const targetColumn = document.querySelector(`[data-state="${newState}"]`);
+        if (targetColumn) {
+          targetColumn.appendChild(item);
+        }
+      }
+
+      // Fonction pour gérer les images
+      function handleImageAction(path, action, content = null) {
+        const imageId = path.split('/').pop();
+        
+        pendingChanges.images.set(imageId, {
+          path,
+          action,
+          content
+        });
+
+        // Mettre à jour visuellement
+        const imageElement = document.querySelector(`[data-image-path="${path}"]`);
+        if (imageElement) {
+          imageElement.classList.add('modified-item');
+        }
+
+        // Sauvegarder en local
+        saveToLocalStorage();
+      }
+
+      // Initialisation de Sortable pour le workflow
+      function initializeWorkflowSortable() {
+        document.querySelectorAll('.workflow-items').forEach(container => {
+          new Sortable(container, {
+            group: 'workflow',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            onEnd: function(evt) {
+              const itemId = evt.item.dataset.id;
+              const newState = evt.to.dataset.state;
+              updateWorkflowStatus(itemId, newState);
+            }
+          });
+        });
+      }
+
+      // Initialisation au chargement de la page
+      document.addEventListener('DOMContentLoaded', () => {
+        initializeWorkflowSortable();
+        loadFromLocalStorage();
+        
+        // Restaurer l'état visuel des éléments modifiés
+        for (const [id, change] of pendingChanges.workflow) {
+          const item = document.querySelector(`[data-id="${id}"]`);
+          if (item) item.classList.add('modified-item');
+        }
+        
+        for (const [id, change] of pendingChanges.images) {
+          const item = document.querySelector(`[data-image-path="${change.path}"]`);
+          if (item) item.classList.add('modified-item');
+        }
+      });
+
+      // Fonction pour sauvegarder toutes les modifications sur GitHub
+      async function saveChanges() {
+        try {
+          const loadingToast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          });
+
+          loadingToast.fire({
+            icon: 'info',
+            title: 'Sauvegarde des modifications en cours...'
+          });
+
+          // Sauvegarder les modifications pour chaque section
+          await Promise.all([
+            saveWorkflowChanges(),
+            saveImageChanges(),
+            saveUpcomingChanges(),
+            saveRestaurantChanges()
+          ]);
+
+          // Vider le cache local
+          pendingChanges.workflow.clear();
+          pendingChanges.images.clear();
+          pendingChanges.upcoming.clear();
+          pendingChanges.restaurants.clear();
+          localStorage.removeItem('pendingChanges');
+          updatePendingChangesBadge();
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Modifications sauvegardées !',
+            text: 'Toutes les modifications ont été publiées avec succès.',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        } catch (error) {
+          console.error('Erreur lors de la sauvegarde:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur !',
+            text: 'Une erreur est survenue lors de la sauvegarde des modifications.',
+            footer: 'Vos modifications sont toujours en cache local.'
+          });
+        }
+      }
+
+      // Fonction pour vérifier les modifications non sauvegardées avant de quitter
+      function checkUnsavedChanges() {
+        const totalChanges = 
+          pendingChanges.workflow.size + 
+          pendingChanges.images.size + 
+          pendingChanges.upcoming.size + 
+          pendingChanges.restaurants.size;
+
+        if (totalChanges > 0) {
+          return 'Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir quitter ?';
+        }
+      }
+
+      // Écouteur pour les modifications non sauvegardées
+      window.addEventListener('beforeunload', (e) => {
+        const message = checkUnsavedChanges();
+        if (message) {
+          e.returnValue = message;
+          return message;
+        }
+      });
     </script>
   </body>
 </html>

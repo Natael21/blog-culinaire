@@ -619,6 +619,24 @@
       .scroll-toggle.unsynced i {
         transform: rotate(90deg);
       }
+
+      /* Styles pour le badge */
+      .pending-count {
+        background-color: #e74c3c;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        margin-left: 8px;
+      }
+      .save-changes-btn.has-changes {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
     </style>
   </head>
   <body>
@@ -870,6 +888,157 @@
         ...quillOptions,
         placeholder: 'Entrez une description détaillée du restaurant...'
       });
+
+      // Fonction pour formater le texte de la description
+      function formatDescription(content) {
+        // Convertir les marqueurs Markdown en HTML
+        let formattedContent = content
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Convertir **texte** en <strong>texte</strong>
+          .replace(/\*(.*?)\*/g, '<em>$1</em>') // Convertir *texte* en <em>texte</em>
+          .replace(/\n\n/g, '</p><p>') // Convertir les doubles sauts de ligne en paragraphes
+          .replace(/\n/g, '<br>'); // Convertir les simples sauts de ligne en <br>
+
+        // Ajouter les balises de paragraphe au début et à la fin
+        formattedContent = `<p>${formattedContent}</p>`;
+
+        return formattedContent;
+      }
+
+      // Variable globale pour stocker les modifications en attente
+      let pendingChanges = {
+        restaurants: new Map(),
+        lastEdited: null
+      };
+
+      // Fonction pour sauvegarder les modifications en cache
+      function saveToCache(formData) {
+        const restaurantId = formData.id || formData.title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const timestamp = Date.now();
+        
+        pendingChanges.restaurants.set(restaurantId, {
+          id: restaurantId,
+          title: formData.title,
+          style: formData.style,
+          diet: formData.diet,
+          price: formData.price,
+          note: formData.note,
+          address: formData.address,
+          description: formData.description,
+          mainImage: document.querySelector('.preview-card img').src,
+          timestamp: timestamp,
+          lastModified: new Date().toLocaleString()
+        });
+        
+        pendingChanges.lastEdited = restaurantId;
+        
+        // Sauvegarder dans le localStorage
+        localStorage.setItem('pendingChanges', JSON.stringify({
+          restaurants: Array.from(pendingChanges.restaurants.entries()),
+          lastEdited: pendingChanges.lastEdited
+        }));
+        
+        // Activer le bouton de sauvegarde global
+        const saveBtn = document.querySelector('.save-changes-btn');
+        if (saveBtn) {
+          saveBtn.classList.add('has-changes');
+        }
+
+        // Mettre à jour le compteur de modifications en attente
+        updatePendingChangesCount();
+      }
+
+      // Fonction pour charger les modifications en cache
+      function loadFromCache() {
+        const cached = localStorage.getItem('pendingChanges');
+        if (cached) {
+          const parsedCache = JSON.parse(cached);
+          pendingChanges.restaurants = new Map(parsedCache.restaurants);
+          pendingChanges.lastEdited = parsedCache.lastEdited;
+          
+          // Restaurer les données si on est sur la page d'édition du restaurant
+          const urlParams = new URLSearchParams(window.location.search);
+          const currentId = urlParams.get('id') || urlParams.get('title')?.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          
+          if (currentId && pendingChanges.restaurants.has(currentId)) {
+            const data = pendingChanges.restaurants.get(currentId);
+            restoreFormData(data);
+            
+            // Afficher une notification
+            Swal.fire({
+              title: 'Modifications trouvées',
+              html: `Des modifications non sauvegardées ont été trouvées pour ce restaurant.<br>Dernière modification : ${data.lastModified}`,
+              icon: 'info',
+              showCancelButton: true,
+              confirmButtonText: 'Restaurer',
+              cancelButtonText: 'Ignorer'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                restoreFormData(data);
+                updatePreview();
+              } else {
+                // Si l'utilisateur ignore, supprimer les modifications en cache
+                pendingChanges.restaurants.delete(currentId);
+                saveToCache({});
+              }
+            });
+          }
+        }
+      }
+
+      // Fonction pour restaurer les données du formulaire
+      function restoreFormData(data) {
+        document.getElementById('restaurant-title').value = data.title || '';
+        document.getElementById('restaurant-style').value = data.style || '';
+        document.getElementById('restaurant-diet').value = data.diet || '';
+        document.getElementById('restaurant-price').value = data.price || '';
+        document.getElementById('restaurant-note').value = data.note || '';
+        document.getElementById('restaurant-address').value = data.address || '';
+        if (summaryEditor) {
+          summaryEditor.root.innerHTML = data.description || '';
+        }
+        
+        // Restaurer l'image principale si elle existe
+        if (data.mainImage) {
+          const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
+          previewImages.forEach(img => img.src = data.mainImage);
+        }
+      }
+
+      // Fonction pour mettre à jour le compteur de modifications en attente
+      function updatePendingChangesCount() {
+        const count = pendingChanges.restaurants.size;
+        const saveBtn = document.querySelector('.save-changes-btn');
+        if (saveBtn) {
+          const badge = saveBtn.querySelector('.pending-count') || document.createElement('span');
+          badge.className = 'pending-count';
+          badge.textContent = count > 0 ? `(${count})` : '';
+          if (!saveBtn.querySelector('.pending-count')) {
+            saveBtn.appendChild(badge);
+          }
+        }
+      }
+
+      // Ajouter des styles pour le badge
+      const badgeStyles = document.createElement('style');
+      badgeStyles.textContent = `
+        .pending-count {
+          background-color: #e74c3c;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 10px;
+          font-size: 0.8rem;
+          margin-left: 8px;
+        }
+        .save-changes-btn.has-changes {
+          animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+      `;
+      document.head.appendChild(badgeStyles);
 
       // Fonction pour formater le texte de la description
       function formatDescription(content) {
@@ -1593,70 +1762,40 @@
         e.preventDefault();
 
         try {
-          const name = document.getElementById('restaurant-title').value;
-          const date = document.getElementById('restaurant-date').value;
-          const fileName = `${date}-${name
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
-            .replace(/&/g, 'and') // Remplacer & par and
-            .replace(/[^a-z0-9]+/g, '-')}.markdown`;
-          
-          // Construire le contenu du fichier avec traitement des accents
-          const frontMatter = [
-            '---',
-            `layout: restaurant`,
-            `title: "${sanitizeFrontmatterValue(name)}"`,
-            `date: "${date}"`,
-            `style: "${sanitizeFrontmatterValue(document.getElementById('restaurant-style').value)}"`,
-            `price: "${convertPriceToFrontmatter(document.getElementById('restaurant-price').value)}"`,
-            `note: ${document.getElementById('restaurant-note').value}`,
-            `address: "${sanitizeFrontmatterValue(document.getElementById('restaurant-address').value)}"`,
-            `description: "${sanitizeFrontmatterValue(summaryEditor.root.innerHTML)}"`,
-            `image: "${document.querySelector('.preview-card img').src}"`,
-            `state: "draft"`,
-            '---\n'
-          ].join('\n');
+          const formData = {
+            id: new URLSearchParams(window.location.search).get('id'),
+            title: document.getElementById('restaurant-title').value,
+            style: document.getElementById('restaurant-style').value,
+            diet: document.getElementById('restaurant-diet').value,
+            price: document.getElementById('restaurant-price').value,
+            note: document.getElementById('restaurant-note').value,
+            address: document.getElementById('restaurant-address').value,
+            description: summaryEditor.root.innerHTML,
+            mainImage: document.querySelector('.preview-card img').src,
+            lastModified: new Date().toLocaleString(),
+            status: 'pending' // Indique que les changements sont en attente
+          };
 
-          const content = frontMatter + summaryEditor.root.innerHTML;
-
-          // Encoder le contenu en Base64 avec support des accents
-          const contentBase64 = btoa(unescape(encodeURIComponent(content)));
-
-          // Créer le fichier via l'API GitHub
-          const token = netlifyIdentity.currentUser().token.access_token;
-          const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts/${fileName}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `Ajout du restaurant ${name}`,
-              content: contentBase64
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error('Erreur lors de la sauvegarde');
-          }
+          // Sauvegarder dans le localStorage
+          saveToCache(formData);
 
           // Afficher une confirmation
           await Swal.fire({
-            title: 'Restaurant sauvegardé !',
-            text: 'Le restaurant a été ajouté avec succès dans les brouillons.',
+            title: 'Modifications enregistrées localement',
+            html: 'Les modifications ont été sauvegardées temporairement.<br><br>' +
+                  '<strong>N\'oubliez pas de cliquer sur "Sauvegarder les changements"</strong> dans la barre supérieure pour publier définitivement vos modifications.',
             icon: 'success',
             confirmButtonText: 'OK'
           });
 
-          // Rediriger vers la section workflow
-          window.location.href = '/admin/#workflow';
+          // Rediriger vers la liste des restaurants
+          window.location.href = '/admin/';
 
         } catch (error) {
           console.error('Erreur lors de la sauvegarde:', error);
           await Swal.fire({
             title: 'Erreur !',
-            text: 'Une erreur est survenue lors de la sauvegarde du restaurant.',
+            text: 'Une erreur est survenue lors de la sauvegarde locale des modifications.',
             icon: 'error',
             confirmButtonText: 'OK'
           });
@@ -1670,26 +1809,24 @@
         }
         
         const hasUnsavedChanges = checkForChanges();
-        console.log('Vérification des changements avant sortie:', hasUnsavedChanges);
         
-        if (!hasUnsavedChanges) {
-          console.log('Aucun changement détecté, redirection directe');
-          window.location.href = '/admin/';
-          return;
-        }
-        
-        const result = await Swal.fire({
-          title: 'Attention !',
-          text: 'Tous les changements non sauvegardés seront perdus. Voulez-vous vraiment quitter la page ?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Oui, quitter',
-          cancelButtonText: 'Non, rester',
-          confirmButtonColor: '#e74c3c',
-          cancelButtonColor: '#3498db'
-        });
+        if (hasUnsavedChanges) {
+          const result = await Swal.fire({
+            title: 'Attention !',
+            html: 'Si vous quittez maintenant, les modifications non sauvegardées seront perdues.<br><br>' +
+                  'Pour conserver vos modifications, cliquez sur "Enregistrer" avant de quitter.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Quitter quand même',
+            cancelButtonText: 'Rester sur la page',
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#3498db'
+          });
 
-        if (result.isConfirmed) {
+          if (result.isConfirmed) {
+            window.location.href = '/admin/';
+          }
+        } else {
           window.location.href = '/admin/';
         }
       }
@@ -1829,82 +1966,6 @@
         loadCuisineStyles();
         loadRestaurantData();
       });
-
-      // Variable globale pour stocker les modifications en attente
-      let pendingChanges = {
-        restaurants: new Map()
-      };
-
-      // Fonction pour sauvegarder les modifications en cache
-      function saveToCache(formData) {
-        const restaurantId = formData.id || 'new_' + Date.now();
-        pendingChanges.restaurants.set(restaurantId, {
-          title: formData.title,
-          style: formData.style,
-          diet: formData.diet,
-          price: formData.price,
-          note: formData.note,
-          address: formData.address,
-          description: formData.description,
-          timestamp: Date.now()
-        });
-        
-        // Sauvegarder dans le localStorage
-        localStorage.setItem('pendingChanges', JSON.stringify(Array.from(pendingChanges.restaurants.entries())));
-        
-        // Activer le bouton de sauvegarde global
-        document.querySelector('.save-changes-btn').classList.add('has-changes');
-      }
-
-      // Fonction pour charger les modifications en cache
-      function loadFromCache() {
-        const cached = localStorage.getItem('pendingChanges');
-        if (cached) {
-          pendingChanges.restaurants = new Map(JSON.parse(cached));
-          
-          // Restaurer les données si on est sur la page d'édition du restaurant correspondant
-          const urlParams = new URLSearchParams(window.location.search);
-          const currentId = urlParams.get('id');
-          if (currentId && pendingChanges.restaurants.has(currentId)) {
-            const data = pendingChanges.restaurants.get(currentId);
-            document.getElementById('restaurant-title').value = data.title;
-            document.getElementById('restaurant-style').value = data.style;
-            document.getElementById('restaurant-diet').value = data.diet;
-            document.getElementById('restaurant-price').value = data.price;
-            document.getElementById('restaurant-note').value = data.note;
-            document.getElementById('restaurant-address').value = data.address;
-            document.getElementById('restaurant-description').value = data.description;
-          }
-        }
-      }
-
-      // Écouteur d'événements pour le formulaire
-      document.getElementById('restaurant-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = {
-          id: new URLSearchParams(window.location.search).get('id'),
-          title: document.getElementById('restaurant-title').value,
-          style: document.getElementById('restaurant-style').value,
-          diet: document.getElementById('restaurant-diet').value,
-          price: document.getElementById('restaurant-price').value,
-          note: document.getElementById('restaurant-note').value,
-          address: document.getElementById('restaurant-address').value,
-          description: document.getElementById('restaurant-description').value
-        };
-        
-        saveToCache(formData);
-        
-        Swal.fire({
-          title: 'Modifications enregistrées',
-          text: 'Les modifications ont été sauvegardées localement. Cliquez sur "Sauvegarder les changements" dans la barre supérieure pour les publier.',
-          icon: 'success',
-          confirmButtonText: 'OK'
-        });
-      });
-
-      // Charger les modifications en cache au chargement de la page
-      document.addEventListener('DOMContentLoaded', loadFromCache);
     </script>
   </body>
 </html> 

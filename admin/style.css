@@ -69,12 +69,24 @@ body {
   justify-content: center;
   gap: 0.8rem;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
 }
 
-.admin-nav button:hover {
-  background-color: #34495e;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+.admin-nav button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.admin-nav button:hover::after {
+  width: 100%;
 }
 
 .admin-nav button.active {
@@ -83,14 +95,8 @@ body {
 }
 
 .admin-nav button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid #3498db;
+  width: 100%;
+  background-color: #3498db;
 }
 
 .admin-content-section {
@@ -665,27 +671,139 @@ body {
 }
 
 .save-changes-btn {
-  background-color: #27ae60;
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  background-color: #2ecc71;
   color: white;
-  padding: 0.8rem 1.2rem;
   border: none;
   border-radius: 8px;
-  text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 8px;
+  opacity: 0.6;
+}
+
+.save-changes-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.save-changes-btn.has-changes {
+  opacity: 1;
+  animation: pulse 2s infinite;
+}
+
+.save-changes-btn:hover:not(:disabled) {
+  background-color: #27ae60;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.save-changes-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.pending-changes-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  border: 2px solid white;
+  animation: bounce 0.5s ease;
+}
+
+/* Animation pour le badge */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Animation pour le bouton de sauvegarde */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+  }
+}
+
+/* Styles pour les éléments modifiés */
+.modified-item {
+  position: relative;
+  border-left: 4px solid #3498db !important;
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+.modified-item::before {
+  content: '•';
+  position: absolute;
+  top: 8px;
+  left: -12px;
+  color: #3498db;
+  font-size: 24px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Améliorations de l'interface utilisateur */
+.admin-nav button {
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  cursor: pointer;
 }
 
-.save-changes-btn:hover {
-  background-color: #219a52;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+.admin-nav button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
 }
 
-.save-changes-btn i {
-  font-size: 1.1rem;
+.admin-nav button:hover::after {
+  width: 100%;
+}
+
+.admin-nav button.active::after {
+  width: 100%;
+  background-color: #3498db;
+}
+
+/* Toast notifications */
+.swal2-toast {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
 } 
