@@ -87,6 +87,16 @@
         <i class="fas fa-user"></i>
         <span>Connexion</span>
       </a>
+      <div class="login-dropdown" id="login-dropdown">
+        <button class="dropdown-item" onclick="handleDisqusLogin()">
+          <i class="fas fa-comments"></i>
+          <span>Se connecter pour commenter</span>
+        </button>
+        <button class="dropdown-item" onclick="handleNetlifyLogin()">
+          <i class="fas fa-user-shield"></i>
+          <span>Administration</span>
+        </button>
+      </div>
     </header>
 
     <nav class="main-nav-container">
@@ -121,16 +131,24 @@
       // Chargement différé du JavaScript non critique
       document.addEventListener('DOMContentLoaded', function() {
         const loginButton = document.getElementById('login-button');
+        const loginDropdown = document.getElementById('login-dropdown');
         
         // Fonction pour gérer le clic sur le bouton
         function handleLoginClick(e) {
           e.preventDefault();
           if (!window.netlifyIdentity.currentUser()) {
-            window.netlifyIdentity.open('login');
+            loginDropdown.classList.toggle('show');
           } else {
             window.location.href = '/admin/';
           }
         }
+
+        // Fermer le dropdown si on clique en dehors
+        document.addEventListener('click', function(e) {
+          if (!loginButton.contains(e.target) && !loginDropdown.contains(e.target)) {
+            loginDropdown.classList.remove('show');
+          }
+        });
 
         // Initialisation du bouton
         loginButton.addEventListener('click', handleLoginClick);
@@ -161,12 +179,33 @@
           if (user) {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
             loginButton.onclick = () => window.location.href = '/admin/';
+            loginDropdown.style.display = 'none';
           } else {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
             loginButton.onclick = handleLoginClick;
+            loginDropdown.style.display = 'block';
           }
         }
       });
+
+      // Fonction pour gérer la connexion Disqus
+      function handleDisqusLogin() {
+        // Déclencher le widget Disqus
+        if (window.DISQUS) {
+          window.DISQUS.reset({
+            reload: true
+          });
+        }
+        document.getElementById('login-dropdown').classList.remove('show');
+      }
+
+      // Fonction pour gérer la connexion Netlify
+      function handleNetlifyLogin() {
+        if (window.netlifyIdentity) {
+          window.netlifyIdentity.open('login');
+        }
+        document.getElementById('login-dropdown').classList.remove('show');
+      }
 
       // Optimisation du scroll to top avec throttling
       let scrollTimeout;
