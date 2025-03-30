@@ -11,15 +11,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
       body {
         font-family: 'Open Sans', sans-serif;
         background-color: #f4f4f9;
         margin: 0;
         padding: 0;
-        position: relative;
-        min-height: 100vh;
       }
       .header {
         background-color: #2c3e50;
@@ -58,70 +55,23 @@
         max-width: 1800px;
         margin: 2rem auto;
         padding: 0 2rem;
-        padding-bottom: 5rem;
       }
       .form-section {
         background: white;
-        padding: 2.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      }
-      .form-section h2 {
-        font-family: 'Playfair Display', serif;
-        color: #2c3e50;
-        font-size: 2rem;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #f0f2f5;
-      }
-      .form-group {
-        margin-bottom: 2rem;
-      }
-      .form-group label {
-        display: block;
-        margin-bottom: 0.8rem;
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 1.1rem;
-      }
-      .form-group input,
-      .form-group select,
-      .form-group textarea {
-        width: 100%;
-        padding: 1rem;
-        border: 2px solid #e9ecef;
+        padding: 2rem;
         border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background-color: #f8f9fa;
-      }
-      .form-group input:focus,
-      .form-group select:focus,
-      .form-group textarea:focus {
-        border-color: #3498db;
-        background-color: white;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-      }
-      .form-group small {
-        display: block;
-        margin-top: 0.5rem;
-        color: #6c757d;
-        font-size: 0.9rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
       .preview-section {
+        position: static;
+        height: auto;
+        overflow-y: visible;
+        padding: 1rem;
         background: white;
-        padding: 2.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      }
-      .preview-section h2 {
-        font-family: 'Playfair Display', serif;
-        color: #2c3e50;
-        font-size: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
         margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #f0f2f5;
       }
       .preview-section.unsynced {
         position: static;
@@ -208,6 +158,57 @@
       }
       .preview-toggle button:hover {
         transform: translateY(-2px);
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+        width: 100%;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+      .form-group textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+      .form-actions button {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+      .save-btn {
+        background-color: #2ecc71;
+        color: white;
+      }
+      .save-btn:hover {
+        background-color: #27ae60;
+      }
+      .cancel-btn {
+        background-color: #e74c3c;
+        color: white;
+      }
+      .cancel-btn:hover {
+        background-color: #c0392b;
       }
       .preview-card, .preview-full {
         display: none;
@@ -618,231 +619,105 @@
       .scroll-toggle.unsynced i {
         transform: rotate(90deg);
       }
-
-      /* Styles pour le badge */
-      .pending-count {
-        background-color: #e74c3c;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-        margin-left: 8px;
-      }
-      .save-changes-btn.has-changes {
-        animation: pulse 2s infinite;
-      }
-      @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-      }
-
-      /* Styles pour le bouton de déconnexion */
-      .logout-btn {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background-color: #e74c3c;
-        color: white;
-        padding: 0.8rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border: none;
-        cursor: pointer;
-        z-index: 9999;
-        font-size: 1rem;
-      }
-
-      .logout-btn:hover {
-        background-color: #c0392b;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-      }
-
-      .logout-btn i {
-        font-size: 1.2rem;
-      }
-
-      @media (max-width: 768px) {
-        .logout-btn {
-          bottom: 1rem;
-          right: 1rem;
-          padding: 0.6rem 1rem;
-        }
-      }
-
-      /* Style pour masquer le formulaire d'ajout de restaurant à venir */
-      form[action*="ajouter-restaurant"],
-      form[action*="add-restaurant"],
-      #upcoming-form,
-      .upcoming-form,
-      div[id*="upcoming"],
-      div[class*="upcoming"] {
-        display: none !important;
-      }
-
-      /* Styles pour les boutons d'action */
-      .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 2px solid #f0f2f5;
-      }
-
-      .action-btn {
-        padding: 0.8rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: none;
-      }
-
-      .action-btn i {
-        font-size: 1.1rem;
-      }
-
-      .save-btn {
-        background-color: #2ecc71;
-        color: white;
-      }
-
-      .save-btn:hover {
-        background-color: #27ae60;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      }
-
-      .cancel-btn {
-        background-color: #e74c3c;
-        color: white;
-      }
-
-      .cancel-btn:hover {
-        background-color: #c0392b;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      }
-
-      @media (max-width: 768px) {
-        .form-actions {
-          flex-direction: column;
-        }
-
-        .action-btn {
-          width: 100%;
-          justify-content: center;
-        }
-      }
     </style>
   </head>
   <body>
     <header class="header">
       <h1>Édition Restaurant</h1>
-      <a href="/admin/" class="back-to-site">
-        <i class="fas fa-arrow-left"></i> Retour à l'administration
-      </a>
+      <a href="#" class="back-to-site" onclick="confirmExit(event)"><i class="fas fa-arrow-left"></i> Retour à l'administration</a>
     </header>
 
     <div class="container">
       <div class="form-section">
-        <h2>Édition du Restaurant</h2>
-        <form id="edit-restaurant-form">
+        <h2>Formulaire d'édition</h2>
+        <form id="restaurant-form">
           <div class="form-group">
-            <label for="restaurant-title">Nom du restaurant</label>
-            <input type="text" id="restaurant-title" required>
+            <label for="name">Nom du restaurant</label>
+            <input type="text" id="name" name="name" required>
           </div>
-          
           <div class="form-group">
-            <label for="restaurant-style">Style de cuisine</label>
-            <select id="restaurant-style" required>
-              <option value="">Sélectionnez un style</option>
-              <option value="Bistro">Bistro</option>
-              <option value="Gastronomique">Gastronomique</option>
-              <option value="Italien">Italien</option>
-              <option value="Asiatique">Asiatique</option>
-              <option value="Mexicain">Mexicain</option>
-              <option value="Fast-Food">Fast-Food</option>
-              <option value="Méditerranéen">Méditerranéen</option>
-              <option value="Fusion">Fusion</option>
-            </select>
+            <label for="date">Date de publication</label>
+            <input type="date" id="date" name="date" required>
           </div>
-
           <div class="form-group">
-            <label for="restaurant-diet">Régime alimentaire</label>
-            <select id="restaurant-diet">
-              <option value="">Tous régimes</option>
-              <option value="Végétarien">Végétarien</option>
-              <option value="Végétalien">Végétalien</option>
-              <option value="Sans Gluten">Sans Gluten</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="restaurant-price">Gamme de prix</label>
-            <select id="restaurant-price" required>
-              <option value="">Sélectionnez une gamme</option>
-              <option value="€">€ - Économique</option>
-              <option value="€€">€€ - Modéré</option>
-              <option value="€€€">€€€ - Élevé</option>
-              <option value="€€€€">€€€€ - Luxe</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="restaurant-note">Note (sur 10)</label>
-            <input type="number" id="restaurant-note" min="0" max="10" step="0.5" required>
-          </div>
-
-          <div class="form-group">
-            <label for="restaurant-address">Adresse</label>
-            <input type="text" id="restaurant-address" required>
-          </div>
-
-          <div class="form-group">
-            <label for="restaurant-description">Description</label>
-            <textarea id="restaurant-description" rows="6" required></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Image principale</label>
-            <div id="main-image-upload" class="main-image-upload">
-              <div id="main-image-preview"></div>
-              <input type="file" id="main-image-input" accept="image/*" style="display: none;">
-              <button type="button" onclick="document.getElementById('main-image-input').click()">
-                <i class="fas fa-upload"></i> Choisir une image
+            <label for="cuisine">Style de cuisine</label>
+            <div class="cuisine-input-container" style="display: flex; gap: 1rem; align-items: center;">
+              <div class="select-wrapper" style="flex: 1; position: relative;">
+                <select id="cuisine" name="cuisine" required style="width: 100%;">
+                  <option value="">Sélectionner un style</option>
+                  <option value="nouveau">+ Ajouter un nouveau style</option>
+                </select>
+                <button type="button" id="supprimer-style" style="display: none; position: absolute; right: 2.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #e74c3c; cursor: pointer; padding: 0.5rem;">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <input type="text" id="nouveau-style" placeholder="Entrez un nouveau style" style="flex: 1; display: none;">
+              <button type="button" id="confirmer-style" style="display: none; padding: 0.8rem 1.2rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-check"></i>
               </button>
             </div>
           </div>
-
           <div class="form-group">
-            <label>Galerie photos</label>
-            <div id="gallery-grid" class="gallery-grid">
-              <!-- Les images de la galerie seront ajoutées ici -->
+            <label for="price">Prix</label>
+            <select id="price" name="price" required>
+              <option value="$">$ (0-20$)</option>
+              <option value="$$">$$ (20-50$)</option>
+              <option value="$$$">$$$ (50$ et +)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rating">Note</label>
+            <select id="rating" name="rating" required style="flex: 1;">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="address">Adresse</label>
+            <input type="text" id="address" name="address" required>
+          </div>
+          <div class="form-group">
+            <label>Image principale du restaurant</label>
+            <div class="main-image-upload">
+              <input type="file" id="main-image" accept="image/*" style="display: none;">
+              <div class="upload-preview" id="main-image-preview">
+                <img src="/images/header.jpg" alt="Preview">
+                <button type="button" class="change-image-btn">
+                  <i class="fas fa-camera"></i> Changer l'image
+                </button>
+              </div>
             </div>
-            <div id="gallery-upload" class="gallery-upload" onclick="document.getElementById('gallery-input').click()">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <p>Cliquez ou glissez des images ici</p>
-              <input type="file" id="gallery-input" accept="image/*" multiple style="display: none;">
+          </div>
+          <div class="form-group">
+            <label>Description courte (résumé)</label>
+            <div id="summary-editor"></div>
+          </div>
+          <div class="form-group">
+            <label>Description complète</label>
+            <div id="description-editor"></div>
+          </div>
+          
+          <div class="gallery-section">
+            <h3>Galerie d'images</h3>
+            <p>Faites glisser les images pour réorganiser leur ordre d'apparition</p>
+            <div class="gallery-grid" id="gallery-grid">
+              <!-- Les images seront ajoutées ici -->
+            </div>
+            <div class="gallery-upload" id="gallery-upload">
+              <i class="fas fa-plus"></i>
+              <p>Ajouter des photos à la galerie</p>
+              <input type="file" id="gallery-input" multiple accept="image/*" style="display: none;">
             </div>
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="action-btn save-btn">
+            <button type="submit" class="save-btn">
               <i class="fas fa-save"></i> Enregistrer
             </button>
-            <button type="button" class="action-btn cancel-btn" onclick="confirmExit()">
+            <button type="button" class="cancel-btn" onclick="window.location.href='/admin/'">
               <i class="fas fa-times"></i> Annuler
             </button>
           </div>
@@ -850,45 +725,63 @@
       </div>
 
       <div class="preview-section">
-        <h2>Prévisualisation</h2>
+        <h2>Aperçu</h2>
         <div class="preview-toggle">
-          <button data-view="card">Vue carte</button>
-          <button data-view="full" class="active">Vue complète</button>
+          <button class="active" data-preview="full">Vue complète</button>
+          <button data-preview="card">Vue carte</button>
         </div>
 
         <div class="preview-card">
-          <h3></h3>
+          <div class="preview-date">14 Mar 2024</div>
+          <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-card-content">
+            <h3>Nom du Restaurant</h3>
+            <p></p>
             <div class="preview-card-meta">
-              <span class="style"><i class="fas fa-utensils"></i> <span class="style-value"></span></span>
-              <span class="price"><i class="fas fa-euro-sign"></i> <span class="price-value"></span></span>
-              <span class="rating"><i class="fas fa-star"></i> <span class="note"></span>/10</span>
+              <span class="rating">
+                <i class="fas fa-star"></i>
+                <span class="note">4.5</span>/5
+              </span>
+              <span class="cuisine">
+                <i class="fas fa-utensils"></i>
+                <span class="style">Style de cuisine</span>
+              </span>
+              <span class="price">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="price-value">Prix</span>
+              </span>
             </div>
           </div>
         </div>
 
         <div class="preview-full active">
-          <h3></h3>
+          <img src="/images/header.jpg" alt="Restaurant">
           <div class="preview-content">
+            <h3>Nom du Restaurant</h3>
             <div class="preview-meta">
-              <span class="style"><i class="fas fa-utensils"></i> <span class="style-value"></span></span>
-              <span class="price"><i class="fas fa-euro-sign"></i> <span class="price-value"></span></span>
-              <span class="rating"><i class="fas fa-star"></i> <span class="note"></span>/10</span>
+              <span class="rating"><i class="fas fa-star"></i> <span class="note">4.5</span>/5</span>
+              <span class="cuisine"><i class="fas fa-utensils"></i> <span class="style">Style de cuisine</span></span>
+              <span class="price"><i class="fas fa-dollar-sign"></i> <span class="price-value">Prix</span></span>
             </div>
-            <div class="preview-address"><i class="fas fa-map-marker-alt"></i> <span class="address"></span></div>
+            <div class="preview-address">
+              <i class="fas fa-map-marker-alt"></i> <span class="address">Adresse du restaurant</span>
+            </div>
+            <div class="preview-summary">
+              <h4>Résumé</h4>
+              <div class="summary-text"></div>
+            </div>
             <div class="preview-description">
-              <h4>Description</h4>
+              <h4>Description complète</h4>
               <div class="description-text"></div>
+            </div>
+            <div class="preview-gallery">
+              <h4>Galerie photos</h4>
+              <div class="gallery-preview"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <button onclick="handleLogout()" class="logout-btn">
-      <i class="fas fa-sign-out-alt"></i>
-      Déconnexion
-    </button>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
@@ -996,161 +889,15 @@
       document.head.appendChild(styleUpdates);
 
       // Initialiser les éditeurs Quill avec les nouvelles options
-      const summaryEditor = new Quill('#restaurant-description', {
+      const summaryEditor = new Quill('#summary-editor', {
+        ...quillOptions,
+        placeholder: 'Entrez un bref résumé du restaurant...'
+      });
+
+      const descriptionEditor = new Quill('#description-editor', {
         ...quillOptions,
         placeholder: 'Entrez une description détaillée du restaurant...'
       });
-
-      // Fonction pour formater le texte de la description
-      function formatDescription(content) {
-        // Convertir les marqueurs Markdown en HTML
-        let formattedContent = content
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Convertir **texte** en <strong>texte</strong>
-          .replace(/\*(.*?)\*/g, '<em>$1</em>') // Convertir *texte* en <em>texte</em>
-          .replace(/\n\n/g, '</p><p>') // Convertir les doubles sauts de ligne en paragraphes
-          .replace(/\n/g, '<br>'); // Convertir les simples sauts de ligne en <br>
-
-        // Ajouter les balises de paragraphe au début et à la fin
-        formattedContent = `<p>${formattedContent}</p>`;
-
-        return formattedContent;
-      }
-
-      // Variable globale pour stocker les modifications en attente
-      let pendingChanges = {
-        restaurants: new Map(),
-        lastEdited: null
-      };
-
-      // Fonction pour sauvegarder les modifications en cache
-      function saveToCache(formData) {
-        const restaurantId = formData.id || formData.title.toLowerCase().replace(/[^a-z0-9]/g, '_');
-        const timestamp = Date.now();
-        
-        pendingChanges.restaurants.set(restaurantId, {
-          id: restaurantId,
-          title: formData.title,
-          style: formData.style,
-          diet: formData.diet,
-          price: formData.price,
-          note: formData.note,
-          address: formData.address,
-          description: formData.description,
-          mainImage: document.querySelector('.preview-card img').src,
-          timestamp: timestamp,
-          lastModified: new Date().toLocaleString()
-        });
-        
-        pendingChanges.lastEdited = restaurantId;
-        
-        // Sauvegarder dans le localStorage
-        localStorage.setItem('pendingChanges', JSON.stringify({
-          restaurants: Array.from(pendingChanges.restaurants.entries()),
-          lastEdited: pendingChanges.lastEdited
-        }));
-        
-        // Activer le bouton de sauvegarde global
-        const saveBtn = document.querySelector('.save-changes-btn');
-        if (saveBtn) {
-          saveBtn.classList.add('has-changes');
-        }
-
-        // Mettre à jour le compteur de modifications en attente
-        updatePendingChangesCount();
-      }
-
-      // Fonction pour charger les modifications en cache
-      function loadFromCache() {
-        const cached = localStorage.getItem('pendingChanges');
-        if (cached) {
-          const parsedCache = JSON.parse(cached);
-          pendingChanges.restaurants = new Map(parsedCache.restaurants);
-          pendingChanges.lastEdited = parsedCache.lastEdited;
-          
-          // Restaurer les données si on est sur la page d'édition du restaurant
-          const urlParams = new URLSearchParams(window.location.search);
-          const currentId = urlParams.get('id') || urlParams.get('title')?.toLowerCase().replace(/[^a-z0-9]/g, '_');
-          
-          if (currentId && pendingChanges.restaurants.has(currentId)) {
-            const data = pendingChanges.restaurants.get(currentId);
-            restoreFormData(data);
-            
-            // Afficher une notification
-            Swal.fire({
-              title: 'Modifications trouvées',
-              html: `Des modifications non sauvegardées ont été trouvées pour ce restaurant.<br>Dernière modification : ${data.lastModified}`,
-              icon: 'info',
-              showCancelButton: true,
-              confirmButtonText: 'Restaurer',
-              cancelButtonText: 'Ignorer'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                restoreFormData(data);
-                updatePreview();
-              } else {
-                // Si l'utilisateur ignore, supprimer les modifications en cache
-                pendingChanges.restaurants.delete(currentId);
-                saveToCache({});
-              }
-            });
-          }
-        }
-      }
-
-      // Fonction pour restaurer les données du formulaire
-      function restoreFormData(data) {
-        document.getElementById('restaurant-title').value = data.title || '';
-        document.getElementById('restaurant-style').value = data.style || '';
-        document.getElementById('restaurant-diet').value = data.diet || '';
-        document.getElementById('restaurant-price').value = data.price || '';
-        document.getElementById('restaurant-note').value = data.note || '';
-        document.getElementById('restaurant-address').value = data.address || '';
-        if (summaryEditor) {
-          summaryEditor.root.innerHTML = data.description || '';
-        }
-        
-        // Restaurer l'image principale si elle existe
-        if (data.mainImage) {
-          const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
-          previewImages.forEach(img => img.src = data.mainImage);
-        }
-      }
-
-      // Fonction pour mettre à jour le compteur de modifications en attente
-      function updatePendingChangesCount() {
-        const count = pendingChanges.restaurants.size;
-        const saveBtn = document.querySelector('.save-changes-btn');
-        if (saveBtn) {
-          const badge = saveBtn.querySelector('.pending-count') || document.createElement('span');
-          badge.className = 'pending-count';
-          badge.textContent = count > 0 ? `(${count})` : '';
-          if (!saveBtn.querySelector('.pending-count')) {
-            saveBtn.appendChild(badge);
-          }
-        }
-      }
-
-      // Ajouter des styles pour le badge
-      const badgeStyles = document.createElement('style');
-      badgeStyles.textContent = `
-        .pending-count {
-          background-color: #e74c3c;
-          color: white;
-          padding: 2px 6px;
-          border-radius: 10px;
-          font-size: 0.8rem;
-          margin-left: 8px;
-        }
-        .save-changes-btn.has-changes {
-          animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-          100% { transform: scale(1); }
-        }
-      `;
-      document.head.appendChild(badgeStyles);
 
       // Fonction pour formater le texte de la description
       function formatDescription(content) {
@@ -1174,13 +921,14 @@
       // Fonction pour sauvegarder l'état initial
       function saveInitialState() {
         initialState = {
-          title: document.getElementById('restaurant-title').value.trim(),
-          style: document.getElementById('restaurant-style').value.trim(),
-          diet: document.getElementById('restaurant-diet').value.trim(),
-          price: document.getElementById('restaurant-price').value,
-          note: document.getElementById('restaurant-note').value,
-          address: document.getElementById('restaurant-address').value.trim(),
-          description: summaryEditor.root.innerHTML.trim(),
+          name: document.getElementById('name').value.trim(),
+          date: document.getElementById('date').value,
+          cuisine: document.getElementById('cuisine').value.trim(),
+          price: document.getElementById('price').value,
+          rating: document.getElementById('rating').value,
+          address: document.getElementById('address').value.trim(),
+          summary: summaryEditor.root.innerHTML.trim(),
+          description: descriptionEditor.root.innerHTML.trim(),
           mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
@@ -1190,45 +938,49 @@
       // Fonction pour vérifier s'il y a eu des changements
       function checkForChanges() {
         const currentState = {
-          title: document.getElementById('restaurant-title').value.trim(),
-          style: document.getElementById('restaurant-style').value.trim(),
-          diet: document.getElementById('restaurant-diet').value.trim(),
-          price: document.getElementById('restaurant-price').value,
-          note: document.getElementById('restaurant-note').value,
-          address: document.getElementById('restaurant-address').value.trim(),
-          description: summaryEditor.root.innerHTML.trim(),
+          name: document.getElementById('name').value.trim(),
+          date: document.getElementById('date').value,
+          cuisine: document.getElementById('cuisine').value.trim(),
+          price: document.getElementById('price').value,
+          rating: document.getElementById('rating').value,
+          address: document.getElementById('address').value.trim(),
+          summary: summaryEditor.root.innerHTML.trim(),
+          description: descriptionEditor.root.innerHTML.trim(),
           mainImage: document.querySelector('#main-image-preview img').src,
           galleryImages: Array.from(document.querySelectorAll('.gallery-grid img')).map(img => img.src)
         };
 
         // Comparer chaque propriété individuellement
-        const hasTitleChanged = currentState.title !== initialState.title;
-        const hasStyleChanged = currentState.style !== initialState.style;
-        const hasDietChanged = currentState.diet !== initialState.diet;
+        const hasNameChanged = currentState.name !== initialState.name;
+        const hasDateChanged = currentState.date !== initialState.date;
+        const hasCuisineChanged = currentState.cuisine !== initialState.cuisine;
         const hasPriceChanged = currentState.price !== initialState.price;
-        const hasNoteChanged = currentState.note !== initialState.note;
+        const hasRatingChanged = currentState.rating !== initialState.rating;
         const hasAddressChanged = currentState.address !== initialState.address;
+        const hasSummaryChanged = currentState.summary !== initialState.summary;
         const hasDescriptionChanged = currentState.description !== initialState.description;
         const hasMainImageChanged = currentState.mainImage !== initialState.mainImage;
         const hasGalleryChanged = JSON.stringify(currentState.galleryImages) !== JSON.stringify(initialState.galleryImages);
 
-        const hasChanges = hasTitleChanged || 
-                          hasStyleChanged ||
-                          hasDietChanged || 
+        const hasChanges = hasNameChanged || 
+                          hasDateChanged ||
+                          hasCuisineChanged || 
                           hasPriceChanged || 
-                          hasNoteChanged || 
+                          hasRatingChanged || 
                           hasAddressChanged || 
+                          hasSummaryChanged || 
                           hasDescriptionChanged || 
                           hasMainImageChanged || 
                           hasGalleryChanged;
 
         console.log('Changements détectés:', {
-          title: hasTitleChanged,
-          style: hasStyleChanged,
-          diet: hasDietChanged,
+          name: hasNameChanged,
+          date: hasDateChanged,
+          cuisine: hasCuisineChanged,
           price: hasPriceChanged,
-          note: hasNoteChanged,
+          rating: hasRatingChanged,
           address: hasAddressChanged,
+          summary: hasSummaryChanged,
           description: hasDescriptionChanged,
           mainImage: hasMainImageChanged,
           gallery: hasGalleryChanged
@@ -1239,7 +991,7 @@
 
       // Mettre à jour les écouteurs d'événements pour détecter les changements
       function setupChangeDetection() {
-        const inputs = ['restaurant-title', 'restaurant-style', 'restaurant-diet', 'restaurant-price', 'restaurant-note', 'restaurant-address'];
+        const inputs = ['name', 'date', 'cuisine', 'price', 'rating', 'address'];
         inputs.forEach(id => {
           document.getElementById(id).addEventListener('input', () => {
             console.log(`Changement détecté dans ${id}`);
@@ -1247,6 +999,10 @@
         });
 
         summaryEditor.on('text-change', () => {
+          console.log('Changement détecté dans le résumé');
+        });
+
+        descriptionEditor.on('text-change', () => {
           console.log('Changement détecté dans la description');
         });
 
@@ -1314,9 +1070,9 @@
       // Fonction pour convertir le prix en format frontmatter
       function convertPriceToFrontmatter(price) {
         const priceMap = {
-          '€': 'budget',
-          '€€': 'medium',
-          '€€€': 'expensive'
+          '$': 'budget',
+          '$$': 'medium',
+          '$$$': 'expensive'
         };
         return priceMap[price] || 'medium';
       }
@@ -1324,11 +1080,11 @@
       // Fonction pour convertir le prix du frontmatter en format affichage
       function convertPriceFromFrontmatter(price) {
         const priceMap = {
-          'budget': '€',
-          'medium': '€€',
-          'expensive': '€€€'
+          'budget': '$',
+          'medium': '$$',
+          'expensive': '$$$'
         };
-        return priceMap[price] || '€€';
+        return priceMap[price] || '$$';
       }
 
       // Fonction pour valider les données du restaurant
@@ -1416,19 +1172,19 @@
                   // Mettre à jour les champs du formulaire
                   switch(field) {
                     case 'title':
-                      document.getElementById('restaurant-title').value = originalMetadata[field];
+                      document.getElementById('name').value = originalMetadata[field];
                       break;
                     case 'style':
-                      document.getElementById('restaurant-style').value = originalMetadata[field];
+                      document.getElementById('cuisine').value = originalMetadata[field];
                       break;
                     case 'price':
-                      document.getElementById('restaurant-price').value = originalMetadata[field];
+                      document.getElementById('price').value = originalMetadata[field];
                       break;
                     case 'note':
-                      document.getElementById('restaurant-note').value = originalMetadata[field];
+                      document.getElementById('rating').value = originalMetadata[field];
                       break;
                     case 'address':
-                      document.getElementById('restaurant-address').value = originalMetadata[field];
+                      document.getElementById('address').value = originalMetadata[field];
                       break;
                     case 'description':
                       summaryEditor.root.innerHTML = originalMetadata[field];
@@ -1460,7 +1216,7 @@
             }).then((result) => {
               if (result.isConfirmed) {
                 const formattedContent = formatDescription(originalFullContent.trim());
-                summaryEditor.root.innerHTML = formattedContent;
+                descriptionEditor.root.innerHTML = formattedContent;
                 updatePreview();
               }
             });
@@ -1471,167 +1227,287 @@
         }
       }
 
-      // Fonction pour charger l'image par défaut
-      function setDefaultImage() {
-        const defaultImageUrl = '/images/default-restaurant.jpg';
-        const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
-        previewImages.forEach(img => {
-          if (!img.src || img.src.endsWith('header.jpg')) {
-            img.src = defaultImageUrl;
+      // Modifier la fonction loadRestaurantData pour utiliser formatDescription
+      async function loadRestaurantData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const content = urlParams.get('content');
+        
+        if (content) {
+          try {
+            // Décoder le contenu en gérant les caractères spéciaux
+            let decodedContent;
+            try {
+              decodedContent = decodeURIComponent(content);
+            } catch (uriError) {
+              // Si le décodage échoue, essayer une autre méthode
+              decodedContent = content.replace(/\+/g, ' ')
+                .replace(/%([0-9A-F]{2})/g,
+                  function toSolidBytes(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                });
+            }
+
+            decodedContent = decodedContent.replace(/title: "([^"]+)"/g, (match, title) => {
+              return `title: "${title.replace(/\band\b/g, '&')}"`;
+            });
+            console.log("Contenu décodé:", decodedContent);
+            
+            // Extraire les images avant de séparer le contenu
+            const galleryImages = extractImagesFromMarkdown(decodedContent);
+            console.log("Images de la galerie extraites:", galleryImages);
+
+            const parts = decodedContent.split('---');
+            if (parts.length < 3) {
+              throw new Error('Format de fichier invalide');
+            }
+            
+            const frontmatter = parts[1];
+            const fullContent = parts[2] || '';
+
+            // Extraire les métadonnées avec gestion des erreurs
+            const metadata = {};
+            frontmatter.split('\n').forEach(line => {
+              const match = line.match(/^(\w+):\s*(.+)$/);
+              if (match) {
+                const [_, key, value] = match;
+                // Décoder les caractères spéciaux HTML et enlever les guillemets
+                metadata[key] = value
+                  .replace(/^"(.*)"$/, '$1')
+                  .replace(/&amp;/g, '&')
+                  .replace(/&lt;/g, '<')
+                  .replace(/&gt;/g, '>')
+                  .replace(/&quot;/g, '"')
+                  .trim();
+              }
+            });
+
+            // Vérifier les champs requis
+            const requiredFields = ['title', 'date', 'style', 'price', 'note', 'address', 'description', 'image'];
+            const missingFields = requiredFields.filter(field => !metadata[field]);
+            
+            if (missingFields.length > 0) {
+              console.warn('Champs manquants:', missingFields);
+              // Remplir avec des valeurs par défaut pour les champs manquants
+              missingFields.forEach(field => {
+                switch(field) {
+                  case 'title':
+                    metadata.title = 'Nouveau Restaurant';
+                    break;
+                  case 'date':
+                    metadata.date = new Date().toISOString().split('T')[0];
+                    break;
+                  case 'style':
+                    metadata.style = 'Non spécifié';
+                    break;
+                  case 'price':
+                    metadata.price = 'medium';
+                    break;
+                  case 'note':
+                    metadata.note = '4.5';
+                    break;
+                  case 'address':
+                    metadata.address = 'Adresse à spécifier';
+                    break;
+                  case 'description':
+                    metadata.description = 'Description à venir...';
+                    break;
+                  case 'image':
+                    metadata.image = '/images/header.jpg';
+                    break;
+                }
+              });
+            }
+
+            // Remplir les champs du formulaire avec les métadonnées
+            document.getElementById('name').value = metadata.title || '';
+            const date = metadata.date ? new Date(metadata.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = date;
+
+            // Gérer le style de cuisine
+            const style = metadata.style || '';
+            document.getElementById('cuisine').value = style;
+
+            // Si le style n'existe pas dans la liste, l'ajouter
+            const cuisineSelect = document.getElementById('cuisine');
+            const styleExists = Array.from(cuisineSelect.options).some(option => option.value === style);
+            if (style && !styleExists) {
+              const option = document.createElement('option');
+              option.value = style;
+              option.textContent = style;
+              option.setAttribute('data-default', '');
+              cuisineSelect.insertBefore(option, cuisineSelect.options[cuisineSelect.options.length - 1]);
+            }
+
+            document.getElementById('rating').value = parseFloat(metadata.note) || 4.5;
+            document.getElementById('address').value = metadata.address || '';
+
+            // Gérer le prix avec conversion
+            const priceSelect = document.getElementById('price');
+            const priceValue = convertPriceFromFrontmatter(metadata.price) || '$$';
+            Array.from(priceSelect.options).forEach((option, index) => {
+              if (option.value === priceValue) {
+                priceSelect.selectedIndex = index;
+              }
+            });
+
+            // Remplir les éditeurs avec le contenu
+            summaryEditor.root.innerHTML = metadata.description || '';
+            
+            // Formater le contenu de la description
+            const descriptionContent = fullContent.trim();
+            const formattedContent = formatDescription(descriptionContent);
+            descriptionEditor.root.innerHTML = formattedContent || '**Nataël** :\n\n\n\n**Nicolas** :\n';
+
+            // Gérer l'image principale
+            const mainImageUrl = metadata.image || '/images/header.jpg';
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+            previewImages.forEach(img => {
+              img.style.display = 'block';
+              img.src = mainImageUrl;
+            });
+
+            // Vider les galeries existantes
+            document.getElementById('gallery-grid').innerHTML = '';
+            document.querySelector('.gallery-preview').innerHTML = '';
+
+            // Ajouter les images à la galerie en excluant l'image principale
+            galleryImages.forEach(({ src, alt }) => {
+              if (src !== mainImageUrl) {
+                console.log("Ajout de l'image à la galerie:", src);
+                addGalleryImage(src, alt, false);
+              }
+            });
+
+            // Mettre à jour les prévisualisations
+            updatePreview();
+            updateGalleryPreview(false);
+
+            // Activer la vue complète par défaut
+            document.querySelector('.preview-toggle button[data-preview="full"]').click();
+
+            // Sauvegarder l'état initial après le chargement complet
+            setTimeout(() => {
+              saveInitialState();
+              console.log('État initial sauvegardé après chargement complet');
+              setupChangeDetection();
+            }, 100);
+
+          } catch (error) {
+            console.error('Erreur lors du chargement des données:', error);
+            // Afficher une alerte à l'utilisateur
+            await Swal.fire({
+              title: 'Erreur de chargement',
+              text: 'Une erreur est survenue lors du chargement des données du restaurant. Les champs ont été remplis avec des valeurs par défaut.',
+              icon: 'warning',
+              confirmButtonText: 'OK'
+            });
           }
+        } else {
+          // Nouveau post avec des valeurs par défaut
+          document.getElementById('name').value = '';
+          document.getElementById('date').value = new Date().toISOString().split('T')[0];
+          document.getElementById('cuisine').value = '';
+          document.getElementById('price').value = '$$';
+          document.getElementById('rating').value = '4.5';
+          document.getElementById('address').value = '';
+          summaryEditor.root.innerHTML = 'Entrez une brève description du restaurant...';
+          descriptionEditor.root.innerHTML = '**Nataël** :\n\n\n\n**Nicolas** :\n';
+          
+          const previewImages = document.querySelectorAll('.preview-card img, .preview-full img, #main-image-preview img');
+          previewImages.forEach(img => {
+            img.style.display = 'block';
+            img.src = '/images/header.jpg';
+          });
+
+          saveInitialState();
+          setupChangeDetection();
+        }
+      }
+
+      // Fonction pour mettre à jour l'aperçu
+      function updatePreview() {
+        const name = document.getElementById('name').value || 'Nom du Restaurant';
+        const dateInput = document.getElementById('date').value;
+        const date = dateInput ? new Date(new Date(dateInput).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', { 
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }).replace('.', '') : new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', { 
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }).replace('.', '');
+        const cuisine = document.getElementById('cuisine').value || 'Style de cuisine';
+        const price = document.getElementById('price').value || '$';
+        const rating = document.getElementById('rating').value || '4.5';
+        const address = document.getElementById('address').value || 'Adresse du restaurant';
+        const summary = summaryEditor.root.innerHTML;
+        const description = descriptionEditor.root.innerHTML;
+
+        // Mise à jour de la vue carte
+        document.querySelectorAll('.preview-card').forEach(card => {
+          card.querySelector('.preview-date').textContent = date;
+          card.querySelector('h3').textContent = name;
+          card.querySelector('.style').textContent = cuisine;
+          card.querySelector('.note').textContent = rating;
+          card.querySelector('.price-value').textContent = price;
+          const summaryP = card.querySelector('.preview-card-content p') || document.createElement('p');
+          summaryP.innerHTML = summary;
+          if (!card.querySelector('.preview-card-content p')) {
+            card.querySelector('.preview-card-content').insertBefore(summaryP, card.querySelector('.preview-card-meta'));
+          }
+        });
+
+        // Mise à jour de la vue complète
+        document.querySelectorAll('.preview-full').forEach(full => {
+          // Ajouter la date si elle n'existe pas
+          if (!full.querySelector('.preview-date')) {
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'preview-date';
+            full.querySelector('.preview-content').insertBefore(dateDiv, full.querySelector('.preview-meta'));
+          }
+          
+          full.querySelector('.preview-date').textContent = date;
+          full.querySelector('h3').textContent = name;
+          full.querySelector('.style').textContent = cuisine;
+          full.querySelector('.note').textContent = rating;
+          full.querySelector('.price-value').textContent = price;
+          full.querySelector('.address').textContent = address;
+          full.querySelector('.summary-text').innerHTML = summary;
+          full.querySelector('.description-text').innerHTML = description;
+        });
+
+        // Mise à jour du résumé dans la vue carte avec limitation de longueur
+        document.querySelectorAll('.preview-card-content p').forEach(p => {
+          p.innerHTML = summary;
+          p.style.display = '-webkit-box';
+          p.style.webkitLineClamp = '3';
+          p.style.webkitBoxOrient = 'vertical';
+          p.style.overflow = 'hidden';
         });
       }
 
-      // Fonction pour charger les données du restaurant
-      async function loadRestaurantData() {
-        try {
-          // Récupérer les paramètres de l'URL
-          const urlParams = new URLSearchParams(window.location.search);
-          const fileParam = urlParams.get('file');
-          const contentParam = urlParams.get('content');
-
-          if (!fileParam || !contentParam) {
-            console.error('Paramètres manquants dans l\'URL');
-            return;
-          }
-
-          // Décoder le contenu
-          const content = decodeURIComponent(contentParam);
-          
-          // Extraire les métadonnées du frontmatter
-          const frontmatterMatch = content.match(/---([\s\S]*?)---/);
-          if (!frontmatterMatch) {
-            console.error('Frontmatter non trouvé');
-            return;
-          }
-
-          const frontmatter = frontmatterMatch[1];
-          const metadata = {};
-          frontmatter.split('\n').forEach(line => {
-            const match = line.match(/^(\w+):\s*"?([^"\n]+)"?$/);
-            if (match) {
-              metadata[match[1]] = match[2];
-            }
-          });
-
-          // Remplir les champs du formulaire
-          document.getElementById('restaurant-title').value = metadata.title || '';
-          document.getElementById('restaurant-style').value = metadata.style || '';
-          document.getElementById('restaurant-diet').value = metadata.diet || '';
-          document.getElementById('restaurant-price').value = metadata.price || '';
-          document.getElementById('restaurant-note').value = metadata.note || '';
-          document.getElementById('restaurant-address').value = metadata.address || '';
-          document.getElementById('restaurant-description').value = metadata.description || '';
-
-          // Mettre à jour la prévisualisation
-          updatePreview();
-
-          // Si une image principale est définie, la charger
-          if (metadata.image) {
-            const previewImg = document.createElement('img');
-            previewImg.src = metadata.image;
-            previewImg.alt = metadata.title;
-            document.getElementById('main-image-preview').innerHTML = '';
-            document.getElementById('main-image-preview').appendChild(previewImg);
-          }
-
-          // Sauvegarder le chemin du fichier pour la soumission
-          document.getElementById('edit-restaurant-form').dataset.filePath = fileParam;
-
-        } catch (error) {
-          console.error('Erreur lors du chargement des données:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Erreur',
-            text: 'Impossible de charger les données du restaurant'
-          });
-        }
-      }
-
-      // Charger les données au chargement de la page
-      document.addEventListener('DOMContentLoaded', loadRestaurantData);
-
-      // Mettre à jour le lien de retour
-      document.querySelector('.back-to-site').href = '/admin/';
-
-      // Fonction pour mettre à jour la prévisualisation
-      function updatePreview() {
-        try {
-          // Récupérer les valeurs du formulaire
-          const title = document.getElementById('restaurant-title').value || 'Nom du Restaurant';
-          const style = document.getElementById('restaurant-style').value || 'Style de cuisine';
-          const diet = document.getElementById('restaurant-diet').value || '';
-          const price = document.getElementById('restaurant-price').value || '€';
-          const note = document.getElementById('restaurant-note').value || '0';
-          const address = document.getElementById('restaurant-address').value || 'Adresse du restaurant';
-          const description = document.getElementById('restaurant-description').value || '';
-
-          // Mettre à jour la vue carte
-          document.querySelector('.preview-card h3').textContent = title;
-          document.querySelectorAll('.style-value').forEach(el => el.textContent = style);
-          document.querySelectorAll('.note').forEach(el => el.textContent = note);
-          document.querySelectorAll('.price-value').forEach(el => el.textContent = price);
-          document.querySelector('.address').textContent = address;
-          document.querySelector('.description-text').textContent = description;
-
-        } catch (error) {
-          console.warn('Erreur lors de la mise à jour de la prévisualisation:', error);
-        }
-      }
-
-      // Initialiser les écouteurs d'événements après le chargement du DOM
-      document.addEventListener('DOMContentLoaded', function() {
-        try {
-          // Charger les données du restaurant
-          loadRestaurantData();
-          
-          // Ajouter les écouteurs d'événements pour la mise à jour en temps réel
-          const formElements = [
-            'restaurant-title',
-            'restaurant-style',
-            'restaurant-diet',
-            'restaurant-price',
-            'restaurant-note',
-            'restaurant-address',
-            'restaurant-description'
-          ];
-
-          formElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-              element.addEventListener('input', updatePreview);
-            }
-          });
-
-        } catch (error) {
-          console.error('Erreur lors de l\'initialisation:', error);
-        }
-      });
+      // Gestionnaire d'événements pour les champs de formulaire
+      document.getElementById('name').addEventListener('input', updatePreview);
+      document.getElementById('date').addEventListener('input', updatePreview);
+      document.getElementById('cuisine').addEventListener('input', updatePreview);
+      document.getElementById('price').addEventListener('input', updatePreview);
+      document.getElementById('rating').addEventListener('input', updatePreview);
+      document.getElementById('address').addEventListener('input', updatePreview);
+      summaryEditor.on('text-change', updatePreview);
+      descriptionEditor.on('text-change', updatePreview);
 
       // Gestion de l'image principale
-      document.getElementById('main-image-input').addEventListener('change', function(e) {
+      document.querySelector('.change-image-btn').addEventListener('click', () => {
+        document.getElementById('main-image').click();
+      });
+
+      document.getElementById('main-image').addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
           const reader = new FileReader();
           reader.onload = function(e) {
-            // Mettre à jour l'aperçu de l'image principale
-            const mainPreview = document.getElementById('main-image-preview');
-            mainPreview.innerHTML = `<img src="${e.target.result}" alt="Aperçu">`;
-            
-            // Mettre à jour les images dans les prévisualisations
-            const previewCardImg = document.querySelector('.preview-card img') || document.createElement('img');
-            const previewFullImg = document.querySelector('.preview-full img') || document.createElement('img');
-            
-            previewCardImg.src = e.target.result;
-            previewFullImg.src = e.target.result;
-            
-            if (!document.querySelector('.preview-card img')) {
-              document.querySelector('.preview-card').insertBefore(previewCardImg, document.querySelector('.preview-card-content'));
-            }
-            if (!document.querySelector('.preview-full img')) {
-              document.querySelector('.preview-full').insertBefore(previewFullImg, document.querySelector('.preview-content'));
-            }
-            
-            updatePreview();
+            const previewImages = document.querySelectorAll('.preview-card img, .preview-full img');
+            previewImages.forEach(img => img.src = e.target.result);
           };
           reader.readAsDataURL(e.target.files[0]);
         }
@@ -1711,13 +1587,14 @@
       }
 
       // Gestionnaire d'événements pour les champs de formulaire
-      document.getElementById('restaurant-title').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-date').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-style').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-price').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-note').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-address').addEventListener('input', updatePreview);
+      document.getElementById('name').addEventListener('input', updatePreview);
+      document.getElementById('date').addEventListener('input', updatePreview);
+      document.getElementById('cuisine').addEventListener('input', updatePreview);
+      document.getElementById('price').addEventListener('input', updatePreview);
+      document.getElementById('rating').addEventListener('input', updatePreview);
+      document.getElementById('address').addEventListener('input', updatePreview);
       summaryEditor.on('text-change', updatePreview);
+      descriptionEditor.on('text-change', updatePreview);
 
       // Gestion de l'image principale
       document.querySelector('.change-image-btn').addEventListener('click', () => {
@@ -1737,110 +1614,79 @@
 
       // Gestion du toggle des previews
       document.querySelectorAll('.preview-toggle button').forEach(button => {
-        button.addEventListener('click', function() {
-          const viewType = this.getAttribute('data-view');
-          
+        button.addEventListener('click', () => {
           // Désactiver tous les boutons et vues
           document.querySelectorAll('.preview-toggle button').forEach(btn => btn.classList.remove('active'));
-          document.querySelectorAll('.preview-card, .preview-full').forEach(view => view.classList.remove('active'));
+          document.querySelectorAll('.preview-card, .preview-full').forEach(preview => preview.style.display = 'none');
           
           // Activer le bouton cliqué et sa vue correspondante
-          this.classList.add('active');
-          document.querySelector(`.preview-${viewType}`).classList.add('active');
+          button.classList.add('active');
+          const previewToShow = document.querySelector(`.preview-${button.dataset.preview}`);
+          if(previewToShow) {
+            previewToShow.style.display = 'block';
+          }
         });
       });
 
-      // Fonction pour créer le frontmatter d'un restaurant
-      function createRestaurantFrontmatter(data) {
-        return [
-          '---',
-          `layout: restaurant`,
-          `title: "${sanitizeFrontmatterValue(data.title)}"`,
-          `date: "${data.date || new Date().toISOString().split('T')[0]}"`,
-          `style: "${sanitizeFrontmatterValue(data.style)}"`,
-          `price: "${convertPriceToFrontmatter(data.price)}"`,
-          `note: ${data.note}`,
-          `address: "${sanitizeFrontmatterValue(data.address)}"`,
-          `description: "${sanitizeFrontmatterValue(data.description)}"`,
-          `image: "${data.mainImage}"`,
-          `state: "draft"`,
-          `published: false`,
-          '---\n'
-        ].join('\n');
-      }
-
       // Gestion de la soumission du formulaire
-      document.getElementById('edit-restaurant-form').addEventListener('submit', async function(e) {
+      document.getElementById('restaurant-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         try {
-          // Récupérer les données du formulaire
-          const formData = {
-            title: document.getElementById('restaurant-title').value,
-            style: document.getElementById('restaurant-style').value,
-            diet: document.getElementById('restaurant-diet').value,
-            price: document.getElementById('restaurant-price').value,
-            note: document.getElementById('restaurant-note').value,
-            address: document.getElementById('restaurant-address').value,
-            description: document.getElementById('restaurant-description').value,
-            mainImage: document.querySelector('#main-image-preview img')?.src || '',
-            date: new Date().toISOString().split('T')[0],
-            state: 'draft',
-            published: false
-          };
-
-          // Récupérer les images de la galerie
-          const galleryImages = Array.from(document.querySelectorAll('#gallery-grid img')).map(img => img.src);
-
-          // Créer l'identifiant unique pour le restaurant
-          const restaurantId = formData.title.toLowerCase().replace(/[^a-z0-9]/g, '_');
-
-          // Créer le contenu du fichier markdown
-          const frontmatter = [
+          const name = document.getElementById('name').value;
+          const date = document.getElementById('date').value;
+          const fileName = `${date}-${name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Supprimer les accents
+            .replace(/&/g, 'and') // Remplacer & par and
+            .replace(/[^a-z0-9]+/g, '-')}.markdown`;
+          
+          // Construire le contenu du fichier avec traitement des accents
+          const frontMatter = [
             '---',
             `layout: restaurant`,
-            `title: "${formData.title}"`,
-            `date: ${formData.date}`,
-            `style: "${formData.style}"`,
-            `diet: "${formData.diet}"`,
-            `price: "${formData.price}"`,
-            `note: ${formData.note}`,
-            `address: "${formData.address}"`,
-            `description: "${formData.description}"`,
-            `image: "${formData.mainImage}"`,
+            `title: "${sanitizeFrontmatterValue(name)}"`,
+            `date: "${date}"`,
+            `style: "${sanitizeFrontmatterValue(document.getElementById('cuisine').value)}"`,
+            `price: "${convertPriceToFrontmatter(document.getElementById('price').value)}"`,
+            `note: ${document.getElementById('rating').value}`,
+            `address: "${sanitizeFrontmatterValue(document.getElementById('address').value)}"`,
+            `description: "${sanitizeFrontmatterValue(summaryEditor.root.innerHTML)}"`,
+            `image: "${document.querySelector('.preview-card img').src}"`,
             `state: "draft"`,
-            `published: false`,
-            '---'
+            '---\n'
           ].join('\n');
 
-          // Sauvegarder dans le localStorage
-          const pendingChanges = {
-            restaurants: new Map()
-          };
-          pendingChanges.restaurants.set(restaurantId, {
-            ...formData,
-            gallery: galleryImages,
-            frontmatter: frontmatter,
-            timestamp: Date.now(),
-            lastModified: new Date().toLocaleString()
-          });
-          pendingChanges.lastEdited = restaurantId;
+          const content = frontMatter + descriptionEditor.root.innerHTML;
 
-          localStorage.setItem('pendingChanges', JSON.stringify({
-            restaurants: Array.from(pendingChanges.restaurants.entries()),
-            lastEdited: restaurantId
-          }));
+          // Encoder le contenu en Base64 avec support des accents
+          const contentBase64 = btoa(unescape(encodeURIComponent(content)));
+
+          // Créer le fichier via l'API GitHub
+          const token = netlifyIdentity.currentUser().token.access_token;
+          const response = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts/${fileName}`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Ajout du restaurant ${name}`,
+              content: contentBase64
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Erreur lors de la sauvegarde');
+          }
 
           // Afficher une confirmation
           await Swal.fire({
             title: 'Restaurant sauvegardé !',
-            html: 'Le restaurant a été sauvegardé en brouillon.<br><br>' +
-                  'Vous allez être redirigé vers la section workflow<br>' +
-                  'où vous pourrez le retrouver dans la colonne "Brouillons".',
+            text: 'Le restaurant a été ajouté avec succès dans les brouillons.',
             icon: 'success',
-            timer: 3000,
-            timerProgressBar: true,
-            showConfirmButton: false
+            confirmButtonText: 'OK'
           });
 
           // Rediriger vers la section workflow
@@ -1848,10 +1694,11 @@
 
         } catch (error) {
           console.error('Erreur lors de la sauvegarde:', error);
-          Swal.fire({
+          await Swal.fire({
             title: 'Erreur !',
-            text: 'Une erreur est survenue lors de la sauvegarde : ' + error.message,
-            icon: 'error'
+            text: 'Une erreur est survenue lors de la sauvegarde du restaurant.',
+            icon: 'error',
+            confirmButtonText: 'OK'
           });
         }
       });
@@ -1863,24 +1710,26 @@
         }
         
         const hasUnsavedChanges = checkForChanges();
+        console.log('Vérification des changements avant sortie:', hasUnsavedChanges);
         
-        if (hasUnsavedChanges) {
-          const result = await Swal.fire({
-            title: 'Attention !',
-            html: 'Si vous quittez maintenant, les modifications non sauvegardées seront perdues.<br><br>' +
-                  'Pour conserver vos modifications, cliquez sur "Enregistrer" avant de quitter.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Quitter quand même',
-            cancelButtonText: 'Rester sur la page',
-            confirmButtonColor: '#e74c3c',
-            cancelButtonColor: '#3498db'
-          });
+        if (!hasUnsavedChanges) {
+          console.log('Aucun changement détecté, redirection directe');
+          window.location.href = '/admin/';
+          return;
+        }
+        
+        const result = await Swal.fire({
+          title: 'Attention !',
+          text: 'Tous les changements non sauvegardés seront perdus. Voulez-vous vraiment quitter la page ?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, quitter',
+          cancelButtonText: 'Non, rester',
+          confirmButtonColor: '#e74c3c',
+          cancelButtonColor: '#3498db'
+        });
 
-          if (result.isConfirmed) {
-            window.location.href = '/admin/';
-          }
-        } else {
+        if (result.isConfirmed) {
           window.location.href = '/admin/';
         }
       }
@@ -1897,6 +1746,9 @@
         confirmExit(e);
       };
 
+      // Charger les données au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadRestaurantData);
+
       // Gestion de la synchronisation du scroll
       const previewSection = document.querySelector('.preview-section');
 
@@ -1910,14 +1762,14 @@
       });
 
       // Gestion du style de cuisine personnalisé
-      const styleSelect = document.getElementById('restaurant-style');
+      const cuisineSelect = document.getElementById('cuisine');
       const nouveauStyleInput = document.getElementById('nouveau-style');
       const confirmerStyleBtn = document.getElementById('confirmer-style');
       const supprimerStyleBtn = document.getElementById('supprimer-style');
 
       // Fonction pour vérifier si le style sélectionné est personnalisé
       function isCustomStyle() {
-        const selectedOption = styleSelect.options[styleSelect.selectedIndex];
+        const selectedOption = cuisineSelect.options[cuisineSelect.selectedIndex];
         return selectedOption && !selectedOption.hasAttribute('data-default') && selectedOption.value !== 'nouveau' && selectedOption.value !== '';
       }
 
@@ -1926,7 +1778,7 @@
         supprimerStyleBtn.style.display = isCustomStyle() ? 'block' : 'none';
       }
 
-      styleSelect.addEventListener('change', function() {
+      cuisineSelect.addEventListener('change', function() {
         if (this.value === 'nouveau') {
           this.style.display = 'none';
           nouveauStyleInput.style.display = 'block';
@@ -1947,16 +1799,16 @@
           option.textContent = nouveauStyle;
           
           // Insérer avant l'option "Ajouter un nouveau style"
-          const dernierIndex = styleSelect.options.length - 1;
-          styleSelect.insertBefore(option, styleSelect.options[dernierIndex]);
+          const dernierIndex = cuisineSelect.options.length - 1;
+          cuisineSelect.insertBefore(option, cuisineSelect.options[dernierIndex]);
           
           // Sélectionner le nouveau style
-          styleSelect.value = nouveauStyle;
+          cuisineSelect.value = nouveauStyle;
           
           // Cacher les éléments d'ajout
           nouveauStyleInput.style.display = 'none';
           confirmerStyleBtn.style.display = 'none';
-          styleSelect.style.display = 'block';
+          cuisineSelect.style.display = 'block';
           
           // Vider l'input
           nouveauStyleInput.value = '';
@@ -1970,10 +1822,10 @@
       });
 
       supprimerStyleBtn.addEventListener('click', function() {
-        const selectedIndex = styleSelect.selectedIndex;
+        const selectedIndex = cuisineSelect.selectedIndex;
         if (selectedIndex !== -1 && isCustomStyle()) {
-          styleSelect.remove(selectedIndex);
-          styleSelect.value = '';
+          cuisineSelect.remove(selectedIndex);
+          cuisineSelect.value = '';
           updateDeleteButton();
           updatePreview();
         }
@@ -1994,7 +1846,7 @@
           "Microbrasserie", "Pub", "Thaïlandais", "Vietnamien"
         ];
         
-        const select = document.getElementById('restaurant-style');
+        const select = document.getElementById('cuisine');
         const defaultOption = select.options[0];
         const newStyleOption = select.options[1];
         
@@ -2017,57 +1869,6 @@
         loadCuisineStyles();
         loadRestaurantData();
       });
-
-      // Vérifier si l'utilisateur est connecté
-      document.addEventListener('DOMContentLoaded', function() {
-        if (!window.netlifyIdentity) {
-          window.location.href = '/';
-          return;
-        }
-
-        const user = window.netlifyIdentity.currentUser();
-        if (!user) {
-          window.location.href = '/';
-        }
-      });
-
-      // Fonction pour gérer la déconnexion
-      async function handleLogout() {
-        try {
-          await Swal.fire({
-            title: 'Déconnexion',
-            text: 'Êtes-vous sûr de vouloir vous déconnecter ?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Oui, me déconnecter',
-            cancelButtonText: 'Annuler',
-            confirmButtonColor: '#e74c3c',
-            cancelButtonColor: '#3498db'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // Déconnexion de Netlify Identity
-              if (window.netlifyIdentity) {
-                window.netlifyIdentity.logout();
-                // La redirection sera gérée par l'événement logout de Netlify Identity
-              }
-            }
-          });
-        } catch (error) {
-          console.error('Erreur lors de la déconnexion:', error);
-          Swal.fire({
-            title: 'Erreur',
-            text: 'Une erreur est survenue lors de la déconnexion.',
-            icon: 'error'
-          });
-        }
-      }
-
-      // Écouter l'événement de déconnexion
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on('logout', () => {
-          window.location.href = '/';
-        });
-      }
     </script>
   </body>
 </html> 
