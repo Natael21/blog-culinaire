@@ -306,15 +306,14 @@ title: Accueil
 }
 
 .filter-item {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .filter-item label {
   display: block;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: 0.8rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
 }
 
 .filter-select {
@@ -340,12 +339,16 @@ title: Accueil
 
 .filter-select[multiple] {
   height: 42px;
-  overflow: hidden;
+  min-height: 42px;
   padding: 0.8rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   background-size: 1em;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  overflow: hidden;
 }
 
 .filter-select[multiple]:focus {
@@ -359,14 +362,21 @@ title: Accueil
 .filter-select[multiple] option {
   padding: 0.8rem;
   border-bottom: 1px solid #eee;
+  margin: 0;
+  border-radius: 0;
 }
 
-.filter-select[multiple]:not(:focus) option {
-  display: none;
+.filter-select[multiple] option:checked {
+  background-color: var(--accent-color);
+  color: white;
 }
 
-.filter-select[multiple]:not(:focus) option:first-child {
-  display: block;
+.filter-select[multiple] option:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.filter-select[multiple] option:checked:hover {
+  background-color: var(--accent-color);
 }
 
 .reset-filters {

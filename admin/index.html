@@ -110,106 +110,79 @@
     <script src="https://cdn.jsdelivr.net/npm/@octokit/core@5.0.1/dist/index.min.js"></script>
     
     <script>
-      const GITHUB_OWNER = 'Natael21';
-      const GITHUB_REPO = 'blog-culinaire';
-      let octokit;
-
-      // Fonction pour initialiser Octokit avec le token
-      function initOctokit(token) {
-        octokit = new Octokit({
-          auth: token
+      // Fonction pour charger les restaurants
+      function loadRestaurants() {
+        const restaurantList = document.getElementById('restaurant-list');
+        restaurantList.innerHTML = '';
+        
+        // Récupérer les restaurants depuis les éléments HTML existants
+        const restaurants = [];
+        document.querySelectorAll('.post').forEach(post => {
+          restaurants.push({
+            title: post.querySelector('.post-title').textContent,
+            date: post.dataset.date,
+            style: post.dataset.style,
+            note: post.dataset.note,
+            image: post.querySelector('img').src,
+            description: post.querySelector('.post-description').textContent
+          });
         });
-        // Une fois Octokit initialisé, charger les restaurants
-        loadRestaurants();
-      }
 
-      // Fonction pour charger les restaurants depuis le dossier _posts
-      async function loadRestaurants() {
-        try {
-          if (!octokit) {
-            console.error('Octokit n\'est pas initialisé');
-            return;
-          }
+        // Trier les restaurants par date (plus récent en premier)
+        restaurants.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-          const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = '<p class="loading">Chargement des restaurants...</p>';
-          
-          const displayedTitles = new Set(); // Pour éviter les doublons
-
-          // Charger les restaurants existants
-          const { data: postsData } = await octokit.rest.repos.getContent({
-            owner: GITHUB_OWNER,
-            repo: GITHUB_REPO,
-            path: '_posts'
+        // Afficher les restaurants
+        restaurants.forEach(restaurant => {
+          const formattedDate = new Date(restaurant.date).toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
           });
 
-          // Collecter tous les restaurants
-          let allRestaurants = [];
-
-          for (const file of postsData) {
-            if (file.name.endsWith('.markdown') || file.name.endsWith('.md')) {
-              const { data: content } = await octokit.rest.repos.getContent({
-                owner: GITHUB_OWNER,
-                repo: GITHUB_REPO,
-                path: file.path
-              });
-
-              const decodedContent = atob(content.content);
-              const frontMatter = decodedContent.split('---')[1];
-              
-              if (frontMatter) {
-                const metadata = parseFrontMatter(frontMatter);
-                if (!displayedTitles.has(metadata.title)) {
-                  displayedTitles.add(metadata.title);
-                  allRestaurants.push({
-                    metadata,
-                    path: file.path,
-                    date: new Date(metadata.date)
-                  });
-                }
-              }
-            }
-          }
-
-          // Trier les restaurants par date (plus récent en premier)
-          allRestaurants.sort((a, b) => b.date - a.date);
-
-          // Nettoyer le message de chargement
-          restaurantList.innerHTML = '';
-
-          // Afficher les restaurants triés
-          allRestaurants.forEach(restaurant => {
-            renderRestaurantItem(restaurant.metadata, restaurant.path);
-          });
-
-        } catch (error) {
-          console.error('Erreur lors du chargement des restaurants:', error);
-          const restaurantList = document.getElementById('restaurant-list');
-          restaurantList.innerHTML = `
-            <div class="error-message">
-              <i class="fas fa-exclamation-circle"></i>
-              <p>Une erreur est survenue lors du chargement des restaurants.</p>
-              <button onclick="loadRestaurants()" class="retry-btn">
-                <i class="fas fa-redo"></i> Réessayer
+          const restaurantItem = document.createElement('div');
+          restaurantItem.className = 'restaurant-item';
+          restaurantItem.innerHTML = `
+            <div class="restaurant-info">
+              <img src="${restaurant.image}" alt="${restaurant.title}" class="restaurant-image">
+              <div class="restaurant-details">
+                <h3>${restaurant.title}</h3>
+                <div class="restaurant-meta">
+                  <span><i class="far fa-calendar"></i> ${formattedDate}</span>
+                  <span><i class="fas fa-utensils"></i> ${restaurant.style}</span>
+                  <span><i class="fas fa-star"></i> ${restaurant.note}/5</span>
+                </div>
+              </div>
+            </div>
+            <div class="restaurant-actions">
+              <a href="/admin/edit-restaurant.html?id=${encodeURIComponent(restaurant.title)}" class="action-btn edit-btn">
+                <i class="fas fa-edit"></i> Modifier
+              </a>
+              <button class="action-btn delete-btn" onclick="deleteRestaurant('${restaurant.title}')">
+                <i class="fas fa-trash"></i> Supprimer
               </button>
-            </div>`;
-        }
+            </div>
+          `;
+          restaurantList.appendChild(restaurantItem);
+        });
       }
+
+      // Charger les restaurants au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadRestaurants);
 
       // Gestion de l'authentification Netlify Identity
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", user => {
           if (user) {
-            initOctokit(user.token.access_token);
+            // initOctokit(user.token.access_token);
           }
         });
 
         window.netlifyIdentity.on("login", user => {
-          initOctokit(user.token.access_token);
+          // initOctokit(user.token.access_token);
         });
 
         window.netlifyIdentity.on("logout", () => {
-          octokit = null;
+          // octokit = null;
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '<p class="login-message">Veuillez vous connecter pour voir les restaurants.</p>';
         });
@@ -1321,6 +1294,18 @@
             <option value="name-asc">Nom (A-Z)</option>
             <option value="name-desc">Nom (Z-A)</option>
           </select>
+        </div>
+        <div style="display: none;">
+          {% for post in site.posts %}
+          <div class="post" 
+               data-date="{{ post.date | date: '%Y-%m-%d' }}"
+               data-style="{{ post.style }}"
+               data-note="{{ post.note }}">
+            <h2 class="post-title">{{ post.title }}</h2>
+            <img src="{{ post.image }}" alt="{{ post.title }}">
+            <div class="post-description">{{ post.description }}</div>
+          </div>
+          {% endfor %}
         </div>
         <div class="restaurant-list" id="restaurant-list">
           <!-- Les restaurants seront chargés dynamiquement ici -->
