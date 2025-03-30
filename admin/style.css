@@ -949,4 +949,94 @@ body {
 
 .workflow-item.new-item {
   animation: itemTransition 0.3s ease;
+}
+
+/* Styles pour le bouton de déconnexion */
+.logout-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: #e74c3c;
+  color: white !important;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border: none;
+  cursor: pointer;
+  z-index: 99999;
+  font-size: 1rem;
+  margin: 0;
+  pointer-events: auto;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  color: white !important;
+}
+
+.logout-btn i {
+  font-size: 1.2rem;
+  color: white !important;
+}
+
+/* Masquer tous les autres boutons de déconnexion */
+button[onclick*="logout"]:not(.logout-btn),
+a[onclick*="logout"]:not(.logout-btn),
+.logout-button:not(.logout-btn),
+[class*="logout"]:not(.logout-btn) {
+  display: none !important;
+}
+
+/* Conteneur fixe pour le bouton de déconnexion */
+.logout-container {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 2rem;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .logout-btn {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.6rem 1rem;
+  }
+}
+
+/* Masquer le formulaire en dehors de sa section */
+#upcoming-form:not(#upcoming-section #upcoming-form) {
+  display: none !important;
+}
+
+/* Masquer le bouton de déconnexion par défaut */
+.logout-button:not(.logout-btn) {
+  display: none !important;
+}
+
+/* Style pour la section des restaurants à venir */
+#upcoming-section {
+  display: none;
+}
+
+#upcoming-section.active {
+  display: block;
+}
+
+/* Masquer tout formulaire d'ajout de restaurant en dehors de sa section */
+form[action*="ajouter-restaurant"],
+form[action*="add-restaurant"],
+.upcoming-form,
+div[id*="upcoming"]:not(#upcoming-section),
+div[class*="upcoming"]:not(.upcoming-form-container) {
+  display: none !important;
 } 
