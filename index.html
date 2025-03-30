@@ -110,15 +110,20 @@ title: Accueil
               <div class="rating">
                 <span class="stars">
                   {% assign rating = post.note | plus: 0.0 %}
+                  {% assign whole_stars = rating | floor %}
+                  {% assign has_half_star = rating | minus: whole_stars | times: 10 | floor | divided_by: 5 %}
+                  
                   {% for i in (1..5) %}
-                    {% if rating >= i %}
+                    {% if i <= whole_stars %}
                       <i class="fas fa-star"></i>
+                    {% elsif i == whole_stars | plus: 1 and has_half_star == 1 %}
+                      <i class="fas fa-star-half-alt"></i>
                     {% else %}
                       <i class="far fa-star"></i>
                     {% endif %}
                   {% endfor %}
                 </span>
-                <span class="score">{{ rating | floor }}/5</span>
+                <span class="score">{{ rating }}/5</span>
               </div>
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
@@ -129,11 +134,11 @@ title: Accueil
               {% endif %}
               <span class="price">
                 {% if post.price == "budget" %}
-                  <i class="fas fa-dollar-sign"></i> (0-20$)
+                  <i class="fas fa-dollar-sign"></i><span class="price-range"> (0-20$)</span>
                 {% elsif post.price == "medium" %}
-                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> (20-40$)
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (20-40$)</span>
                 {% elsif post.price == "expensive" %}
-                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> (40$ et +)
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (40$ et +)</span>
                 {% endif %}
               </span>
             </div>
@@ -928,6 +933,11 @@ h2 {
   color: #2ecc71;
 }
 
+.map-popup .popup-meta .price i {
+  color: #2ecc71;
+  margin-right: -2px;
+}
+
 /* Ajustements responsive pour la carte */
 @media (max-width: 768px) {
   .map-view {
@@ -935,6 +945,21 @@ h2 {
     border-radius: 0;
     margin: 0 -0.5rem;
   }
+}
+
+/* Cacher les fourchettes de prix en mode grid */
+.post-grid.grid-view .price-range {
+  display: none;
+}
+
+/* Afficher les fourchettes de prix en mode liste */
+.post-grid.list-view .price-range {
+  display: inline;
+}
+
+/* Style pour la vue carte */
+.map-popup .price-range {
+  display: inline;
 }
 </style>
 
