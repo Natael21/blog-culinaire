@@ -93,7 +93,24 @@
     </button>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
+      // Attendre que le widget Netlify Identity soit chargé
+      window.addEventListener('load', function() {
+        // Vérifier si le widget est disponible
+        if (window.netlifyIdentity) {
+          initializeNetlifyIdentity();
+        } else {
+          // Si le widget n'est pas disponible, réessayer après un court délai
+          setTimeout(function() {
+            if (window.netlifyIdentity) {
+              initializeNetlifyIdentity();
+            } else {
+              console.error('Netlify Identity widget not loaded');
+            }
+          }, 1000);
+        }
+      });
+
+      function initializeNetlifyIdentity() {
         const loginButton = document.getElementById('login-button');
         const loginDropdown = document.getElementById('login-dropdown');
         
@@ -114,26 +131,23 @@
         // Initialisation du bouton
         loginButton.addEventListener('click', handleLoginClick);
 
-        // Gestion des événements Netlify Identity
-        if (window.netlifyIdentity) {
-          // Vérifier l'état de connexion au chargement de la page
-          const user = window.netlifyIdentity.currentUser();
+        // Vérifier l'état de connexion au chargement de la page
+        const user = window.netlifyIdentity.currentUser();
+        updateButtonState(user);
+
+        window.netlifyIdentity.on("init", user => {
           updateButtonState(user);
+        });
 
-          window.netlifyIdentity.on("init", user => {
-            updateButtonState(user);
-          });
+        window.netlifyIdentity.on("login", user => {
+          updateButtonState(user);
+          // Redirection vers la page admin après la connexion
+          window.location.href = '/admin/';
+        });
 
-          window.netlifyIdentity.on("login", user => {
-            updateButtonState(user);
-            // Redirection vers la page admin après la connexion
-            window.location.href = '/admin/';
-          });
-
-          window.netlifyIdentity.on("logout", () => {
-            updateButtonState(null);
-          });
-        }
+        window.netlifyIdentity.on("logout", () => {
+          updateButtonState(null);
+        });
 
         // Fonction pour mettre à jour l'état du bouton
         function updateButtonState(user) {
@@ -147,7 +161,7 @@
             loginDropdown.style.display = 'block';
           }
         }
-      });
+      }
 
       // Fonction pour gérer la connexion Disqus
       function handleDisqusLogin() {
@@ -164,9 +178,34 @@
       function handleNetlifyLogin() {
         if (window.netlifyIdentity) {
           window.netlifyIdentity.open('login');
+        } else {
+          console.error('Netlify Identity widget not loaded');
         }
         document.getElementById('login-dropdown').classList.remove('show');
       }
+
+      // Initialisation du menu déroulant même si Netlify Identity n'est pas chargé
+      document.addEventListener('DOMContentLoaded', function() {
+        const loginButton = document.getElementById('login-button');
+        const loginDropdown = document.getElementById('login-dropdown');
+        
+        // Fonction pour gérer le clic sur le bouton
+        function handleLoginClick(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          loginDropdown.classList.toggle('show');
+        }
+
+        // Fermer le dropdown si on clique en dehors
+        document.addEventListener('click', function(e) {
+          if (!loginButton.contains(e.target) && !loginDropdown.contains(e.target)) {
+            loginDropdown.classList.remove('show');
+          }
+        });
+
+        // Initialisation du bouton
+        loginButton.addEventListener('click', handleLoginClick);
+      });
 
       // Optimisation du scroll to top avec throttling
       let scrollTimeout;
