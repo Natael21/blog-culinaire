@@ -41,7 +41,7 @@ title: Accueil
         <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
-          <select id="style" class="filter-select" multiple>
+          <select id="style-filter" class="filter-select" multiple>
             <option value="">Tous les styles</option>
             <option value="Américain">Américain</option>
             <option value="Asiatique">Asiatique</option>
@@ -58,11 +58,14 @@ title: Accueil
 
         <!-- Note -->
         <div class="filter-item">
-          <label for="rating-filter">Note</label>
+          <label for="rating-filter">Note minimale</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="4plus">4 étoiles et plus</option>
-            <option value="3minus">3 étoiles et moins</option>
+            <option value="5">5 étoiles</option>
+            <option value="4">4 étoiles et plus</option>
+            <option value="3">3 étoiles et plus</option>
+            <option value="2">2 étoiles et plus</option>
+            <option value="1">1 étoile et plus</option>
           </select>
         </div>
 
@@ -977,86 +980,62 @@ h2 {
 
 <script>
 const titleSearch = document.getElementById('title-search');
-const styleFilter = document.getElementById('style');
+const styleFilter = document.getElementById('style-filter');
 const ratingFilter = document.getElementById('rating-filter');
 const priceFilter = document.getElementById('price-filter');
 const advancedFiltersToggle = document.getElementById('advanced-filters-toggle');
 const advancedFilters = document.getElementById('advanced-filters');
 const restaurantGrid = document.getElementById('restaurant-grid');
-let restaurants = Array.from(restaurantGrid.children);
 let map = null;
-let markers = new Map(); // Pour stocker les marqueurs
-
-// Toggle des filtres avancés
-advancedFiltersToggle.addEventListener('click', function() {
-  const isHidden = advancedFilters.style.display === 'none';
-  advancedFilters.style.display = isHidden ? 'block' : 'none';
-  this.innerHTML = isHidden ? 
-    '<i class="fas fa-times"></i> Masquer les filtres' : 
-    '<i class="fas fa-sliders-h"></i> Filtres avancés';
-});
+let markers = new Map();
 
 function filterRestaurants() {
     const searchText = titleSearch.value.toLowerCase();
     const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
-    const selectedRating = ratingFilter.value;
+    const selectedRating = parseFloat(ratingFilter.value) || 0;
     const selectedPrice = priceFilter.value;
 
-    restaurants.forEach(restaurant => {
-        const titleMatch = restaurant.title.toLowerCase().includes(searchText);
-        const styleMatch = selectedStyles.length === 0 || selectedStyles.includes('') || selectedStyles.includes(restaurant.style);
-        const ratingMatch = selectedRating === '' || restaurant.rating >= parseFloat(selectedRating);
-        const priceMatch = selectedPrice === '' || restaurant.price === selectedPrice;
+    const restaurantElements = document.querySelectorAll('.post-card');
+    restaurantElements.forEach(restaurant => {
+        const title = restaurant.querySelector('h2').textContent.toLowerCase();
+        const style = restaurant.dataset.style;
+        const rating = parseFloat(restaurant.dataset.rating);
+        const price = restaurant.dataset.price;
 
-        const marker = markers[restaurant.id];
+        const titleMatch = title.includes(searchText);
+        const styleMatch = selectedStyles.length === 0 || selectedStyles.includes('') || selectedStyles.includes(style);
+        const ratingMatch = rating >= selectedRating;
+        const priceMatch = !selectedPrice || price === selectedPrice;
+
+        const marker = markers.get(restaurant.id);
         if (titleMatch && styleMatch && ratingMatch && priceMatch) {
-            restaurant.element.style.display = '';
+            restaurant.style.display = '';
             if (marker) marker.addTo(map);
         } else {
-            restaurant.element.style.display = 'none';
+            restaurant.style.display = 'none';
             if (marker) marker.remove();
         }
     });
-}
 
-function resetFilters() {
-  // Réinitialiser la recherche
-  titleSearch.value = '';
-  
-  // Réinitialiser le select multiple des styles
-  Array.from(styleFilter.options).forEach(option => {
-    option.selected = false;
-  });
-  styleFilter.options[0].selected = true; // Sélectionner "Tous les styles"
-  
-  // Réinitialiser les autres filtres
-  ratingFilter.value = '';
-  priceFilter.value = '';
-  
-  // Masquer les filtres avancés
-  advancedFilters.style.display = 'none';
-  advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
-  
-  // Réafficher tous les restaurants
-  restaurants.forEach(restaurant => {
-    restaurant.style.display = '';
-    const marker = markers[restaurant.id];
-    if (marker && map) {
-      marker.addTo(map);
+    // Si la carte est visible et qu'il y a des marqueurs, ajuster la vue
+    if (map && markers.size > 0) {
+        const bounds = new L.LatLngBounds();
+        let hasVisibleMarkers = false;
+
+        markers.forEach(marker => {
+            if (map.hasLayer(marker)) {
+                bounds.extend(marker.getLatLng());
+                hasVisibleMarkers = true;
+            }
+        });
+
+        if (hasVisibleMarkers) {
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 15
+            });
+        }
     }
-  });
-
-  // Si la carte est visible et qu'il y a des marqueurs, ajuster la vue
-  if (map && markers.size > 0) {
-    const bounds = new L.LatLngBounds();
-    markers.forEach(marker => {
-      bounds.extend(marker.getLatLng());
-    });
-    map.fitBounds(bounds, {
-      padding: [50, 50],
-      maxZoom: 15
-    });
-  }
 }
 
 // Ajout des event listeners
@@ -1064,6 +1043,48 @@ titleSearch.addEventListener('input', filterRestaurants);
 styleFilter.addEventListener('change', filterRestaurants);
 ratingFilter.addEventListener('change', filterRestaurants);
 priceFilter.addEventListener('change', filterRestaurants);
+
+// Fonction pour réinitialiser les filtres
+function resetFilters() {
+    // Réinitialiser la recherche
+    titleSearch.value = '';
+    
+    // Réinitialiser le select multiple des styles
+    Array.from(styleFilter.options).forEach(option => {
+        option.selected = false;
+    });
+    styleFilter.options[0].selected = true;
+    
+    // Réinitialiser les autres filtres
+    ratingFilter.value = '';
+    priceFilter.value = '';
+    
+    // Masquer les filtres avancés
+    advancedFilters.style.display = 'none';
+    advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
+    
+    // Réafficher tous les restaurants
+    const restaurantElements = document.querySelectorAll('.post-card');
+    restaurantElements.forEach(restaurant => {
+        restaurant.style.display = '';
+        const marker = markers.get(restaurant.id);
+        if (marker && map) {
+            marker.addTo(map);
+        }
+    });
+
+    // Si la carte est visible et qu'il y a des marqueurs, ajuster la vue
+    if (map && markers.size > 0) {
+        const bounds = new L.LatLngBounds();
+        markers.forEach(marker => {
+            bounds.extend(marker.getLatLng());
+        });
+        map.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 15
+        });
+    }
+}
 
 // Fonction pour sauvegarder la vue actuelle
 function saveCurrentView(event) {
