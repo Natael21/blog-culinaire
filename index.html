@@ -6,7 +6,7 @@ title: Accueil
 <div class="main-content">
   <div class="page-header">
     <h2>Nos Dernières Découvertes</h2>
-    <p>Explorez nos critiques de restaurants à Sherbrooke</p>
+    <p>Explorez nos critiques de restaurants à Sherbrooke ci-dessous</p>
   </div>
 
   <!-- Barre de filtres -->
@@ -63,11 +63,9 @@ title: Accueil
           <label for="rating-filter">Note</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="5">5 étoiles</option>
-            <option value="4">4 étoiles</option>
-            <option value="3">3 étoiles</option>
-            <option value="2">2 étoiles</option>
-            <option value="1">1 étoile</option>
+            <option value="4">Recommandés (4 et +)</option>
+            <option value="3">Corrects (3 à 4)</option>
+            <option value="2">Non recommandés (moins de 3)</option>
           </select>
         </div>
 
@@ -76,9 +74,9 @@ title: Accueil
           <label for="price-filter">Fourchette de prix</label>
           <select id="price-filter" class="filter-select">
             <option value="">Tous les prix</option>
-            <option value="budget">Budget ($)</option>
-            <option value="medium">Moyen ($$)</option>
-            <option value="expensive">Luxe ($$$)</option>
+            <option value="budget">$ (0-20$)</option>
+            <option value="medium">$$ (20-40$)</option>
+            <option value="expensive">$$$ (40$ et +)</option>
           </select>
         </div>
 
@@ -965,7 +963,7 @@ advancedFiltersToggle.addEventListener('click', function() {
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
   const selectedStyle = styleFilter.value;
-  const exactRating = ratingFilter.value;
+  const selectedRating = ratingFilter.value;
   const selectedPrice = priceFilter.value;
 
   let filteredRestaurants = restaurants.filter(restaurant => {
@@ -976,8 +974,23 @@ function filterRestaurants() {
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
     const styleMatch = !selectedStyle || style === selectedStyle;
-    const ratingMatch = !exactRating || rating === parseFloat(exactRating);
     const priceMatch = !selectedPrice || price === selectedPrice;
+    
+    // Nouvelle logique pour le filtrage des notes
+    let ratingMatch = true;
+    if (selectedRating) {
+      switch(selectedRating) {
+        case "4":
+          ratingMatch = rating >= 4;
+          break;
+        case "3":
+          ratingMatch = rating >= 3 && rating < 4;
+          break;
+        case "2":
+          ratingMatch = rating < 3;
+          break;
+      }
+    }
     
     // Si la carte est initialisée, mettre à jour la visibilité des marqueurs
     if (map) {
