@@ -83,10 +83,6 @@
         <h1>Blog Culinaire Sherbrooke</h1>
         <p class="tagline">Nos critiques honnêtes de restaurants à Sherbrooke – pour les amoureux de bonne bouffe</p>
       </div>
-      <a href="javascript:void(0)" class="admin-button" id="login-button">
-        <i class="fas fa-user"></i>
-        <span>Connexion</span>
-      </a>
     </header>
 
     <nav class="main-nav-container">
@@ -118,56 +114,6 @@
     </button>
 
     <script>
-      // Chargement différé du JavaScript non critique
-      document.addEventListener('DOMContentLoaded', function() {
-        const loginButton = document.getElementById('login-button');
-        
-        // Fonction pour gérer le clic sur le bouton
-        function handleLoginClick(e) {
-          e.preventDefault();
-          if (!window.netlifyIdentity.currentUser()) {
-            window.netlifyIdentity.open('login');
-          } else {
-            window.location.href = '/admin/';
-          }
-        }
-
-        // Initialisation du bouton
-        loginButton.addEventListener('click', handleLoginClick);
-
-        // Gestion des événements Netlify Identity
-        if (window.netlifyIdentity) {
-          // Vérifier l'état de connexion au chargement de la page
-          const user = window.netlifyIdentity.currentUser();
-          updateButtonState(user);
-
-          window.netlifyIdentity.on("init", user => {
-            updateButtonState(user);
-          });
-
-          window.netlifyIdentity.on("login", user => {
-            updateButtonState(user);
-            // Redirection vers la page admin après la connexion
-            window.location.href = '/admin/';
-          });
-
-          window.netlifyIdentity.on("logout", () => {
-            updateButtonState(null);
-          });
-        }
-
-        // Fonction pour mettre à jour l'état du bouton
-        function updateButtonState(user) {
-          if (user) {
-            loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
-            loginButton.onclick = () => window.location.href = '/admin/';
-          } else {
-            loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
-            loginButton.onclick = handleLoginClick;
-          }
-        }
-      });
-
       // Optimisation du scroll to top avec throttling
       let scrollTimeout;
       const scrollToTopButton = document.getElementById('scroll-to-top');

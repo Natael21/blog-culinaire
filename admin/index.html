@@ -1314,6 +1314,7 @@
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", user => {
           if (!user) {
+            // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion Netlify
             window.netlifyIdentity.open('login');
           } else {
             showAdminContent();
@@ -1330,9 +1331,14 @@
 
         // Vérification immédiate de l'authentification
         const currentUser = window.netlifyIdentity.currentUser();
-        if (currentUser) {
+        if (!currentUser) {
+          window.netlifyIdentity.open('login');
+        } else {
           showAdminContent();
         }
+      } else {
+        // Si Netlify Identity n'est pas chargé, rediriger vers la page d'accueil
+        window.location.href = "/";
       }
 
       // Fonction pour charger les restaurants depuis le dossier _posts
