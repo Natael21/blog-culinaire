@@ -247,15 +247,16 @@ body {
 
 /* Styles pour les filtres de restaurants */
 .restaurant-filters {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
   margin: 1rem 0;
-  align-items: center;
 }
 
 .search-filter {
   position: relative;
+  max-width: 300px;
   width: 100%;
 }
 
@@ -297,6 +298,20 @@ body {
 .filter-select:focus {
   border-color: #3498db;
   outline: none;
+}
+
+@media (max-width: 768px) {
+  .restaurant-filters {
+    flex-direction: column;
+  }
+  
+  .search-filter {
+    max-width: 100%;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
 }
 
 /* Styles pour la preview des restaurants */
