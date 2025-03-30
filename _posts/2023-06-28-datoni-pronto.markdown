@@ -3,7 +3,7 @@ layout: restaurant
 title: "Datoni Pronto"
 date: 2023-06-28
 note: 8
-style: "Italien & Méditerranéen"
+style: "Italien"
 diet: "vegetarian-friendly"
 description: "Une pizzéria authentique avec des produits d'origine italienne et une ambiance parfaite pour les rendez-vous galants !"
 price: "medium"

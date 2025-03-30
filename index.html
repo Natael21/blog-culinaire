@@ -44,11 +44,12 @@ title: Accueil
           <select id="style-filter" class="filter-select">
             <option value="all">Tous les styles</option>
             <option value="Asiatique">Asiatique</option>
-            <option value="Méditerranéen & Moyen-Orient">Méditerranéen & Moyen-Orient</option>
+            <option value="Américain">Américain</option>
+            <option value="Moyen-Orient">Moyen-Orient</option>
             <option value="Mexicain & Latino">Mexicain & Latino</option>
             <option value="Bistro & Café">Bistro & Café</option>
             <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
-            <option value="Italien & Méditerranéen">Italien & Méditerranéen</option>
+            <option value="Italien">Italien</option>
             <option value="Indien & Épicé">Indien & Épicé</option>
           </select>
         </div>
@@ -1014,26 +1015,14 @@ function filterRestaurants() {
     if (selectedRating) {
       switch(selectedRating) {
         case "8":
-          ratingMatch = rating >= 8 && rating <= 10;
+          ratingMatch = rating >= 8;
           break;
         case "6":
-          ratingMatch = rating >= 6 && rating <= 7;
+          ratingMatch = rating >= 6 && rating < 8;
           break;
         case "5":
-          ratingMatch = rating <= 5;
+          ratingMatch = rating < 6;
           break;
-      }
-    }
-    
-    // Si la carte est initialisée, mettre à jour la visibilité des marqueurs
-    if (map) {
-      const marker = markers.get(restaurant.id);
-      if (marker) {
-        if (titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch) {
-          marker.addTo(map);
-        } else {
-          marker.remove();
-        }
       }
     }
     
@@ -1045,26 +1034,6 @@ function filterRestaurants() {
   filteredRestaurants.forEach(restaurant => {
     restaurantGrid.appendChild(restaurant);
   });
-
-  // Si la carte est visible et qu'il y a des marqueurs visibles, ajuster la vue
-  if (map && markers.size > 0) {
-    const bounds = new L.LatLngBounds();
-    let hasVisibleMarkers = false;
-
-    markers.forEach((marker, restaurantId) => {
-      if (map.hasLayer(marker)) {
-        bounds.extend(marker.getLatLng());
-        hasVisibleMarkers = true;
-      }
-    });
-
-    if (hasVisibleMarkers) {
-      map.fitBounds(bounds, {
-        padding: [50, 50],
-        maxZoom: 15
-      });
-    }
-  }
 }
 
 function resetFilters() {

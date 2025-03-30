@@ -3,7 +3,7 @@ layout: restaurant
 title: "Caffuccino"
 date: 2024-05-04
 note: 8
-style: "Bistro"
+style: "Bistro & Café"
 diet: "vegetarian-friendly"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
 price: "medium"

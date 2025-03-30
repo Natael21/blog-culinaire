@@ -3,7 +3,7 @@ layout: restaurant
 title: "Les Vraies Richesses"
 date: 2023-06-20
 note: 9
-style: "Boulangerie-Café"
+style: "Bistro & Café"
 diet: "vegetarian-friendly"
 description: "Bienvenue à la boulangerie Les Vraies Richesses au centre-ville de Sherbrooke ! Un endroit chaleureux où les viennoiseries et les sandwichs sont préparés avec passion."
 price: "budget"

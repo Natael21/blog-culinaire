@@ -1,5 +1,5 @@
 ---
-restaurant_type: Méditerranéen & Moyen-Orient
+restaurant_type: Moyen-Orient
 title: Resto Amir
 diet: "vegetarian-friendly"
 description: Un restaurant offrant une cuisine méditerranéenne et du Moyen-Orient dans une ambiance chaleureuse.
