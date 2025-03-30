@@ -857,11 +857,30 @@
         </div>
 
         <div class="preview-card active">
-          <!-- La prévisualisation en mode carte sera mise à jour dynamiquement -->
+          <h3></h3>
+          <div class="preview-card-content">
+            <div class="preview-card-meta">
+              <span class="style"><i class="fas fa-utensils"></i> <span class="style-value"></span></span>
+              <span class="price"><i class="fas fa-euro-sign"></i> <span class="price-value"></span></span>
+              <span class="rating"><i class="fas fa-star"></i> <span class="note"></span>/10</span>
+            </div>
+          </div>
         </div>
 
         <div class="preview-full">
-          <!-- La prévisualisation en mode complet sera mise à jour dynamiquement -->
+          <h3></h3>
+          <div class="preview-content">
+            <div class="preview-meta">
+              <span class="style"><i class="fas fa-utensils"></i> <span class="style-value"></span></span>
+              <span class="price"><i class="fas fa-euro-sign"></i> <span class="price-value"></span></span>
+              <span class="rating"><i class="fas fa-star"></i> <span class="note"></span>/10</span>
+            </div>
+            <div class="preview-address"><i class="fas fa-map-marker-alt"></i> <span class="address"></span></div>
+            <div class="preview-description">
+              <h4>Description</h4>
+              <div class="description-text"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1537,38 +1556,57 @@
 
       // Fonction pour mettre à jour la prévisualisation
       function updatePreview() {
-        // Récupérer les valeurs du formulaire
-        const title = document.getElementById('restaurant-title').value || 'Nom du Restaurant';
-        const style = document.getElementById('restaurant-style').value || 'Style de cuisine';
-        const diet = document.getElementById('restaurant-diet').value || 'Régime alimentaire';
-        const price = document.getElementById('restaurant-price').value || 'Prix';
-        const note = document.getElementById('restaurant-note').value || '4.5';
-        const address = document.getElementById('restaurant-address').value || 'Adresse du restaurant';
-        const description = document.getElementById('restaurant-description').value || '';
+        try {
+          // Récupérer les valeurs du formulaire
+          const title = document.getElementById('restaurant-title').value || 'Nom du Restaurant';
+          const style = document.getElementById('restaurant-style').value || 'Style de cuisine';
+          const diet = document.getElementById('restaurant-diet').value || '';
+          const price = document.getElementById('restaurant-price').value || '€';
+          const note = document.getElementById('restaurant-note').value || '0';
+          const address = document.getElementById('restaurant-address').value || 'Adresse du restaurant';
+          const description = document.getElementById('restaurant-description').value || '';
 
-        // Mettre à jour la vue carte
-        document.querySelector('.preview-card h3').textContent = title;
-        document.querySelector('.preview-card .style').textContent = style;
-        document.querySelector('.preview-card .note').textContent = note;
-        document.querySelector('.preview-card .price-value').textContent = price;
+          // Mettre à jour la vue carte
+          document.querySelector('.preview-card h3').textContent = title;
+          document.querySelectorAll('.style-value').forEach(el => el.textContent = style);
+          document.querySelectorAll('.note').forEach(el => el.textContent = note);
+          document.querySelectorAll('.price-value').forEach(el => el.textContent = price);
+          document.querySelector('.address').textContent = address;
+          document.querySelector('.description-text').textContent = description;
 
-        // Mettre à jour la vue complète
-        document.querySelector('.preview-full h3').textContent = title;
-        document.querySelector('.preview-full .style').textContent = style;
-        document.querySelector('.preview-full .note').textContent = note;
-        document.querySelector('.preview-full .price-value').textContent = price;
-        document.querySelector('.preview-full .address').textContent = address;
-        document.querySelector('.preview-full .description-text').textContent = description;
+        } catch (error) {
+          console.warn('Erreur lors de la mise à jour de la prévisualisation:', error);
+        }
       }
 
-      // Ajouter les event listeners pour la mise à jour en temps réel
-      document.getElementById('restaurant-title').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-style').addEventListener('change', updatePreview);
-      document.getElementById('restaurant-diet').addEventListener('change', updatePreview);
-      document.getElementById('restaurant-price').addEventListener('change', updatePreview);
-      document.getElementById('restaurant-note').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-address').addEventListener('input', updatePreview);
-      document.getElementById('restaurant-description').addEventListener('input', updatePreview);
+      // Initialiser les écouteurs d'événements après le chargement du DOM
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          // Charger les données du restaurant
+          loadRestaurantData();
+          
+          // Ajouter les écouteurs d'événements pour la mise à jour en temps réel
+          const formElements = [
+            'restaurant-title',
+            'restaurant-style',
+            'restaurant-diet',
+            'restaurant-price',
+            'restaurant-note',
+            'restaurant-address',
+            'restaurant-description'
+          ];
+
+          formElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+              element.addEventListener('input', updatePreview);
+            }
+          });
+
+        } catch (error) {
+          console.error('Erreur lors de l\'initialisation:', error);
+        }
+      });
 
       // Gestion de l'image principale
       document.getElementById('main-image-input').addEventListener('change', function(e) {
@@ -1763,17 +1801,41 @@
           // Créer l'identifiant unique pour le restaurant
           const restaurantId = formData.title.toLowerCase().replace(/[^a-z0-9]/g, '_');
 
+          // Créer le contenu du fichier markdown
+          const frontmatter = [
+            '---',
+            `layout: restaurant`,
+            `title: "${formData.title}"`,
+            `date: ${formData.date}`,
+            `style: "${formData.style}"`,
+            `diet: "${formData.diet}"`,
+            `price: "${formData.price}"`,
+            `note: ${formData.note}`,
+            `address: "${formData.address}"`,
+            `description: "${formData.description}"`,
+            `image: "${formData.mainImage}"`,
+            `state: "draft"`,
+            `published: false`,
+            '---'
+          ].join('\n');
+
           // Sauvegarder dans le localStorage
-          const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '{"restaurants":[]}');
-          pendingChanges.restaurants = pendingChanges.restaurants.filter(r => r[0] !== restaurantId);
-          pendingChanges.restaurants.push([restaurantId, {
+          const pendingChanges = {
+            restaurants: new Map()
+          };
+          pendingChanges.restaurants.set(restaurantId, {
             ...formData,
             gallery: galleryImages,
+            frontmatter: frontmatter,
             timestamp: Date.now(),
             lastModified: new Date().toLocaleString()
-          }]);
+          });
           pendingChanges.lastEdited = restaurantId;
-          localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+
+          localStorage.setItem('pendingChanges', JSON.stringify({
+            restaurants: Array.from(pendingChanges.restaurants.entries()),
+            lastEdited: restaurantId
+          }));
 
           // Afficher une confirmation
           await Swal.fire({
@@ -1794,7 +1856,7 @@
           console.error('Erreur lors de la sauvegarde:', error);
           Swal.fire({
             title: 'Erreur !',
-            text: 'Une erreur est survenue lors de la sauvegarde.',
+            text: 'Une erreur est survenue lors de la sauvegarde : ' + error.message,
             icon: 'error'
           });
         }
