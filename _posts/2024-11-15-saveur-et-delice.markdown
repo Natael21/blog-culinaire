@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Saveur et Délice"
 date: 2024-11-15
-note: 4
+note: 8
 style: "Asiatique"
 description: "Fusion asiatique-québécoise avec ambiance musicale douce et prix abordables."
 price: "budget"

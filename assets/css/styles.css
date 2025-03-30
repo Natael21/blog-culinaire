@@ -1,0 +1,48 @@
+/* Styles pour la notation */
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rating-bar {
+  flex-grow: 1;
+  height: 8px;
+  background-color: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rating-fill {
+  height: 100%;
+  background: linear-gradient(to right, #f1c40f, #f39c12);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.score {
+  color: #666;
+  font-weight: 600;
+  min-width: 45px;
+  text-align: right;
+}
+
+/* Ajustements pour la vue en liste */
+.post-grid.list-view .rating-bar {
+  max-width: 150px;
+}
+
+/* Ajustements pour la vue en pastilles */
+.post-grid.grid-view .rating-bar {
+  max-width: 100%;
+}
+
+/* Ajustements pour la popup de la carte */
+.map-popup .rating-bar {
+  max-width: 100px;
+}
+
+/* Ajustements pour la page détaillée du restaurant */
+.restaurant-detail .rating-bar {
+  max-width: 200px;
+} 

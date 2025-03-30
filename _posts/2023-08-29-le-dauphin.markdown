@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Le Dauphin"
 date: 2023-08-29
-note: 4
+note: 7
 style: "Bistro"
 description: "Un bistro offrant des plats classiques comme des côtes levées et des frites dans une ambiance chaleureuse"
 price: "medium"

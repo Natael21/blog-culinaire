@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Datoni Pronto"
 date: 2023-06-28
-note: 4
+note: 8
 style: "Italien"
 description: "Une pizzéria authentique avec des produits d'origine italienne et une ambiance parfaite pour les rendez-vous galants !"
 price: "medium"

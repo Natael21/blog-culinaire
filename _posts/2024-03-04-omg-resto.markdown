@@ -2,7 +2,7 @@
 layout: restaurant
 title: "OMG Resto"
 date: 2024-03-04
-note: 4
+note: 7
 style: "Américain"
 description: "Restaurant spacieux et luxueux offrant burgers raffinés et bières artisanales."
 price: "medium"

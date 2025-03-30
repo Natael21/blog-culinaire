@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Taverne Alexandre"
 date: 2023-05-23
-note: 4
+note: 8
 style: "Pub"
 description: "Bienvenue à la taverne Alexandre située sur la rue Alexandre au centre-ville de Sherbrooke ! Une très belle ambiance comme on pourrait s'attendre d'un pub !"
 price: "medium"

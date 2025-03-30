@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Café Restaurant L"
 date: 2024-01-12
-note: 4
+note: 8
 style: "Iranien"
 description: "Salaam ! Vous avez besoin d'un coin tranquille pour savourer un repas gastronomique ? La cuisine iranienne saura vous impressionner dans ce restaurant paisible !"
 price: "medium"

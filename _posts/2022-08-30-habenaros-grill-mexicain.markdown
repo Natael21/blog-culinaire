@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Habenaros Grill Mexicain"
 date: 2022-08-30
-note: 3
+note: 6
 style: "Mexicain"
 description: "Un fast-food mexicain parfait pour s'initier à la cuisine mexicaine avec des prix abordables"
 price: "budget"

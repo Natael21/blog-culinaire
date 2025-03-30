@@ -63,9 +63,9 @@ title: Accueil
           <label for="rating-filter">Note</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="4">Recommandés (4 et +)</option>
-            <option value="3">Corrects (3 à 4)</option>
-            <option value="2">Non recommandés (moins de 3)</option>
+            <option value="8">Recommandés (8/10 et +)</option>
+            <option value="6">Corrects (6 à 8/10)</option>
+            <option value="5">Non recommandés (moins de 6/10)</option>
           </select>
         </div>
 
@@ -109,17 +109,11 @@ title: Accueil
             <div class="content-header">
               <h2>{{ post.title }}</h2>
               <div class="rating">
-                <span class="stars">
-                  {% assign rating = post.note | plus: 0.0 %}
-                  {% for i in (1..5) %}
-                    {% if rating >= i %}
-                      <i class="fas fa-star"></i>
-                    {% else %}
-                      <i class="far fa-star"></i>
-                    {% endif %}
-                  {% endfor %}
-                </span>
-                <span class="score">{{ rating | floor }}/5</span>
+                {% assign rating_on_ten = post.note | times: 2 %}
+                <div class="rating-bar">
+                  <div class="rating-fill" style="width: {{ rating_on_ten | times: 10 }}%"></div>
+                </div>
+                <span class="score">{% if rating_on_ten | modulo: 1 == 0 %}{{ rating_on_ten | floor }}{% else %}{{ rating_on_ten }}{% endif %}/10</span>
               </div>
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
@@ -738,16 +732,44 @@ h2 {
 .rating {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.stars {
-  color: #f1c40f;
+.rating-bar {
+  flex-grow: 1;
+  height: 8px;
+  background-color: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rating-fill {
+  height: 100%;
+  background: linear-gradient(to right, #f1c40f, #f39c12);
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
 
 .score {
   color: #666;
   font-weight: 600;
+  min-width: 45px;
+  text-align: right;
+}
+
+/* Ajustements pour la vue en liste */
+.post-grid.list-view .rating-bar {
+  max-width: 150px;
+}
+
+/* Ajustements pour la vue en pastilles */
+.post-grid.grid-view .rating-bar {
+  max-width: 100%;
+}
+
+/* Ajustements pour la popup de la carte */
+.map-popup .rating-bar {
+  max-width: 100px;
 }
 
 .description {
@@ -979,15 +1001,16 @@ function filterRestaurants() {
     // Nouvelle logique pour le filtrage des notes
     let ratingMatch = true;
     if (selectedRating) {
+      const ratingOnTen = rating * 2; // Convertir la note sur 5 en note sur 10
       switch(selectedRating) {
-        case "4":
-          ratingMatch = rating >= 4;
+        case "8":
+          ratingMatch = ratingOnTen >= 8;
           break;
-        case "3":
-          ratingMatch = rating >= 3 && rating < 4;
+        case "6":
+          ratingMatch = ratingOnTen >= 6 && ratingOnTen < 8;
           break;
-        case "2":
-          ratingMatch = rating < 3;
+        case "5":
+          ratingMatch = ratingOnTen < 6;
           break;
       }
     }
@@ -1373,7 +1396,9 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="popup-info">
             <h3>${restaurant.querySelector('h2').textContent}</h3>
             <div class="popup-rating">
-              ${restaurant.querySelector('.rating').innerHTML}
+              <div class="rating-bar">
+                <div class="rating-fill" style="width: {{ rating_on_ten | times: 10 }}%"></div>
+              </div>
             </div>
             <div class="popup-meta">
               <span class="cuisine-style">

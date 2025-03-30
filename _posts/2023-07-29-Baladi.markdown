@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Baladi"
 date: 2023-07-29
-note: 4
+note: 9
 style: "Libano-Marocain"
 description: "C'est l'un des meilleurs restaurants à cuisine libano-marocaine en ville, particulièrement pour leur spécialité du couscous !"
 price: "medium"

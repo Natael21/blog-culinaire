@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Masala Café"
 date: 2023-07-16
-note: 5
+note: 10
 style: "Indien"
 description: "Sabhee ko namaskaar ! Par une longue semaine de pluie, un excellent restaurant indien orné de reliques qui pimentent votre journée."
 price: "medium"

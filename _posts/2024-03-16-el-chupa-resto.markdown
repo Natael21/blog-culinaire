@@ -2,7 +2,7 @@
 layout: restaurant
 title: "El Chupa Resto"
 date: 2024-03-16
-note: 4
+note: 7
 style: "Mexicain"
 description: "Cuisine mexicaine authentique avec tortillas maison et ambiance chaleureuse."
 price: "medium"

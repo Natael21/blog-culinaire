@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Le Refuge des Brasseurs"
 date: 2022-12-14
-note: 5
+note: 8
 style: "Microbrasserie"
 description: "Une microbrasserie offrant des plats gastronomiques et une sélection impressionnante de bières artisanales"
 price: "medium"

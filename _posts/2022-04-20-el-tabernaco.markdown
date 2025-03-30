@@ -2,7 +2,7 @@
 layout: restaurant
 title: "El Tabernaco (Fermé)"
 date: 2022-04-20
-note: 4
+note: 10
 style: "Mexicain"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui offrait une expérience gastronomique mexicaine authentique, avec des plats savoureux et une ambiance chaleureuse qui transportait ses clients au cœur du Mexique."
 price: "medium"

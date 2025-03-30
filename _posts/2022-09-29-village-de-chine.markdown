@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Village de Chine"
 date: 2022-09-29
-note: 3
+note: 4
 style: "Asiatique"
 description: "Un restaurant chinois avec un vaste menu, idéal pour découvrir la cuisine chinoise traditionnelle"
 price: "budget"

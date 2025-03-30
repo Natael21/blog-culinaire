@@ -2,7 +2,7 @@
 layout: restaurant
 title: "La Buvette du Centro"
 date: 2022-04-13
-note: 5
+note: 10
 style: "Café-Bistro"
 description: "Un restaurant végétarien offrant des burgers créatifs et une sélection impressionnante de boissons locales"
 price: "medium"
