@@ -63,11 +63,8 @@ title: Accueil
           <label for="rating-filter">Note</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="5">5 étoiles</option>
-            <option value="4">4 étoiles</option>
-            <option value="3">3 étoiles</option>
-            <option value="2">2 étoiles</option>
-            <option value="1">1 étoile</option>
+            <option value="4plus">4 étoiles et plus</option>
+            <option value="3minus">3 étoiles et moins</option>
           </select>
         </div>
 
@@ -76,9 +73,9 @@ title: Accueil
           <label for="price-filter">Fourchette de prix</label>
           <select id="price-filter" class="filter-select">
             <option value="">Tous les prix</option>
-            <option value="budget">Budget ($)</option>
-            <option value="medium">Moyen ($$)</option>
-            <option value="expensive">Luxe ($$$)</option>
+            <option value="budget">$ (0-20$)</option>
+            <option value="medium">$$ (20-40$)</option>
+            <option value="expensive">$$$ (40$ et +)</option>
           </select>
         </div>
 
@@ -132,11 +129,11 @@ title: Accueil
               {% endif %}
               <span class="price">
                 {% if post.price == "budget" %}
-                  <i class="fas fa-dollar-sign"></i>
+                  <i class="fas fa-dollar-sign"></i> (0-20$)
                 {% elsif post.price == "medium" %}
-                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> (20-40$)
                 {% elsif post.price == "expensive" %}
-                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> (40$ et +)
                 {% endif %}
               </span>
             </div>
@@ -965,7 +962,7 @@ advancedFiltersToggle.addEventListener('click', function() {
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
   const selectedStyle = styleFilter.value;
-  const exactRating = ratingFilter.value;
+  const ratingFilter = document.getElementById('rating-filter').value;
   const selectedPrice = priceFilter.value;
 
   let filteredRestaurants = restaurants.filter(restaurant => {
@@ -976,7 +973,9 @@ function filterRestaurants() {
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
     const styleMatch = !selectedStyle || style === selectedStyle;
-    const ratingMatch = !exactRating || rating === parseFloat(exactRating);
+    const ratingMatch = !ratingFilter || 
+      (ratingFilter === '4plus' && rating >= 4) || 
+      (ratingFilter === '3minus' && rating <= 3);
     const priceMatch = !selectedPrice || price === selectedPrice;
     
     // Si la carte est initialisée, mettre à jour la visibilité des marqueurs
