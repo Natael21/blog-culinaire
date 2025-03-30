@@ -3,6 +3,8 @@ layout: default
 title: Accueil
 ---
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <div class="page-header">
   <h2>Nos Dernières Découvertes</h2>
   <p>Explorez nos critiques de restaurants à Sherbrooke</p>
@@ -63,14 +65,21 @@ title: Accueil
             <h2>{{ post.title }}</h2>
             <div class="rating">
               <span class="stars">
-                {% assign rating = post.note | default: 0 %}
+                {% assign rating = post.note | plus: 0.0 %}
+                {% assign whole_stars = rating | floor %}
+                {% assign has_half_star = rating | minus: whole_stars | times: 10 | floor | divided_by: 5 %}
+                
                 {% for i in (1..5) %}
-                  {% if i <= rating %}
-                    ⭐
+                  {% if i <= whole_stars %}
+                    <i class="fas fa-star"></i>
+                  {% elsif i == whole_stars | plus: 1 and has_half_star == 1 %}
+                    <i class="fas fa-star-half-alt"></i>
+                  {% else %}
+                    <i class="far fa-star"></i>
                   {% endif %}
                 {% endfor %}
               </span>
-              <span class="score">{{ rating }}/5</span>
+              <span class="score">{% if rating | modulo: 1 == 0 %}{{ rating | floor }}{% else %}{{ rating }}{% endif %}/5</span>
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
             <div class="meta">

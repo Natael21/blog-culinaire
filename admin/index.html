@@ -1083,6 +1083,12 @@
         }
       }
     </style>
+    <style>
+      /* Masquer la fourchette de prix dans l'interface d'administration */
+      .restaurant-meta .price-range {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <!-- Ajout de l'overlay de chargement -->
@@ -1413,10 +1419,10 @@
                 <span><i class="fas fa-star"></i> ${Number(metadata.note) % 1 === 0 ? Math.floor(Number(metadata.note)) : metadata.note}/5</span>
                 <span class="price">
                   ${metadata.price === "budget" ? 
-                    '<i class="fas fa-dollar-sign"></i><span class="price-range"> (0-20$)</span>' : 
+                    '<i class="fas fa-dollar-sign"></i>' : 
                     metadata.price === "medium" ? 
-                    '<i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (20-40$)</span>' : 
-                    '<i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (40$ et +)</span>'
+                    '<i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>' : 
+                    '<i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>'
                   }
                 </span>
               </div>
