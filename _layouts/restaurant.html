@@ -28,7 +28,7 @@ comments: true
               {% endif %}
             {% endfor %}
           </span>
-          <span class="score">{{ rating }}/5</span>
+          <span class="score">{% if rating | modulo: 1 == 0 %}{{ rating | floor }}{% else %}{{ rating }}{% endif %}/5</span>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
         <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
