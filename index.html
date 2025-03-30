@@ -6,7 +6,7 @@ title: Accueil
 <div class="main-content">
   <div class="page-header">
     <h2>Nos Dernières Découvertes</h2>
-    <p>Explorez nos critiques de restaurants à Sherbrooke ci-dessous</p>
+    <p>Explorez nos critiques de restaurants à Sherbrooke</p>
   </div>
 
   <!-- Barre de filtres -->
@@ -41,18 +41,20 @@ title: Accueil
         <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
-          <select id="style-filter" class="filter-select" multiple>
+          <select id="style-filter" class="filter-select">
             <option value="">Tous les styles</option>
-            <option value="Américain">Américain</option>
             <option value="Asiatique">Asiatique</option>
-            <option value="Bar & Microbrasserie">Bar & Microbrasserie</option>
-            <option value="Bistro">Bistro</option>
-            <option value="Boulangerie-Café">Boulangerie-Café</option>
-            <option value="Oriental">Oriental</option>
             <option value="Italien">Italien</option>
             <option value="Mexicain">Mexicain</option>
-            <option value="Végétalien">Végétalien</option>
-            <option value="Végétarien">Végétarien</option>
+            <option value="Bistro">Bistro</option>
+            <option value="Américain">Américain</option>
+            <option value="Libano-Marocain">Libano-Marocain</option>
+            <option value="Iranien">Iranien</option>
+            <option value="Vietnamien">Vietnamien</option>
+            <option value="Indien">Indien</option>
+            <option value="Café-Bistro">Café-Bistro</option>
+            <option value="Microbrasserie">Microbrasserie</option>
+            <option value="Pub">Pub</option>
           </select>
         </div>
 
@@ -61,8 +63,8 @@ title: Accueil
           <label for="rating-filter">Note</label>
           <select id="rating-filter" class="filter-select">
             <option value="">Toutes les notes</option>
-            <option value="4">4 étoiles et +</option>
-            <option value="3">3 étoiles et moins</option>
+            <option value="4plus">4 étoiles et plus</option>
+            <option value="3minus">3 étoiles et moins</option>
           </select>
         </div>
 
@@ -107,35 +109,21 @@ title: Accueil
               <h2>{{ post.title }}</h2>
               <div class="rating">
                 <span class="stars">
-                  {% assign rating = post.note | times: 2 | round | divided_by: 2.0 %}
+                  {% assign rating = post.note | plus: 0.0 %}
                   {% assign whole_stars = rating | floor %}
-                  {% assign decimal_part = rating | minus: whole_stars %}
+                  {% assign has_half_star = rating | minus: whole_stars | times: 10 | floor | divided_by: 5 %}
                   
-                  {% for i in (1..whole_stars) %}
-                    <i class="fas fa-star"></i>
-                  {% endfor %}
-                  
-                  {% if decimal_part >= 0.5 %}
-                    <i class="fas fa-star-half-alt"></i>
-                  {% endif %}
-                  
-                  {% assign remaining_stars = 5 | minus: whole_stars %}
-                  {% if decimal_part >= 0.5 %}
-                    {% assign remaining_stars = remaining_stars | minus: 1 %}
-                  {% endif %}
-                  
-                  {% for i in (1..remaining_stars) %}
-                    <i class="far fa-star"></i>
+                  {% for i in (1..5) %}
+                    {% if i <= whole_stars %}
+                      <i class="fas fa-star"></i>
+                    {% elsif i == whole_stars | plus: 1 and has_half_star == 1 %}
+                      <i class="fas fa-star-half-alt"></i>
+                    {% else %}
+                      <i class="far fa-star"></i>
+                    {% endif %}
                   {% endfor %}
                 </span>
-                <span class="score">
-                  {% assign decimal_part = rating | modulo: 1 %}
-                  {% if decimal_part == 0 %}
-                    {{ rating | floor }}/5
-                  {% else %}
-                    {{ rating }}/5
-                  {% endif %}
-                </span>
+                <span class="score">{{ rating }}/5</span>
               </div>
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
@@ -146,11 +134,11 @@ title: Accueil
               {% endif %}
               <span class="price">
                 {% if post.price == "budget" %}
-                  <span class="price-symbols"><i class="fas fa-dollar-sign"></i></span><span class="price-range"> (0-20$)</span>
+                  <i class="fas fa-dollar-sign"></i><span class="price-range"> (0-20$)</span>
                 {% elsif post.price == "medium" %}
-                  <span class="price-symbols"><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i></span><span class="price-range"> (20-40$)</span>
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (20-40$)</span>
                 {% elsif post.price == "expensive" %}
-                  <span class="price-symbols"><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i></span><span class="price-range"> (40$ et +)</span>
+                  <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><span class="price-range"> (40$ et +)</span>
                 {% endif %}
               </span>
             </div>
@@ -306,25 +294,27 @@ title: Accueil
 }
 
 .filter-item {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .filter-item label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
 }
 
 .filter-select {
   width: 100%;
-  padding: 0.8rem;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  font-size: 1rem;
-  background-color: white;
-  transition: all 0.3s ease;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: var(--white);
+  color: var(--text-color);
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .filter-select:hover {
@@ -334,49 +324,7 @@ title: Accueil
 .filter-select:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
-}
-
-.filter-select[multiple] {
-  height: 42px;
-  min-height: 42px;
-  padding: 0.8rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.7rem center;
-  background-size: 1em;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  overflow: hidden;
-}
-
-.filter-select[multiple]:focus {
-  height: auto;
-  min-height: 200px;
-  overflow-y: auto;
-  background-image: none;
-  padding: 0;
-}
-
-.filter-select[multiple] option {
-  padding: 0.8rem;
-  border-bottom: 1px solid #eee;
-  margin: 0;
-  border-radius: 0;
-}
-
-.filter-select[multiple] option:checked {
-  background-color: var(--accent-color);
-  color: white;
-}
-
-.filter-select[multiple] option:hover {
-  background-color: rgba(231, 76, 60, 0.1);
-}
-
-.filter-select[multiple] option:checked:hover {
-  background-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
 }
 
 .reset-filters {
@@ -559,14 +507,6 @@ title: Accueil
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.post-grid.list-view .post-link {
-  display: flex;
-  width: 100%;
-  text-decoration: none;
-  color: inherit;
-  flex-direction: row;
-}
-
 .post-grid.list-view .post-card .post-image {
   width: 250px;
   height: 100%;
@@ -659,11 +599,8 @@ title: Accueil
 
 @media (max-width: 768px) {
   .post-grid.list-view .post-card {
-    height: auto;
-  }
-
-  .post-grid.list-view .post-link {
     flex-direction: column;
+    height: auto;
   }
 
   .post-grid.list-view .post-card .post-image {
@@ -769,8 +706,6 @@ title: Accueil
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: flex;
-  flex-direction: column;
 }
 
 .post-card:hover {
@@ -782,60 +717,81 @@ title: Accueil
   text-decoration: none;
   color: inherit;
   display: flex;
-  flex-direction: column;
   height: 100%;
 }
 
 .post-image {
-  width: 100%;
-  height: 200px;
   background-size: cover;
   background-position: center;
-  flex-shrink: 0;
-  display: block;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
-  flex-grow: 1;
 }
 
 .content-header {
   margin-bottom: 1rem;
 }
 
-.post-card h2 {
+h2 {
   color: var(--primary-color);
-  margin: 0 0 0.5rem 0;
-  font-size: 1.4rem;
-  line-height: 1.3;
+  margin-bottom: 0.5rem;
 }
 
 .rating {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+}
+
+.stars {
+  color: #f1c40f;
+}
+
+.score {
+  color: #666;
+  font-weight: 600;
 }
 
 .description {
   color: #666;
   line-height: 1.5;
-  margin-bottom: 1rem;
   flex-grow: 1;
 }
 
 .meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid #eee;
   margin-top: auto;
+}
+
+.meta > * {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #666;
+}
+
+.meta i {
+  color: #666;
+}
+
+.meta .cuisine-style i {
+  color: var(--accent-color);
+}
+
+.meta .price {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.meta .price i {
+  color: #2ecc71;
+  margin-right: -2px;
 }
 
 /* Style pour la vue en pastilles */
@@ -847,7 +803,19 @@ title: Accueil
 
 .post-grid.grid-view .post-card {
   height: auto;
-  min-height: 450px;
+}
+
+.post-grid.grid-view .post-link {
+  flex-direction: column;
+}
+
+.post-grid.grid-view .post-image {
+  width: 100%;
+  height: 200px;
+}
+
+.post-grid.grid-view .content {
+  padding: 1.5rem;
 }
 
 /* Style pour la vue en liste */
@@ -858,8 +826,7 @@ title: Accueil
 }
 
 .post-grid.list-view .post-card {
-  height: auto;
-  min-height: 180px;
+  height: 200px;
 }
 
 .post-grid.list-view .post-link {
@@ -867,19 +834,22 @@ title: Accueil
 }
 
 .post-grid.list-view .post-image {
-  width: 250px;
-  height: auto;
+  width: 300px;
+  flex-shrink: 0;
 }
 
 .post-grid.list-view .content {
-  padding: 1.2rem;
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.post-grid.list-view h2 {
+  font-size: 1.4rem;
 }
 
 @media (max-width: 768px) {
-  .post-grid.list-view .post-card,
-  .post-grid.grid-view .post-card {
+  .post-grid.list-view .post-card {
     height: auto;
-    min-height: auto;
   }
 
   .post-grid.list-view .post-link {
@@ -891,20 +861,10 @@ title: Accueil
     height: 200px;
   }
 
-  .meta {
-    flex-direction: column;
-    align-items: flex-start;
+  .post-grid.list-view .meta {
+    flex-wrap: wrap;
+    gap: 1rem;
   }
-}
-
-/* Style pour la vue carte */
-.map-popup .price-range {
-  display: inline !important;
-}
-
-/* Assurer que les symboles $ restent visibles en mode grid */
-.post-grid.grid-view .price-symbols {
-  display: inline-flex !important;
 }
 
 /* Style pour la vue carte */
@@ -916,6 +876,7 @@ title: Accueil
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Style pour les popups de la carte */
 .map-popup {
   padding: 0;
   max-width: 300px;
@@ -951,6 +912,11 @@ title: Accueil
   margin-bottom: 0.5rem;
 }
 
+.map-popup .popup-rating .stars {
+  color: #f1c40f;
+  font-size: 0.9rem;
+}
+
 .map-popup .popup-meta {
   display: flex;
   align-items: center;
@@ -969,7 +935,7 @@ title: Accueil
 
 .map-popup .popup-meta .price i {
   color: #2ecc71;
-  margin-right: 2px;
+  margin-right: -2px;
 }
 
 /* Ajustements responsive pour la carte */
@@ -981,48 +947,19 @@ title: Accueil
   }
 }
 
-.filter-select[multiple] {
-  height: auto;
-  min-height: 120px;
-  padding: 0.5rem;
+/* Cacher les fourchettes de prix en mode grid */
+.post-grid.grid-view .price-range {
+  display: none !important;
 }
 
-.filter-select[multiple] option {
-  padding: 0.5rem;
-  margin: 0.2rem 0;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+/* Afficher les fourchettes de prix en mode liste */
+.post-grid.list-view .price-range {
+  display: inline !important;
 }
 
-.filter-select[multiple] option:checked {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.filter-select[multiple] option:hover {
-  background-color: rgba(231, 76, 60, 0.1);
-}
-
-.filter-select[multiple] option:checked:hover {
-  background-color: var(--accent-color);
-}
-
-/* Style pour les prix */
-.price-symbols {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.price-symbols i {
-  margin-right: 0;
-}
-
-.price {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+/* Style pour la vue carte */
+.map-popup .price-range {
+  display: inline !important;
 }
 </style>
 
@@ -1034,8 +971,9 @@ const priceFilter = document.getElementById('price-filter');
 const advancedFiltersToggle = document.getElementById('advanced-filters-toggle');
 const advancedFilters = document.getElementById('advanced-filters');
 const restaurantGrid = document.getElementById('restaurant-grid');
+let restaurants = Array.from(restaurantGrid.children);
 let map = null;
-let markers = new Map();
+let markers = new Map(); // Pour stocker les marqueurs
 
 // Toggle des filtres avancés
 advancedFiltersToggle.addEventListener('click', function() {
@@ -1047,60 +985,74 @@ advancedFiltersToggle.addEventListener('click', function() {
 });
 
 function filterRestaurants() {
-    const searchText = titleSearch.value.toLowerCase();
-    const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
-    const selectedRating = ratingFilter.value;
-    const selectedPrice = priceFilter.value;
+  const searchTitle = titleSearch.value.toLowerCase();
+  const selectedStyle = styleFilter.value;
+  const ratingFilter = document.getElementById('rating-filter').value;
+  const selectedPrice = priceFilter.value;
 
-    const restaurantElements = document.querySelectorAll('.post-card');
-    restaurantElements.forEach(restaurant => {
-        const title = restaurant.querySelector('h2').textContent.toLowerCase();
-        const style = restaurant.dataset.style;
-        const rating = parseFloat(restaurant.dataset.rating);
-        const price = restaurant.dataset.price;
-
-        const titleMatch = title.includes(searchText);
-        const styleMatch = selectedStyles.length === 0 || selectedStyles.includes('') || selectedStyles.includes(style);
-        
-        // Nouvelle logique pour le filtrage par note
-        let ratingMatch = true;
-        if (selectedRating === '4') {
-            ratingMatch = rating >= 4;
-        } else if (selectedRating === '3') {
-            ratingMatch = rating <= 3;
-        }
-        
-        const priceMatch = !selectedPrice || price === selectedPrice;
-
-        const marker = markers.get(restaurant.id);
+  let filteredRestaurants = restaurants.filter(restaurant => {
+    const title = restaurant.dataset.title;
+    const style = restaurant.dataset.style;
+    const rating = parseFloat(restaurant.dataset.rating);
+    const price = restaurant.dataset.price;
+    
+    const titleMatch = !searchTitle || title.includes(searchTitle);
+    const styleMatch = !selectedStyle || style === selectedStyle;
+    const ratingMatch = !ratingFilter || 
+      (ratingFilter === '4plus' && rating >= 4) || 
+      (ratingFilter === '3minus' && rating <= 3);
+    const priceMatch = !selectedPrice || price === selectedPrice;
+    
+    // Si la carte est initialisée, mettre à jour la visibilité des marqueurs
+    if (map) {
+      const marker = markers.get(restaurant.id);
+      if (marker) {
         if (titleMatch && styleMatch && ratingMatch && priceMatch) {
-            restaurant.style.display = '';
-            if (marker) marker.addTo(map);
+          marker.addTo(map);
         } else {
-            restaurant.style.display = 'none';
-            if (marker) marker.remove();
+          marker.remove();
         }
+      }
+    }
+    
+    return titleMatch && styleMatch && ratingMatch && priceMatch;
+  });
+
+  // Mettre à jour la grille
+  restaurantGrid.innerHTML = '';
+  filteredRestaurants.forEach(restaurant => {
+    restaurantGrid.appendChild(restaurant);
+  });
+
+  // Si la carte est visible et qu'il y a des marqueurs visibles, ajuster la vue
+  if (map && markers.size > 0) {
+    const bounds = new L.LatLngBounds();
+    let hasVisibleMarkers = false;
+
+    markers.forEach((marker, restaurantId) => {
+      if (map.hasLayer(marker)) {
+        bounds.extend(marker.getLatLng());
+        hasVisibleMarkers = true;
+      }
     });
 
-    // Si la carte est visible et qu'il y a des marqueurs, ajuster la vue
-    if (map && markers.size > 0) {
-        const bounds = new L.LatLngBounds();
-        let hasVisibleMarkers = false;
-
-        markers.forEach(marker => {
-            if (map.hasLayer(marker)) {
-                bounds.extend(marker.getLatLng());
-                hasVisibleMarkers = true;
-            }
-        });
-
-        if (hasVisibleMarkers) {
-            map.fitBounds(bounds, {
-                padding: [50, 50],
-                maxZoom: 15
-            });
-        }
+    if (hasVisibleMarkers) {
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 15
+      });
     }
+  }
+}
+
+function resetFilters() {
+  titleSearch.value = '';
+  styleFilter.value = '';
+  ratingFilter.value = '';
+  priceFilter.value = '';
+  advancedFilters.style.display = 'none';
+  advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
+  filterRestaurants();
 }
 
 // Ajout des event listeners
@@ -1108,48 +1060,6 @@ titleSearch.addEventListener('input', filterRestaurants);
 styleFilter.addEventListener('change', filterRestaurants);
 ratingFilter.addEventListener('change', filterRestaurants);
 priceFilter.addEventListener('change', filterRestaurants);
-
-// Fonction pour réinitialiser les filtres
-function resetFilters() {
-    // Réinitialiser la recherche
-    titleSearch.value = '';
-    
-    // Réinitialiser le select multiple des styles
-    Array.from(styleFilter.options).forEach(option => {
-        option.selected = false;
-    });
-    styleFilter.options[0].selected = true;
-    
-    // Réinitialiser les autres filtres
-    ratingFilter.value = '';
-    priceFilter.value = '';
-    
-    // Masquer les filtres avancés
-    advancedFilters.style.display = 'none';
-    advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
-    
-    // Réafficher tous les restaurants
-    const restaurantElements = document.querySelectorAll('.post-card');
-    restaurantElements.forEach(restaurant => {
-        restaurant.style.display = '';
-        const marker = markers.get(restaurant.id);
-        if (marker && map) {
-            marker.addTo(map);
-        }
-    });
-
-    // Si la carte est visible et qu'il y a des marqueurs, ajuster la vue
-    if (map && markers.size > 0) {
-        const bounds = new L.LatLngBounds();
-        markers.forEach(marker => {
-            bounds.extend(marker.getLatLng());
-        });
-        map.fitBounds(bounds, {
-            padding: [50, 50],
-            maxZoom: 15
-        });
-    }
-}
 
 // Fonction pour sauvegarder la vue actuelle
 function saveCurrentView(event) {
@@ -1515,7 +1425,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Vérifier si le restaurant passe les filtres actuels
     const searchTitle = titleSearch.value.toLowerCase();
-    const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
+    const selectedStyle = styleFilter.value;
     const exactRating = ratingFilter.value;
     const selectedPrice = priceFilter.value;
     
@@ -1525,7 +1435,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const price = restaurant.dataset.price;
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
-    const styleMatch = selectedStyles.length === 0 || selectedStyles.includes(style);
+    const styleMatch = !selectedStyle || style === selectedStyle;
     const ratingMatch = !exactRating || rating === parseFloat(exactRating);
     const priceMatch = !selectedPrice || price === selectedPrice;
     
