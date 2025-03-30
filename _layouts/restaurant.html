@@ -14,7 +14,7 @@ comments: true
       <div class="restaurant-meta">
         <div class="rating">
           <div class="rating-bar">
-            <div class="rating-fill" data-rating="{{ page.note }}"></div>
+            <div class="rating-fill" style="width: {{ page.note | times: 10 }}%"></div>
           </div>
           <span class="score">{{ page.note }}/10</span>
         </div>
@@ -198,10 +198,6 @@ comments: true
     this.page.url = "{{ site.url }}{{ page.url }}";
     this.page.identifier = "{{ page.url }}";
     this.page.title = "{{ page.title }}";
-    this.callbacks.onReady = function() {
-      // Rendre le widget Disqus accessible globalement
-      window.DISQUS = this;
-    };
   };
 
   (function() {

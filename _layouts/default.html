@@ -32,18 +32,43 @@
     <!-- Leaflet CSS et JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Disqus -->
-    <script>
-      var disqus_config = function () {
-        this.page.url = window.location.href;
-        this.page.identifier = window.location.pathname;
-        this.page.title = document.title;
-      };
-    </script>
-    <script async src="https://appreciationrestaurantssherbrooke.disqus.com/embed.js"></script>
     
     <style>
+      /* Styles critiques inlinés */
+      .site-return {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .site-return:hover {
+        background-color: #34495e;
+        transform: translateY(-2px);
+      }
+      .site-return i {
+        font-size: 0.9em;
+      }
+      @media (max-width: 768px) {
+        .site-return {
+          top: 10px;
+          right: 10px;
+          padding: 8px 15px;
+          font-size: 0.9em;
+        }
+      }
+      
       /* Styles pour éviter le flash de contenu non stylé */
       .hero {
         min-height: 400px;
@@ -62,16 +87,6 @@
         <i class="fas fa-user"></i>
         <span>Connexion</span>
       </a>
-      <div class="login-dropdown" id="login-dropdown">
-        <button class="dropdown-item" onclick="handleDisqusLogin()">
-          <i class="fas fa-comments"></i>
-          <span>Se connecter pour commenter</span>
-        </button>
-        <button class="dropdown-item" onclick="handleNetlifyLogin()">
-          <i class="fas fa-user-shield"></i>
-          <span>Administration</span>
-        </button>
-      </div>
     </header>
 
     <nav class="main-nav-container">
@@ -84,8 +99,6 @@
 
     <main class="container">
       {{ content }}
-      <!-- Conteneur Disqus -->
-      <div id="disqus_thread" style="display: none;"></div>
     </main>
 
     <footer>
@@ -105,128 +118,54 @@
     </button>
 
     <script>
-      // Attendre que le widget Netlify Identity soit chargé
-      window.addEventListener('load', function() {
-        // Vérifier si le widget est disponible
-        if (window.netlifyIdentity) {
-          initializeNetlifyIdentity();
-        } else {
-          // Si le widget n'est pas disponible, réessayer après un court délai
-          setTimeout(function() {
-            if (window.netlifyIdentity) {
-              initializeNetlifyIdentity();
-            } else {
-              console.error('Netlify Identity widget not loaded');
-            }
-          }, 1000);
-        }
-
-        // Initialiser les barres de notation
-        initializeRatingBars();
-      });
-
-      function initializeNetlifyIdentity() {
+      // Chargement différé du JavaScript non critique
+      document.addEventListener('DOMContentLoaded', function() {
         const loginButton = document.getElementById('login-button');
-        const loginDropdown = document.getElementById('login-dropdown');
         
         // Fonction pour gérer le clic sur le bouton
         function handleLoginClick(e) {
           e.preventDefault();
-          e.stopPropagation();
-          loginDropdown.classList.toggle('show');
-        }
-
-        // Fermer le dropdown si on clique en dehors
-        document.addEventListener('click', function(e) {
-          if (!loginButton.contains(e.target) && !loginDropdown.contains(e.target)) {
-            loginDropdown.classList.remove('show');
+          if (!window.netlifyIdentity.currentUser()) {
+            window.netlifyIdentity.open('login');
+          } else {
+            window.location.href = '/admin/';
           }
-        });
+        }
 
         // Initialisation du bouton
         loginButton.addEventListener('click', handleLoginClick);
 
-        // Vérifier l'état de connexion au chargement de la page
-        const user = window.netlifyIdentity.currentUser();
-        updateButtonState(user);
-
-        window.netlifyIdentity.on("init", user => {
+        // Gestion des événements Netlify Identity
+        if (window.netlifyIdentity) {
+          // Vérifier l'état de connexion au chargement de la page
+          const user = window.netlifyIdentity.currentUser();
           updateButtonState(user);
-        });
 
-        window.netlifyIdentity.on("login", user => {
-          updateButtonState(user);
-          // Redirection vers la page admin après la connexion
-          window.location.href = '/admin/';
-        });
+          window.netlifyIdentity.on("init", user => {
+            updateButtonState(user);
+          });
 
-        window.netlifyIdentity.on("logout", () => {
-          updateButtonState(null);
-        });
+          window.netlifyIdentity.on("login", user => {
+            updateButtonState(user);
+            // Redirection vers la page admin après la connexion
+            window.location.href = '/admin/';
+          });
+
+          window.netlifyIdentity.on("logout", () => {
+            updateButtonState(null);
+          });
+        }
 
         // Fonction pour mettre à jour l'état du bouton
         function updateButtonState(user) {
           if (user) {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Admin</span>';
             loginButton.onclick = () => window.location.href = '/admin/';
-            loginDropdown.style.display = 'none';
           } else {
             loginButton.innerHTML = '<i class="fas fa-user"></i><span>Connexion</span>';
             loginButton.onclick = handleLoginClick;
-            loginDropdown.style.display = 'block';
           }
         }
-      }
-
-      // Fonction pour gérer la connexion Disqus
-      function handleDisqusLogin() {
-        // Afficher le conteneur Disqus
-        const disqusContainer = document.getElementById('disqus_thread');
-        disqusContainer.style.display = 'block';
-        
-        // Vérifier si Disqus est chargé
-        if (typeof DISQUS !== 'undefined') {
-          DISQUS.reset({
-            reload: true
-          });
-        } else {
-          // Si Disqus n'est pas chargé, recharger la page pour forcer le chargement
-          window.location.reload();
-        }
-        document.getElementById('login-dropdown').classList.remove('show');
-      }
-
-      // Fonction pour gérer la connexion Netlify
-      function handleNetlifyLogin() {
-        if (window.netlifyIdentity) {
-          window.netlifyIdentity.open('login');
-        } else {
-          console.error('Netlify Identity widget not loaded');
-        }
-        document.getElementById('login-dropdown').classList.remove('show');
-      }
-
-      // Initialisation du menu déroulant même si Netlify Identity n'est pas chargé
-      document.addEventListener('DOMContentLoaded', function() {
-        const loginButton = document.getElementById('login-button');
-        const loginDropdown = document.getElementById('login-dropdown');
-        
-        // Fonction pour gérer le clic sur le bouton
-        function handleLoginClick(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          loginDropdown.classList.toggle('show');
-        }
-
-        // Fermer le dropdown si on clique en dehors
-        document.addEventListener('click', function(e) {
-          if (!loginButton.contains(e.target) && !loginDropdown.contains(e.target)) {
-            loginDropdown.classList.remove('show');
-          }
-        });
-
-        // Initialisation du bouton
-        loginButton.addEventListener('click', handleLoginClick);
       });
 
       // Optimisation du scroll to top avec throttling
@@ -260,73 +199,6 @@
           behavior: 'smooth'
         });
       });
-
-      // Fonction pour initialiser les barres de notation
-      function initializeRatingBars() {
-        const ratingBars = document.querySelectorAll('.rating-fill');
-        ratingBars.forEach(bar => {
-          const rating = parseFloat(bar.dataset.rating);
-          if (!isNaN(rating)) {
-            bar.style.width = `${(rating / 10) * 100}%`;
-          }
-        });
-      }
-
-      // Gestion des boutons de vue (liste/carte)
-      document.addEventListener('DOMContentLoaded', function() {
-        const viewButtons = document.querySelectorAll('.view-btn');
-        const restaurantGrid = document.querySelector('.restaurant-grid');
-        const mapContainer = document.getElementById('map-container');
-        const mapView = document.querySelector('.map-view');
-
-        viewButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            // Retirer la classe active de tous les boutons
-            viewButtons.forEach(btn => btn.classList.remove('active'));
-            // Ajouter la classe active au bouton cliqué
-            this.classList.add('active');
-
-            if (this.querySelector('.fa-list')) {
-              // Vue liste
-              if (restaurantGrid) restaurantGrid.style.display = 'grid';
-              if (mapContainer) mapContainer.style.display = 'none';
-            } else if (this.querySelector('.fa-map')) {
-              // Vue carte
-              if (restaurantGrid) restaurantGrid.style.display = 'none';
-              if (mapContainer) {
-                mapContainer.style.display = 'block';
-                // Réinitialiser la carte si nécessaire
-                if (mapView && !mapView._leaflet) {
-                  initializeMap();
-                }
-              }
-            }
-          });
-        });
-      });
-
-      // Fonction pour initialiser la carte
-      function initializeMap() {
-        const mapView = document.querySelector('.map-view');
-        if (!mapView) return;
-
-        const map = L.map('map-container').setView([45.4000, -71.8900], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Ajouter les marqueurs pour chaque restaurant
-        const restaurants = document.querySelectorAll('.restaurant-card');
-        restaurants.forEach(restaurant => {
-          const lat = parseFloat(restaurant.dataset.lat);
-          const lng = parseFloat(restaurant.dataset.lng);
-          if (!isNaN(lat) && !isNaN(lng)) {
-            L.marker([lat, lng])
-              .bindPopup(restaurant.querySelector('h2').textContent)
-              .addTo(map);
-          }
-        });
-      }
     </script>
   </body>
 </html>

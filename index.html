@@ -120,7 +120,7 @@ title: Accueil
               <h2>{{ post.title }}</h2>
               <div class="rating">
                 <div class="rating-bar">
-                  <div class="rating-fill" data-rating="{{ post.note }}"></div>
+                  <div class="rating-fill" style="width: {{ post.note | times: 10 }}%"></div>
                 </div>
                 <span class="score">{{ post.note }}/10</span>
               </div>
@@ -419,11 +419,6 @@ title: Accueil
   .post-card .post-link {
     flex-direction: column !important;
   }
-
-  .post-grid.list-view .post-card .description {
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
 }
 
 /* Spécifique pour l'orientation portrait sur mobile */
@@ -556,8 +551,7 @@ title: Accueil
   line-height: 1.4;
   margin-bottom: 0.5rem;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex-grow: 0;
@@ -619,7 +613,6 @@ title: Accueil
 
   .post-grid.list-view .post-card .description {
     -webkit-line-clamp: 3;
-    line-clamp: 3;
   }
 
   .post-grid.list-view .post-card .meta {
@@ -996,32 +989,405 @@ function addMarker(restaurant, coords) {
   });
   
   const popupContent = `
-    <div class="popup-content">
-      <div class="popup-image" style="background-image: url('${restaurant.dataset.image}')"></div>
-      <div class="popup-info">
-        <h3>${restaurant.querySelector('h2').textContent}</h3>
-        <div class="popup-rating">
-          <div class="rating-bar">
-            <div class="rating-fill" data-rating="${restaurant.dataset.rating}"></div>
+    <div class="map-popup">
+      <div class="popup-content">
+        <div class="popup-image" style="background-image: url('${restaurant.dataset.image}')"></div>
+        <div class="popup-info">
+          <h3>${restaurant.querySelector('h2').textContent}</h3>
+          <div class="popup-rating">
+            <span class="score">${restaurant.dataset.rating}/10</span>
           </div>
-          <span class="score">${restaurant.dataset.rating}/10</span>
-        </div>
-        <div class="popup-meta">
-          <span><i class="fas fa-map-marker-alt"></i> ${restaurant.dataset.address}</span>
+          <div class="popup-meta">
+            <span class="cuisine-style">
+              <i class="fas fa-utensils"></i> ${restaurant.dataset.style}
+            </span>
+            <span class="price">
+              ${restaurant.querySelector('.price').innerHTML}
+            </span>
+          </div>
         </div>
       </div>
     </div>
   `;
   
   const popup = L.popup({
-    content: popupContent,
     maxWidth: 300,
-    minWidth: 200,
-    autoClose: false,
-    closeOnClick: false
-  });
+    className: 'restaurant-popup'
+  }).setContent(popupContent);
   
   marker.bindPopup(popup);
+  
+  marker.on('click', () => {
+    localStorage.setItem('selectedView', 'map');
+    localStorage.setItem('fromView', 'true');
+    window.location.href = restaurant.querySelector('a').href;
+  });
+  
+  marker.on('mouseover', function() {
+    this.openPopup();
+  });
+
+  marker.on('mouseout', function() {
+    this.closePopup();
+  });
+
+  // Stocker le marqueur dans la Map
   markers.set(restaurant.id, marker);
+  marker.addTo(map);
+  
+  return marker;
 }
+
+// Modifier la fonction resetFilters pour mettre à jour aussi les marqueurs
+function resetFilters() {
+  titleSearch.value = '';
+  styleFilter.value = 'all';
+  ratingFilter.value = '';
+  priceFilter.value = '';
+  document.getElementById('diet-filter').value = 'all';
+  advancedFilters.style.display = 'none';
+  advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
+  
+  // Réafficher tous les restaurants
+  restaurants.forEach(restaurant => {
+    restaurant.style.display = '';
+  });
+
+  // Mettre à jour les marqueurs si on est en vue carte
+  if (map) {
+    updateMapMarkers();
+  }
+}
+
+// Ajouter l'event listener pour le filtre de régime alimentaire
+document.getElementById('diet-filter').addEventListener('change', filterRestaurants);
+
+// Ajout des event listeners
+titleSearch.addEventListener('input', filterRestaurants);
+styleFilter.addEventListener('change', filterRestaurants);
+ratingFilter.addEventListener('change', filterRestaurants);
+priceFilter.addEventListener('change', filterRestaurants);
+
+// Fonction pour sauvegarder la vue actuelle
+function saveCurrentView(event) {
+  const currentView = restaurantGrid.classList.contains('list-view') ? 'list' : 'grid';
+  localStorage.setItem('selectedView', currentView);
+  localStorage.setItem('fromView', 'true');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Vérifier si nous sommes sur la page admin
+  const isAdminPage = window.location.pathname.includes('/admin');
+  
+  // Si nous sommes sur la page admin, ne rien faire
+  if (isAdminPage) {
+    return;
+  }
+
+  const viewButtons = document.querySelectorAll('.view-btn');
+  const restaurantGrid = document.getElementById('restaurant-grid');
+  const mapContainer = document.getElementById('map-container');
+  let geocodedCoordinates = new Map();
+
+  // Vérifier si nous sommes sur la page d'accueil
+  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+  
+  // Vérifier si nous revenons d'une page de restaurant
+  const returningFromRestaurant = document.referrer.includes(window.location.host);
+  
+  // Récupérer la dernière vue utilisée
+  let currentView = localStorage.getItem('selectedView');
+  
+  // Si nous sommes sur la page d'accueil et que nous ne revenons pas d'une page de restaurant
+  if (isHomePage && !returningFromRestaurant) {
+    currentView = 'grid'; // Vue par défaut
+    localStorage.setItem('selectedView', currentView);
+  }
+  
+  // Si aucune vue n'est définie, utiliser la vue en pastilles
+  if (!currentView) {
+    currentView = 'grid';
+    localStorage.setItem('selectedView', currentView);
+  }
+
+  // Fonction pour mettre à jour l'interface selon la vue
+  async function updateView(view) {
+    // Mettre à jour les classes des boutons
+    viewButtons.forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.view === view) {
+        btn.classList.add('active');
+      }
+    });
+
+    // Mettre à jour l'affichage
+    if (view === 'list') {
+      restaurantGrid.classList.add('list-view');
+      restaurantGrid.style.display = 'flex';
+      mapContainer.style.display = 'none';
+    } else if (view === 'grid') {
+      restaurantGrid.classList.remove('list-view');
+      restaurantGrid.style.display = 'grid';
+      mapContainer.style.display = 'none';
+    } else if (view === 'map') {
+      restaurantGrid.style.display = 'none';
+      mapContainer.style.display = 'block';
+      await initMap();
+    }
+  }
+
+  // Ajouter les événements de clic sur les boutons de vue
+  viewButtons.forEach(button => {
+    button.addEventListener('click', async () => {
+      const view = button.dataset.view;
+      localStorage.setItem('selectedView', view);
+      await updateView(view);
+    });
+  });
+
+  // Ajouter l'événement de clic sur les liens des restaurants
+  document.querySelectorAll('.post-link').forEach(link => {
+    link.addEventListener('click', () => {
+      // La vue actuelle est déjà sauvegardée dans le localStorage
+    });
+  });
+
+  // Appliquer la vue actuelle
+  updateView(currentView);
+
+  // Fonction pour attendre un certain temps
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Fonction pour formater l'adresse
+  function formatAddress(address) {
+    return address
+      .replace(/ N,/g, ' Nord,')
+      .replace(/ S,/g, ' Sud,')
+      .replace(/ E,/g, ' Est,')
+      .replace(/ O,/g, ' Ouest,')
+      .replace(/ E\./g, ' Est')
+      .replace(/ O\./g, ' Ouest')
+      .replace(/ N\./g, ' Nord')
+      .replace(/ S\./g, ' Sud')
+      .replace(/\bRue\b/g, 'rue')
+      .replace(/\bAvenue\b/g, 'avenue')
+      .replace(/\bBoulevard\b/g, 'boulevard')
+      .trim();
+  }
+
+  // Fonction pour extraire le code postal
+  function extractPostalCode(address) {
+    const match = address.match(/[A-Z]\d[A-Z]\s?\d[A-Z]\d/i);
+    return match ? match[0] : null;
+  }
+
+  // Cache pour le géocodage
+  const geocodeCache = {
+    save: function(address, coords) {
+      try {
+        localStorage.setItem(`geocode_${address}`, JSON.stringify(coords));
+      } catch (e) {
+        console.warn('Impossible de sauvegarder dans le cache:', e);
+      }
+    },
+    get: function(address) {
+      try {
+        const cached = localStorage.getItem(`geocode_${address}`);
+        return cached ? JSON.parse(cached) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+  };
+
+  // Fonction de géocodage
+  async function geocodeAddress(address, retryCount = 0) {
+    // Vérifier le cache d'abord
+    const cached = geocodeCache.get(address);
+    if (cached) {
+      console.log('✅ Coordonnées trouvées dans le cache pour:', address);
+      return cached;
+    }
+
+    const maxRetries = 3;
+    const formattedAddress = formatAddress(address);
+    const cleanAddress = formattedAddress.replace(/[^\w\s,-]/g, '').trim();
+    const encodedAddress = encodeURIComponent(cleanAddress + ', Sherbrooke, Quebec, Canada');
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1&countrycodes=ca`;
+    
+    try {
+      console.log(`Tentative de géocodage pour: ${address}`);
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'BlogCulinaireSherbrooke/1.0'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const coords = {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+        // Sauvegarder dans le cache
+        geocodeCache.save(address, coords);
+        return coords;
+      }
+      
+      // Si l'adresse complète échoue, essayer avec le code postal
+      const postalCode = extractPostalCode(address);
+      if (postalCode) {
+        const postalUrl = `https://nominatim.openstreetmap.org/search?q=${postalCode}&format=json&limit=1&countrycodes=ca`;
+        const postalResponse = await fetch(postalUrl, {
+          headers: {
+            'User-Agent': 'BlogCulinaireSherbrooke/1.0'
+          }
+        });
+        
+        if (postalResponse.ok) {
+          const postalData = await postalResponse.json();
+          if (postalData && postalData.length > 0) {
+            const coords = {
+              lat: parseFloat(postalData[0].lat),
+              lng: parseFloat(postalData[0].lon)
+            };
+            // Sauvegarder dans le cache
+            geocodeCache.save(address, coords);
+            return coords;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erreur de géocodage pour', address, ':', error);
+    }
+    return null;
+  }
+
+  // Précharger les coordonnées en arrière-plan
+  async function preloadCoordinates() {
+    const restaurants = document.querySelectorAll('.post-card');
+    console.log(`Début du géocodage pour ${restaurants.length} restaurants`);
+    let successCount = 0;
+    let failureCount = 0;
+    
+    // Créer un tableau de promesses pour le géocodage parallèle
+    const geocodingPromises = Array.from(restaurants).map(async (restaurant) => {
+      const address = restaurant.dataset.address;
+      const title = restaurant.querySelector('h2').textContent;
+      let lat = parseFloat(restaurant.dataset.lat);
+      let lng = parseFloat(restaurant.dataset.lng);
+      
+      // Si on a déjà les coordonnées, les utiliser
+      if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        geocodedCoordinates.set(address, { lat, lng });
+        successCount++;
+        console.log(`ℹ️ Coordonnées existantes pour ${title}: ${lat}, ${lng}`);
+        return;
+      }
+      
+      // Sinon, géocoder l'adresse
+      const coords = await geocodeAddress(address);
+      if (coords) {
+        geocodedCoordinates.set(address, coords);
+        restaurant.dataset.lat = coords.lat;
+        restaurant.dataset.lng = coords.lng;
+        successCount++;
+        console.log(`✅ Coordonnées obtenues pour ${title}: ${coords.lat}, ${coords.lng}`);
+      } else {
+        failureCount++;
+        console.log(`❌ Échec du géocodage pour ${title}`);
+      }
+    });
+    
+    // Attendre que toutes les promesses soient résolues
+    await Promise.all(geocodingPromises);
+    
+    console.log(`\nRésumé du géocodage:`);
+    console.log(`Total des restaurants: ${restaurants.length}`);
+    console.log(`Succès: ${successCount}`);
+    console.log(`Échecs: ${failureCount}`);
+  }
+
+  // Lancer le préchargement en arrière-plan
+  preloadCoordinates();
+
+  // Fonction pour initialiser la carte
+  async function initMap() {
+    if (!map) {
+      map = L.map('map-container').setView([45.4040, -71.8929], 13);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Ajouter d'abord les restaurants avec des coordonnées existantes
+      const restaurants = document.querySelectorAll('.post-card');
+      restaurants.forEach(restaurant => {
+        const lat = parseFloat(restaurant.dataset.lat);
+        const lng = parseFloat(restaurant.dataset.lng);
+        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+          addMarker(restaurant, { lat, lng });
+        }
+      });
+
+      // Lancer le géocodage en arrière-plan pour les restaurants restants
+      const geocodingPromises = Array.from(restaurants).map(async (restaurant) => {
+        const address = restaurant.dataset.address;
+        let lat = parseFloat(restaurant.dataset.lat);
+        let lng = parseFloat(restaurant.dataset.lng);
+        
+        if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && address) {
+          const coords = await geocodeAddress(address);
+          if (coords) {
+            geocodedCoordinates.set(address, coords);
+            restaurant.dataset.lat = coords.lat;
+            restaurant.dataset.lng = coords.lng;
+            addMarker(restaurant, coords);
+          }
+        }
+      });
+      
+      // Une fois tous les marqueurs ajoutés, ajuster la vue
+      Promise.all(geocodingPromises).then(() => {
+        const bounds = new L.LatLngBounds();
+        let hasVisibleMarkers = false;
+
+        markers.forEach(marker => {
+          if (map.hasLayer(marker)) {
+            bounds.extend(marker.getLatLng());
+            hasVisibleMarkers = true;
+          }
+        });
+
+        if (hasVisibleMarkers) {
+          map.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 15
+          });
+        }
+        
+        console.log(`Marqueurs ajoutés: ${markers.size}/${restaurants.length}`);
+      });
+    }
+  }
+
+  // Scroll to last viewed restaurant
+  const lastViewedRestaurant = localStorage.getItem('lastViewedRestaurant');
+  if (lastViewedRestaurant) {
+    const restaurantElement = document.getElementById(lastViewedRestaurant);
+    if (restaurantElement) {
+      setTimeout(() => {
+        restaurantElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+    localStorage.removeItem('lastViewedRestaurant');
+  }
+});
 </script>
