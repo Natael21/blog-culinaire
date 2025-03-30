@@ -35,7 +35,14 @@ comments: true
               <i class="far fa-star"></i>
             {% endfor %}
           </span>
-          <span class="score">{{ rating }}/5</span>
+          <span class="score">
+            {% assign decimal_part = rating | modulo: 1 %}
+            {% if decimal_part == 0 %}
+              {{ rating | floor }}/5
+            {% else %}
+              {{ rating }}/5
+            {% endif %}
+          </span>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
         <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>

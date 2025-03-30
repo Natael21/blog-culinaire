@@ -65,6 +65,28 @@
       .admin-container.authenticated {
         opacity: 1;
       }
+      /* Style pour l'état de chargement */
+      .loading-state {
+        text-align: center;
+        padding: 2rem;
+      }
+      .loading-state .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      .loading-state p {
+        margin-top: 1rem;
+        color: #666;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
 
     <!-- Chargement asynchrone des styles non critiques -->
@@ -1230,23 +1252,19 @@
                   <label for="restaurant-type">Type de restaurant</label>
                   <select id="restaurant-type" class="form-input" required>
                     <option value="">Sélectionnez un type</option>
-                    <option value="Café-Boulangerie">Café-Boulangerie</option>
-                    <option value="Bistro-Gastronomique">Bistro-Gastronomique</option>
-                    <option value="Végétalien">Végétalien</option>
-                    <option value="Mexicain">Mexicain</option>
-                    <option value="Steakhouse">Steakhouse</option>
-                    <option value="Libanais">Libanais</option>
-                    <option value="Pub & Grill">Pub & Grill</option>
-                    <option value="Marocain">Marocain</option>
-                    <option value="Italien">Italien</option>
-                    <option value="Asiatique">Asiatique</option>
-                    <option value="Bistro">Bistro</option>
                     <option value="Américain">Américain</option>
+                    <option value="Asiatique">Asiatique</option>
+                    <option value="Bar & Microbrasserie">Bar & Microbrasserie</option>
+                    <option value="Bistro">Bistro</option>
+                    <option value="Café-Bistro">Café-Bistro</option>
+                    <option value="Fast-Food">Fast-Food</option>
                     <option value="Fusion">Fusion</option>
+                    <option value="Italien">Italien</option>
                     <option value="Méditerranéen">Méditerranéen</option>
-                    <option value="Fast-food">Fast-food</option>
-                    <option value="Fruits de mer">Fruits de mer</option>
-                    <option value="Autre">Autre</option>
+                    <option value="Mexicain">Mexicain</option>
+                    <option value="Oriental">Oriental</option>
+                    <option value="Pub & Grill">Pub & Grill</option>
+                    <option value="Végétarien">Végétarien</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -1524,9 +1542,7 @@
         // Charger les restaurants uniquement si nous sommes sur la section restaurants
         const activeSection = document.querySelector('.admin-content-section.active');
         if (activeSection && activeSection.id === 'restaurants') {
-          loadRestaurants().then(() => {
-            filterAndSortRestaurants();
-          });
+          loadRestaurants();
         }
       });
 
@@ -1544,24 +1560,28 @@
           if (button.dataset.section === 'upcoming') {
             loadUpcomingRestaurants();
           } else if (button.dataset.section === 'restaurants') {
-            // Vider la liste avant de recharger
-            const restaurantList = document.getElementById('restaurant-list');
-            restaurantList.innerHTML = '';
-            loadRestaurants().then(() => {
-              filterAndSortRestaurants();
-            });
+            loadRestaurants();
           }
         });
       });
 
       // Fonction pour charger les restaurants à venir
       async function loadUpcomingRestaurants() {
+        const list = document.getElementById('upcoming-list');
+        
+        // Afficher l'indicateur de chargement
+        list.innerHTML = `
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Chargement des restaurants...</p>
+          </div>
+        `;
+
         try {
           const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_upcoming');
           if (!response.ok) throw new Error('Erreur lors de la récupération des fichiers');
           
           const files = await response.json();
-          const list = document.getElementById('upcoming-list');
           
           if (!Array.isArray(files) || files.length === 0) {
             list.innerHTML = '<div class="empty-state">Aucun restaurant à venir pour le moment</div>';
@@ -1569,53 +1589,50 @@
             return;
           }
 
-          const restaurants = [];
-          for (const file of files) {
-            if (file.name.endsWith('.md')) {
-              try {
-                const contentResponse = await fetch(file.download_url);
-                if (!contentResponse.ok) continue;
-                
-                const content = await contentResponse.text();
-                // Extraire le frontmatter entre les marqueurs ---
-                const matches = content.match(/^---([\s\S]*?)---/);
-                if (!matches || !matches[1]) continue;
+          // Filtrer uniquement les fichiers .md et faire les requêtes en parallèle
+          const mdFiles = files.filter(file => file.name.endsWith('.md'));
+          const restaurantPromises = mdFiles.map(async file => {
+            try {
+              const contentResponse = await fetch(file.download_url);
+              if (!contentResponse.ok) return null;
+              
+              const content = await contentResponse.text();
+              const matches = content.match(/^---([\s\S]*?)---/);
+              if (!matches || !matches[1]) return null;
 
-                const frontmatter = matches[1].trim();
-                const metadata = {};
-                
-                // Parser chaque ligne du frontmatter
-                frontmatter.split('\n').forEach(line => {
-                  const [key, ...valueParts] = line.split(':').map(part => part.trim());
-                  if (key && valueParts.length > 0) {
-                    metadata[key] = valueParts.join(':').trim();
-                  }
-                });
-
-                if (metadata.title && metadata.restaurant_type) {
-                  restaurants.push({
-                    id: file.sha,
-                    path: file.path,
-                    content: content,
-                    ...metadata
-                  });
+              const frontmatter = matches[1].trim();
+              const metadata = {};
+              
+              frontmatter.split('\n').forEach(line => {
+                const [key, ...valueParts] = line.split(':').map(part => part.trim());
+                if (key && valueParts.length > 0) {
+                  metadata[key] = valueParts.join(':').trim();
                 }
-              } catch (err) {
-                console.error(`Erreur lors du traitement du fichier ${file.name}:`, err);
-                continue;
-              }
-            }
-          }
+              });
 
+              if (metadata.title && metadata.restaurant_type) {
+                return {
+                  id: file.sha,
+                  path: file.path,
+                  content: content,
+                  ...metadata
+                };
+              }
+              return null;
+            } catch (err) {
+              console.error(`Erreur lors du traitement du fichier ${file.name}:`, err);
+              return null;
+            }
+          });
+
+          // Attendre toutes les requêtes et filtrer les résultats null
+          const restaurants = (await Promise.all(restaurantPromises)).filter(r => r !== null);
           localUpcomingRestaurants = restaurants;
           renderUpcomingRestaurants();
           
-          // Log pour le débogage
-          console.log('Restaurants chargés:', restaurants);
         } catch (error) {
           console.error('Erreur lors du chargement des restaurants:', error);
-          document.getElementById('upcoming-list').innerHTML = 
-            '<div class="error-state">Une erreur est survenue lors du chargement des restaurants</div>';
+          list.innerHTML = '<div class="error-state">Une erreur est survenue lors du chargement des restaurants</div>';
         }
       }
 
@@ -2509,6 +2526,118 @@ order: ${formData.order}
         await addUpcomingRestaurant(formData);
         document.getElementById('add-upcoming-modal').style.display = 'none';
       });
+
+      async function updateRestaurantStyles() {
+        const styleMapping = {
+          'Asiatique': 'Asiatique',
+          'Mexicain': 'Mexicain',
+          'Italien': 'Italien',
+          'Bistro': 'Bistro',
+          'Américain': 'Américain',
+          'Libano-Marocain': 'Oriental',
+          'Iranien': 'Oriental',
+          'Vietnamien': 'Asiatique',
+          'Indien': 'Oriental',
+          'Café-Bistro': 'Café-Bistro',
+          'Microbrasserie': 'Bar & Microbrasserie',
+          'Pub': 'Bar & Microbrasserie',
+          'Thaïlandais': 'Asiatique',
+          'Végétalien': 'Végétarien'
+        };
+
+        try {
+          // Mettre à jour les restaurants existants
+          const postsRef = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: GITHUB_OWNER,
+            repo: GITHUB_REPO,
+            path: '_posts'
+          });
+
+          for (const file of postsRef.data) {
+            if (file.name.endsWith('.markdown') || file.name.endsWith('.md')) {
+              const content = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+                owner: GITHUB_OWNER,
+                repo: GITHUB_REPO,
+                path: file.path
+              });
+
+              const decodedContent = atob(content.data.content);
+              const frontMatter = decodedContent.split('---')[1];
+              
+              if (frontMatter) {
+                const styleMatch = frontMatter.match(/style:\s*"([^"]+)"/);
+                if (styleMatch && styleMapping[styleMatch[1]]) {
+                  const newContent = decodedContent.replace(
+                    `style: "${styleMatch[1]}"`,
+                    `style: "${styleMapping[styleMatch[1]]}"`
+                  );
+
+                  if (newContent !== decodedContent) {
+                    pendingChanges.push({
+                      path: file.path,
+                      content: btoa(newContent),
+                      sha: content.data.sha,
+                      action: 'update'
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          // Mettre à jour les restaurants à venir
+          const upcomingRef = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+            owner: GITHUB_OWNER,
+            repo: GITHUB_REPO,
+            path: '_upcoming'
+          });
+
+          for (const file of upcomingRef.data) {
+            if (file.name.endsWith('.md')) {
+              const content = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+                owner: GITHUB_OWNER,
+                repo: GITHUB_REPO,
+                path: file.path
+              });
+
+              const decodedContent = atob(content.data.content);
+              const frontMatter = decodedContent.split('---')[1];
+              
+              if (frontMatter) {
+                const styleMatch = frontMatter.match(/restaurant_type:\s*([^\n]+)/);
+                if (styleMatch && styleMapping[styleMatch[1]]) {
+                  const newContent = decodedContent.replace(
+                    `restaurant_type: ${styleMatch[1]}`,
+                    `restaurant_type: ${styleMapping[styleMatch[1]]}`
+                  );
+
+                  if (newContent !== decodedContent) {
+                    pendingChanges.push({
+                      path: file.path,
+                      content: btoa(newContent),
+                      sha: content.data.sha,
+                      action: 'update'
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          await saveAllChanges();
+          showMessage('Les styles des restaurants ont été mis à jour avec succès !', 'success');
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour des styles :', error);
+          showMessage('Une erreur est survenue lors de la mise à jour des styles.', 'error');
+        }
+      }
+
+      // Ajouter un bouton pour mettre à jour les styles
+      const updateStylesButton = document.createElement('button');
+      updateStylesButton.textContent = 'Mettre à jour les styles des restaurants';
+      updateStylesButton.classList.add('btn', 'btn-warning', 'mb-3');
+      updateStylesButton.onclick = updateRestaurantStyles;
+      document.querySelector('#restaurantForm').parentNode.insertBefore(updateStylesButton, document.querySelector('#restaurantForm'));
     </script>
   </body>
 </html>

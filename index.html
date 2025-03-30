@@ -6,7 +6,7 @@ title: Accueil
 <div class="main-content">
   <div class="page-header">
     <h2>Nos Dernières Découvertes</h2>
-    <p>Explorez nos critiques de restaurants à Sherbrooke</p>
+    <p>Explorez nos critiques de restaurants à Sherbrooke plus bas</p>
   </div>
 
   <!-- Barre de filtres -->
@@ -41,20 +41,18 @@ title: Accueil
         <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
-          <select id="style-filter" class="filter-select">
+          <select id="style-filter" class="filter-select" multiple>
             <option value="">Tous les styles</option>
+            <option value="Américain">Américain</option>
             <option value="Asiatique">Asiatique</option>
+            <option value="Bar & Microbrasserie">Bar & Microbrasserie</option>
+            <option value="Bistro">Bistro</option>
+            <option value="Boulangerie-Café">Boulangerie-Café</option>
+            <option value="Oriental">Oriental</option>
             <option value="Italien">Italien</option>
             <option value="Mexicain">Mexicain</option>
-            <option value="Bistro">Bistro</option>
-            <option value="Américain">Américain</option>
-            <option value="Libano-Marocain">Libano-Marocain</option>
-            <option value="Iranien">Iranien</option>
-            <option value="Vietnamien">Vietnamien</option>
-            <option value="Indien">Indien</option>
-            <option value="Café-Bistro">Café-Bistro</option>
-            <option value="Microbrasserie">Microbrasserie</option>
-            <option value="Pub">Pub</option>
+            <option value="Végétalien">Végétalien</option>
+            <option value="Végétarien">Végétarien</option>
           </select>
         </div>
 
@@ -521,6 +519,13 @@ title: Accueil
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+.post-grid.list-view .post-link {
+  display: flex;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
 .post-grid.list-view .post-card .post-image {
   width: 250px;
   height: 100%;
@@ -837,7 +842,11 @@ h2 {
 
 .price-symbols i {
   color: #2ecc71;
-  margin-right: 2px;
+  margin-right: 4px !important;
+}
+
+.price-symbols i:last-child {
+  margin-right: 0 !important;
 }
 
 .price-range {
@@ -937,6 +946,33 @@ h2 {
     margin: 0 -0.5rem;
   }
 }
+
+.filter-select[multiple] {
+  height: auto;
+  min-height: 120px;
+  padding: 0.5rem;
+}
+
+.filter-select[multiple] option {
+  padding: 0.5rem;
+  margin: 0.2rem 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.filter-select[multiple] option:checked {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.filter-select[multiple] option:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.filter-select[multiple] option:checked:hover {
+  background-color: var(--accent-color);
+}
 </style>
 
 <script>
@@ -962,7 +998,7 @@ advancedFiltersToggle.addEventListener('click', function() {
 
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
-  const selectedStyle = styleFilter.value;
+  const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
   const ratingFilter = document.getElementById('rating-filter').value;
   const selectedPrice = priceFilter.value;
 
@@ -973,7 +1009,21 @@ function filterRestaurants() {
     const price = restaurant.dataset.price;
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
-    const styleMatch = !selectedStyle || style === selectedStyle;
+    
+    // Gestion des regroupements de styles
+    let styleMatch = selectedStyles.length === 0;
+    if (!styleMatch) {
+      styleMatch = selectedStyles.some(selectedStyle => {
+        if (selectedStyle === "Asiatique") {
+          return style === "Asiatique" || style === "Thaïlandais" || style === "Vietnamien";
+        } else if (selectedStyle === "Oriental") {
+          return style === "Oriental" || style === "Libano-Marocain" || style === "Iranien" || style === "Indien";
+        } else {
+          return style === selectedStyle;
+        }
+      });
+    }
+    
     const ratingMatch = !ratingFilter || 
       (ratingFilter === '4plus' && rating >= 4) || 
       (ratingFilter === '3minus' && rating <= 3);
@@ -1401,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Vérifier si le restaurant passe les filtres actuels
     const searchTitle = titleSearch.value.toLowerCase();
-    const selectedStyle = styleFilter.value;
+    const selectedStyles = Array.from(styleFilter.selectedOptions).map(option => option.value);
     const exactRating = ratingFilter.value;
     const selectedPrice = priceFilter.value;
     
@@ -1411,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const price = restaurant.dataset.price;
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
-    const styleMatch = !selectedStyle || style === selectedStyle;
+    const styleMatch = selectedStyles.length === 0 || selectedStyles.includes(style);
     const ratingMatch = !exactRating || rating === parseFloat(exactRating);
     const priceMatch = !selectedPrice || price === selectedPrice;
     

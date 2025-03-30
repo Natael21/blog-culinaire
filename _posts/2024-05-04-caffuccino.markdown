@@ -3,7 +3,7 @@ layout: restaurant
 title: "Caffuccino"
 date: 2024-05-04
 note: 4
-style: "Café-Bistro"
+style: "Bistro"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
 price: "medium"
 address: "1700 Rue King Ouest, Sherbrooke, QC J1J 2C9"
