@@ -5,7 +5,7 @@ date: 2024-01-12
 note: 8
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"
-description: "Salaam ! Vous avez besoin d'un coin tranquille pour savourer un repas gastronomique ? La cuisine iranienne saura vous impressionner dans ce restaurant paisible !"
+description: "Salaam ! La cuisine iranienne saura vous impressionner dans ce restaurant paisible !"
 price: "medium"
 address: "196 Rue Wellington N, Sherbrooke, QC J1H 5C5"
 image: "/images/Café Restaurant L.png"

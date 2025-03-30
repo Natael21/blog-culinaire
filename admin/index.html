@@ -320,10 +320,21 @@
     <script>
       // Initialisation de Netlify Identity
       if (window.netlifyIdentity) {
+        console.log('🔍 Netlify Identity détecté, initialisation en cours...');
+        
+        // S'assurer que le body est visible après 100ms dans tous les cas
+        setTimeout(() => {
+          console.log('⏱️ Timeout initial de 100ms - Ajout de la classe loaded au body');
+          document.body.classList.add('loaded');
+        }, 100);
+
         window.netlifyIdentity.on("init", user => {
+          console.log('🔄 Événement init de Netlify Identity:', user ? 'Utilisateur connecté' : 'Aucun utilisateur');
           if (!user) {
+            console.log('👤 Aucun utilisateur connecté, ouverture de la fenêtre de connexion');
             window.netlifyIdentity.open();
           } else {
+            console.log('✅ Utilisateur authentifié, affichage du contenu');
             document.body.classList.add('loaded');
             document.querySelector('.admin-container').classList.add('authenticated');
             document.getElementById('loading-overlay').style.display = 'none';
@@ -331,33 +342,54 @@
         });
 
         window.netlifyIdentity.on("login", () => {
+          console.log('🔑 Événement login détecté');
           document.body.classList.add('loaded');
           document.querySelector('.admin-container').classList.add('authenticated');
           document.getElementById('loading-overlay').style.display = 'none';
         });
 
         window.netlifyIdentity.on("logout", () => {
+          console.log('🚪 Événement logout détecté');
           document.getElementById('error-message').classList.add('show');
           document.querySelector('.admin-container').classList.remove('authenticated');
         });
 
         // Timeout de sécurité
         setTimeout(() => {
+          console.log('⚠️ Timeout de sécurité de 5 secondes');
           if (!document.body.classList.contains('loaded')) {
+            console.error('❌ La page n\'est toujours pas chargée après 5 secondes');
             document.getElementById('error-message').classList.add('show');
             document.getElementById('loading-overlay').style.display = 'none';
           }
         }, 5000);
       } else {
+        console.error('❌ Netlify Identity n\'est pas disponible');
         document.getElementById('error-message').classList.add('show');
         document.getElementById('loading-overlay').style.display = 'none';
+        document.body.classList.add('loaded');
       }
+
+      // Timeout de secours global pour s'assurer que la page n'est jamais bloquée
+      setTimeout(() => {
+        console.log('🔄 Timeout de secours global de 2 secondes');
+        document.body.classList.add('loaded');
+        document.getElementById('loading-overlay').style.display = 'none';
+      }, 2000);
 
       // Fonction pour charger les restaurants depuis le dossier _posts
       async function loadRestaurants() {
+        console.log('📥 Début du chargement des restaurants');
         try {
           const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/_posts');
+          console.log('📡 Réponse de l\'API GitHub:', response.status);
+          
+          if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+          
           const posts = await response.json();
+          console.log(`📦 ${posts.length} posts trouvés`);
           
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '';
@@ -368,7 +400,12 @@
           for (const post of posts) {
             if (post.name.endsWith('.markdown')) {
               try {
+                console.log(`📄 Chargement du contenu de ${post.name}`);
                 const contentResponse = await fetch(post.download_url);
+                if (!contentResponse.ok) {
+                  throw new Error(`Erreur lors du chargement du contenu: ${contentResponse.status}`);
+                }
+                
                 const content = await contentResponse.text();
                 
                 // Extraire les métadonnées du frontmatter
@@ -381,9 +418,12 @@
                   }
                 });
 
+                console.log(`📋 Métadonnées extraites pour ${post.name}:`, metadata);
+
                 // Vérifier si ce titre a déjà été affiché
                 if (!displayedTitles.has(metadata.title)) {
                   displayedTitles.add(metadata.title);
+                  console.log(`➕ Ajout du restaurant: ${metadata.title}`);
 
                   const item = document.createElement('div');
                   item.className = 'restaurant-item';
@@ -409,14 +449,17 @@
                     </div>
                   `;
                   restaurantList.appendChild(item);
+                } else {
+                  console.log(`⚠️ Restaurant en double ignoré: ${metadata.title}`);
                 }
               } catch (error) {
-                console.error('Erreur lors du chargement du contenu du restaurant:', error);
+                console.error(`❌ Erreur lors du traitement du restaurant ${post.name}:`, error);
               }
             }
           }
+          console.log('✅ Chargement des restaurants terminé');
         } catch (error) {
-          console.error('Erreur lors du chargement des restaurants:', error);
+          console.error('❌ Erreur lors du chargement des restaurants:', error);
           const restaurantList = document.getElementById('restaurant-list');
           restaurantList.innerHTML = '<p class="error-message">Une erreur est survenue lors du chargement des restaurants. Veuillez réessayer plus tard.</p>';
         }

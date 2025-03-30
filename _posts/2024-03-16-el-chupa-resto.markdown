@@ -5,7 +5,7 @@ date: 2024-03-16
 note: 7
 style: "Mexicain & Latino"
 diet: "standard"
-description: "Cuisine mexicaine authentique avec tortillas maison et ambiance chaleureuse."
+description: "C’est la relève du fameux restaurant El Tabernaco ! De plus, la décoration et l’ambiance est la même qu’avant, ce qui est assez incroyable !"
 price: "medium"
 address: "243 Rue Alexandre, Sherbrooke, QC J1H 4S8"
 image: "/images/El Chupa Resto.png"
