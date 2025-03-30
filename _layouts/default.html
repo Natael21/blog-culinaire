@@ -136,6 +136,7 @@
         // Fonction pour gérer le clic sur le bouton
         function handleLoginClick(e) {
           e.preventDefault();
+          e.stopPropagation();
           if (!window.netlifyIdentity.currentUser()) {
             loginDropdown.classList.toggle('show');
           } else {
