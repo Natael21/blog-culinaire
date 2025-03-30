@@ -32,6 +32,16 @@
     <!-- Leaflet CSS et JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Disqus -->
+    <script>
+      var disqus_config = function () {
+        this.page.url = window.location.href;
+        this.page.identifier = window.location.pathname;
+        this.page.title = document.title;
+      };
+    </script>
+    <script async src="https://appreciationrestaurantssherbrooke.disqus.com/embed.js"></script>
     
     <style>
       /* Styles pour éviter le flash de contenu non stylé */
@@ -165,11 +175,14 @@
 
       // Fonction pour gérer la connexion Disqus
       function handleDisqusLogin() {
-        // Déclencher le widget Disqus
-        if (window.DISQUS) {
-          window.DISQUS.reset({
+        // Vérifier si Disqus est chargé
+        if (typeof DISQUS !== 'undefined') {
+          DISQUS.reset({
             reload: true
           });
+        } else {
+          // Si Disqus n'est pas chargé, recharger la page pour forcer le chargement
+          window.location.reload();
         }
         document.getElementById('login-dropdown').classList.remove('show');
       }
