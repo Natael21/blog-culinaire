@@ -109,18 +109,25 @@ title: Accueil
               <h2>{{ post.title }}</h2>
               <div class="rating">
                 <span class="stars">
-                  {% assign rating = post.note | plus: 0.0 %}
+                  {% assign rating = post.note | times: 2 | round | divided_by: 2.0 %}
                   {% assign whole_stars = rating | floor %}
-                  {% assign has_half_star = rating | minus: whole_stars | times: 10 | floor | divided_by: 5 %}
+                  {% assign decimal_part = rating | minus: whole_stars %}
                   
-                  {% for i in (1..5) %}
-                    {% if i <= whole_stars %}
-                      <i class="fas fa-star"></i>
-                    {% elsif i == whole_stars | plus: 1 and has_half_star == 1 %}
-                      <i class="fas fa-star-half-alt"></i>
-                    {% else %}
-                      <i class="far fa-star"></i>
-                    {% endif %}
+                  {% for i in (1..whole_stars) %}
+                    <i class="fas fa-star"></i>
+                  {% endfor %}
+                  
+                  {% if decimal_part >= 0.5 %}
+                    <i class="fas fa-star-half-alt"></i>
+                  {% endif %}
+                  
+                  {% assign remaining_stars = 5 | minus: whole_stars %}
+                  {% if decimal_part >= 0.5 %}
+                    {% assign remaining_stars = remaining_stars | minus: 1 %}
+                  {% endif %}
+                  
+                  {% for i in (1..remaining_stars) %}
+                    <i class="far fa-star"></i>
                   {% endfor %}
                 </span>
                 <span class="score">{{ rating }}/5</span>
@@ -747,6 +754,20 @@ h2 {
 
 .stars {
   color: #f1c40f;
+  white-space: nowrap;
+}
+
+.stars i {
+  margin-right: 2px;
+}
+
+.stars i:last-child {
+  margin-right: 0;
+}
+
+.fa-star-half-alt {
+  position: relative;
+  display: inline-block;
 }
 
 .score {
@@ -948,12 +969,12 @@ h2 {
 }
 
 /* Cacher les fourchettes de prix en mode grid */
-.post-grid.grid-view .price-range {
+.post-grid.grid-view .post-card .price-range {
   display: none !important;
 }
 
 /* Afficher les fourchettes de prix en mode liste */
-.post-grid.list-view .price-range {
+.post-grid.list-view .post-card .price-range {
   display: inline !important;
 }
 
