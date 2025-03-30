@@ -92,4 +92,35 @@
 .filter-item select option[value="vegetarian-friendly"],
 .filter-item select option[value="vegan-friendly"] {
   color: #2ecc71;
+}
+
+/* Styles pour la vue en grille */
+.post-grid.grid-view .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  font-size: 0.85rem;
+  color: #666;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.post-grid.grid-view .meta > * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-grid.grid-view .meta .cuisine-style {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-grid.grid-view .meta .date,
+.post-grid.grid-view .meta .price {
+  flex-shrink: 0;
 } 

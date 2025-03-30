@@ -621,7 +621,7 @@ title: Accueil
   }
 }
 
-/* Style pour la vue en pastilles */
+/* Styles spécifiques pour la vue en grille */
 .post-grid.grid-view {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -631,209 +631,6 @@ title: Accueil
 .post-grid.grid-view .post-card {
   flex-direction: column;
   height: auto;
-}
-
-.post-grid.grid-view .post-card .post-image {
-  width: 100%;
-  height: 200px;
-}
-
-.post-grid.grid-view .post-card .content {
-  padding: 1.5rem;
-}
-
-.post-grid.grid-view .post-card h2 {
-  font-size: 1.4rem;
-}
-
-@media (max-width: 768px) {
-  .post-card {
-    height: auto;
-  }
-
-  .post-card .post-image {
-    width: 100%;
-    height: 200px;
-  }
-}
-
-/* Style pour la vue en liste */
-.post-grid.list-view {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.post-grid.list-view .post-card {
-  flex-direction: row;
-  height: 150px;
-}
-
-.post-grid.list-view .post-card .post-image {
-  width: 200px;
-  height: 100%;
-}
-
-.post-grid.list-view .post-card .content {
-  flex: 1;
-  padding: 1rem;
-}
-
-.post-grid.list-view .post-card h2 {
-  font-size: 1.2rem;
-}
-
-@media (max-width: 768px) {
-  .post-card {
-    height: auto;
-  }
-
-  .post-card .post-image {
-    width: 100%;
-    height: 200px;
-  }
-
-  .post-grid.list-view .post-card {
-    flex-direction: column;
-  }
-}
-
-/* Style commun pour les cartes */
-.post-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.post-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.post-link {
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-  height: 100%;
-}
-
-.post-image {
-  background-size: cover;
-  background-position: center;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-}
-
-.content-header {
-  margin-bottom: 1rem;
-}
-
-h2 {
-  color: var(--primary-color);
-  margin-bottom: 0.5rem;
-}
-
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.rating-bar {
-  flex-grow: 1;
-  height: 8px;
-  background-color: #eee;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.rating-fill {
-  height: 100%;
-  background: linear-gradient(to right, #f1c40f, #f39c12);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.score {
-  color: #666;
-  font-weight: 600;
-  min-width: 45px;
-  text-align: right;
-}
-
-/* Ajustements pour la vue en liste */
-.post-grid.list-view .rating-bar {
-  max-width: 150px;
-}
-
-/* Ajustements pour la vue en pastilles */
-.post-grid.grid-view .rating-bar {
-  max-width: 100%;
-}
-
-/* Ajustements pour la popup de la carte */
-.map-popup .rating-bar {
-  max-width: 100px;
-}
-
-.description {
-  color: #666;
-  line-height: 1.5;
-  flex-grow: 1;
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
-  margin-top: auto;
-}
-
-.meta > * {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #666;
-}
-
-.meta i {
-  color: #666;
-}
-
-.meta .cuisine-style i {
-  color: var(--accent-color);
-}
-
-.meta .price {
-  color: #2ecc71;
-  font-weight: 600;
-}
-
-.meta .price i {
-  color: #2ecc71;
-  margin-right: -2px;
-}
-
-/* Style pour la vue en pastilles */
-.post-grid.grid-view {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.post-grid.grid-view .post-card {
-  height: auto;
-}
-
-.post-grid.grid-view .post-link {
-  flex-direction: column;
 }
 
 .post-grid.grid-view .post-image {
@@ -843,6 +640,40 @@ h2 {
 
 .post-grid.grid-view .content {
   padding: 1.5rem;
+}
+
+.post-grid.grid-view .post-card h2 {
+  font-size: 1.4rem;
+}
+
+.post-grid.grid-view .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  font-size: 0.85rem;
+  color: #666;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.post-grid.grid-view .meta > * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-grid.grid-view .meta .cuisine-style {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-grid.grid-view .meta .date,
+.post-grid.grid-view .meta .price {
+  flex-shrink: 0;
 }
 
 /* Style pour la vue en liste */
@@ -998,7 +829,7 @@ function filterRestaurants() {
   const selectedPrice = priceFilter.value;
   const selectedDiet = document.getElementById('diet-filter').value;
 
-  let filteredRestaurants = restaurants.filter(restaurant => {
+  restaurants.forEach(restaurant => {
     const title = restaurant.dataset.title;
     const style = restaurant.dataset.style;
     const rating = parseFloat(restaurant.dataset.rating);
@@ -1006,9 +837,9 @@ function filterRestaurants() {
     const diet = restaurant.dataset.diet;
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
-    const styleMatch = !selectedStyle || style === selectedStyle;
+    const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
-    const dietMatch = !selectedDiet || diet === selectedDiet;
+    const dietMatch = selectedDiet === 'all' || selectedDiet === '' || diet === selectedDiet;
     
     // Logique pour le filtrage des notes
     let ratingMatch = true;
@@ -1026,24 +857,27 @@ function filterRestaurants() {
       }
     }
     
-    return titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch;
-  });
-
-  // Mettre à jour la grille
-  restaurantGrid.innerHTML = '';
-  filteredRestaurants.forEach(restaurant => {
-    restaurantGrid.appendChild(restaurant);
+    if (titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch) {
+      restaurant.style.display = '';
+    } else {
+      restaurant.style.display = 'none';
+    }
   });
 }
 
 function resetFilters() {
   titleSearch.value = '';
-  styleFilter.value = '';
+  styleFilter.value = 'all';
   ratingFilter.value = '';
   priceFilter.value = '';
+  document.getElementById('diet-filter').value = 'all';
   advancedFilters.style.display = 'none';
   advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
-  filterRestaurants();
+  
+  // Réafficher tous les restaurants
+  restaurants.forEach(restaurant => {
+    restaurant.style.display = '';
+  });
 }
 
 // Ajout des event listeners

@@ -3,7 +3,7 @@ layout: restaurant
 title: "Restaurant Persépolis"
 date: 2023-06-13
 note: 10
-style: "Méditerranéen & Moyen-Orient"
+style: "Moyen-Orient"
 diet: "vegetarian-friendly"
 description: "Une authentique cuisine iranienne servie dans un cadre chaleureux et décoré avec soin"
 price: "medium"
