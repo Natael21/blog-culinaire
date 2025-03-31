@@ -17,6 +17,21 @@
 
 [build.processing]
   skip_processing = true
+  skip_processing = [
+    "*.jpg",
+    "*.png",
+    "*.gif",
+    "*.ico",
+    "*.svg",
+    "*.woff",
+    "*.woff2",
+    "*.ttf",
+    "*.eot",
+    "*.pdf",
+    "*.zip",
+    "*.gz",
+    "*.br"
+  ]
 
 [build.processing.css]
   bundle = true
@@ -28,22 +43,6 @@
 
 [build.processing.images]
   compress = true
-
-# Skip processing for specific file types
-[build.processing.skip_processing]
-  - "*.jpg"
-  - "*.png"
-  - "*.gif"
-  - "*.ico"
-  - "*.svg"
-  - "*.woff"
-  - "*.woff2"
-  - "*.ttf"
-  - "*.eot"
-  - "*.pdf"
-  - "*.zip"
-  - "*.gz"
-  - "*.br"
 
 [[plugins]]
   package = "@netlify/plugin-cacheing"
