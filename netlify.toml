@@ -1,12 +1,10 @@
 [build]
   publish = "_site"
   command = """
-    if [ ! -d "vendor/bundle" ]; then
-      gem install bundler -v "2.4.22" && \
-      bundle config set --local path 'vendor/bundle' && \
-      bundle config set --local deployment 'true' && \
-      bundle install --jobs=4 --retry=3
-    fi && \
+    gem install bundler -v "2.4.22" && \
+    bundle config set --local path 'vendor/bundle' && \
+    bundle config set --local deployment 'false' && \
+    bundle install --jobs=4 --retry=3 && \
     bundle exec jekyll build --trace --incremental
   """
 
@@ -32,7 +30,8 @@
     "assets/images",
     "node_modules",
     ".bundle/cache",
-    ".bundle/config"
+    ".bundle/config",
+    "Gemfile.lock"
   ]
 
 # Cache control headers
