@@ -3,6 +3,8 @@ layout: default
 comments: true
 ---
 
+<link rel="stylesheet" href="{{ '/assets/css/restaurant.css' | relative_url }}">
+
 <article class="restaurant-detail">
   <div class="restaurant-header" style="background-image: url('{{ page.image }}');">
     <div class="restaurant-header-content">
@@ -14,7 +16,7 @@ comments: true
       <div class="restaurant-meta">
         <div class="rating">
           <div class="rating-bar">
-            <div class="rating-fill" style="width: {{ page.note | times: 10 }}%"></div>
+            <div class="rating-fill" data-rating="{{ page.note }}"></div>
           </div>
           <span class="score">{{ page.note }}/10</span>
         </div>
@@ -54,6 +56,44 @@ comments: true
     <div class="restaurant-body">
       {{ content }}
     </div>
+
+    {% if page.ratings %}
+    <div class="restaurant-ratings">
+      <h2>Pourquoi cette note ?</h2>
+      
+      {% for rating in page.ratings %}
+      {% assign category = rating[0] %}
+      {% assign details = rating[1] %}
+      <div class="rating-category">
+        <h3>
+          <span class="rating-title">
+            {% case category %}
+            {% when 'food' %}
+              <i class="fas fa-utensils"></i> Qualité de la nourriture
+            {% when 'service' %}
+              <i class="fas fa-concierge-bell"></i> Service
+            {% when 'ambiance' %}
+              <i class="fas fa-music"></i> Ambiance
+            {% when 'value' %}
+              <i class="fas fa-coins"></i> Rapport qualité/prix
+            {% when 'originality' %}
+              <i class="fas fa-lightbulb"></i> Originalité / Concept
+            {% when 'overall' %}
+              <i class="fas fa-star"></i> Expérience globale
+            {% endcase %}
+          </span>
+          <span class="rating-score">({{ details.score }}/10)</span>
+        </h3>
+        
+        {% if details.criteria %}
+        <p class="criteria"><em>{{ details.criteria }}</em></p>
+        {% endif %}
+        
+        <p class="comment">{{ details.comment }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
     {% if page.images %}
     <div class="restaurant-gallery">
@@ -208,249 +248,3 @@ comments: true
   })();
 </script>
 <noscript>Veuillez activer JavaScript pour voir les <a href="https://disqus.com/?ref_noscript">commentaires propulsés par Disqus.</a></noscript>
-
-<style>
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.9);
-  justify-content: center;
-  align-items: center;
-}
-
-.modal img {
-  max-width: 90%;
-  max-height: 90vh;
-  object-fit: contain;
-  border-radius: 4px;
-  transition: opacity 0.3s ease;
-}
-
-.close {
-  position: absolute;
-  top: 15px;
-  right: 35px;
-  color: #f1f1f1;
-  font-size: 40px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close:hover {
-  color: #bbb;
-}
-
-.gallery-item {
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  height: 250px;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.gallery-item:hover {
-  transform: scale(1.05);
-}
-
-.gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 25%;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  padding: 1rem 0;
-}
-
-.restaurant-navigation {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2rem;
-  gap: 1rem;
-}
-
-.nav-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  background: var(--white);
-  color: var(--primary-color);
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  flex: 1;
-  max-width: 300px;
-}
-
-.nav-button.prev {
-  justify-content: flex-start;
-}
-
-.nav-button.next {
-  justify-content: flex-end;
-}
-
-.nav-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  background: var(--primary-color);
-  color: var(--white);
-}
-
-.nav-button i {
-  font-size: 1.2rem;
-}
-
-.nav-button span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-@media (max-width: 768px) {
-  .restaurant-navigation {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .nav-button {
-    max-width: 100%;
-    justify-content: center;
-  }
-
-  .nav-arrow {
-    padding: 0.8rem;
-  }
-  
-  .nav-arrow.prev {
-    left: 1rem;
-  }
-  
-  .nav-arrow.next {
-    right: 1rem;
-  }
-}
-
-.comments-section {
-  background: var(--white);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  margin-top: 2rem;
-}
-
-.comments-section h2 {
-  font-family: 'Playfair Display', serif;
-  color: var(--primary-color);
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #eee;
-}
-
-#disqus_thread {
-  margin-top: 1.5rem;
-  width: 100%;
-}
-
-.restaurant-header-content {
-  text-align: center;
-  padding: 2rem;
-  color: white;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7));
-}
-
-.restaurant-location {
-  color: white;
-  font-size: 1.2rem;
-  margin: 1rem 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.restaurant-location i {
-  color: var(--accent-color);
-}
-
-.nav-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255,255,255,0.1);
-  border: none;
-  color: white;
-  padding: 1rem;
-  cursor: pointer;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  z-index: 1001;
-}
-
-.nav-arrow:hover {
-  background: rgba(255,255,255,0.2);
-  transform: translateY(-50%) scale(1.1);
-}
-
-.nav-arrow.prev {
-  left: 2rem;
-}
-
-.nav-arrow.next {
-  right: 2rem;
-}
-
-.nav-arrow i {
-  font-size: 1.5rem;
-}
-
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.rating-bar {
-  flex-grow: 1;
-  height: 8px;
-  background-color: #eee;
-  border-radius: 4px;
-  overflow: hidden;
-  max-width: 200px;
-}
-
-.rating-fill {
-  height: 100%;
-  background: linear-gradient(to right, #f1c40f, #f39c12);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.score {
-  color: #666;
-  font-weight: 600;
-  min-width: 45px;
-  text-align: right;
-}
-</style>

@@ -15,6 +15,29 @@ images:
   - image: "/images/Saveur_delice_soupe_wonton.jpg"
   - image: "/images/Saveur_delice_riz_contonais.jpg"
   - image: "/images/Saveur_delice_curry_crevette.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "La fusion des saveurs asiatiques et québécoises est bien équilibrée, avec des ingrédients frais et une cuisson maîtrisée. Les plats sont présentés avec soin et montrent une belle créativité dans l'adaptation des recettes traditionnelles."
+  service:
+    score: 8
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service attentionné et professionnel, avec une bonne réactivité et des explications détaillées sur les plats. L'équipe est accueillante et à l'écoute des besoins des clients."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "L'ambiance est conviviale et décontractée, avec une musique d'ambiance à un volume parfait pour la conversation. Le décor est simple mais chaleureux, et l'établissement est bien entretenu."
+  value:
+    score: 9
+    comment: "Les portions généreuses et les prix abordables offrent un excellent rapport qualité/prix, particulièrement pour le centre-ville de Sherbrooke."
+  originality:
+    score: 7
+    comment: "Le concept de fusion asiatique-québécoise est intéressant et bien exécuté, apportant une touche unique à la scène culinaire locale."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience satisfaisante qui se démarque par sa cuisine fusion réussie et son ambiance agréable, même si elle ne révolutionne pas le genre."
 ---
 
 **Nataël** :
