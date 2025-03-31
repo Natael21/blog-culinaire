@@ -29,6 +29,22 @@
 [build.processing.images]
   compress = true
 
+# Skip processing for specific file types
+[build.processing.skip_processing]
+  - "*.jpg"
+  - "*.png"
+  - "*.gif"
+  - "*.ico"
+  - "*.svg"
+  - "*.woff"
+  - "*.woff2"
+  - "*.ttf"
+  - "*.eot"
+  - "*.pdf"
+  - "*.zip"
+  - "*.gz"
+  - "*.br"
+
 [[plugins]]
   package = "@netlify/plugin-cacheing"
 
@@ -54,6 +70,8 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    X-XSS-Protection = "1; mode=block"
+    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;"
     
 [[headers]]
   for = "/*.css"
@@ -79,30 +97,4 @@
 [[redirects]]
   from = "/feed.xml"
   to = "/feed/index.xml"
-  status = 301
-
-# Security headers
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-XSS-Protection = "1; mode=block"
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;"
-
-# Cache optimization
-[build.processing.skip_processing]
-  - "*.jpg"
-  - "*.png"
-  - "*.gif"
-  - "*.ico"
-  - "*.svg"
-  - "*.woff"
-  - "*.woff2"
-  - "*.ttf"
-  - "*.eot"
-  - "*.pdf"
-  - "*.zip"
-  - "*.gz"
-  - "*.br" 
+  status = 301 
