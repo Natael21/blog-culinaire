@@ -63,17 +63,49 @@ rss: rss
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.
-# exclude:
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - README.md
+  - LICENSE
+  - .git
+  - .gitignore
+  - .sass-cache
+  - .jekyll-cache
+  - .DS_Store
 
 # Collections
 collections:
   upcoming:
     output: false
     permalink: /upcoming/:path/
+
+# Optimisations de performance
+compress_html:
+  clippings: all
+  comments: ["<!-- ", " -->"]
+  endings: all
+  ignore:
+    envs: [development]
+  blanklines: false
+  profile: false
+  startings: [html, head, body]
+
+# Optimisation des images
+defaults:
+  - scope:
+      path: "assets/img"
+    values:
+      image: true
+      
+# Configuration du cache
+keep_files:
+  - .git
+  - .svn
+  - assets
+  - _site

@@ -20,30 +20,58 @@ comments: true
           </div>
           <span class="score">{{ page.note }}/10</span>
         </div>
-        <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
-        {% if page.diet %}
-        <span class="diet-type">
-          {% if page.diet == "vegetarian" %}
-          <i class="fas fa-carrot"></i> 100% Végétarien
-          {% elsif page.diet == "vegan" %}
-          <i class="fas fa-leaf"></i> 100% Végétalien
-          {% elsif page.diet == "vegetarian-friendly" %}
-          <i class="fas fa-carrot"></i> Options végétariennes
-          {% elsif page.diet == "vegan-friendly" %}
-          <i class="fas fa-leaf"></i> Options végétaliennes
+
+        <div class="quick-ratings">
+          {% if page.ratings.food %}
+          <span class="quick-rating-item">
+            <i class="fas fa-utensils"></i> {{ page.ratings.food.score }}/10
+          </span>
           {% endif %}
-        </span>
+          {% if page.ratings.service %}
+          <span class="quick-rating-item">
+            <i class="fas fa-concierge-bell"></i> {{ page.ratings.service.score }}/10
+          </span>
+          {% endif %}
+          {% if page.ratings.value %}
+          <span class="quick-rating-item">
+            <i class="fas fa-coins"></i> {{ page.ratings.value.score }}/10
+          </span>
+          {% endif %}
+        </div>
+
+        {% if page.ratings.overall %}
+        <div class="quick-rating-summary">
+          <i class="fas fa-star"></i>
+          <span>{{ page.ratings.overall.comment }}</span>
+        </div>
         {% endif %}
-        <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
-        <span class="price">
-          {% if page.price == "budget" %}
-            <i class="fas fa-dollar-sign"></i>
-          {% elsif page.price == "medium" %}
-            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
-          {% elsif page.price == "expensive" %}
-            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+
+        <div class="restaurant-info">
+          <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+          {% if page.diet %}
+          <span class="diet-type">
+            {% if page.diet == "vegetarian" %}
+            <i class="fas fa-carrot"></i> 100% Végétarien
+            {% elsif page.diet == "vegan" %}
+            <i class="fas fa-leaf"></i> 100% Végétalien
+            {% elsif page.diet == "vegetarian-friendly" %}
+            <i class="fas fa-carrot"></i> Options végétariennes
+            {% elsif page.diet == "vegan-friendly" %}
+            <i class="fas fa-leaf"></i> Options végétaliennes
+            {% endif %}
+          </span>
           {% endif %}
-        </span>
+          <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
+          <span class="price">
+            {% if page.price == "budget" %}
+              <i class="fas fa-dollar-sign"></i> Budget
+            {% elsif page.price == "medium" %}
+              <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> Moyen
+            {% elsif page.price == "expensive" %}
+              <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> Élevé
+            {% endif %}
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -69,44 +97,44 @@ comments: true
       </div>
     </div>
     {% endif %}
-
-    {% if page.ratings %}
-    <div class="restaurant-ratings">
-      <h2>Pourquoi cette note ?</h2>
-      
-      {% for rating in page.ratings %}
-      {% assign category = rating[0] %}
-      {% assign details = rating[1] %}
-      <div class="rating-category">
-        <h3>
-          <span class="rating-title">
-            {% case category %}
-            {% when 'food' %}
-              <i class="fas fa-utensils"></i> Qualité de la nourriture
-            {% when 'service' %}
-              <i class="fas fa-concierge-bell"></i> Service
-            {% when 'ambiance' %}
-              <i class="fas fa-music"></i> Ambiance
-            {% when 'value' %}
-              <i class="fas fa-coins"></i> Rapport qualité/prix
-            {% when 'originality' %}
-              <i class="fas fa-lightbulb"></i> Originalité / Concept
-            {% when 'overall' %}
-              <i class="fas fa-star"></i> Expérience globale
-            {% endcase %}
-          </span>
-        </h3>
-        
-        {% if details.criteria %}
-        <p class="criteria"><em>{{ details.criteria }}</em></p>
-        {% endif %}
-        
-        <p class="comment">{{ details.comment }}</p>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
   </div>
+
+  {% if page.ratings %}
+  <div class="ratings-section">
+    <h2>Pourquoi cette note ?</h2>
+    
+    {% for rating in page.ratings %}
+    {% assign category = rating[0] %}
+    {% assign details = rating[1] %}
+    <div class="rating-category">
+      <h3>
+        <span class="rating-title">
+          {% case category %}
+          {% when 'food' %}
+            <i class="fas fa-utensils"></i> Qualité de la nourriture
+          {% when 'service' %}
+            <i class="fas fa-concierge-bell"></i> Service
+          {% when 'ambiance' %}
+            <i class="fas fa-music"></i> Ambiance
+          {% when 'value' %}
+            <i class="fas fa-coins"></i> Rapport qualité/prix
+          {% when 'originality' %}
+            <i class="fas fa-lightbulb"></i> Originalité / Concept
+          {% when 'overall' %}
+            <i class="fas fa-star"></i> Expérience globale
+          {% endcase %}
+        </span>
+      </h3>
+      
+      {% if details.criteria %}
+      <p class="criteria"><em>{{ details.criteria }}</em></p>
+      {% endif %}
+      
+      <p class="comment">{{ details.comment }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <!-- Section Commentaires -->
   <div class="comments-section">
