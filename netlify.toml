@@ -15,34 +15,8 @@
   RUBY_VERSION = "2.7.1"
   BUNDLER_VERSION = "2.4.22"
 
-[build.processing]
-  skip_processing = true
-  skip_processing = [
-    "*.jpg",
-    "*.png",
-    "*.gif",
-    "*.ico",
-    "*.svg",
-    "*.woff",
-    "*.woff2",
-    "*.ttf",
-    "*.eot",
-    "*.pdf",
-    "*.zip",
-    "*.gz",
-    "*.br"
-  ]
-
-[build.processing.css]
-  bundle = true
-  minify = true
-
-[build.processing.js]
-  bundle = true
-  minify = true
-
-[build.processing.images]
-  compress = true
+# Skip processing for static assets
+skip_processing = true
 
 [[plugins]]
   package = "@netlify/plugin-cacheing"
