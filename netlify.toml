@@ -1,27 +1,25 @@
 [build]
   publish = "_site"
-  command = "jekyll build"
+  command = "bundle install && bundle exec jekyll build"
+
+[build.environment]
+  JEKYLL_ENV = "production"
+  RUBY_VERSION = "2.7.1"
 
 [build.processing]
-  skip_processing = false
-[build.processing.css]
-  bundle = true
-  minify = true
-[build.processing.js]
-  bundle = true
-  minify = true
-[build.processing.images]
-  compress = true
+  skip_processing = true
+
+[[plugins]]
+  package = "@netlify/plugin-cacheing"
+
+[plugins.inputs]
+  paths = [
+    "vendor/bundle",
+    "_site",
+    ".jekyll-cache"
+  ]
 
 [[headers]]
   for = "/*"
-  [headers.values]
-    Cache-Control = "public, max-age=2592000"
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-
-[[headers]]
-  for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000" 
