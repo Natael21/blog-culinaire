@@ -57,6 +57,19 @@ comments: true
       {{ content }}
     </div>
 
+    {% if page.images %}
+    <div class="restaurant-gallery">
+      <h2>Galerie photos</h2>
+      <div class="gallery-grid">
+        {% for image in page.images %}
+        <div class="gallery-item" onclick="openModal(this)">
+          <img src="{{ image.image }}" alt="{{ page.title }}" loading="lazy">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     {% if page.ratings %}
     <div class="restaurant-ratings">
       <h2>Pourquoi cette note ?</h2>
@@ -82,7 +95,6 @@ comments: true
               <i class="fas fa-star"></i> Expérience globale
             {% endcase %}
           </span>
-          <span class="rating-score">({{ details.score }}/10)</span>
         </h3>
         
         {% if details.criteria %}
@@ -92,19 +104,6 @@ comments: true
         <p class="comment">{{ details.comment }}</p>
       </div>
       {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if page.images %}
-    <div class="restaurant-gallery">
-      <h2>Galerie photos</h2>
-      <div class="gallery-grid">
-        {% for image in page.images %}
-        <div class="gallery-item" onclick="openModal(this)">
-          <img src="{{ image.image }}" alt="{{ page.title }}" loading="lazy">
-        </div>
-        {% endfor %}
-      </div>
     </div>
     {% endif %}
   </div>

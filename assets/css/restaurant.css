@@ -229,24 +229,26 @@
 /* Ratings Section
 ------------------------- */
 .restaurant-ratings {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--white);
     padding: 2rem;
-    margin: 2rem 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
 }
 
 .restaurant-ratings h2 {
-    color: #333;
+    font-family: 'Playfair Display', serif;
+    color: var(--primary-color);
+    font-size: 2rem;
     margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    font-weight: 600;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #eee;
 }
 
 .rating-category {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
     animation: slideIn 0.5s ease-out;
     animation-fill-mode: both;
 }
@@ -265,36 +267,32 @@
 .rating-category:nth-child(6) { animation-delay: 0.6s; }
 
 .rating-category h3 {
-    color: var(--primary-color);
-    font-size: 1.4rem;
+    color: var(--text-color);
+    font-size: 1.1rem;
     margin-bottom: var(--spacing-xs);
     display: flex;
-    justify-content: space-between;
     align-items: center;
 }
 
 .rating-title i {
     color: var(--accent-color);
     margin-right: var(--spacing-xs);
-    width: 24px;
-}
-
-.rating-score {
-    font-size: 1.1rem;
-    color: var(--text-light);
+    width: 20px;
+    font-size: 0.9rem;
 }
 
 .rating-category .criteria {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-xs);
     font-style: italic;
 }
 
 .rating-category .comment {
-    color: #2c3e50;
-    line-height: 1.6;
+    color: var(--text-color);
+    line-height: 1.5;
     margin: 0;
+    font-size: 0.9rem;
 }
 
 /* Comments Section
@@ -326,18 +324,16 @@
 @media (max-width: 768px) {
     .restaurant-ratings {
         padding: 1.5rem;
-        margin: 1.5rem 0;
+        margin-top: 1.5rem;
     }
 
     .restaurant-ratings h2 {
         font-size: 1.6rem;
+        margin-bottom: 1rem;
     }
 
     .rating-category h3 {
-        font-size: 1.2rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-xs);
+        font-size: 1rem;
     }
 
     .restaurant-navigation {
