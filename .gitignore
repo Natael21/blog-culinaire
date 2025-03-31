@@ -6,10 +6,20 @@ _site/
 .bundle/
 vendor/
 
-# Logs
-*.log
+# Ruby
+*.gem
+*.rbc
+.ruby-version
+.ruby-gemset
+.rvmrc
 
-# Système
+# Node
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# OS
 .DS_Store
 Thumbs.db
 
@@ -19,15 +29,14 @@ Thumbs.db
 *.swp
 *.swo
 
-# Dépendances
-node_modules/
-package-lock.json
-yarn.lock
+# Netlify
+.netlify/
+netlify.toml.local
 
 # Cache
 .cache/
-tmp/
-temp/
+.temp/
+.tmp/
 
 .users.yml
 git rm --cached admin/config.yml
