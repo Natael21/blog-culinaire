@@ -1,33 +1,5 @@
-# Jekyll
-_site/
-.sass-cache/
-.jekyll-cache/
+_site
+.sass-cache
 .jekyll-metadata
-.bundle/
-vendor/
-
-# Logs
-*.log
-
-# Système
-.DS_Store
-Thumbs.db
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Dépendances
-node_modules/
-package-lock.json
-yarn.lock
-
-# Cache
-.cache/
-tmp/
-temp/
-
 .users.yml
 git rm --cached admin/config.yml
