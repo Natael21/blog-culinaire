@@ -3,8 +3,6 @@ layout: default
 title: Accueil
 ---
 
-<link rel="stylesheet" href="{{ '/assets/css/mobile.css' | relative_url }}">
-
 <div class="main-content">
   <div class="page-header">
     <h2>Nos Dernières Découvertes</h2>
@@ -129,24 +127,19 @@ title: Accueil
             </div>
             <p class="description">{{ post.description | truncate: 150 }}</p>
             <div class="meta">
-              <div class="meta-row">
-                <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
-                {% if post.diet %}
-                <span class="diet-type"><i class="fas fa-leaf"></i> {{ post.diet }}</span>
+              <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
+              {% if post.style %}
+              <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
+              {% endif %}
+              <span class="price" style="display: inline-flex; align-items: center; vertical-align: middle;">
+                {% if post.price == "budget" %}
+                  <i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i>
+                {% elsif post.price == "medium" %}
+                  <i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i><i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i>
+                {% elsif post.price == "expensive" %}
+                  <i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i><i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i><i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i>
                 {% endif %}
-              </div>
-              <div class="meta-row">
-                <span class="date"><i class="far fa-calendar"></i> {{ post.date | date: "%d %b %Y" }}</span>
-                <span class="price">
-                  {% if post.price == "budget" %}
-                    <i class="fas fa-dollar-sign"></i>
-                  {% elsif post.price == "medium" %}
-                    <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
-                  {% elsif post.price == "expensive" %}
-                    <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
-                  {% endif %}
-                </span>
-              </div>
+              </span>
             </div>
           </div>
         </a>
@@ -435,37 +428,23 @@ title: Accueil
     margin: 0.8rem 0.5rem;
   }
 
-  .filter-group {
-    padding: 0;
-  }
-
   .search-and-view {
+    max-width: 200px;
     padding: 0;
-    width: 100%;
-    max-width: 600px;
-  }
-
-  .search-input-wrapper {
-    width: 100%;
-  }
-
-  .search-input {
-    width: 100%;
-    font-size: 0.9rem;
-    padding: 0.7rem 2.5rem;
-    border-radius: 10px;
   }
 
   .advanced-filters-btn {
-    width: 100%;
-    max-width: 600px;
-    margin: 0.5rem auto 0;
+    max-width: 200px;
     padding: 0.7rem;
-    border-radius: 10px;
+  }
+
+  .search-input {
+    font-size: 0.9rem;
+    padding: 0.7rem 2rem 0.7rem 2rem;
   }
 
   .search-input-wrapper i {
-    left: 0.8rem;
+    left: 0.6rem;
     font-size: 0.9rem;
   }
 }

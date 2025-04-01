@@ -4,7 +4,6 @@ comments: true
 ---
 
 <link rel="stylesheet" href="{{ '/assets/css/restaurant.css' | relative_url }}">
-<link rel="stylesheet" href="{{ '/assets/css/restaurant-mobile.css' | relative_url }}">
 
 <article class="restaurant-detail">
   <div class="restaurant-header" style="background-image: url('{{ page.image }}');">
@@ -23,34 +22,30 @@ comments: true
             <span class="score">{{ page.note }}/10</span>
           </a>
         </div>
-        <div class="meta-row">
-          <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
-          {% if page.diet %}
-          <span class="diet-type">
-            {% if page.diet == "vegetarian" %}
-            <i class="fas fa-carrot"></i> 100% Végétarien
-            {% elsif page.diet == "vegan" %}
-            <i class="fas fa-leaf"></i> 100% Végétalien
-            {% elsif page.diet == "vegetarian-friendly" %}
-            <i class="fas fa-carrot"></i> Options végétariennes
-            {% elsif page.diet == "vegan-friendly" %}
-            <i class="fas fa-leaf"></i> Options végétaliennes
-            {% endif %}
-          </span>
+        <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+        {% if page.diet %}
+        <span class="diet-type">
+          {% if page.diet == "vegetarian" %}
+          <i class="fas fa-carrot"></i> 100% Végétarien
+          {% elsif page.diet == "vegan" %}
+          <i class="fas fa-leaf"></i> 100% Végétalien
+          {% elsif page.diet == "vegetarian-friendly" %}
+          <i class="fas fa-carrot"></i> Options végétariennes
+          {% elsif page.diet == "vegan-friendly" %}
+          <i class="fas fa-leaf"></i> Options végétaliennes
           {% endif %}
-        </div>
-        <div class="meta-row">
-          <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
-          <span class="price">
-            {% if page.price == "budget" %}
-              <i class="fas fa-dollar-sign"></i>
-            {% elsif page.price == "medium" %}
-              <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
-            {% elsif page.price == "expensive" %}
-              <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
-            {% endif %}
-          </span>
-        </div>
+        </span>
+        {% endif %}
+        <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
+        <span class="price">
+          {% if page.price == "budget" %}
+            <i class="fas fa-dollar-sign"></i>
+          {% elsif page.price == "medium" %}
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+          {% elsif page.price == "expensive" %}
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+          {% endif %}
+        </span>
       </div>
     </div>
   </div>
