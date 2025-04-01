@@ -165,7 +165,7 @@ comments: true
   </button>
 </div>
 
-<a href="{{ '/' | relative_url }}" class="back-button" id="backButton">
+<a href="{{ '/' | relative_url }}" class="back-button" onclick="storeRestaurantId(event)">
   <i class="fas fa-arrow-left"></i>
   <span>Retour</span>
 </a>
@@ -176,36 +176,24 @@ comments: true
     sessionStorage.setItem('scrollPosition', window.scrollY);
   });
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const backButton = document.getElementById('backButton');
+  // Store restaurant ID before redirecting
+  function storeRestaurantId(event) {
+    event.preventDefault();
+    const restaurantId = '{{ page.title | slugify }}';
+    localStorage.setItem('lastViewedRestaurant', restaurantId);
+    window.location.href = "{{ '/' | relative_url }}";
+  }
+
+  // Handle back button appearance on scroll
+  window.addEventListener('scroll', function() {
+    const backButton = document.querySelector('.back-button');
+    const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
     
-    // Gestion du clic et du toucher
-    function handleBack(e) {
-      e.preventDefault();
-      const restaurantId = '{{ page.title | slugify }}';
-      localStorage.setItem('lastViewedRestaurant', restaurantId);
-      window.location.href = "{{ '/' | relative_url }}";
+    if (isBottom) {
+      backButton.classList.add('bottom-page');
+    } else {
+      backButton.classList.remove('bottom-page');
     }
-
-    // Ajout des écouteurs d'événements
-    backButton.addEventListener('click', handleBack);
-    backButton.addEventListener('touchstart', function(e) {
-      e.preventDefault(); // Empêche le double-événement sur mobile
-    });
-    backButton.addEventListener('touchend', handleBack);
-
-    // Gestion de l'apparence du bouton au scroll
-    function handleScroll() {
-      const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
-      if (isBottom) {
-        backButton.classList.add('bottom-page');
-      } else {
-        backButton.classList.remove('bottom-page');
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Vérification initiale
   });
 
   let currentImageIndex = 0;
