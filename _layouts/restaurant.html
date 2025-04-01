@@ -165,7 +165,7 @@ comments: true
   </button>
 </div>
 
-<a href="{{ '/' | relative_url }}" class="back-button" onclick="storeRestaurantId(event)">
+<a href="{{ '/' | relative_url }}" class="back-button" id="backButton">
   <i class="fas fa-arrow-left"></i>
   <span>Retour</span>
 </a>
@@ -176,17 +176,24 @@ comments: true
     sessionStorage.setItem('scrollPosition', window.scrollY);
   });
 
-  // Store restaurant ID before redirecting
-  function storeRestaurantId(event) {
+  // Store restaurant ID and handle navigation
+  function handleBackButtonClick(event) {
     event.preventDefault();
     const restaurantId = '{{ page.title | slugify }}';
     localStorage.setItem('lastViewedRestaurant', restaurantId);
     window.location.href = "{{ '/' | relative_url }}";
   }
 
+  // Add event listeners for both click and touch events
+  const backButton = document.getElementById('backButton');
+  backButton.addEventListener('click', handleBackButtonClick);
+  backButton.addEventListener('touchend', function(event) {
+    event.preventDefault();
+    handleBackButtonClick(event);
+  });
+
   // Handle back button appearance on scroll
   window.addEventListener('scroll', function() {
-    const backButton = document.querySelector('.back-button');
     const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
     
     if (isBottom) {

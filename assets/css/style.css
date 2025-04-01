@@ -432,6 +432,17 @@ footer {
   }
 }
 
+@media screen and (max-width: 768px) and (orientation: portrait) {
+    .hero {
+        margin-top: -1rem;
+        height: 60vh;
+    }
+
+    .main-nav-container {
+        margin-bottom: 0;
+    }
+}
+
 /* Restaurant Detail Page */
 .restaurant-detail {
   max-width: 1000px;
@@ -1069,4 +1080,73 @@ footer {
   padding: 1.5rem;
   margin-top: 1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Media Queries pour les boutons de vue */
+@media screen and (max-width: 768px) {
+    .view-buttons {
+        display: none !important;
+    }
+}
+
+/* Styles pour ordinateur (au-dessus de 768px) */
+@media screen and (min-width: 769px) {
+    .view-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .view-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .view-button:hover,
+    .view-button.active {
+        background: var(--accent-color);
+        transform: translateY(-2px);
+    }
+
+    .view-button i {
+        font-size: 1.2rem;
+    }
+}
+
+/* Styles pour la recherche et les filtres en mode portrait sur mobile */
+@media screen and (max-width: 768px) and (orientation: portrait) {
+    .search-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+        padding: 0 1rem;
+    }
+
+    .search-input-wrapper {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .search-input {
+        width: 100%;
+        text-align: center;
+    }
+
+    .advanced-filters-btn {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 0.8rem;
+    }
 }
