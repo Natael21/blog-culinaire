@@ -1,42 +1,5 @@
-# Jekyll
-_site/
-.sass-cache/
-.jekyll-cache/
+_site
+.sass-cache
 .jekyll-metadata
-.bundle/
-vendor/
-
-# Ruby
-*.gem
-*.rbc
-.ruby-version
-.ruby-gemset
-.rvmrc
-
-# Node
-node_modules/
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-
-# OS
-.DS_Store
-Thumbs.db
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Netlify
-.netlify/
-netlify.toml.local
-
-# Cache
-.cache/
-.temp/
-.tmp/
-
 .users.yml
 git rm --cached admin/config.yml
