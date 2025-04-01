@@ -290,36 +290,59 @@
     gap: 1rem;
 }
 
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
 .rating-bar {
-    width: 120px;
+    flex-grow: 1;
     height: 8px;
-    background: var(--border-color);
+    background-color: rgba(243, 156, 18, 0.2);
     border-radius: 4px;
     overflow: hidden;
+    min-width: 100px;
+    max-width: 200px;
+    position: relative;
+}
+
+.rating-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to right, rgba(243, 156, 18, 0.2) 0%, rgba(243, 156, 18, 0.2) 100%);
+    border-radius: 4px;
+    z-index: 1;
 }
 
 .rating-fill {
     height: 100%;
-    background: linear-gradient(to right, var(--rating-good), var(--rating-better));
-    transition: width var(--transition-speed);
+    background: linear-gradient(to right, #f1c40f, #f39c12);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    position: relative;
+    z-index: 2;
 }
 
-.rating-fill[data-rating="1"] { width: 10%; }
-.rating-fill[data-rating="2"] { width: 20%; }
-.rating-fill[data-rating="3"] { width: 30%; }
-.rating-fill[data-rating="4"] { width: 40%; }
-.rating-fill[data-rating="5"] { width: 50%; }
-.rating-fill[data-rating="6"] { width: 60%; }
-.rating-fill[data-rating="7"] { width: 70%; }
-.rating-fill[data-rating="8"] { width: 80%; }
-.rating-fill[data-rating="9"] { width: 90%; }
-.rating-fill[data-rating="10"] { width: 100%; }
-
 .score {
+    color: #fff;
+    font-weight: 600;
     min-width: 45px;
     text-align: right;
-    font-weight: bold;
-    color: var(--secondary-color);
+    font-size: 0.9rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: none;
+    transition: background-color 0.3s ease;
+}
+
+.score:hover {
+    background: none;
 }
 
 .criteria {
@@ -385,42 +408,35 @@ html {
 /* Back Button
 ------------------------- */
 .back-button {
-    position: fixed;
-    bottom: 20px;
+    position: absolute;
+    top: 20px;
     left: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.8rem;
-    background: var(--primary-color);
-    color: white;
-    text-decoration: none;
-    border-radius: 20px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
-    z-index: 100;
-    border: 1px solid transparent;
-}
-
-.back-button i {
-    font-size: 0.9rem;
-}
-
-.back-button span {
-    display: block;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+    backdrop-filter: blur(5px);
 }
 
 .back-button:hover {
-    transform: translateX(-3px);
-    background: var(--primary-color);
-    color: white;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
 }
 
-.back-button:active {
-    transform: translateX(-1px);
+.back-button i {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.back-button span {
+    color: #fff;
+    font-weight: 500;
 }
 
 /* Responsive Design
