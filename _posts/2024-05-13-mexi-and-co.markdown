@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Mexi & Co"
 date: 2024-05-13
-note: 9
+note: 7.8
 style: "Mexicain & Latino"
 diet: "vegetarian-friendly"
 description: "L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !"
@@ -21,6 +21,29 @@ images:
   - image: "/images/Mexi&Co Nataël_2.jpg"
   - image: "/images/Mexi&co Nicolas.jpg"
   - image: "/images/Mexi&Co Nataël_3.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Les nachos sont préparés à la main avec des légumes frais, et les tacos sont délicieux. La présentation est attrayante et les saveurs sont authentiques. Quelques plats manquent parfois de piquant."
+  service:
+    score: 7
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Équipe dynamique mais parfois débordée en période d'affluence. Service attentionné mais peut être lent."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance festive avec une belle terrasse en arrière. L'établissement est bien entretenu mais peut être bruyant."
+  value:
+    score: 8
+    comment: "Bon rapport qualité/prix, particulièrement avec les promotions étudiantes. Prix réguliers un peu élevés."
+  originality:
+    score: 7
+    comment: "Concept de personnalisation des nachos intéressant mais menu parfois répétitif. Promotions créatives."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire agréable qui combine authenticité et convivialité, avec quelques points à améliorer."
 ---
 
 Nous avons eu la chance d'essayer ce nouveau petit restaurant au centre-ville de Sherbrooke l'été passé (2023), servant l'un des meilleurs Nachos en ville !

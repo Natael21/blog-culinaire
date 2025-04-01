@@ -2,7 +2,7 @@
 layout: restaurant
 title: "OMG Resto"
 date: 2024-03-04
-note: 7
+note: 6.8
 style: "Américain"
 diet: "standard"
 description: "Restaurant spacieux et luxueux offrant burgers, tacos, poutines et tartares, accompagnés d'une sélection de vins et bières artisanales."
@@ -13,6 +13,29 @@ images:
   - image: "/images/OMG_natael.JPG"
   - image: "/images/OMG_Nicolas.jpg"
   - image: "/images/OMG_bieres.jpg"
+ratings:
+  food:
+    score: 6
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Menu très limité et décevant comparé à avant. Burgers corrects mais sans plus, comme un fast-food premium."
+  service:
+    score: 7
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service professionnel mais manque de passion. Bonne connaissance des boissons."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Cadre luxueux avec foyer mais ambiance parfois trop froide. Décor impressionnant."
+  value:
+    score: 6
+    comment: "Prix élevés pour la qualité de la nourriture. Seule la dégustation de bières justifie le prix."
+  originality:
+    score: 5
+    comment: "Menu très standard et décevant. Seule la sélection de boissons apporte de l'originalité."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience décevante pour la nourriture mais agréable pour les boissons. Le cadre luxueux ne compense pas le menu limité."
 ---
 
 **Nataël** :

@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Principe Pizza Pasta (Fermé)"
 date: 2022-04-02
-note: 10
+note: 8.3
 style: "Italien"
 diet: "vegetarian-friendly"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui proposait une cuisine italienne traditionnelle, avec des pizzas et des pâtes authentiques dans une ambiance familiale chaleureuse."
@@ -12,6 +12,29 @@ image: "/images/la brigade resto.jpg"
 images:
   - image: "/images/la brigade resto.jpg"
   - image: "/images/La Brigade Nicolas et Nataël.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Pizzas bien exécutées avec pâte fine, mais manquant parfois de caractère dans les garnitures. Pâtes al dente avec sauces classiques bien réalisées."
+  service:
+    score: 9
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service attentif et chaleureux, créant une belle ambiance familiale."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance familiale agréable mais décor assez basique."
+  value:
+    score: 8
+    comment: "Prix corrects pour la qualité offerte, portions généreuses."
+  originality:
+    score: 7
+    comment: "Cuisine italienne classique bien exécutée mais peu innovante."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une bonne expérience italienne traditionnelle, sans surprise mais satisfaisante."
 ---
 
 **Nataël** :

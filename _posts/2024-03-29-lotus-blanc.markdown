@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Lotus Blanc Vietnamien"
 date: 2024-03-29
-note: 8
+note: 7.2
 style: "Asiatique"
 diet: "vegetarian-friendly"
 description: "Cuisine vietnamienne authentique et abordable dans un cadre zen avec aquariums."
@@ -19,6 +19,29 @@ images:
   - image: "/images/Lotus Blanc_Nicolas (2).jpg"
   - image: "/images/Lotus blanc bol.jpg"
   - image: "/images/Lotus blanc_beignets.jpg"
+ratings:
+  food:
+    score: 7
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Cuisine vietnamienne authentique mais parfois inégale. Les rouleaux impériaux au lotus blanc sont créatifs mais certains plats manquent de fraîcheur."
+  service:
+    score: 6
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service basique et efficace mais manque parfois de chaleur. L'équipe est professionnelle mais peu communicative."
+  ambiance:
+    score: 7
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Cadre zen avec aquariums mais ambiance parfois trop calme. Décor authentique mais pourrait être mieux entretenu."
+  value:
+    score: 8
+    comment: "Excellent rapport qualité/prix avec des tables d'hôte abordables. Portions généreuses pour le prix."
+  originality:
+    score: 6
+    comment: "Menu assez traditionnel avec quelques touches créatives. Manque d'innovation dans les recettes."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire correcte dans un cadre authentique, mais manque de personnalité et d'innovation."
 ---
 
 **Nataël** :

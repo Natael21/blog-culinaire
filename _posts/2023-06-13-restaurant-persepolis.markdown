@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Restaurant Persépolis"
 date: 2023-06-13
-note: 10
+note: 9.1
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"
 description: "Une authentique cuisine iranienne servie dans un cadre chaleureux et décoré avec soin !"
@@ -13,6 +13,29 @@ images:
   - image: "/images/Restaurant Persépolis.jpg"
   - image: "/images/Persepolis Nicolas.jpg"
   - image: "/images/Persepolis Nataël.jpg"
+ratings:
+  food:
+    score: 9
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Cuisine iranienne authentique avec des saveurs bien équilibrées. Les plats sont bien présentés et les ingrédients sont frais."
+  service:
+    score: 10
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service attentionné et professionnel. L'équipe est accueillante et connaît bien le menu."
+  ambiance:
+    score: 10
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance chaleureuse et conviviale. Le décor est agréable et l'établissement est bien entretenu."
+  value:
+    score: 9
+    comment: "Excellent rapport qualité/prix pour une cuisine authentique."
+  originality:
+    score: 10
+    comment: "Cuisine iranienne authentique avec des recettes traditionnelles."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire exceptionnelle dans un cadre chaleureux."
 ---
 
 Bienvenue au restaurant Persépolis, un vrai resto iranien, servi par une serveuse d'origine iranienne !

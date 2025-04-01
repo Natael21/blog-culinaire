@@ -13,6 +13,29 @@ images:
   - image: "/images/Le Refuge des Brasseurs - Microbrasserie.jpg"
   - image: "/images/Refuge des Brasseurs Nicolas.jpg"
   - image: "/images/Refuge des Brasseurs Nataël.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Plats gastronomiques variés, des burgers végétaliens aux options de viande de forêt. Excellente qualité des ingrédients."
+  service:
+    score: 8
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service attentif et connaisseur, particulièrement pour la dégustation de bières."
+  ambiance:
+    score: 9
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance chaleureuse avec jeux de société et livres. Cadre parfait pour déguster des bières artisanales."
+  value:
+    score: 8
+    comment: "Bon rapport qualité/prix pour des plats gastronomiques et des bières artisanales."
+  originality:
+    score: 9
+    comment: "Cuisine créative avec des options végétaliennes et de viande de forêt, accompagnée de bières brassées sur place."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire complète avec des plats gastronomiques et des bières artisanales."
 ---
 
 Bienvenue au Refuge des Brasseurs !

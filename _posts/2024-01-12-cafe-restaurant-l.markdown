@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Café Restaurant L"
 date: 2024-01-12
-note: 8
+note: 7.2
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"
 description: "Salaam ! La cuisine iranienne saura vous impressionner dans ce restaurant paisible !"
@@ -14,6 +14,29 @@ images:
   - image: "/images/Café Restaurant L Nataël.jpg"
   - image: "/images/Café Restaurant L Nicolas.jpg"
   - image: "/images/Café Restaurant L Repas Nataël.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Filet mignon exceptionnel mais riz fade. Sauce grenade délicieuse mais portions insuffisantes."
+  service:
+    score: 7
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service professionnel mais manque de chaleur. L'équipe est efficace mais peu communicative."
+  ambiance:
+    score: 7
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance paisible mais manque d'authenticité iranienne. Décor simple et fonctionnel."
+  value:
+    score: 6
+    comment: "Portions petites pour le prix. Rapport qualité/prix décevant malgré la qualité de la viande."
+  originality:
+    score: 6
+    comment: "Menu traditionnel sans innovation. Manque de créativité dans les accompagnements."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience inégale avec des hauts (viande) et des bas (portions, riz). Bonne cuisine mais manque de finesse."
 ---
 
 **Nataël** :

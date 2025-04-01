@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Brasserie Daniel Lapointe"
 date: 2024-01-18
-note: 9
+note: 8
 style: "Pub & Microbrasserie"
 diet: "standard"
 description: "Une brasserie réputée pour ses délicieuses crevettes à volonté les jeudis soirs !"
@@ -15,6 +15,29 @@ images:
   - image: "/images/Daniel Lapointe Natael_2.jpg"
   - image: "/images/Daniel Lapointe Nicolas.jpg"
   - image: "/images/Daniel Lapointe Nicolas_2.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Crevettes à volonté excellentes avec différentes sauces. Menu varié mais certains plats manquent de finesse."
+  service:
+    score: 8
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service efficace mais peut être lent pour les crevettes à volonté. Personnel parfois débordé."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance de brasserie classique. Décor agréable mais peut être bruyant."
+  value:
+    score: 8
+    comment: "Excellent rapport qualité/prix pour les crevettes à volonté. Prix réguliers corrects."
+  originality:
+    score: 7
+    comment: "Concept de crevettes à volonté intéressant mais reste une brasserie classique."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience agréable, particulièrement pour les crevettes à volonté. Bonne brasserie sans plus."
 ---
 
 **Nataël** :

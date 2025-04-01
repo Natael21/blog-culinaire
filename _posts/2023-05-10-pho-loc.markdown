@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Pho Loc"
 date: 2023-05-10
-note: 9
+note: 8.5
 style: "Asiatique"
 diet: "vegetarian-friendly"
 description: "Une authentique cuisine vietnamienne dans un cadre pittoresque et intime"
@@ -13,6 +13,29 @@ images:
   - image: "/images/pho loc.PNG"
   - image: "/images/Pho Loc Nicolas.jpg"
   - image: "/images/Pho Loc Nataël.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Cuisine vietnamienne correcte, saveurs équilibrées mais manque parfois d'intensité. Légumes frais et bien préparés."
+  service:
+    score: 8
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service simple mais efficace, communication parfois limitée en français."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Décor modeste mais authentique, musique traditionnelle appréciable. Éclairage un peu trop vif."
+  value:
+    score: 8
+    comment: "Très bon rapport qualité/prix, portions généreuses pour les prix demandés."
+  originality:
+    score: 7
+    comment: "Menu vietnamien classique, peu de surprises mais bien exécuté."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire honnête dans un cadre simple et authentique."
 ---
 
 Chào mừng ! C'est par un bel après-midi ensoleillé que nous nous sommes réfugiés de la chaleur torride chez Pho Loc, l'un des restaurants vietnamiens les plus notoires de l'Estrie.

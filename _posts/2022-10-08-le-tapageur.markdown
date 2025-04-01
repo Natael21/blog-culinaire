@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Le Tapageur"
 date: 2022-10-08
-note: 8
+note: 7.7
 style: "Bistro & Café"
 diet: "standard"
 description: "Un bistro festif offrant des plats spectaculaires et une ambiance vivante, parfait pour les célébrations"
@@ -11,6 +11,29 @@ address: "83 Rue King Ouest, Sherbrooke, QC J1H 1P1"
 image: "/images/Le Tapageur.jpg"
 images:
   - image: "/images/Le Tapageur.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "La Potence est impressionnante visuellement, viande de bonne qualité mais certains accompagnements manquent de finesse."
+  service:
+    score: 7
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service correct mais peut être débordé les soirs d'affluence, temps d'attente parfois long."
+  ambiance:
+    score: 7
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance très festive, peut être trop bruyante pour une conversation normale. Décor intéressant."
+  value:
+    score: 8
+    comment: "Prix corrects pour les plats spectaculaires, portions généreuses mais certains cocktails chers."
+  originality:
+    score: 9
+    comment: "Concept unique avec les plats flambés et présentations spectaculaires."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience divertissante mais qui mise parfois plus sur le spectacle que sur la finesse culinaire."
 ---
 
 Bienvenue au Tapageur !

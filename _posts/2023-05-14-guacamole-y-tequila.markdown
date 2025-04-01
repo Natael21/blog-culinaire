@@ -12,6 +12,29 @@ image: "/images/Guacamole y tequila.png"
 images:
   - image: "/images/Guecamole y Tequila Nicolas.png"
   - image: "/images/Guecamole y Tequila Nataël.jpg"
+ratings:
+  food:
+    score: 7
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Cuisine mexicaine correcte, mais les sauces peuvent être trop piquantes pour certains palais. Les plats sont bien présentés."
+  service:
+    score: 7
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service correct et efficace. L'équipe est accueillante."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Belle ambiance mexicaine avec un décor agréable et une atmosphère conviviale."
+  value:
+    score: 7
+    comment: "Rapport qualité/prix correct pour une cuisine mexicaine."
+  originality:
+    score: 7
+    comment: "Cuisine mexicaine classique avec quelques variations."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire correcte dans une ambiance agréable."
 ---
 
 **Nataël** :

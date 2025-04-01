@@ -2,7 +2,7 @@
 layout: restaurant
 title: "El Tabernaco (Fermé)"
 date: 2022-04-20
-note: 10
+note: 8.2
 style: "Mexicain & Latino"
 diet: "vegetarian-friendly"
 description: "⚠️ Ce restaurant est maintenant fermé. Un établissement qui offrait une expérience gastronomique mexicaine authentique, avec des plats savoureux et une ambiance chaleureuse qui transportait ses clients au cœur du Mexique."
@@ -12,6 +12,29 @@ image: "/images/El Tabernaco.jpg"
 images:
   - image: "/images/El Tabernaco Nicolas.jpg"
   - image: "/images/El Tabernaco Nataël.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Tacos bien exécutés avec tortillas maison, mais certaines garnitures manquaient parfois de punch. Guacamole frais et bien assaisonné."
+  service:
+    score: 9
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service attentif et sympathique, bonne connaissance des plats."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance chaleureuse mais décor parfois un peu surchargé."
+  value:
+    score: 8
+    comment: "Prix raisonnables pour des portions généreuses, mais certains plats un peu chers."
+  originality:
+    score: 7
+    comment: "Menu mexicain classique bien exécuté mais peu de surprises."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une bonne expérience mexicaine authentique, manquant parfois d'audace."
 ---
 
 **Nataël** :

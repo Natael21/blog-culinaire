@@ -2,18 +2,40 @@
 layout: restaurant
 title: "Baladi"
 date: 2023-07-29
-note: 9
+note: 7.3
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"
-description: "C'est l'un des meilleurs restaurants à cuisine libano-marocaine en ville, particulièrement pour leur spécialité du couscous !"
+description: "Cuisine libanaise authentique dans un cadre chaleureux."
 price: "medium"
-address: "123 Rue Wellington N, Sherbrooke, QC J1H 5B9"
-image: "/images/Baladi.jpeg"
+address: "1564 Rue Denault, Sherbrooke, QC J1H 2R2"
+image: "/images/baladi.png"
 images:
-  - image: "/images/Baladi Nataël.jpg"
-  - image: "/images/Baladi Nicolas.jpg"
-  - image: "/images/Baladi nourriture_2.jpg"
-  - image: "/images/Baladi nourriture Nicolas.jpg"
+  - image: "/images/baladi.png"
+  - image: "/images/baladi_nicolas.jpg"
+  - image: "/images/baladi_natael.jpg"
+ratings:
+  food:
+    score: 7
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Cuisine libanaise correcte mais manque d'authenticité. Couscous bien préparé mais saveurs parfois trop douces."
+  service:
+    score: 7
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service efficace mais manque de chaleur. L'équipe est professionnelle mais peu communicative."
+  ambiance:
+    score: 7
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance chaleureuse mais manque d'authenticité libanaise. Décor simple et fonctionnel."
+  value:
+    score: 8
+    comment: "Bon rapport qualité/prix avec des portions généreuses. Prix raisonnables."
+  originality:
+    score: 6
+    comment: "Menu traditionnel sans innovation. Manque de créativité dans les recettes."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience correcte mais sans surprise. Bon pour un repas simple et copieux."
 ---
 
 **Nataël** :

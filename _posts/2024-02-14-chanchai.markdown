@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Chanchai"
 date: 2024-02-14
-note: 8
+note: 7
 style: "Asiatique"
 diet: "vegetarian-friendly"
 description: "Saveurs thaïlandaises authentiques et portions généreuses dans un cadre tranquille."
@@ -13,6 +13,29 @@ images:
   - image: "/images/chanchai.jpeg"
   - image: "/images/chanchai_natael.jpg"
   - image: "/images/chanchai_nicolas.jpg"
+ratings:
+  food:
+    score: 7
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Cuisine thaïlandaise correcte mais parfois trop adaptée au goût local. Saveurs équilibrées mais manquent de piquant."
+  service:
+    score: 6
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service basique et efficace. Très occupé, nécessite une réservation. Manque de personnalité."
+  ambiance:
+    score: 7
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Cadre simple et fonctionnel. Ambiance tranquille mais manque d'authenticité thaïlandaise."
+  value:
+    score: 8
+    comment: "Portions généreuses pour le prix. Bon rapport qualité/prix malgré la popularité."
+  originality:
+    score: 5
+    comment: "Menu très traditionnel sans innovation. Manque de créativité dans les recettes."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire correcte mais sans surprise. Bon pour un repas simple et copieux."
 ---
 
 **Nataël** :

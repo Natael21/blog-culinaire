@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Caffuccino"
 date: 2024-05-04
-note: 8
+note: 7.2
 style: "Bistro & Café"
 diet: "vegetarian-friendly"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
@@ -13,6 +13,33 @@ images:
   - image: "/images/Caffucino.jpg"
   - image: "/images/Caffucino_Nicolas.jpg"
   - image: "/images/Caffucino_Nataël.jpg"
+ratings:
+  food:
+    score: 7
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Plats frais mais parfois trop simples. Les sandwichs sont bons mais manquent d'originalité. Desserts maison corrects."
+  service:
+    score: 8
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service efficace et souriant mais parfois un peu précipité. Personnel accueillant mais manque de personnalité."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance chaleureuse mais décoration un peu kitsch. Belle terrasse en été mais peut être bruyante."
+  value:
+    score: 7
+    comment: "Prix un peu élevés pour la simplicité des plats. Portions correctes mais pas exceptionnelles."
+  originality:
+    score: 5
+    comment: "Menu très classique de café-bistro sans réelle innovation. Manque de créativité dans les recettes."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Cuisine de café-bistro classique bien exécutée."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience agréable dans un cadre chaleureux, parfait pour un repas léger."
 ---
 
 **Nataël** :

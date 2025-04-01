@@ -11,6 +11,29 @@ address: "1748 Rue King Ouest, Sherbrooke, QC J1J 2C9"
 image: "/images/Village de chine.PNG"
 images:
   - image: "/images/Village de chine.PNG"
+ratings:
+  food:
+    score: 4
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Plats chinois traditionnels avec une qualité variable. Certains plats manquent d'équilibre dans les ingrédients."
+  service:
+    score: 5
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service basique et efficace."
+  ambiance:
+    score: 5
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance simple et fonctionnelle."
+  value:
+    score: 4
+    comment: "Rapport qualité/prix moyen, certains plats sont dispendieux pour la qualité offerte."
+  originality:
+    score: 4
+    comment: "Menu vaste mais avec des plats chinois traditionnels standards."
+  overall:
+    score: 4
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience culinaire basique avec un vaste choix de plats."
 ---
 
 Bienvenue au Restaurant Village de Chine !

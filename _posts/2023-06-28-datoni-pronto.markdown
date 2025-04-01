@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Datoni Pronto"
 date: 2023-06-28
-note: 8
+note: 7.2
 style: "Italien"
 diet: "vegetarian-friendly"
 description: "Une pizzéria authentique avec des produits d'origine italienne et une ambiance parfaite pour les rendez-vous galants !"
@@ -13,6 +13,29 @@ images:
   - image: "/images/datoni pronto.jpg"
   - image: "/images/Datoni Pronto Nicolas.jpg"
   - image: "/images/Datoni Pronto Nataël.jpg"
+ratings:
+  food:
+    score: 7
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Pizza correcte mais manque d'authenticité italienne. Sauce et fromage de qualité moyenne."
+  service:
+    score: 7
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service efficace mais manque de chaleur. L'équipe est professionnelle mais peu communicative."
+  ambiance:
+    score: 8
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Ambiance romantique et chaleureuse. Décor italien agréable."
+  value:
+    score: 7
+    comment: "Prix élevés pour la qualité. Portions généreuses mais rapport qualité/prix moyen."
+  originality:
+    score: 6
+    comment: "Menu classique de pizzéria. Manque d'innovation dans les recettes."
+  overall:
+    score: 7
+    criteria: "Facteur \"wow\""
+    comment: "Une expérience correcte mais sans surprise. Bonne ambiance mais cuisine moyenne."
 ---
 
 Benvenuto a tutti ! 

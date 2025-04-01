@@ -2,7 +2,7 @@
 layout: restaurant
 title: "La Buvette du Centro"
 date: 2022-04-13
-note: 10
+note: 8.5
 style: "Bistro & Café"
 diet: "vegetarian"
 description: "Un restaurant végétarien offrant des burgers créatifs et une sélection impressionnante de boissons locales"
@@ -13,6 +13,29 @@ images:
   - image: "/images/La buvette.PNG"
   - image: "/images/La Buvette Nicolas.jpg"
   - image: "/images/La Buvette Nataël.jpg"
+ratings:
+  food:
+    score: 8
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "Burgers végétariens bien exécutés, notamment le Burger Gouda Chipotle. Poutine tao intéressante mais sauce parfois trop sucrée."
+  service:
+    score: 8
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "Service efficace et bonne connaissance des boissons, mais peut être débordé aux heures de pointe."
+  ambiance:
+    score: 9
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "Belle ambiance avec terrasse agréable, musique parfois un peu forte à l'intérieur."
+  value:
+    score: 8
+    comment: "Prix corrects pour la qualité, mais certains cocktails un peu chers."
+  originality:
+    score: 9
+    comment: "Menu végétarien créatif et excellente carte des boissons locales."
+  overall:
+    score: 8
+    criteria: "Facteur \"wow\""
+    comment: "Une belle expérience bistro végétarien avec une carte des boissons remarquable."
 ---
 
 Hey les friands de burger, envie de stimuler vos papilles gustatives autrement que de manger du McDonald's ou du Burger King ? Nous avons la solution pour vous ! 
