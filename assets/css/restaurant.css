@@ -191,14 +191,15 @@
 .restaurant-meta .rating {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
-    padding: 0.4rem 0.8rem;
-    border-radius: 15px;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.8rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.2s ease;
     vertical-align: middle;
+    cursor: pointer;
 }
 
 .restaurant-meta {
@@ -212,15 +213,28 @@
 .restaurant-meta .rating:hover {
     background: rgba(255, 255, 255, 0.15);
     transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .restaurant-meta .rating-bar {
-    width: 60px;
-    height: 4px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 2px;
+    width: 100px;
+    height: 8px;
+    background: rgba(221, 221, 221, 0.2);
+    border-radius: 4px;
     overflow: hidden;
     position: relative;
+}
+
+.restaurant-meta .rating-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+    border-radius: 4px;
+    z-index: 1;
 }
 
 .restaurant-meta .rating-fill {
@@ -229,6 +243,7 @@
     transition: width var(--transition-speed);
     position: relative;
     z-index: 2;
+    border-radius: 4px;
 }
 
 .restaurant-meta .rating-fill[data-rating="1"] { width: 10%; }
