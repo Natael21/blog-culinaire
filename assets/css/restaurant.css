@@ -436,7 +436,8 @@ html {
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 0.8rem;
-    background: var(--primary-color);
+    background: rgba(44, 62, 80, 0.9);
+    backdrop-filter: blur(10px);
     color: white;
     text-decoration: none;
     border-radius: 20px;
@@ -445,7 +446,11 @@ html {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     transition: all 0.2s ease;
     z-index: 100;
-    border: 1px solid transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-button.bottom-page {
+    background: var(--accent-color);
 }
 
 .back-button:hover {
@@ -455,12 +460,17 @@ html {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+.back-button.bottom-page:hover {
+    background: #c0392b;
+}
+
 .back-button:active {
     transform: translateX(-1px);
 }
 
 .back-button i {
     font-size: 0.9rem;
+    color: white;
 }
 
 .back-button span {

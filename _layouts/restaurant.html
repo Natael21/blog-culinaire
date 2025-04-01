@@ -184,6 +184,18 @@ comments: true
     window.location.href = "{{ '/' | relative_url }}";
   }
 
+  // Handle back button appearance on scroll
+  window.addEventListener('scroll', function() {
+    const backButton = document.querySelector('.back-button');
+    const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
+    
+    if (isBottom) {
+      backButton.classList.add('bottom-page');
+    } else {
+      backButton.classList.remove('bottom-page');
+    }
+  });
+
   let currentImageIndex = 0;
   const galleryImages = [];
 
