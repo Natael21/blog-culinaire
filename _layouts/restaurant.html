@@ -176,31 +176,36 @@ comments: true
     sessionStorage.setItem('scrollPosition', window.scrollY);
   });
 
-  // Store restaurant ID and handle navigation
-  function handleBackButtonClick(event) {
-    event.preventDefault();
-    const restaurantId = '{{ page.title | slugify }}';
-    localStorage.setItem('lastViewedRestaurant', restaurantId);
-    window.location.href = "{{ '/' | relative_url }}";
-  }
-
-  // Add event listeners for both click and touch events
-  const backButton = document.getElementById('backButton');
-  backButton.addEventListener('click', handleBackButtonClick);
-  backButton.addEventListener('touchend', function(event) {
-    event.preventDefault();
-    handleBackButtonClick(event);
-  });
-
-  // Handle back button appearance on scroll
-  window.addEventListener('scroll', function() {
-    const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
+  document.addEventListener('DOMContentLoaded', function() {
+    const backButton = document.getElementById('backButton');
     
-    if (isBottom) {
-      backButton.classList.add('bottom-page');
-    } else {
-      backButton.classList.remove('bottom-page');
+    // Gestion du clic et du toucher
+    function handleBack(e) {
+      e.preventDefault();
+      const restaurantId = '{{ page.title | slugify }}';
+      localStorage.setItem('lastViewedRestaurant', restaurantId);
+      window.location.href = "{{ '/' | relative_url }}";
     }
+
+    // Ajout des écouteurs d'événements
+    backButton.addEventListener('click', handleBack);
+    backButton.addEventListener('touchstart', function(e) {
+      e.preventDefault(); // Empêche le double-événement sur mobile
+    });
+    backButton.addEventListener('touchend', handleBack);
+
+    // Gestion de l'apparence du bouton au scroll
+    function handleScroll() {
+      const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
+      if (isBottom) {
+        backButton.classList.add('bottom-page');
+      } else {
+        backButton.classList.remove('bottom-page');
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Vérification initiale
   });
 
   let currentImageIndex = 0;

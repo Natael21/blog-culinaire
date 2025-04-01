@@ -1084,8 +1084,106 @@ footer {
 
 /* Media Queries pour les boutons de vue */
 @media screen and (max-width: 768px) {
+    /* Cacher les boutons de vue sur mobile (portrait ET paysage) */
     .view-buttons {
         display: none !important;
+    }
+
+    /* Ajustement du header */
+    .hero {
+        height: 250px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .hero-overlay {
+        padding: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero .tagline {
+        font-size: 1rem;
+        margin: 0.5rem 0;
+    }
+
+    /* Ajustements pour la barre de recherche et les filtres */
+    .search-container {
+        width: 100%;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .search-input-wrapper {
+        width: 90%;
+        max-width: none;
+        margin: 0 auto;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+        text-align: left;
+    }
+
+    .advanced-filters-btn {
+        width: 90%;
+        margin: 0.5rem auto;
+        padding: 0.8rem;
+    }
+
+    /* Correction du bouton retour */
+    .back-button {
+        position: fixed;
+        bottom: 1rem;
+        left: 1rem;
+        background: var(--primary-color);
+        color: white !important;
+        padding: 0.8rem 1.2rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 1000;
+    }
+
+    .back-button i {
+        color: white;
+    }
+
+    .back-button:hover,
+    .back-button:active {
+        background: var(--accent-color);
+        transform: none;
+    }
+
+    .back-button.bottom-page {
+        background: var(--accent-color);
+    }
+}
+
+/* Styles spécifiques pour le mode portrait */
+@media screen and (max-width: 768px) and (orientation: portrait) {
+    .hero {
+        height: 200px;
+    }
+
+    .search-container {
+        padding: 1rem 1.5rem;
+    }
+
+    .search-input-wrapper,
+    .advanced-filters-btn {
+        width: 100%;
     }
 }
 
