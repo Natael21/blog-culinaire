@@ -352,100 +352,128 @@ title: Accueil
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 0 0.5rem;
+    padding: 0;
+  }
+
+  .page-header {
+    margin-top: 0;
+    padding: 1rem 0.5rem;
   }
 
   .filters-container {
     padding: 1rem;
-    margin: 1rem 0.5rem;
-    border-radius: 8px;
+    margin: 0.5rem;
+    border-radius: 12px;
     width: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
   
   .filter-group {
-    gap: 1rem;
+    gap: 0.8rem;
+    width: 100%;
   }
 
   .search-and-view {
     width: 100%;
     max-width: 100%;
-    padding: 0 0.5rem;
+    padding: 0;
+    margin-bottom: 0.8rem;
+    flex-direction: column;
   }
   
   .search-input-wrapper {
     width: 100%;
+    margin-bottom: 0.8rem;
   }
   
   .search-input {
-    padding: 0.8rem 2.5rem 0.8rem 2.5rem;
-    font-size: 0.95rem;
+    padding: 0.8rem 2.8rem;
+    font-size: 1rem;
+    border-radius: 12px;
+    height: 48px;
+    width: 100%;
   }
 
   .search-input-wrapper i {
-    left: 0.8rem;
+    left: 1rem;
+    font-size: 1.1rem;
   }
 
   .advanced-filters-btn {
-    padding: 0.7rem;
-    font-size: 0.95rem;
-    max-width: 200px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    width: 100%;
+    height: 48px;
+    border-radius: 12px;
+    margin: 0;
   }
   
-  /* Masquer les boutons de vue sur mobile */
+  /* Masquer les boutons de vue sur mobile (portrait ET paysage) */
   .view-buttons {
     display: none !important;
   }
-  
-  /* Forcer la vue en pastilles sur mobile */
-  .post-grid {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-  }
-  
-  .post-card {
-    height: auto !important;
+
+  /* Ajustements pour le header des restaurants */
+  .restaurant-header {
+    height: auto;
+    min-height: 200px;
+    position: relative;
   }
 
-  .post-card .post-image {
-    width: 100% !important;
-    height: 200px !important;
+  .restaurant-header-content {
+    padding: 1rem;
+    position: relative;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8));
   }
 
-  .post-card .content {
-    padding: 1.2rem !important;
+  .restaurant-header h1 {
+    font-size: 1.8rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
   }
 
-  .post-card .post-link {
-    flex-direction: column !important;
+  .restaurant-meta {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
   }
 }
 
 /* Spécifique pour l'orientation portrait sur mobile */
 @media (max-width: 768px) and (orientation: portrait) {
   .filters-container {
-    padding: 0.8rem;
-    margin: 0.8rem 0.5rem;
+    padding: 1rem;
+    margin: 0.5rem;
   }
 
   .search-and-view {
-    max-width: 200px;
+    max-width: 100%;
     padding: 0;
   }
 
   .advanced-filters-btn {
-    max-width: 200px;
-    padding: 0.7rem;
+    width: 100%;
+    padding: 0.8rem;
   }
 
   .search-input {
-    font-size: 0.9rem;
-    padding: 0.7rem 2rem 0.7rem 2rem;
+    font-size: 1rem;
+    padding: 0.8rem 2.8rem;
+    height: 48px;
   }
 
   .search-input-wrapper i {
-    left: 0.6rem;
-    font-size: 0.9rem;
+    left: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .restaurant-header-content {
+    padding: 1rem;
+  }
+
+  .restaurant-header h1 {
+    font-size: 1.6rem;
   }
 }
 
