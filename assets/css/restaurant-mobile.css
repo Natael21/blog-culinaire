@@ -1,0 +1,49 @@
+/* Styles spécifiques pour la vue mobile des restaurants */
+@media (max-width: 768px) and (orientation: portrait) {
+  .restaurant-header-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .restaurant-header-content h1 {
+    font-size: 1.8rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .restaurant-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .restaurant-meta .rating {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .meta-row .cuisine-style,
+  .meta-row .diet-type,
+  .meta-row .date,
+  .meta-row .price {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: white;
+  }
+
+  .restaurant-location {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+  }
+} 
