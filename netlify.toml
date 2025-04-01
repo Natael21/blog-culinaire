@@ -1,40 +1,11 @@
 [build]
   publish = "_site"
-  command = """
-    gem install bundler -v "2.4.22" && \
-    bundle config set --local path 'vendor/bundle' && \
-    bundle config set --local deployment 'false' && \
-    bundle install --jobs=4 --retry=3 && \
-    bundle exec jekyll build --trace --incremental
-  """
+  command = "bundle install && bundle exec jekyll build"
 
 [build.environment]
   JEKYLL_ENV = "production"
   RUBY_VERSION = "2.7.1"
-  BUNDLER_VERSION = "2.4.22"
 
-[build.processing]
-  skip_processing = "true"
-
-[[plugins]]
-  package = "@netlify/plugin-cacheing"
-
-[plugins.inputs]
-  paths = [
-    "vendor/bundle",
-    "_site",
-    ".jekyll-cache",
-    ".bundle",
-    "assets/css",
-    "assets/js",
-    "assets/images",
-    "node_modules",
-    ".bundle/cache",
-    ".bundle/config",
-    "Gemfile.lock"
-  ]
-
-# Cache control headers
 [[headers]]
   for = "/*"
   [headers.values]
@@ -44,23 +15,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-XSS-Protection = "1; mode=block"
     Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;"
-    
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-    
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-    
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
 
-# Redirects
 [[redirects]]
   from = "/*"
   to = "/404.html"
