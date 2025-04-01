@@ -370,7 +370,6 @@ title: Accueil
   
   .filter-group {
     gap: 0.8rem;
-    width: 100%;
   }
 
   .search-and-view {
@@ -378,7 +377,6 @@ title: Accueil
     max-width: 100%;
     padding: 0;
     margin-bottom: 0.8rem;
-    flex-direction: column;
   }
   
   .search-input-wrapper {
@@ -387,11 +385,13 @@ title: Accueil
   }
   
   .search-input {
-    padding: 0.8rem 2.8rem;
-    font-size: 1rem;
-    border-radius: 12px;
-    height: 48px;
     width: 100%;
+    padding: 1rem 1rem 1rem 2.8rem;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fff;
   }
 
   .search-input-wrapper i {
@@ -408,35 +408,64 @@ title: Accueil
     margin: 0;
   }
   
-  /* Masquer les boutons de vue sur mobile (portrait ET paysage) */
-  .view-buttons {
+  /* Masquer complètement les boutons de vue sur mobile */
+  .view-buttons,
+  .view-buttons * {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
   }
 
   /* Ajustements pour le header des restaurants */
   .restaurant-header {
     height: auto;
-    min-height: 200px;
+    min-height: 180px;
     position: relative;
   }
 
   .restaurant-header-content {
-    padding: 1rem;
+    padding: 0.8rem;
     position: relative;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8));
+    background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.9));
   }
 
   .restaurant-header h1 {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     line-height: 1.2;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     word-break: break-word;
   }
 
   .restaurant-meta {
+    display: flex;
     flex-wrap: wrap;
-    gap: 0.8rem;
+    gap: 0.5rem;
     justify-content: center;
+    font-size: 0.9rem;
+  }
+
+  .restaurant-meta .date,
+  .restaurant-meta .price {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .restaurant-meta .date {
+    margin-right: 1rem;
+  }
+
+  .restaurant-meta .cuisine-style {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.2rem;
   }
 }
 
@@ -458,9 +487,9 @@ title: Accueil
   }
 
   .search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 2.8rem;
     font-size: 1rem;
-    padding: 0.8rem 2.8rem;
-    height: 48px;
   }
 
   .search-input-wrapper i {
@@ -469,11 +498,25 @@ title: Accueil
   }
 
   .restaurant-header-content {
-    padding: 1rem;
+    padding: 0.8rem;
   }
 
   .restaurant-header h1 {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
+  }
+
+  .restaurant-meta {
+    font-size: 0.85rem;
+  }
+
+  /* Masquer les options végétariennes en mode portrait */
+  [data-diet],
+  .post-card [data-diet],
+  span[class*="vegetarian"],
+  span[class*="vegan"],
+  .post-card span[class*="vegetarian"],
+  .post-card span[class*="vegan"] {
+    display: none !important;
   }
 }
 
