@@ -15,10 +15,12 @@ comments: true
       </div>
       <div class="restaurant-meta">
         <div class="rating">
-          <div class="rating-bar">
-            <div class="rating-fill" data-rating="{{ page.note }}"></div>
-          </div>
-          <span class="score">{{ page.note }}/10</span>
+          <a href="#ratings-section" class="rating-link">
+            <div class="rating-bar">
+              <div class="rating-fill" data-rating="{{ page.note }}"></div>
+            </div>
+            <span class="score">{{ page.note }}/10</span>
+          </a>
         </div>
         <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
         {% if page.diet %}
@@ -69,15 +71,17 @@ comments: true
       </div>
     </div>
     {% endif %}
+  </div>
 
-    {% if page.ratings %}
-    <div class="restaurant-ratings">
-      <h2>Pourquoi cette note ?</h2>
-      
-      {% for rating in page.ratings %}
-      {% assign category = rating[0] %}
-      {% assign details = rating[1] %}
-      <div class="rating-category">
+  {% if page.ratings %}
+  <div id="ratings-section" class="ratings-section">
+    <h2>Pourquoi cette note ?</h2>
+    
+    {% for rating in page.ratings %}
+    {% assign category = rating[0] %}
+    {% assign details = rating[1] %}
+    <div class="rating-category">
+      <div class="rating-header">
         <h3>
           <span class="rating-title">
             {% case category %}
@@ -96,17 +100,23 @@ comments: true
             {% endcase %}
           </span>
         </h3>
-        
-        {% if details.criteria %}
-        <p class="criteria"><em>{{ details.criteria }}</em></p>
-        {% endif %}
-        
-        <p class="comment">{{ details.comment }}</p>
+        <div class="rating-score">
+          <div class="rating-bar">
+            <div class="rating-fill" data-rating="{{ details.score }}"></div>
+          </div>
+          <span class="score">{{ details.score }}/10</span>
+        </div>
       </div>
-      {% endfor %}
+      
+      {% if details.criteria %}
+      <p class="criteria"><em>{{ details.criteria }}</em></p>
+      {% endif %}
+      
+      <p class="comment">{{ details.comment }}</p>
     </div>
-    {% endif %}
+    {% endfor %}
   </div>
+  {% endif %}
 
   <!-- Section Commentaires -->
   <div class="comments-section">

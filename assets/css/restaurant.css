@@ -4,12 +4,13 @@
 /* Variables
 ------------------------- */
 :root {
-    --primary-color: #2c3e50;
-    --accent-color: #e74c3c;
+    --primary-color: #e74c3c;
+    --secondary-color: #2c3e50;
+    --background-color: #f8f9fa;
     --text-color: #333;
     --text-light: #666;
     --background-light: #fff;
-    --border-color: #eee;
+    --border-color: #ddd;
     --rating-good: #f1c40f;
     --rating-better: #f39c12;
     
@@ -17,11 +18,13 @@
     --spacing-sm: 1rem;
     --spacing-md: 1.5rem;
     --spacing-lg: 2rem;
+    --spacing-unit: 1rem;
     
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
     
     --border-radius: 8px;
+    --transition-speed: 0.3s;
 }
 
 /* Animations
@@ -183,52 +186,9 @@
     color: var(--accent-color);
 }
 
-/* Rating Bar
-------------------------- */
-.rating {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.rating-bar {
-    flex-grow: 1;
-    height: 8px;
-    background-color: #eee;
-    border-radius: 4px;
-    overflow: hidden;
-    max-width: 200px;
-}
-
-.rating-fill {
-    height: 100%;
-    background: linear-gradient(to right, var(--rating-good), var(--rating-better));
-    border-radius: var(--border-radius);
-    animation: fillWidth 1s ease-out forwards;
-    --rating-width: calc(var(--rating, 0) * 10%);
-}
-
-.rating-fill[data-rating="1"] { --rating: 1; }
-.rating-fill[data-rating="2"] { --rating: 2; }
-.rating-fill[data-rating="3"] { --rating: 3; }
-.rating-fill[data-rating="4"] { --rating: 4; }
-.rating-fill[data-rating="5"] { --rating: 5; }
-.rating-fill[data-rating="6"] { --rating: 6; }
-.rating-fill[data-rating="7"] { --rating: 7; }
-.rating-fill[data-rating="8"] { --rating: 8; }
-.rating-fill[data-rating="9"] { --rating: 9; }
-.rating-fill[data-rating="10"] { --rating: 10; }
-
-.score {
-    color: #666;
-    font-weight: 600;
-    min-width: 45px;
-    text-align: right;
-}
-
 /* Ratings Section
 ------------------------- */
-.restaurant-ratings {
+.ratings-section {
     background: var(--white);
     padding: 2rem;
     border-radius: 12px;
@@ -236,7 +196,7 @@
     margin-top: 2rem;
 }
 
-.restaurant-ratings h2 {
+.ratings-section h2 {
     font-family: 'Playfair Display', serif;
     color: var(--primary-color);
     font-size: 2rem;
@@ -247,52 +207,91 @@
 
 .rating-category {
     margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-    animation: slideIn 0.5s ease-out;
-    animation-fill-mode: both;
+    padding: var(--spacing-md);
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-speed);
 }
 
 .rating-category:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
     margin-bottom: 0;
 }
 
-.rating-category:nth-child(1) { animation-delay: 0.1s; }
-.rating-category:nth-child(2) { animation-delay: 0.2s; }
-.rating-category:nth-child(3) { animation-delay: 0.3s; }
-.rating-category:nth-child(4) { animation-delay: 0.4s; }
-.rating-category:nth-child(5) { animation-delay: 0.5s; }
-.rating-category:nth-child(6) { animation-delay: 0.6s; }
+.rating-category:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
 
-.rating-category h3 {
-    color: var(--text-color);
-    font-size: 1.1rem;
-    margin-bottom: var(--spacing-xs);
+.rating-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.rating-title {
     display: flex;
     align-items: center;
+    gap: 0.5rem;
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .rating-title i {
-    color: var(--accent-color);
-    margin-right: var(--spacing-xs);
-    width: 20px;
-    font-size: 0.9rem;
+    color: var(--primary-color);
 }
 
-.rating-category .criteria {
+.rating-score {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.rating-bar {
+    width: 120px;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rating-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--rating-good), var(--rating-better));
+    transition: width var(--transition-speed);
+}
+
+.rating-fill[data-rating="1"] { width: 10%; }
+.rating-fill[data-rating="2"] { width: 20%; }
+.rating-fill[data-rating="3"] { width: 30%; }
+.rating-fill[data-rating="4"] { width: 40%; }
+.rating-fill[data-rating="5"] { width: 50%; }
+.rating-fill[data-rating="6"] { width: 60%; }
+.rating-fill[data-rating="7"] { width: 70%; }
+.rating-fill[data-rating="8"] { width: 80%; }
+.rating-fill[data-rating="9"] { width: 90%; }
+.rating-fill[data-rating="10"] { width: 100%; }
+
+.score {
+    min-width: 45px;
+    text-align: right;
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+.criteria {
     color: var(--text-light);
-    font-size: 0.85rem;
-    margin-bottom: var(--spacing-xs);
     font-style: italic;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
 }
 
-.rating-category .comment {
+.comment {
     color: var(--text-color);
-    line-height: 1.5;
+    line-height: 1.6;
     margin: 0;
-    font-size: 0.9rem;
 }
 
 /* Comments Section
@@ -319,21 +318,65 @@
     width: 100%;
 }
 
+/* Rating Link
+------------------------- */
+.rating-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.rating-link:hover {
+    transform: scale(1.05);
+}
+
+/* Smooth Scroll Behavior
+------------------------- */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem; /* Pour compenser la hauteur du header fixe si présent */
+}
+
+/* Ratings Section
+------------------------- */
+#ratings-section {
+    scroll-margin-top: 2rem; /* Pour compenser la hauteur du header fixe si présent */
+}
+
 /* Responsive Design
 ------------------------- */
 @media (max-width: 768px) {
-    .restaurant-ratings {
+    .ratings-section {
         padding: 1.5rem;
         margin-top: 1.5rem;
     }
 
-    .restaurant-ratings h2 {
+    .ratings-section h2 {
         font-size: 1.6rem;
         margin-bottom: 1rem;
     }
 
-    .rating-category h3 {
-        font-size: 1rem;
+    .rating-category {
+        padding: var(--spacing-sm);
+    }
+
+    .rating-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .rating-score {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .rating-bar {
+        width: 150px;
     }
 
     .restaurant-navigation {
