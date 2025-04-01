@@ -4,8 +4,8 @@
 /* Variables
 ------------------------- */
 :root {
-    --primary-color: #e74c3c;
-    --secondary-color: #2c3e50;
+    --primary-color: #2c3e50;
+    --accent-color: #e74c3c;
     --background-color: #f8f9fa;
     --text-color: #333;
     --text-light: #666;
@@ -186,6 +186,46 @@
     color: var(--accent-color);
 }
 
+/* Header Rating
+------------------------- */
+.restaurant-meta .rating {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.restaurant-meta .rating-bar {
+    width: 80px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.restaurant-meta .rating-fill {
+    height: 100%;
+    background: var(--accent-color);
+    transition: width var(--transition-speed);
+}
+
+.restaurant-meta .score {
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.restaurant-meta .rating-link:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.15);
+}
+
 /* Ratings Section
 ------------------------- */
 .ratings-section {
@@ -240,7 +280,7 @@
 }
 
 .rating-title i {
-    color: var(--primary-color);
+    color: var(--accent-color);
 }
 
 .rating-score {
@@ -347,6 +387,47 @@ html {
     scroll-margin-top: 2rem; /* Pour compenser la hauteur du header fixe si présent */
 }
 
+/* Back Button
+------------------------- */
+.back-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 100;
+    border: 2px solid transparent;
+}
+
+.back-button i {
+    font-size: 1.1rem;
+}
+
+.back-button span {
+    display: block;
+}
+
+.back-button:hover {
+    transform: translateX(-5px);
+    background: white;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-button:active {
+    transform: translateX(-2px);
+}
+
 /* Responsive Design
 ------------------------- */
 @media (max-width: 768px) {
@@ -399,5 +480,27 @@ html {
     
     .nav-arrow.next {
         right: 1rem;
+    }
+
+    .back-button {
+        top: 10px;
+        left: 10px;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        background: rgba(44, 62, 80, 0.9);
+        backdrop-filter: blur(5px);
+    }
+
+    .back-button span {
+        display: none; /* Cache le texte "Retour" sur mobile */
+    }
+
+    .back-button i {
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.9);
     }
 } 
