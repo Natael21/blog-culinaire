@@ -1,0 +1,154 @@
+/* Styles spécifiques pour mobile */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0 0.5rem;
+  }
+
+  .filters-container {
+    padding: 1rem;
+    margin: 1rem 0.5rem;
+    border-radius: 8px;
+    width: auto;
+  }
+  
+  .filter-group {
+    gap: 1rem;
+  }
+
+  .search-and-view {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+  
+  .search-input-wrapper {
+    width: 100%;
+  }
+  
+  .search-input {
+    padding: 0.8rem 2.5rem;
+    font-size: 0.95rem;
+  }
+
+  .search-input-wrapper i {
+    left: 0.8rem;
+  }
+
+  .advanced-filters-btn {
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Masquer les boutons de vue sur mobile */
+  .view-buttons {
+    display: none !important;
+  }
+  
+  /* Forcer la vue en pastilles sur mobile */
+  .post-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+}
+
+/* Spécifique pour l'orientation portrait sur mobile */
+@media (max-width: 768px) and (orientation: portrait) {
+  .filters-container {
+    padding: 0.8rem;
+    margin: 0.8rem 0.5rem;
+  }
+
+  .filter-group {
+    padding: 0;
+  }
+
+  .search-and-view {
+    padding: 0;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .search-input-wrapper {
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 0.7rem 2.5rem;
+    border-radius: 10px;
+  }
+
+  .advanced-filters-btn {
+    width: 100%;
+    max-width: 600px;
+    margin: 0.5rem auto 0;
+    padding: 0.7rem;
+    border-radius: 10px;
+  }
+
+  .search-input-wrapper i {
+    left: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  /* Styles pour les métadonnées des restaurants */
+  .post-card .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding-top: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+
+  .post-card .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .post-card .cuisine-style,
+  .post-card .diet-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .post-card .date,
+  .post-card .price {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .post-card .rating {
+    margin-bottom: 0.5rem;
+  }
+
+  .post-card .rating-bar {
+    height: 6px;
+    background-color: #eee;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-right: 0.5rem;
+  }
+
+  .post-card .rating-fill {
+    height: 100%;
+    background-color: var(--accent-color);
+    border-radius: 3px;
+  }
+
+  .post-card .score {
+    font-weight: 600;
+    color: var(--accent-color);
+  }
+} 
