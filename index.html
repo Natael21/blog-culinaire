@@ -351,253 +351,101 @@ title: Accueil
 }
 
 @media (max-width: 768px) {
-  .view-buttons,
-  .view-buttons *,
-  [data-view="list"],
-  [data-view="grid"],
-  [data-view="map"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    position: absolute !important;
-    left: -9999px !important;
-    clip: rect(0 0 0 0) !important;
-    clip-path: inset(50%) !important;
-  }
-
   .main-content {
-    padding: 0;
-  }
-
-  .page-header {
-    margin-top: 0;
-    padding: 1rem 0.5rem;
+    padding: 0 0.5rem;
   }
 
   .filters-container {
     padding: 1rem;
-    margin: 0.5rem;
-    border-radius: 12px;
+    margin: 1rem 0.5rem;
+    border-radius: 8px;
     width: auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
   
   .filter-group {
-    gap: 0.8rem;
+    gap: 1rem;
   }
 
   .search-and-view {
     width: 100%;
     max-width: 100%;
-    padding: 0;
-    margin-bottom: 0.8rem;
+    padding: 0 0.5rem;
   }
   
   .search-input-wrapper {
     width: 100%;
-    margin-bottom: 0.8rem;
   }
   
   .search-input {
-    width: 100%;
-    padding: 1rem 1rem 1rem 2.8rem;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background-color: #fff;
+    padding: 0.8rem 2.5rem 0.8rem 2.5rem;
+    font-size: 0.95rem;
   }
 
   .search-input-wrapper i {
-    left: 1rem;
-    font-size: 1.1rem;
+    left: 0.8rem;
   }
 
   .advanced-filters-btn {
-    padding: 0.8rem;
-    font-size: 1rem;
-    width: 100%;
-    height: 48px;
-    border-radius: 12px;
-    margin: 0;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+    max-width: 200px;
   }
   
-  /* Styles pour la grille de restaurants sur mobile */
+  /* Masquer les boutons de vue sur mobile */
+  .view-buttons {
+    display: none !important;
+  }
+  
+  /* Forcer la vue en pastilles sur mobile */
   .post-grid {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
-    padding: 0.5rem !important;
   }
-
+  
   .post-card {
     height: auto !important;
-    border-radius: 12px !important;
-    overflow: hidden !important;
   }
 
   .post-card .post-image {
     width: 100% !important;
-    height: 220px !important;
-    object-fit: cover !important;
+    height: 200px !important;
   }
 
   .post-card .content {
     padding: 1.2rem !important;
   }
 
-  .post-card h2 {
-    font-size: 1.3rem !important;
-    margin-bottom: 0.6rem !important;
-    line-height: 1.3 !important;
-  }
-
-  .post-card .description {
-    font-size: 0.95rem !important;
-    line-height: 1.5 !important;
-    margin: 0.8rem 0 !important;
-    -webkit-line-clamp: 3 !important;
-  }
-
-  .post-card .meta {
-    padding-top: 0.8rem !important;
-    gap: 0.8rem !important;
-    font-size: 0.9rem !important;
-  }
-
   .post-card .post-link {
     flex-direction: column !important;
-  }
-
-  /* Ajustements pour le header des restaurants */
-  .restaurant-header {
-    height: auto;
-    min-height: 180px;
-    position: relative;
-  }
-
-  .restaurant-header-content {
-    padding: 0.8rem;
-    position: relative;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.9));
-  }
-
-  .restaurant-header h1 {
-    font-size: 1.4rem;
-    line-height: 1.2;
-    margin-bottom: 0.3rem;
-    word-break: break-word;
-  }
-
-  .restaurant-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-    font-size: 0.9rem;
-  }
-
-  .restaurant-meta .date,
-  .restaurant-meta .price {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .restaurant-meta .date {
-    margin-right: 1rem;
-  }
-
-  .restaurant-meta .cuisine-style {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 0.2rem;
   }
 }
 
 /* Spécifique pour l'orientation portrait sur mobile */
 @media (max-width: 768px) and (orientation: portrait) {
   .filters-container {
-    padding: 1rem;
-    margin: 0.5rem;
+    padding: 0.8rem;
+    margin: 0.8rem 0.5rem;
   }
 
   .search-and-view {
-    max-width: 100%;
+    max-width: 200px;
     padding: 0;
   }
 
   .advanced-filters-btn {
-    width: 100%;
-    padding: 0.8rem;
+    max-width: 200px;
+    padding: 0.7rem;
   }
 
   .search-input {
-    width: 100%;
-    padding: 1rem 1rem 1rem 2.8rem;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    padding: 0.7rem 2rem 0.7rem 2rem;
   }
 
   .search-input-wrapper i {
-    left: 1rem;
-    font-size: 1.1rem;
-  }
-
-  /* Ajustements spécifiques pour le header de restaurant en mode portrait */
-  .restaurant-header {
-    min-height: 160px;
-  }
-
-  .restaurant-header-content {
-    padding: 0.8rem;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.95));
-  }
-
-  .restaurant-header h1 {
-    font-size: 1.1rem;
-    line-height: 1.2;
-    margin-bottom: 0.2rem;
-  }
-
-  .restaurant-meta {
-    font-size: 0.8rem;
-    gap: 0.3rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .restaurant-meta .cuisine-style {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 0.2rem;
-    font-size: 0.85rem;
-  }
-
-  .restaurant-meta .date,
-  .restaurant-meta .price {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    font-size: 0.8rem;
-  }
-
-  .restaurant-meta .date {
-    margin-right: 0.5rem;
-  }
-
-  /* Masquer les options végétariennes en mode portrait */
-  [data-diet],
-  .post-card [data-diet],
-  span[class*="vegetarian"],
-  span[class*="vegan"],
-  .post-card span[class*="vegetarian"],
-  .post-card span[class*="vegan"] {
-    display: none !important;
+    left: 0.6rem;
+    font-size: 0.9rem;
   }
 }
 
