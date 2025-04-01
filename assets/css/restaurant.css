@@ -196,8 +196,22 @@
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    margin-bottom: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+    vertical-align: middle;
+}
+
+.restaurant-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.restaurant-meta .rating:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
 }
 
 .restaurant-meta .rating-bar {
@@ -221,9 +235,14 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+.restaurant-meta .rating-link {
+    text-decoration: none;
+    color: inherit;
+}
+
 .restaurant-meta .rating-link:hover {
-    transform: scale(1.05);
-    background: rgba(255, 255, 255, 0.15);
+    transform: none;
+    background: none;
 }
 
 /* Ratings Section
