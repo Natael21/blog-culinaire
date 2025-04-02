@@ -2,6 +2,7 @@
 layout: restaurant
 title: "El Chupa Resto"
 date: 2024-03-16
+state: ready
 note: 6.8
 style: "Mexicain & Latino"
 diet: "standard"

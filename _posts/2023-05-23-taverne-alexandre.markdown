@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Taverne Alexandre"
 date: 2023-05-23
+state: ready
 note: 7.3
 style: "Pub & Microbrasserie"
 diet: "standard"

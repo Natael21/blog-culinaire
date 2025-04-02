@@ -2,6 +2,7 @@
 layout: restaurant
 title: "La Buvette du Centro"
 date: 2022-04-13
+state: ready
 note: 8.5
 style: "Bistro & Café"
 diet: "vegetarian"

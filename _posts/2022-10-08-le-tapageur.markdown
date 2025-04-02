@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Le Tapageur"
 date: 2022-10-08
+state: ready
 note: 7.7
 style: "Bistro & Café"
 diet: "standard"

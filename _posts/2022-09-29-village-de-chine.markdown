@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Village de Chine"
 date: 2022-09-29
+state: ready
 note: 4
 style: "Asiatique"
 diet: "vegetarian-friendly"

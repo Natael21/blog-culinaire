@@ -2,7 +2,8 @@
 layout: restaurant
 title: "Le Refuge des Brasseurs"
 date: 2022-12-14
-note: 8
+state: ready
+note: 8.2
 style: "Pub & Microbrasserie"
 diet: "vegan-friendly"
 description: "Une microbrasserie offrant des plats gastronomiques et une sélection impressionnante de bières artisanales"

@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Datoni Pronto"
 date: 2023-06-28
+state: ready
 note: 7.2
 style: "Italien"
 diet: "vegetarian-friendly"

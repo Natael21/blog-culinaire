@@ -2,6 +2,7 @@
 layout: restaurant
 title: "El Tabernaco (Fermé)"
 date: 2022-04-20
+state: ready
 note: 8.2
 style: "Mexicain & Latino"
 diet: "vegetarian-friendly"

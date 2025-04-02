@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Habenaros Grill Mexicain"
 date: 2022-08-30
+state: ready
 note: 6.2
 style: "Mexicain & Latino"
 diet: "vegetarian-friendly"

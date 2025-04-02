@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Les Vraies Richesses"
 date: 2023-06-20
+state: ready
 note: 8.5
 style: "Bistro & Café"
 diet: "vegetarian-friendly"

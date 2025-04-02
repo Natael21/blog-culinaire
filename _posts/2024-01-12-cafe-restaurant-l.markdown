@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Café Restaurant L"
 date: 2024-01-12
+state: ready
 note: 7.2
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"

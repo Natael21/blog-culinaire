@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Masala Café"
 date: 2023-07-16
+state: ready
 note: 8.5
 style: "Indien & Épicé"
 diet: "vegetarian-friendly"

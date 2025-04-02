@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Restaurant Persépolis"
 date: 2023-06-13
+state: ready
 note: 9.1
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"

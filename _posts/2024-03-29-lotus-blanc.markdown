@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Lotus Blanc Vietnamien"
 date: 2024-03-29
+state: ready
 note: 7.2
 style: "Asiatique"
 diet: "vegetarian-friendly"

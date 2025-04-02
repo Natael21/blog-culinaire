@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Mexi & Co"
 date: 2024-05-13
+state: ready
 note: 7.8
 style: "Mexicain & Latino"
 diet: "vegetarian-friendly"

@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Principe Pizza Pasta (Fermé)"
 date: 2022-04-02
+state: ready
 note: 8.3
 style: "Italien"
 diet: "vegetarian-friendly"

@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Caffuccino"
 date: 2024-05-04
+state: ready
 note: 7.2
 style: "Bistro & Café"
 diet: "vegetarian-friendly"

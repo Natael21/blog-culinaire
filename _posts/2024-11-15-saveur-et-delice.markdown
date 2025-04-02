@@ -2,6 +2,7 @@
 layout: restaurant
 title: "Saveur et Délice"
 date: 2024-11-15
+state: ready
 note: 7.3
 style: "Asiatique"
 diet: "vegetarian-friendly"
