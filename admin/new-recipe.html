@@ -129,9 +129,43 @@
             white-space: pre-wrap;
             font-family: monospace;
         }
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+        }
         .image-preview {
             max-width: 200px;
-            margin-top: 1rem;
+            max-height: 200px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .delete-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: white;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 22px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: none;
+        }
+        .image-preview-container:hover .delete-image {
+            display: block;
+        }
+        .delete-image:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        #mainImagePreview, #galleryPreview {
+            margin-top: 10px;
         }
         .rating-input {
             width: 80px;
@@ -347,7 +381,7 @@
                     <div class="image-upload-container">
                         <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
                         <input type="hidden" id="mainImageUrl" name="mainImageUrl">
-                        <div id="mainImagePreview" class="image-preview"></div>
+                        <div id="mainImagePreview" class="image-preview-container"></div>
                     </div>
                 </div>
 
@@ -613,14 +647,7 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             preview.innerHTML = '';
             
             galleryImageFiles.forEach((file, index) => {
-                const imgContainer = document.createElement('div');
-                imgContainer.className = 'gallery-item';
-                imgContainer.innerHTML = `
-                    <img src="${URL.createObjectURL(file)}" alt="Prévisualisation">
-                    <button type="button" class="remove-image" onclick="removeGalleryImage(${index})">
-                        <i class="fas fa-times"></i>
-                    </button>`;
-                preview.appendChild(imgContainer);
+                createImagePreview(file, preview, false);
             });
         }
 
@@ -628,14 +655,7 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
         document.getElementById('mainImage').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                const preview = document.getElementById('mainImagePreview');
-                preview.innerHTML = `
-                    <div class="main-image-container">
-                        <img src="${URL.createObjectURL(file)}" alt="Prévisualisation">
-                        <button type="button" class="remove-image" onclick="removeMainImage()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>`;
+                createImagePreview(file, document.getElementById('mainImagePreview'), true);
                 mainImageFile = file;
                 updateMarkdownPreview();
             }
@@ -702,85 +722,183 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
         }
 
         // Gérer la soumission du formulaire
-        document.getElementById('restaurantForm').addEventListener('submit', async (e) => {
+        document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            try {
-                // Afficher un message de chargement
-                const saveBtn = document.querySelector('.save-btn');
-                const originalText = saveBtn.textContent;
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload des images en cours...';
+            const submitButton = document.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Upload des images...';
 
-                // 1. Upload toutes les images
+            try {
+                // Vérifier si une image principale est sélectionnée
+                if (!mainImageFile) {
+                    throw new Error('Veuillez sélectionner une image principale');
+                }
+
+                // Uploader toutes les images d'abord
                 const imageUrls = await uploadAllImages();
-                
-                // 2. Mettre à jour les URLs dans le formulaire
+                console.log('Images uploadées:', imageUrls);
+
+                // Mettre à jour les URLs des images dans le formulaire
                 if (imageUrls.mainImage) {
                     document.getElementById('mainImageUrl').value = imageUrls.mainImage;
                 }
-                
+
                 // Créer des champs cachés pour les URLs de la galerie
+                const existingContainer = document.getElementById('galleryUrlsContainer');
+                if (existingContainer) {
+                    existingContainer.remove();
+                }
+                
                 const galleryUrlsContainer = document.createElement('div');
                 galleryUrlsContainer.id = 'galleryUrlsContainer';
-                imageUrls.gallery.forEach(url => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'galleryUrls[]';
-                    input.value = url;
-                    galleryUrlsContainer.appendChild(input);
-                });
+                if (imageUrls.gallery && imageUrls.gallery.length > 0) {
+                    imageUrls.gallery.forEach(url => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'galleryUrls[]';
+                        input.value = url;
+                        galleryUrlsContainer.appendChild(input);
+                    });
+                }
                 document.getElementById('restaurantForm').appendChild(galleryUrlsContainer);
 
-                // 3. Générer et envoyer le markdown
-                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde du restaurant en cours...';
-                const markdown = generateMarkdown();
-                const title = document.getElementById('title').value;
-                const filename = title.toLowerCase()
-                    .replace(/[éèêë]/g, 'e')
-                    .replace(/[àâä]/g, 'a')
-                    .replace(/[ùûü]/g, 'u')
-                    .replace(/[îï]/g, 'i')
-                    .replace(/[ôö]/g, 'o')
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
+                // Mettre à jour le texte du bouton
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enregistrement du restaurant...';
 
-                const date = new Date().toISOString().split('T')[0];
-                const fullFilename = `_posts/${date}-${filename}.md`;
+                // Vérifier tous les champs requis
+                const requiredFields = {
+                    'title': 'Nom du restaurant',
+                    'description': 'Description',
+                    'address': 'Adresse',
+                    'style': 'Style de cuisine',
+                    'price': 'Gamme de prix',
+                    'diet': 'Régime alimentaire'
+                };
 
-                const response = await fetch('/.netlify/functions/create-restaurant', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        filename: fullFilename,
-                        content: markdown,
-                        title: title
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la création du restaurant');
+                let missingFields = [];
+                for (const [fieldId, fieldName] of Object.entries(requiredFields)) {
+                    const field = document.getElementById(fieldId);
+                    if (!field.value.trim()) {
+                        missingFields.push(fieldName);
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
                 }
 
-                // Succès !
-                saveBtn.innerHTML = '<i class="fas fa-check"></i> Sauvegardé !';
+                // Vérifier les notes
+                const ratings = ['food', 'service', 'ambiance', 'value', 'originality'];
+                for (const rating of ratings) {
+                    const ratingInput = document.getElementById(rating + 'Score');
+                    const ratingComment = document.getElementById(rating + 'Comment');
+                    if (!ratingInput.value || !ratingComment.value.trim()) {
+                        missingFields.push(`Note et commentaire pour ${rating}`);
+                        ratingInput.classList.add('is-invalid');
+                        ratingComment.classList.add('is-invalid');
+                    } else {
+                        ratingInput.classList.remove('is-invalid');
+                        ratingComment.classList.remove('is-invalid');
+                    }
+                }
+
+                // Vérifier les commentaires utilisateurs
+                if (!document.getElementById('nataelComment').value.trim()) {
+                    missingFields.push('Commentaire de Nataël');
+                    document.getElementById('nataelComment').classList.add('is-invalid');
+                }
+                if (!document.getElementById('nicolasComment').value.trim()) {
+                    missingFields.push('Commentaire de Nicolas');
+                    document.getElementById('nicolasComment').classList.add('is-invalid');
+                }
+
+                if (missingFields.length > 0) {
+                    throw new Error(`Veuillez remplir les champs suivants :\n- ${missingFields.join('\n- ')}`);
+                }
+
+                // Mettre à jour l'aperçu markdown avec les nouvelles URLs
+                updateMarkdownPreview();
+
+                // Si tout est valide, générer le markdown et sauvegarder
+                const markdown = generateMarkdown();
+                await saveToGitHub(markdown);
+
+                // Afficher un message de succès
+                showAlert('success', 'Restaurant enregistré avec succès !');
+                
+                // Rediriger vers la page d'administration après 2 secondes
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 2000);
 
             } catch (error) {
-                console.error('Erreur:', error);
-                alert(`Erreur lors de la sauvegarde : ${error.message}`);
-                const saveBtn = document.querySelector('.save-btn');
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Enregistrer le restaurant';
+                console.error('Erreur lors de la sauvegarde:', error);
+                showAlert('danger', error.message);
+            } finally {
+                // Restaurer le bouton
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
             }
         });
 
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+            alertDiv.style.zIndex = '1050';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alertDiv);
+
+            // Faire défiler jusqu'en haut de la page en douceur
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Supprimer l'alerte après 5 secondes
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
         // Initialiser l'aperçu
         updateMarkdownPreview();
+
+        function createImagePreview(file, container, isMain = false) {
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'image-preview-container';
+
+            const img = document.createElement('img');
+            img.className = 'image-preview';
+            img.file = file;
+
+            const deleteBtn = document.createElement('span');
+            deleteBtn.className = 'delete-image';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = () => {
+                if (isMain) {
+                    mainImageFile = null;
+                    document.getElementById('mainImage').value = '';
+                } else {
+                    const index = Array.from(container.children).indexOf(previewContainer);
+                    if (index !== -1) {
+                        galleryImageFiles.splice(index, 1);
+                    }
+                }
+                previewContainer.remove();
+                updateMarkdownPreview();
+            };
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            previewContainer.appendChild(img);
+            previewContainer.appendChild(deleteBtn);
+            container.appendChild(previewContainer);
+        }
     </script>
 </body>
 </html> 

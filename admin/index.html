@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Blog Culinaire</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Administration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-        .admin-container {
-            max-width: 1200px;
+        .container {
+            max-width: 800px;
             margin: 0 auto;
             padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
         .admin-header {
             text-align: center;
@@ -25,245 +31,161 @@
             font-size: 2.5rem;
             margin-bottom: 1rem;
         }
-        .admin-subtitle {
-            color: #7f8c8d;
-            font-size: 1.2rem;
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
         }
-        .admin-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
         }
-        .admin-card-title {
-            color: #2c3e50;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        .admin-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #3498db;
-        }
-        .stat-label {
-            color: #7f8c8d;
-            margin-top: 0.5rem;
-        }
-        .admin-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        .action-button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-            text-align: center;
-            text-decoration: none;
-            display: block;
-        }
-        .action-button:hover {
-            background: #2980b9;
-            color: white;
-        }
-        #login-container {
-            display: block;
+        #loading {
             text-align: center;
             padding: 2rem;
         }
-        #admin-content {
-            display: none;
-        }
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            display: none;
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
         }
         .error-message {
             color: #e74c3c;
             text-align: center;
-            padding: 1rem;
             margin: 1rem 0;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="loading" class="loading">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Chargement...</span>
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="admin-title">Administration</h1>
         </div>
-    </div>
 
-    <div id="error-message" class="error-message"></div>
-
-    <div id="login-container">
-        <div class="admin-container">
-            <div class="admin-header">
-                <h1 class="admin-title">Administration</h1>
-                <p class="admin-subtitle">Veuillez vous connecter pour accéder à l'administration</p>
+        <!-- Loading -->
+        <div id="loading" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
             </div>
-            <div class="admin-card">
-                <div data-netlify-identity-button></div>
-            </div>
+            <p class="mt-2">Chargement...</p>
         </div>
-    </div>
 
-    <div id="admin-content">
-        <div class="admin-container">
-            <div class="admin-header">
-                <h1 class="admin-title">Tableau de bord</h1>
-                <p class="admin-subtitle">Bienvenue dans votre espace d'administration</p>
+        <!-- Error message -->
+        <div id="error-message" class="error-message" style="display: none;"></div>
+
+        <!-- Login section -->
+        <div id="login-container" style="display: none;" class="text-center">
+            <p class="mb-4">Veuillez vous connecter pour accéder à l'administration</p>
+            <button class="btn btn-primary" onclick="netlifyIdentity.open('login');">Se connecter</button>
+        </div>
+
+        <!-- Admin content -->
+        <div id="admin-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Bienvenue, <span id="user-email"></span></h2>
+                <button class="btn btn-outline-danger" onclick="netlifyIdentity.logout();">Se déconnecter</button>
+            </div>
+            
+            <div class="mb-4">
+                <a href="new-recipe.html" class="btn btn-primary">Nouveau Restaurant</a>
             </div>
 
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Recettes publiées</div>
+            <div id="token-section">
+                <div class="mb-3">
+                    <label for="githubToken" class="form-label">Token GitHub</label>
+                    <input type="password" class="form-control" id="githubToken" placeholder="Entrez votre token GitHub">
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Recettes en brouillon</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Commentaires</div>
-                </div>
-            </div>
-
-            <div class="admin-actions">
-                <a href="new-recipe.html" class="action-button">
-                    <i class="fas fa-plus"></i> Nouvelle recette
-                </a>
-                <a href="#" class="action-button">
-                    <i class="fas fa-list"></i> Gérer les recettes
-                </a>
-                <a href="#" class="action-button">
-                    <i class="fas fa-comments"></i> Gérer les commentaires
-                </a>
-                <a href="#" class="action-button">
-                    <i class="fas fa-cog"></i> Paramètres
-                </a>
+                <button class="btn btn-success" onclick="saveToken()">Sauvegarder le token</button>
             </div>
         </div>
     </div>
 
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-        // Vérifier l'authentification dès le chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
+        // Fonctions utilitaires
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'none';
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function updateUI(user) {
             const loading = document.getElementById('loading');
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
+            const tokenSection = document.getElementById('token-section');
 
-            // Afficher le loading pendant la vérification
-            loading.style.display = 'block';
-            loginContainer.style.display = 'none';
-            adminContent.style.display = 'none';
+            loading.style.display = 'none';
 
-            // Vérifier si Netlify Identity est chargé
-            if (!window.netlifyIdentity) {
-                showError('Netlify Identity n\'est pas chargé. Vérifiez votre connexion internet.');
-                loading.style.display = 'none';
+            if (user) {
+                console.log('Utilisateur connecté:', user);
+                loginContainer.style.display = 'none';
+                adminContent.style.display = 'block';
+                document.getElementById('user-email').textContent = user.email;
+
+                // Vérifier si le token GitHub est déjà sauvegardé
+                const savedToken = localStorage.getItem('githubToken');
+                if (savedToken) {
+                    tokenSection.style.display = 'none';
+                } else {
+                    tokenSection.style.display = 'block';
+                }
+            } else {
+                console.log('Aucun utilisateur connecté');
                 loginContainer.style.display = 'block';
-                return;
+                adminContent.style.display = 'none';
+            }
+        }
+
+        function saveToken() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (token) {
+                localStorage.setItem('githubToken', token);
+                document.getElementById('token-section').style.display = 'none';
+                alert('Token GitHub sauvegardé avec succès !');
+            } else {
+                alert('Veuillez entrer un token GitHub valide.');
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            showLoading();
+
+            // Vérifier si l'utilisateur est déjà connecté
+            const currentUser = netlifyIdentity.currentUser();
+            if (currentUser) {
+                console.log('Utilisateur déjà connecté:', currentUser);
+                updateUI(currentUser);
             }
 
-            // Configurer les événements Netlify Identity
-            try {
-                window.netlifyIdentity.on("init", user => {
-                    console.log('Netlify Identity initialized');
-                    loading.style.display = 'none';
-                    if (user) {
-                        console.log('Utilisateur authentifié:', user);
-                        loginContainer.style.display = 'none';
-                        adminContent.style.display = 'block';
-                        // Sauvegarder l'état de connexion
-                        localStorage.setItem('isLoggedIn', 'true');
-                        localStorage.setItem('userEmail', user.email);
-                    } else {
-                        console.log('Aucun utilisateur authentifié');
-                        loginContainer.style.display = 'block';
-                        adminContent.style.display = 'none';
-                        // Supprimer l'état de connexion
-                        localStorage.removeItem('isLoggedIn');
-                        localStorage.removeItem('userEmail');
-                    }
-                });
+            // Configurer les écouteurs d'événements Netlify Identity
+            netlifyIdentity.on('init', user => {
+                console.log('Netlify Identity initialized, user:', user);
+                updateUI(user);
+            });
 
-                window.netlifyIdentity.on("login", user => {
-                    console.log('User logged in');
-                    loading.style.display = 'none';
-                    loginContainer.style.display = 'none';
-                    adminContent.style.display = 'block';
-                    // Sauvegarder l'état de connexion
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('userEmail', user.email);
-                });
+            netlifyIdentity.on('login', user => {
+                console.log('Login event, user:', user);
+                updateUI(user);
+            });
 
-                window.netlifyIdentity.on("logout", () => {
-                    console.log('User logged out');
-                    loading.style.display = 'none';
-                    loginContainer.style.display = 'block';
-                    adminContent.style.display = 'none';
-                    // Supprimer l'état de connexion
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('userEmail');
-                });
+            netlifyIdentity.on('logout', () => {
+                console.log('Logout event');
+                localStorage.removeItem('githubToken');
+                updateUI(null);
+            });
 
-                window.netlifyIdentity.on("error", err => {
-                    console.error('Netlify Identity error:', err);
-                    loading.style.display = 'none';
-                    showError('Une erreur est survenue lors de l\'authentification.');
-                });
-
-                // Forcer l'initialisation après 2 secondes si rien ne se passe
-                setTimeout(() => {
-                    if (loading.style.display === 'block') {
-                        console.log('Timeout - forcing display of login');
-                        loading.style.display = 'none';
-                        loginContainer.style.display = 'block';
-                    }
-                }, 2000);
-
-            } catch (error) {
-                console.error('Error setting up Netlify Identity:', error);
-                loading.style.display = 'none';
-                showError('Une erreur est survenue lors de l\'initialisation.');
-                loginContainer.style.display = 'block';
-            }
+            netlifyIdentity.on('error', err => {
+                console.error('Netlify Identity error:', err);
+                showError('Une erreur est survenue lors de l\'authentification.');
+            });
         });
-
-        function showError(message) {
-            const errorElement = document.getElementById('error-message');
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-            console.error(message);
-        }
-
-        function hideError() {
-            const errorElement = document.getElementById('error-message');
-            errorElement.style.display = 'none';
-        }
     </script>
 </body>
 </html> 
