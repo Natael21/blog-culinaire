@@ -168,59 +168,14 @@
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-        function showError(message) {
-            const errorElement = document.getElementById('error-message');
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-            console.error(message);
-        }
-
-        function hideError() {
-            const errorElement = document.getElementById('error-message');
-            errorElement.style.display = 'none';
-        }
-
-        function updateUI(user) {
-            const loading = document.getElementById('loading');
-            const loginContainer = document.getElementById('login-container');
-            const adminContent = document.getElementById('admin-content');
-
-            loading.style.display = 'none';
-            hideError();
-
-            if (user) {
-                loginContainer.style.display = 'none';
-                adminContent.style.display = 'block';
-                // Sauvegarder l'état de connexion
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userEmail', user.email);
-            } else {
-                loginContainer.style.display = 'block';
-                adminContent.style.display = 'none';
-                // Supprimer l'état de connexion
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('userEmail');
-            }
-        }
-
-        // Initialisation
+        // Vérifier l'authentification dès le chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
             const loading = document.getElementById('loading');
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
 
-            // Vérifier si nous sommes déjà connectés
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            const userEmail = localStorage.getItem('userEmail');
-
-            if (isLoggedIn && userEmail) {
-                // Si nous sommes déjà connectés, mettre à jour l'UI immédiatement
-                updateUI({ email: userEmail });
-                return;
-            }
-
-            // Cacher tous les conteneurs au départ
+            // Afficher le loading pendant la vérification
             loading.style.display = 'block';
             loginContainer.style.display = 'none';
             adminContent.style.display = 'none';
@@ -238,12 +193,20 @@
                 window.netlifyIdentity.on("init", user => {
                     console.log('Netlify Identity initialized');
                     loading.style.display = 'none';
-                    if (!user) {
-                        loginContainer.style.display = 'block';
-                        adminContent.style.display = 'none';
-                    } else {
+                    if (user) {
+                        console.log('Utilisateur authentifié:', user);
                         loginContainer.style.display = 'none';
                         adminContent.style.display = 'block';
+                        // Sauvegarder l'état de connexion
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userEmail', user.email);
+                    } else {
+                        console.log('Aucun utilisateur authentifié');
+                        loginContainer.style.display = 'block';
+                        adminContent.style.display = 'none';
+                        // Supprimer l'état de connexion
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('userEmail');
                     }
                 });
 
@@ -252,6 +215,9 @@
                     loading.style.display = 'none';
                     loginContainer.style.display = 'none';
                     adminContent.style.display = 'block';
+                    // Sauvegarder l'état de connexion
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userEmail', user.email);
                 });
 
                 window.netlifyIdentity.on("logout", () => {
@@ -259,6 +225,9 @@
                     loading.style.display = 'none';
                     loginContainer.style.display = 'block';
                     adminContent.style.display = 'none';
+                    // Supprimer l'état de connexion
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userEmail');
                 });
 
                 window.netlifyIdentity.on("error", err => {
@@ -283,6 +252,18 @@
                 loginContainer.style.display = 'block';
             }
         });
+
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            console.error(message);
+        }
+
+        function hideError() {
+            const errorElement = document.getElementById('error-message');
+            errorElement.style.display = 'none';
+        }
     </script>
 </body>
 </html> 
