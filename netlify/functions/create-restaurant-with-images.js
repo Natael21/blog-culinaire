@@ -57,16 +57,7 @@ exports.handler = async (event, context) => {
             };
         }
 
-        console.log("Configuration GitHub :", {
-            owner,
-            repo,
-            branch,
-            hasToken: !!githubToken
-        });
-
         const baseUrl = `https://api.github.com`;
-
-        // Headers pour l'API GitHub
         const headers = {
             Authorization: `token ${githubToken}`,
             Accept: "application/vnd.github.v3+json",
@@ -90,132 +81,113 @@ exports.handler = async (event, context) => {
         const latestCommit = refData.object.sha;
         console.log("Dernier commit SHA :", latestCommit);
 
-        // 2. Récupérer le dernier tree
-        const treeResponse = await fetch(
-            `${baseUrl}/repos/${owner}/${repo}/git/trees/${latestCommit}`,
-            { headers }
-        );
-        
-        if (!treeResponse.ok) {
-            const errorData = await treeResponse.json();
-            throw new Error(`GitHub API Error: ${errorData.message}`);
-        }
-        
-        const treeData = await treeResponse.json();
-        const baseTreeSha = treeData.sha;
-
-        // 3. Créer les blobs et préparer le nouveau tree
-        const tree = [];
-        let updatedContent = content;
-
-        // Traiter les images
-        for (const image of images) {
-            const imageBuffer = Buffer.from(image.data.split(",")[1], "base64");
-            const imagePath = `static/images/restaurants/${filename.replace(
-                ".md",
-                ""
-            )}/${image.name}`;
-
-            // Créer un blob pour l'image
-            const blobResponse = await fetch(
-                `${baseUrl}/repos/${owner}/${repo}/git/blobs`,
-                {
-                    method: "POST",
-                    headers,
-                    body: JSON.stringify({
-                        content: imageBuffer.toString("base64"),
-                        encoding: "base64",
-                    }),
-                }
-            );
-            
-            if (!blobResponse.ok) {
-                const errorData = await blobResponse.json();
-                throw new Error(`GitHub API Error: ${errorData.message}`);
+        // 2. Créer les blobs pour les images
+        console.log("Création des blobs pour les images...");
+        const imageBlobs = [];
+        for (let i = 0; i < images.length; i++) {
+            const imageData = images[i];
+            if (!imageData || !imageData.data) {
+                console.error(`Image ${i} invalide:`, imageData);
+                continue;
             }
-            
-            const blobData = await blobResponse.json();
 
-            tree.push({
-                path: imagePath,
-                mode: "100644",
-                type: "blob",
-                sha: blobData.sha,
+            // Extraire le type MIME et les données base64
+            const [mimeType, base64Data] = imageData.data.split(',');
+            if (!base64Data) {
+                console.error(`Format d'image ${i} invalide:`, mimeType);
+                continue;
+            }
+
+            const blobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    content: base64Data,
+                    encoding: "base64"
+                })
             });
 
-            // Mettre à jour les chemins d'images dans le contenu markdown
-            updatedContent = updatedContent.replace(image.name, `/${imagePath}`);
-        }
-
-        // Créer un blob pour le fichier markdown
-        const markdownBlobResponse = await fetch(
-            `${baseUrl}/repos/${owner}/${repo}/git/blobs`,
-            {
-                method: "POST",
-                headers,
-                body: JSON.stringify({
-                    content: updatedContent,
-                    encoding: "utf-8",
-                }),
+            if (!blobResponse.ok) {
+                console.error(`Erreur lors de la création du blob pour l'image ${i}:`, await blobResponse.json());
+                continue;
             }
-        );
-        
-        if (!markdownBlobResponse.ok) {
-            const errorData = await markdownBlobResponse.json();
-            throw new Error(`GitHub API Error: ${errorData.message}`);
-        }
-        
-        const markdownBlobData = await markdownBlobResponse.json();
 
-        tree.push({
-            path: `content/restaurants/${filename}`,
-            mode: "100644",
-            type: "blob",
-            sha: markdownBlobData.sha,
+            const blobData = await blobResponse.json();
+            imageBlobs.push({
+                path: `images/${imageData.filename}`,
+                sha: blobData.sha,
+                mode: "100644",
+                type: "blob"
+            });
+        }
+
+        // 3. Créer le blob pour le contenu markdown
+        console.log("Création du blob pour le contenu markdown...");
+        const markdownBlobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                content: content,
+                encoding: "utf-8"
+            })
         });
 
-        // 4. Créer un nouveau tree
-        const newTreeResponse = await fetch(
-            `${baseUrl}/repos/${owner}/${repo}/git/trees`,
-            {
-                method: "POST",
-                headers,
-                body: JSON.stringify({
-                    base_tree: baseTreeSha,
-                    tree: tree,
-                }),
-            }
-        );
-        
-        if (!newTreeResponse.ok) {
-            const errorData = await newTreeResponse.json();
-            throw new Error(`GitHub API Error: ${errorData.message}`);
+        if (!markdownBlobResponse.ok) {
+            console.error("Erreur lors de la création du blob markdown:", await markdownBlobResponse.json());
+            throw new Error("Erreur lors de la création du blob markdown");
         }
-        
-        const newTreeData = await newTreeResponse.json();
 
-        // 5. Créer un nouveau commit
-        const commitResponse = await fetch(
-            `${baseUrl}/repos/${owner}/${repo}/git/commits`,
+        const markdownBlob = await markdownBlobResponse.json();
+
+        // 4. Créer le nouveau tree
+        const tree = [
+            ...imageBlobs,
             {
-                method: "POST",
-                headers,
-                body: JSON.stringify({
-                    message: `Ajout du restaurant: ${title}`,
-                    tree: newTreeData.sha,
-                    parents: [latestCommit],
-                }),
+                path: `restaurants/${filename}`,
+                mode: "100644",
+                type: "blob",
+                sha: markdownBlob.sha
             }
-        );
-        
-        if (!commitResponse.ok) {
-            const errorData = await commitResponse.json();
-            throw new Error(`GitHub API Error: ${errorData.message}`);
+        ];
+
+        console.log("Création du nouveau tree...");
+        const treeResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/trees`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                base_tree: latestCommit,
+                tree: tree
+            })
+        });
+
+        if (!treeResponse.ok) {
+            console.error("Erreur lors de la création du tree:", await treeResponse.json());
+            throw new Error("Erreur lors de la création du tree");
         }
-        
+
+        const treeData = await treeResponse.json();
+
+        // 5. Créer le commit
+        console.log("Création du commit...");
+        const commitResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/commits`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                message: `Ajout du restaurant ${title}`,
+                tree: treeData.sha,
+                parents: [latestCommit]
+            })
+        });
+
+        if (!commitResponse.ok) {
+            console.error("Erreur lors de la création du commit:", await commitResponse.json());
+            throw new Error("Erreur lors de la création du commit");
+        }
+
         const commitData = await commitResponse.json();
 
         // 6. Mettre à jour la référence
+        console.log("Mise à jour de la référence...");
         const updateRefResponse = await fetch(
             `${baseUrl}/repos/${owner}/${repo}/git/refs/heads/${branch}`,
             {
@@ -223,30 +195,27 @@ exports.handler = async (event, context) => {
                 headers,
                 body: JSON.stringify({
                     sha: commitData.sha,
-                }),
+                    force: true
+                })
             }
         );
 
         if (!updateRefResponse.ok) {
-            const errorData = await updateRefResponse.json();
-            throw new Error(`GitHub API Error: ${errorData.message}`);
+            console.error("Erreur lors de la mise à jour de la référence:", await updateRefResponse.json());
+            throw new Error("Erreur lors de la mise à jour de la référence");
         }
 
+        console.log("Restaurant créé avec succès!");
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                message: "Restaurant créé avec succès",
-                sha: commitData.sha,
-            }),
+            body: JSON.stringify({ message: "Restaurant créé avec succès" })
         };
+
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Erreur:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({
-                error: "Une erreur est survenue lors de la création du restaurant",
-                details: error.message,
-            }),
+            body: JSON.stringify({ error: error.message })
         };
     }
 }; 
