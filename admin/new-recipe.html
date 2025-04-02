@@ -9,8 +9,10 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            padding-bottom: 2rem;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
         .admin-container {
             max-width: 1200px;
@@ -34,18 +36,43 @@
             margin-bottom: 1.5rem;
         }
         .form-section {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         .form-section:last-child {
             border-bottom: none;
         }
         .form-section-title {
-            color: #2c3e50;
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
         }
         .rating-row {
             display: flex;
@@ -109,6 +136,98 @@
         .rating-input {
             width: 80px;
         }
+        .image-upload-container,
+        .gallery-upload-container {
+            margin-top: 10px;
+        }
+        .image-preview,
+        .gallery-preview {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .image-preview img,
+        .gallery-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .gallery-item {
+            position: relative;
+        }
+        .gallery-item img {
+            cursor: pointer;
+        }
+        .gallery-item:hover::after {
+            content: '×';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,0,0,0.8);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .markdown-preview {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -121,70 +240,55 @@
             <!-- Informations de base -->
             <div class="form-section">
                 <h2 class="form-section-title">Informations de base</h2>
-                <div class="mb-3">
-                    <label for="title" class="form-label">Nom du restaurant</label>
-                    <input type="text" class="form-control" id="title" required>
+                <div class="form-group">
+                    <label for="title">Nom du restaurant</label>
+                    <input type="text" id="title" name="title" required>
                 </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description courte</label>
-                    <textarea class="form-control" id="description" rows="2" maxlength="150" required></textarea>
-                    <small class="text-muted">Maximum 150 caractères</small>
+
+                <div class="form-group">
+                    <label for="date">Date de visite</label>
+                    <input type="date" id="date" name="date" required>
                 </div>
-                <div class="mb-3">
-                    <label for="address" class="form-label">Adresse</label>
-                    <input type="text" class="form-control" id="address" required>
+
+                <div class="form-group">
+                    <label for="description">Description courte</label>
+                    <textarea id="description" name="description" required></textarea>
                 </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="style" class="form-label">Style de cuisine</label>
-                        <select class="form-control" id="style" required>
-                            <option value="Asiatique">Asiatique</option>
-                            <option value="Italien">Italien</option>
-                            <option value="Mexicain">Mexicain</option>
-                            <option value="Bistro">Bistro</option>
-                            <option value="Américain">Américain</option>
-                            <option value="Moyen-Orient">Moyen-Orient</option>
-                            <option value="Vietnamien">Vietnamien</option>
-                            <option value="Indien">Indien</option>
-                            <option value="Café-Bistro">Café-Bistro</option>
-                            <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
-                            <option value="Français">Français</option>
-                            <option value="Fusion">Fusion</option>
-                            <option value="Méditerranéen">Méditerranéen</option>
-                            <option value="Fast-food">Fast-food</option>
-                            <option value="Autre">Autre</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">Gamme de prix</label>
-                        <select class="form-control" id="price" required>
-                            <option value="budget">$ (0-20$)</option>
-                            <option value="medium">$$ (20-40$)</option>
-                            <option value="expensive">$$$ (40$ et +)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="diet" class="form-label">Régime alimentaire</label>
-                        <select class="form-control" id="diet" required>
-                            <option value="standard">Standard</option>
-                            <option value="vegetarian-friendly">Végétarien</option>
-                            <option value="vegan-friendly">Végétalien</option>
-                        </select>
+
+                <div class="form-group">
+                    <label for="address">Adresse</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="style">Style de cuisine</label>
+                    <input type="text" id="style" name="style" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Gamme de prix</label>
+                    <input type="text" id="price" name="price" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="diet">Régime alimentaire</label>
+                    <input type="text" id="diet" name="diet" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="mainImage">Image principale</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
+                        <div id="mainImagePreview" class="image-preview"></div>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label for="mainImage" class="form-label">Image principale</label>
-                    <input type="url" class="form-control" id="mainImage" required>
-                    <div id="mainImagePreview" class="image-preview"></div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Images supplémentaires</label>
-                    <div id="additionalImages">
-                        <!-- Les images supplémentaires seront ajoutées ici -->
+
+                <div class="form-group">
+                    <label>Images de la galerie</label>
+                    <div class="gallery-upload-container">
+                        <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
+                        <div id="galleryPreview" class="gallery-preview"></div>
                     </div>
-                    <button type="button" class="add-btn" onclick="addImage()">
-                        <i class="fas fa-plus"></i> Ajouter une image
-                    </button>
                 </div>
             </div>
 
@@ -311,13 +415,15 @@
         }
 
         function generateMarkdown() {
-            const title = document.getElementById('title').value || '[Nom du restaurant]';
-            const description = document.getElementById('description').value || '[Description]';
-            const address = document.getElementById('address').value || '[Adresse]';
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+            const address = document.getElementById('address').value;
             const style = document.getElementById('style').value;
             const price = document.getElementById('price').value;
             const diet = document.getElementById('diet').value;
-            const mainImage = document.getElementById('mainImage').value;
+            const mainImageUrl = document.getElementById('mainImageUrl').value;
+            const galleryUrls = Array.from(document.getElementsByName('galleryUrls[]')).map(input => input.value);
             const overallRating = document.getElementById('overallRating').value || '0';
 
             // Collecter les images supplémentaires
@@ -366,9 +472,9 @@ diet: "${diet}"
 description: "${description}"
 price: "${price}"
 address: "${address}"
-image: "${mainImage}"
+image: "${mainImageUrl}"
 images:
-  - image: "${mainImage}"
+  - image: "${mainImageUrl}"
 ${additionalImages.join('\n')}
 ratings:
   food:
@@ -415,15 +521,68 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
         });
 
         // Prévisualisation de l'image principale
-        document.getElementById('mainImage').addEventListener('input', function(e) {
-            const preview = document.getElementById('mainImagePreview');
-            if (e.target.value) {
-                preview.innerHTML = `<img src="${e.target.value}" alt="Aperçu" style="max-width: 200px;">`;
-            } else {
-                preview.innerHTML = '';
+        document.getElementById('mainImage').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const preview = document.getElementById('mainImagePreview');
+                preview.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Prévisualisation">`;
+                
+                try {
+                    const imageUrl = await handleImageUpload(file);
+                    document.getElementById('mainImageUrl').value = imageUrl;
+                } catch (error) {
+                    alert('Erreur lors de l\'upload de l\'image : ' + error.message);
+                }
             }
-            updateMarkdownPreview();
         });
+
+        // Gérer la prévisualisation des images de la galerie
+        document.getElementById('galleryImages').addEventListener('change', async function(e) {
+            const files = e.target.files;
+            const preview = document.getElementById('galleryPreview');
+            preview.innerHTML = '';
+            
+            for (let file of files) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'gallery-item';
+                imgContainer.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Prévisualisation">`;
+                preview.appendChild(imgContainer);
+                
+                try {
+                    const imageUrl = await handleImageUpload(file);
+                    const galleryInput = document.createElement('input');
+                    galleryInput.type = 'hidden';
+                    galleryInput.name = 'galleryUrls[]';
+                    galleryInput.value = imageUrl;
+                    imgContainer.appendChild(galleryInput);
+                } catch (error) {
+                    alert('Erreur lors de l\'upload de l\'image : ' + error.message);
+                }
+            }
+        });
+
+        // Fonction pour gérer l'upload des images
+        async function handleImageUpload(file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/.netlify/functions/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'upload de l\'image');
+                }
+
+                const data = await response.json();
+                return data.url;
+            } catch (error) {
+                console.error('Erreur:', error);
+                throw error;
+            }
+        }
 
         // Gérer la soumission du formulaire
         document.getElementById('restaurantForm').addEventListener('submit', async (e) => {
