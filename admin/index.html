@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Blog Culinaire</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .admin-title {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .admin-subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        .admin-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .admin-card-title {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+        .admin-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .action-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        .action-button:hover {
+            background: #2980b9;
+            color: white;
+        }
+        #login-container {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        #admin-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-container">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1 class="admin-title">Administration</h1>
+                <p class="admin-subtitle">Veuillez vous connecter pour accéder à l'administration</p>
+            </div>
+            <div class="admin-card">
+                <div data-netlify-identity-button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-content">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1 class="admin-title">Tableau de bord</h1>
+                <p class="admin-subtitle">Bienvenue dans votre espace d'administration</p>
+            </div>
+
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Recettes publiées</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Recettes en brouillon</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Commentaires</div>
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <a href="#" class="action-button">
+                    <i class="fas fa-plus"></i> Nouvelle recette
+                </a>
+                <a href="#" class="action-button">
+                    <i class="fas fa-list"></i> Gérer les recettes
+                </a>
+                <a href="#" class="action-button">
+                    <i class="fas fa-comments"></i> Gérer les commentaires
+                </a>
+                <a href="#" class="action-button">
+                    <i class="fas fa-cog"></i> Paramètres
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+        if (window.netlifyIdentity) {
+            window.netlifyIdentity.on("init", user => {
+                if (!user) {
+                    window.netlifyIdentity.on("login", () => {
+                        document.getElementById("login-container").style.display = "none";
+                        document.getElementById("admin-content").style.display = "block";
+                    });
+                    window.netlifyIdentity.on("logout", () => {
+                        document.getElementById("login-container").style.display = "block";
+                        document.getElementById("admin-content").style.display = "none";
+                    });
+                } else {
+                    document.getElementById("login-container").style.display = "none";
+                    document.getElementById("admin-content").style.display = "block";
+                }
+            });
+        }
+    </script>
+</body>
+</html> 
