@@ -426,32 +426,41 @@ title: Accueil
 @media (max-width: 768px) and (orientation: portrait) {
   .main-content {
     padding: 0;
+    margin: 0;
+    width: 100vw;
+    overflow-x: hidden;
   }
 
   .filters-container {
     padding: 1rem 0;
-    margin: 1rem 0;
+    margin: 0;
     background: transparent;
     box-shadow: none;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
   }
 
   .filter-group {
     width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
+    margin: 0;
     padding: 0;
   }
 
   .search-and-view {
-    width: 100%;
+    width: 100vw;
     max-width: none;
     padding: 0;
-    margin-left: -2rem;
+    margin: 0;
   }
 
   .search-input-wrapper {
-    width: calc(100% + 4rem);
+    width: 100%;
     margin: 0;
+    padding: 0 1rem;
     position: relative;
   }
 
@@ -464,19 +473,6 @@ title: Accueil
     background-color: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     color: #333;
-  }
-
-  .search-input::placeholder {
-    color: #666;
-  }
-
-  .search-input-wrapper i {
-    position: absolute;
-    left: 1.2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #666;
-    font-size: 1.1rem;
   }
 
   .advanced-filters-btn {
@@ -494,10 +490,6 @@ title: Accueil
     gap: 0.8rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border: none;
-  }
-
-  .advanced-filters-btn i {
-    font-size: 1.2rem;
   }
 
   .page-header {
