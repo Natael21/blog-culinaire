@@ -191,11 +191,15 @@
             if (user) {
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
-                console.log('User logged in:', user);
+                // Sauvegarder l'état de connexion
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', user.email);
             } else {
                 loginContainer.style.display = 'block';
                 adminContent.style.display = 'none';
-                console.log('No user logged in');
+                // Supprimer l'état de connexion
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userEmail');
             }
         }
 
@@ -205,6 +209,16 @@
             const loading = document.getElementById('loading');
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
+
+            // Vérifier si nous sommes déjà connectés
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const userEmail = localStorage.getItem('userEmail');
+
+            if (isLoggedIn && userEmail) {
+                // Si nous sommes déjà connectés, mettre à jour l'UI immédiatement
+                updateUI({ email: userEmail });
+                return;
+            }
 
             // Cacher tous les conteneurs au départ
             loading.style.display = 'block';
