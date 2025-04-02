@@ -150,7 +150,7 @@
             </div>
 
             <div class="admin-actions">
-                <a href="#" class="action-button">
+                <a href="new-recipe.html" class="action-button">
                     <i class="fas fa-plus"></i> Nouvelle recette
                 </a>
                 <a href="#" class="action-button">
@@ -203,35 +203,71 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
             const loading = document.getElementById('loading');
+            const loginContainer = document.getElementById('login-container');
+            const adminContent = document.getElementById('admin-content');
+
+            // Cacher tous les conteneurs au départ
             loading.style.display = 'block';
+            loginContainer.style.display = 'none';
+            adminContent.style.display = 'none';
 
             // Vérifier si Netlify Identity est chargé
             if (!window.netlifyIdentity) {
                 showError('Netlify Identity n\'est pas chargé. Vérifiez votre connexion internet.');
                 loading.style.display = 'none';
+                loginContainer.style.display = 'block';
                 return;
             }
 
             // Configurer les événements Netlify Identity
-            window.netlifyIdentity.on("init", user => {
-                console.log('Netlify Identity initialized');
-                updateUI(user);
-            });
+            try {
+                window.netlifyIdentity.on("init", user => {
+                    console.log('Netlify Identity initialized');
+                    loading.style.display = 'none';
+                    if (!user) {
+                        loginContainer.style.display = 'block';
+                        adminContent.style.display = 'none';
+                    } else {
+                        loginContainer.style.display = 'none';
+                        adminContent.style.display = 'block';
+                    }
+                });
 
-            window.netlifyIdentity.on("login", user => {
-                console.log('User logged in');
-                updateUI(user);
-            });
+                window.netlifyIdentity.on("login", user => {
+                    console.log('User logged in');
+                    loading.style.display = 'none';
+                    loginContainer.style.display = 'none';
+                    adminContent.style.display = 'block';
+                });
 
-            window.netlifyIdentity.on("logout", () => {
-                console.log('User logged out');
-                updateUI(null);
-            });
+                window.netlifyIdentity.on("logout", () => {
+                    console.log('User logged out');
+                    loading.style.display = 'none';
+                    loginContainer.style.display = 'block';
+                    adminContent.style.display = 'none';
+                });
 
-            window.netlifyIdentity.on("error", err => {
-                console.error('Netlify Identity error:', err);
-                showError('Une erreur est survenue lors de l\'authentification.');
-            });
+                window.netlifyIdentity.on("error", err => {
+                    console.error('Netlify Identity error:', err);
+                    loading.style.display = 'none';
+                    showError('Une erreur est survenue lors de l\'authentification.');
+                });
+
+                // Forcer l'initialisation après 2 secondes si rien ne se passe
+                setTimeout(() => {
+                    if (loading.style.display === 'block') {
+                        console.log('Timeout - forcing display of login');
+                        loading.style.display = 'none';
+                        loginContainer.style.display = 'block';
+                    }
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error setting up Netlify Identity:', error);
+                loading.style.display = 'none';
+                showError('Une erreur est survenue lors de l\'initialisation.');
+                loginContainer.style.display = 'block';
+            }
         });
     </script>
 </body>
