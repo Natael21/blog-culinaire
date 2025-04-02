@@ -281,9 +281,12 @@
 .restaurant-meta .rating-fill[data-rating="5"] { width: 50%; }
 .restaurant-meta .rating-fill[data-rating="6"] { width: 60%; }
 .restaurant-meta .rating-fill[data-rating="7"] { width: 70%; }
+.restaurant-meta .rating-fill[data-rating="7.2"] { width: 72%; }
 .restaurant-meta .rating-fill[data-rating="7.3"] { width: 73%; }
 .restaurant-meta .rating-fill[data-rating="8"] { width: 80%; }
+.restaurant-meta .rating-fill[data-rating="8.5"] { width: 85%; }
 .restaurant-meta .rating-fill[data-rating="9"] { width: 90%; }
+.restaurant-meta .rating-fill[data-rating="9.5"] { width: 95%; }
 .restaurant-meta .rating-fill[data-rating="10"] { width: 100%; }
 
 .restaurant-meta .score {
@@ -609,7 +612,7 @@ html {
 
 @media (max-width: 768px) and (orientation: portrait) {
     .restaurant-header {
-        height: 50vh;
+        height: 70vh;
         margin: -1rem -1rem 1rem;
         border-bottom: none;
     }

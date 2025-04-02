@@ -1187,12 +1187,18 @@ footer {
     }
 
     .page-header h2 {
-        font-size: 1.8rem !important;
-        margin-bottom: 0.5rem !important;
+        font-size: 1.4rem !important;
+        margin-bottom: 0.3rem !important;
+        line-height: 1.2 !important;
     }
 
     .page-header p {
-        font-size: 0.9rem !important;
+        font-size: 0.85rem !important;
         margin: 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .page-header {
+        padding: 1rem 0.5rem !important;
     }
 }
