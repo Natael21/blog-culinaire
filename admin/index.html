@@ -97,6 +97,13 @@
             padding: 2rem;
             display: none;
         }
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -105,6 +112,8 @@
             <span class="visually-hidden">Chargement...</span>
         </div>
     </div>
+
+    <div id="error-message" class="error-message"></div>
 
     <div id="login-container">
         <div class="admin-container">
@@ -159,41 +168,70 @@
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            console.error(message);
+        }
+
+        function hideError() {
+            const errorElement = document.getElementById('error-message');
+            errorElement.style.display = 'none';
+        }
+
+        function updateUI(user) {
             const loading = document.getElementById('loading');
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
 
-            loading.style.display = 'block';
-            loginContainer.style.display = 'none';
-            adminContent.style.display = 'none';
+            loading.style.display = 'none';
+            hideError();
 
-            if (window.netlifyIdentity) {
-                window.netlifyIdentity.on("init", user => {
-                    loading.style.display = 'none';
-                    if (!user) {
-                        loginContainer.style.display = 'block';
-                        adminContent.style.display = 'none';
-                    } else {
-                        loginContainer.style.display = 'none';
-                        adminContent.style.display = 'block';
-                    }
-                });
-
-                window.netlifyIdentity.on("login", () => {
-                    loginContainer.style.display = 'none';
-                    adminContent.style.display = 'block';
-                });
-
-                window.netlifyIdentity.on("logout", () => {
-                    loginContainer.style.display = 'block';
-                    adminContent.style.display = 'none';
-                });
+            if (user) {
+                loginContainer.style.display = 'none';
+                adminContent.style.display = 'block';
+                console.log('User logged in:', user);
             } else {
-                loading.style.display = 'none';
                 loginContainer.style.display = 'block';
-                console.error('Netlify Identity not loaded');
+                adminContent.style.display = 'none';
+                console.log('No user logged in');
             }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            // Vérifier si Netlify Identity est chargé
+            if (!window.netlifyIdentity) {
+                showError('Netlify Identity n\'est pas chargé. Vérifiez votre connexion internet.');
+                loading.style.display = 'none';
+                return;
+            }
+
+            // Configurer les événements Netlify Identity
+            window.netlifyIdentity.on("init", user => {
+                console.log('Netlify Identity initialized');
+                updateUI(user);
+            });
+
+            window.netlifyIdentity.on("login", user => {
+                console.log('User logged in');
+                updateUI(user);
+            });
+
+            window.netlifyIdentity.on("logout", () => {
+                console.log('User logged out');
+                updateUI(null);
+            });
+
+            window.netlifyIdentity.on("error", err => {
+                console.error('Netlify Identity error:', err);
+                showError('Une erreur est survenue lors de l\'authentification.');
+            });
         });
     </script>
 </body>
