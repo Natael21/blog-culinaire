@@ -84,6 +84,8 @@ exports.handler = async (event, context) => {
         // 2. Créer les blobs pour les images
         console.log("Création des blobs pour les images...");
         const imageBlobs = [];
+        let updatedContent = content;
+
         for (let i = 0; i < images.length; i++) {
             const imageData = images[i];
             if (!imageData || !imageData.data) {
@@ -113,21 +115,26 @@ exports.handler = async (event, context) => {
             }
 
             const blobData = await blobResponse.json();
+            const imagePath = `images/${imageData.filename}`;
             imageBlobs.push({
-                path: `images/${imageData.filename}`,
+                path: imagePath,
                 sha: blobData.sha,
                 mode: "100644",
                 type: "blob"
             });
+
+            // Mettre à jour les chemins d'images dans le contenu markdown
+            const placeholder = imageData.placeholder || imageData.filename;
+            updatedContent = updatedContent.replace(placeholder, `/${imagePath}`);
         }
 
-        // 3. Créer le blob pour le contenu markdown
+        // 3. Créer le blob pour le contenu markdown avec les chemins d'images mis à jour
         console.log("Création du blob pour le contenu markdown...");
         const markdownBlobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
             method: "POST",
             headers,
             body: JSON.stringify({
-                content: content,
+                content: updatedContent,
                 encoding: "utf-8"
             })
         });
@@ -143,7 +150,7 @@ exports.handler = async (event, context) => {
         const tree = [
             ...imageBlobs,
             {
-                path: `restaurants/${filename}`,
+                path: `_posts/${filename}`,
                 mode: "100644",
                 type: "blob",
                 sha: markdownBlob.sha
