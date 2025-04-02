@@ -13,6 +13,14 @@ comments: true
         <i class="fas fa-map-marker-alt"></i>
         <span>{{ page.address }}</span>
       </div>
+      <div class="rating">
+        <a href="#ratings-section" class="rating-link">
+          <div class="rating-bar">
+            <div class="rating-fill" data-rating="{{ page.note }}"></div>
+          </div>
+          <span class="score">{{ page.note }}/10</span>
+        </a>
+      </div>
       <div class="restaurant-meta">
         <div class="meta-line">
           <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>

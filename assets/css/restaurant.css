@@ -170,11 +170,6 @@
     color: white;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
 }
 
 .restaurant-header h1 {
@@ -200,16 +195,9 @@
 
 .restaurant-meta {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-}
-
-.meta-line {
-    display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
     justify-content: center;
 }
 
@@ -244,14 +232,6 @@
     transition: all 0.2s ease;
     vertical-align: middle;
     cursor: pointer;
-}
-
-.restaurant-meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
 }
 
 .restaurant-meta .rating:hover {
@@ -289,18 +269,6 @@
     z-index: 2;
     border-radius: 4px;
 }
-
-.restaurant-meta .rating-fill[data-rating="1"] { width: 10%; }
-.restaurant-meta .rating-fill[data-rating="2"] { width: 20%; }
-.restaurant-meta .rating-fill[data-rating="3"] { width: 30%; }
-.restaurant-meta .rating-fill[data-rating="4"] { width: 40%; }
-.restaurant-meta .rating-fill[data-rating="5"] { width: 50%; }
-.restaurant-meta .rating-fill[data-rating="6"] { width: 60%; }
-.restaurant-meta .rating-fill[data-rating="7"] { width: 70%; }
-.restaurant-meta .rating-fill[data-rating="7.3"] { width: 73%; }
-.restaurant-meta .rating-fill[data-rating="8"] { width: 80%; }
-.restaurant-meta .rating-fill[data-rating="9"] { width: 90%; }
-.restaurant-meta .rating-fill[data-rating="10"] { width: 100%; }
 
 .restaurant-meta .score {
     color: white;
@@ -384,20 +352,15 @@
 }
 
 .rating {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: relative;
+    margin: 0.5rem 0;
 }
 
 .rating-bar {
-    flex-grow: 1;
+    width: 100px;
     height: 8px;
-    background-color: var(--border-color);
+    background: rgba(221, 221, 221, 0.2);
     border-radius: 4px;
     overflow: hidden;
-    min-width: 100px;
-    max-width: 200px;
     position: relative;
 }
 
@@ -433,11 +396,9 @@
 .rating-fill[data-rating="9"] { width: 90%; }
 .rating-fill[data-rating="10"] { width: 100%; }
 
-.score {
-    color: var(--secondary-color);
-    font-weight: bold;
-    min-width: 45px;
-    text-align: right;
+.rating .score {
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 .criteria {
@@ -482,9 +443,9 @@
 .rating-link {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.8rem;
     text-decoration: none;
-    color: inherit;
+    color: white;
     cursor: pointer;
     transition: transform 0.2s ease;
 }
@@ -554,6 +515,67 @@ html {
 
 /* Responsive Design
 ------------------------- */
+@media (max-width: 768px) and (orientation: portrait) {
+    .restaurant-header {
+        height: 300px;
+    }
+
+    .restaurant-header-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .restaurant-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .restaurant-location {
+        font-size: 0.9rem;
+        margin: 0.5rem 0;
+    }
+
+    .rating {
+        margin: 0.3rem 0;
+    }
+
+    .restaurant-meta {
+        flex-direction: column;
+        gap: 0.3rem;
+        margin-top: 0.3rem;
+        width: 100%;
+    }
+
+    .meta-line {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        justify-content: center;
+    }
+
+    .restaurant-meta .style,
+    .restaurant-meta .diet-type,
+    .restaurant-meta .date,
+    .restaurant-meta .price {
+        font-size: 0.85rem;
+    }
+
+    .restaurant-meta .rating {
+        margin-bottom: 0.5rem;
+    }
+
+    html {
+        scroll-padding-top: 1rem;
+    }
+
+    #ratings-section {
+        scroll-margin-top: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .ratings-section {
         padding: 1.5rem;
@@ -581,7 +603,12 @@ html {
     }
 
     .rating-bar {
-        width: 150px;
+        width: 80px;
+        height: 6px;
+    }
+
+    .rating .score {
+        font-size: 0.9rem;
     }
 
     .restaurant-navigation {
@@ -636,8 +663,13 @@ html {
         margin: 0.5rem 0;
     }
 
+    .rating {
+        margin: 0.3rem 0;
+    }
+
     .restaurant-meta {
         gap: 0.3rem;
+        margin-top: 0.3rem;
     }
 
     .meta-line {
@@ -653,5 +685,13 @@ html {
 
     .restaurant-meta .rating {
         margin-bottom: 0.5rem;
+    }
+
+    html {
+        scroll-padding-top: 1rem; /* Réduit en mobile car le header est plus petit */
+    }
+
+    #ratings-section {
+        scroll-margin-top: 1rem; /* Réduit en mobile car le header est plus petit */
     }
 } 
