@@ -1146,3 +1146,53 @@ footer {
         padding: 0.5rem 1rem !important;
     }
 }
+
+@media (max-width: 768px) and (orientation: portrait) {
+    .filters-container {
+        padding: 0.8rem !important;
+        margin: 0.8rem 0.5rem !important;
+    }
+
+    .search-and-view {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+    }
+
+    .search-input-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 0.5rem !important;
+    }
+
+    .search-input {
+        width: 100% !important;
+        font-size: 0.9rem !important;
+        padding: 0.7rem 2rem 0.7rem 2rem !important;
+    }
+
+    .search-input-wrapper i {
+        left: 1rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    .advanced-filters-btn {
+        max-width: 100% !important;
+        padding: 0.7rem !important;
+        margin: 0.5rem auto !important;
+    }
+
+    .page-header h2 {
+        font-size: 1.8rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .page-header p {
+        font-size: 0.9rem !important;
+        margin: 0 !important;
+    }
+}
