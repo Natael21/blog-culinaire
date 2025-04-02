@@ -228,6 +228,43 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .main-image-container,
+        .gallery-item {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+        }
+        .remove-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+        .remove-image:hover {
+            background-color: #c82333;
+            transform: scale(1.1);
+        }
+        .main-image-container img,
+        .gallery-item img {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -262,17 +299,47 @@
 
                 <div class="form-group">
                     <label for="style">Style de cuisine</label>
-                    <input type="text" id="style" name="style" required>
+                    <select class="form-control" id="style" name="style" required>
+                        <option value="">Sélectionner un style</option>
+                        <option value="Asiatique">Asiatique</option>
+                        <option value="Italien">Italien</option>
+                        <option value="Mexicain">Mexicain</option>
+                        <option value="Bistro">Bistro</option>
+                        <option value="Américain">Américain</option>
+                        <option value="Moyen-Orient">Moyen-Orient</option>
+                        <option value="Vietnamien">Vietnamien</option>
+                        <option value="Indien">Indien</option>
+                        <option value="Café-Bistro">Café-Bistro</option>
+                        <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
+                        <option value="Français">Français</option>
+                        <option value="Fusion">Fusion</option>
+                        <option value="Méditerranéen">Méditerranéen</option>
+                        <option value="Fast-food">Fast-food</option>
+                        <option value="Autre">Autre</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label for="price">Gamme de prix</label>
-                    <input type="text" id="price" name="price" required>
+                    <select class="form-control" id="price" name="price" required>
+                        <option value="">Sélectionner une gamme de prix</option>
+                        <option value="$ (0-20$)">$ (0-20$)</option>
+                        <option value="$$ (20-40$)">$$ (20-40$)</option>
+                        <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label for="diet">Régime alimentaire</label>
-                    <input type="text" id="diet" name="diet" required>
+                    <select class="form-control" id="diet" name="diet" required>
+                        <option value="">Sélectionner un régime</option>
+                        <option value="standard">Standard</option>
+                        <option value="vegetarian-friendly">Végétarien</option>
+                        <option value="vegan-friendly">Végétalien</option>
+                        <option value="gluten-free">Sans gluten</option>
+                        <option value="halal">Halal</option>
+                        <option value="kosher">Kasher</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -521,45 +588,65 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             element.addEventListener('input', updateMarkdownPreview);
         });
 
+        // Variables globales pour stocker les images temporairement
+        let mainImageFile = null;
+        let galleryImageFiles = [];
+
+        // Fonction pour supprimer une image de la galerie
+        function removeGalleryImage(index) {
+            galleryImageFiles.splice(index, 1);
+            updateGalleryPreview();
+            updateMarkdownPreview();
+        }
+
+        // Fonction pour supprimer l'image principale
+        function removeMainImage() {
+            mainImageFile = null;
+            document.getElementById('mainImage').value = '';
+            document.getElementById('mainImagePreview').innerHTML = '';
+            updateMarkdownPreview();
+        }
+
+        // Fonction pour mettre à jour la prévisualisation de la galerie
+        function updateGalleryPreview() {
+            const preview = document.getElementById('galleryPreview');
+            preview.innerHTML = '';
+            
+            galleryImageFiles.forEach((file, index) => {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'gallery-item';
+                imgContainer.innerHTML = `
+                    <img src="${URL.createObjectURL(file)}" alt="Prévisualisation">
+                    <button type="button" class="remove-image" onclick="removeGalleryImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>`;
+                preview.appendChild(imgContainer);
+            });
+        }
+
         // Prévisualisation de l'image principale
-        document.getElementById('mainImage').addEventListener('change', async function(e) {
+        document.getElementById('mainImage').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const preview = document.getElementById('mainImagePreview');
-                preview.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Prévisualisation">`;
-                
-                try {
-                    const imageUrl = await handleImageUpload(file);
-                    document.getElementById('mainImageUrl').value = imageUrl;
-                } catch (error) {
-                    alert('Erreur lors de l\'upload de l\'image : ' + error.message);
-                }
+                preview.innerHTML = `
+                    <div class="main-image-container">
+                        <img src="${URL.createObjectURL(file)}" alt="Prévisualisation">
+                        <button type="button" class="remove-image" onclick="removeMainImage()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>`;
+                mainImageFile = file;
+                updateMarkdownPreview();
             }
         });
 
         // Gérer la prévisualisation des images de la galerie
-        document.getElementById('galleryImages').addEventListener('change', async function(e) {
-            const files = e.target.files;
-            const preview = document.getElementById('galleryPreview');
-            preview.innerHTML = '';
-            
-            for (let file of files) {
-                const imgContainer = document.createElement('div');
-                imgContainer.className = 'gallery-item';
-                imgContainer.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Prévisualisation">`;
-                preview.appendChild(imgContainer);
-                
-                try {
-                    const imageUrl = await handleImageUpload(file);
-                    const galleryInput = document.createElement('input');
-                    galleryInput.type = 'hidden';
-                    galleryInput.name = 'galleryUrls[]';
-                    galleryInput.value = imageUrl;
-                    imgContainer.appendChild(galleryInput);
-                } catch (error) {
-                    alert('Erreur lors de l\'upload de l\'image : ' + error.message);
-                }
-            }
+        document.getElementById('galleryImages').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            galleryImageFiles = [...galleryImageFiles, ...files];
+            updateGalleryPreview();
+            updateMarkdownPreview();
         });
 
         // Fonction pour convertir un fichier en base64
@@ -572,105 +659,119 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             });
         }
 
-        // Fonction pour gérer l'upload des images
-        async function handleImageUpload(file) {
-            try {
-                // Convertir l'image en base64
-                const base64Image = await getBase64(file);
-
-                const response = await fetch('/.netlify/functions/upload-image', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        image: base64Image,
-                        filename: file.name
-                    })
+        // Fonction pour uploader toutes les images
+        async function uploadAllImages() {
+            const images = [];
+            
+            // Ajouter l'image principale
+            if (mainImageFile) {
+                const mainImageBase64 = await getBase64(mainImageFile);
+                images.push({
+                    image: mainImageBase64,
+                    filename: mainImageFile.name,
+                    isMain: true
                 });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Erreur lors de l\'upload de l\'image');
-                }
-
-                const data = await response.json();
-                return data.url;
-            } catch (error) {
-                console.error('Erreur:', error);
-                throw error;
             }
+
+            // Ajouter les images de la galerie
+            for (let file of galleryImageFiles) {
+                const galleryImageBase64 = await getBase64(file);
+                images.push({
+                    image: galleryImageBase64,
+                    filename: file.name,
+                    isMain: false
+                });
+            }
+
+            // Envoyer toutes les images à la fonction Netlify
+            const response = await fetch('/.netlify/functions/upload-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ images })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Erreur lors de l\'upload des images');
+            }
+
+            const data = await response.json();
+            return data.urls;
         }
 
         // Gérer la soumission du formulaire
         document.getElementById('restaurantForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const markdown = generateMarkdown();
-            const title = document.getElementById('title').value;
-            const filename = title.toLowerCase()
-                .replace(/[éèêë]/g, 'e')
-                .replace(/[àâä]/g, 'a')
-                .replace(/[ùûü]/g, 'u')
-                .replace(/[îï]/g, 'i')
-                .replace(/[ôö]/g, 'o')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
 
             try {
-                const date = new Date().toISOString().split('T')[0];
-                const fullFilename = `_posts/${date}-${filename}.md`;
-                
-                // Configuration GitHub
-                const owner = 'Natael21';
-                const repo = 'blog-culinaire';
-                const branch = 'master';
-
                 // Afficher un message de chargement
                 const saveBtn = document.querySelector('.save-btn');
                 const originalText = saveBtn.textContent;
                 saveBtn.disabled = true;
-                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde en cours...';
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload des images en cours...';
 
-                try {
-                    // 1. Créer le fichier via la fonction Netlify
-                    const response = await fetch('/.netlify/functions/create-restaurant', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            filename: fullFilename,
-                            content: markdown,
-                            title: title
-                        })
-                    });
+                // 1. Upload toutes les images
+                const imageUrls = await uploadAllImages();
+                
+                // 2. Mettre à jour les URLs dans le formulaire
+                if (imageUrls.mainImage) {
+                    document.getElementById('mainImageUrl').value = imageUrls.mainImage;
+                }
+                
+                // Créer des champs cachés pour les URLs de la galerie
+                const galleryUrlsContainer = document.createElement('div');
+                galleryUrlsContainer.id = 'galleryUrlsContainer';
+                imageUrls.gallery.forEach(url => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'galleryUrls[]';
+                    input.value = url;
+                    galleryUrlsContainer.appendChild(input);
+                });
+                document.getElementById('restaurantForm').appendChild(galleryUrlsContainer);
 
-                    if (!response.ok) {
-                        throw new Error('Erreur lors de la création du fichier');
-                    }
+                // 3. Générer et envoyer le markdown
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde du restaurant en cours...';
+                const markdown = generateMarkdown();
+                const title = document.getElementById('title').value;
+                const filename = title.toLowerCase()
+                    .replace(/[éèêë]/g, 'e')
+                    .replace(/[àâä]/g, 'a')
+                    .replace(/[ùûü]/g, 'u')
+                    .replace(/[îï]/g, 'i')
+                    .replace(/[ôö]/g, 'o')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
 
-                    // Succès !
-                    saveBtn.innerHTML = '<i class="fas fa-check"></i> Sauvegardé !';
-                    setTimeout(() => {
-                        saveBtn.textContent = originalText;
-                        saveBtn.disabled = false;
-                    }, 2000);
+                const date = new Date().toISOString().split('T')[0];
+                const fullFilename = `_posts/${date}-${filename}.md`;
 
-                    // Rediriger vers la page d'administration après 2 secondes
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000);
+                const response = await fetch('/.netlify/functions/create-restaurant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        filename: fullFilename,
+                        content: markdown,
+                        title: title
+                    })
+                });
 
-                } catch (error) {
-                    console.error('Erreur lors de la sauvegarde:', error);
-                    alert(`Erreur lors de la sauvegarde : ${error.message}`);
-                    const saveBtn = document.querySelector('.save-btn');
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = 'Enregistrer le restaurant';
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la création du restaurant');
                 }
 
+                // Succès !
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Sauvegardé !';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+
             } catch (error) {
-                console.error('Erreur lors de la sauvegarde:', error);
+                console.error('Erreur:', error);
                 alert(`Erreur lors de la sauvegarde : ${error.message}`);
                 const saveBtn = document.querySelector('.save-btn');
                 saveBtn.disabled = false;
