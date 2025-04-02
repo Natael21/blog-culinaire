@@ -270,6 +270,18 @@
     border-radius: 4px;
 }
 
+.restaurant-meta .rating-fill[data-rating="1"] { width: 10%; }
+.restaurant-meta .rating-fill[data-rating="2"] { width: 20%; }
+.restaurant-meta .rating-fill[data-rating="3"] { width: 30%; }
+.restaurant-meta .rating-fill[data-rating="4"] { width: 40%; }
+.restaurant-meta .rating-fill[data-rating="5"] { width: 50%; }
+.restaurant-meta .rating-fill[data-rating="6"] { width: 60%; }
+.restaurant-meta .rating-fill[data-rating="7"] { width: 70%; }
+.restaurant-meta .rating-fill[data-rating="7.3"] { width: 73%; }
+.restaurant-meta .rating-fill[data-rating="8"] { width: 80%; }
+.restaurant-meta .rating-fill[data-rating="9"] { width: 90%; }
+.restaurant-meta .rating-fill[data-rating="10"] { width: 100%; }
+
 .restaurant-meta .score {
     color: white;
     font-weight: 600;
