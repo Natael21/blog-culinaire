@@ -267,5 +267,15 @@ comments: true
     s.setAttribute('data-timestamp', +new Date());
     (d.head || d.body).appendChild(s);
   })();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const ratingFills = document.querySelectorAll('.rating-fill[data-rating]');
+    ratingFills.forEach(fill => {
+        const rating = parseFloat(fill.getAttribute('data-rating'));
+        if (!isNaN(rating)) {
+            fill.style.width = `${rating * 10}%`;
+        }
+    });
+  });
 </script>
 <noscript>Veuillez activer JavaScript pour voir les <a href="https://disqus.com/?ref_noscript">commentaires propulsés par Disqus.</a></noscript>

@@ -274,6 +274,10 @@
     border-radius: 4px;
 }
 
+.restaurant-meta .rating-fill[data-rating] {
+    --rating-width: attr(data-rating number);
+}
+
 .restaurant-meta .rating-fill[data-rating="1"] { width: 10%; }
 .restaurant-meta .rating-fill[data-rating="2"] { width: 20%; }
 .restaurant-meta .rating-fill[data-rating="3"] { width: 30%; }
@@ -669,4 +673,16 @@ html {
     .view-buttons {
         display: none;
     }
-} 
+}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingFills = document.querySelectorAll('.rating-fill[data-rating]');
+    ratingFills.forEach(fill => {
+        const rating = parseFloat(fill.getAttribute('data-rating'));
+        if (!isNaN(rating)) {
+            fill.style.width = `${rating * 10}%`;
+        }
+    });
+});
+</script> 
