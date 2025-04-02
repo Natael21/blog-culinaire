@@ -85,16 +85,27 @@
             color: white;
         }
         #login-container {
-            display: none;
+            display: block;
             text-align: center;
             padding: 2rem;
         }
         #admin-content {
             display: none;
         }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <div id="loading" class="loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+    </div>
+
     <div id="login-container">
         <div class="admin-container">
             <div class="admin-header">
@@ -148,23 +159,42 @@
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-        if (window.netlifyIdentity) {
-            window.netlifyIdentity.on("init", user => {
-                if (!user) {
-                    window.netlifyIdentity.on("login", () => {
-                        document.getElementById("login-container").style.display = "none";
-                        document.getElementById("admin-content").style.display = "block";
-                    });
-                    window.netlifyIdentity.on("logout", () => {
-                        document.getElementById("login-container").style.display = "block";
-                        document.getElementById("admin-content").style.display = "none";
-                    });
-                } else {
-                    document.getElementById("login-container").style.display = "none";
-                    document.getElementById("admin-content").style.display = "block";
-                }
-            });
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const loading = document.getElementById('loading');
+            const loginContainer = document.getElementById('login-container');
+            const adminContent = document.getElementById('admin-content');
+
+            loading.style.display = 'block';
+            loginContainer.style.display = 'none';
+            adminContent.style.display = 'none';
+
+            if (window.netlifyIdentity) {
+                window.netlifyIdentity.on("init", user => {
+                    loading.style.display = 'none';
+                    if (!user) {
+                        loginContainer.style.display = 'block';
+                        adminContent.style.display = 'none';
+                    } else {
+                        loginContainer.style.display = 'none';
+                        adminContent.style.display = 'block';
+                    }
+                });
+
+                window.netlifyIdentity.on("login", () => {
+                    loginContainer.style.display = 'none';
+                    adminContent.style.display = 'block';
+                });
+
+                window.netlifyIdentity.on("logout", () => {
+                    loginContainer.style.display = 'block';
+                    adminContent.style.display = 'none';
+                });
+            } else {
+                loading.style.display = 'none';
+                loginContainer.style.display = 'block';
+                console.error('Netlify Identity not loaded');
+            }
+        });
     </script>
 </body>
 </html> 
