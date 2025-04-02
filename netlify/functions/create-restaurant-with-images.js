@@ -8,26 +8,62 @@ exports.handler = async (event, context) => {
     }
 
     try {
+        console.log("Début du traitement de la requête");
+        
         // Récupérer les données du corps de la requête
-        const { filename, content, images, title } = JSON.parse(event.body);
+        const body = JSON.parse(event.body);
+        console.log("Corps de la requête reçu:", {
+            hasFilename: !!body.filename,
+            hasContent: !!body.content,
+            numberOfImages: body.images?.length,
+            hasTitle: !!body.title
+        });
+        
+        const { filename, content, images, title } = body;
 
         // Utiliser le token GitHub depuis les variables d'environnement
         const githubToken = process.env.GITHUB_TOKEN;
+        const owner = process.env.GITHUB_OWNER;
+        const repo = process.env.GITHUB_REPO;
+        const branch = process.env.GITHUB_BRANCH || "main";
 
-        if (!githubToken) {
-            throw new Error("La variable d'environnement GITHUB_TOKEN n'est pas configurée");
+        console.log("Variables d'environnement:", {
+            hasToken: !!githubToken,
+            owner,
+            repo,
+            branch
+        });
+
+        // Vérifier que toutes les variables d'environnement nécessaires sont définies
+        if (!githubToken || !owner || !repo) {
+            console.error("Variables d'environnement manquantes:", {
+                hasToken: !!githubToken,
+                hasOwner: !!owner,
+                hasRepo: !!repo
+            });
+            throw new Error("Variables d'environnement manquantes. Veuillez configurer GITHUB_TOKEN, GITHUB_OWNER et GITHUB_REPO");
         }
 
         if (!filename || !content || !images || !title) {
+            console.error("Paramètres manquants:", {
+                hasFilename: !!filename,
+                hasContent: !!content,
+                hasImages: !!images,
+                hasTitle: !!title
+            });
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: "Missing required parameters" }),
             };
         }
 
-        const owner = "nataelbaffou";
-        const repo = "blog-culinaire";
-        const branch = "main";
+        console.log("Configuration GitHub :", {
+            owner,
+            repo,
+            branch,
+            hasToken: !!githubToken
+        });
+
         const baseUrl = `https://api.github.com`;
 
         // Headers pour l'API GitHub
@@ -38,6 +74,7 @@ exports.handler = async (event, context) => {
         };
 
         // 1. Récupérer la référence du dernier commit
+        console.log("Récupération de la référence du dernier commit...");
         const refResponse = await fetch(
             `${baseUrl}/repos/${owner}/${repo}/git/refs/heads/${branch}`,
             { headers }
@@ -45,11 +82,13 @@ exports.handler = async (event, context) => {
         
         if (!refResponse.ok) {
             const errorData = await refResponse.json();
+            console.error("Erreur lors de la récupération de la référence :", errorData);
             throw new Error(`GitHub API Error: ${errorData.message}`);
         }
         
         const refData = await refResponse.json();
         const latestCommit = refData.object.sha;
+        console.log("Dernier commit SHA :", latestCommit);
 
         // 2. Récupérer le dernier tree
         const treeResponse = await fetch(
