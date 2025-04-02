@@ -153,6 +153,7 @@ title: Accueil
 </div>
 
 <style>
+/* Styles généraux */
 .main-content {
   max-width: 1400px;
   margin: 0 auto;
@@ -424,28 +425,75 @@ title: Accueil
 /* Spécifique pour l'orientation portrait sur mobile */
 @media (max-width: 768px) and (orientation: portrait) {
   .filters-container {
-    padding: 0.8rem;
-    margin: 0.8rem 0.5rem;
+    padding: 1rem;
+    margin: 1rem;
+    background: transparent;
+    box-shadow: none;
   }
 
   .search-and-view {
-    max-width: 200px;
+    width: 100%;
+    max-width: none;
     padding: 0;
   }
 
-  .advanced-filters-btn {
-    max-width: 200px;
-    padding: 0.7rem;
+  .search-input-wrapper {
+    width: 100%;
+    margin: 0;
   }
 
   .search-input {
-    font-size: 0.9rem;
-    padding: 0.7rem 2rem 0.7rem 2rem;
+    width: 100%;
+    font-size: 1rem;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid #ddd;
+    border-radius: 100px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   .search-input-wrapper i {
-    left: 0.6rem;
+    left: 1.2rem;
+    font-size: 1.1rem;
+    color: #666;
+  }
+
+  .search-input::placeholder {
+    color: #666;
+  }
+
+  .advanced-filters-btn {
+    width: 100%;
+    max-width: none;
+    margin: 1rem 0 0;
+    padding: 1rem;
+    border-radius: 12px;
+    background-color: #2c3e50;
+    color: white;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .advanced-filters-btn i {
+    font-size: 1.1rem;
+  }
+
+  .page-header {
+    padding: 1rem;
+  }
+
+  .page-header h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .page-header p {
     font-size: 0.9rem;
+    margin: 0;
   }
 }
 
