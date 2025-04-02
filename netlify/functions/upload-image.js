@@ -1,5 +1,3 @@
-const { Octokit } = require('@octokit/rest');
-
 exports.handler = async function(event, context) {
     // Vérifier que c'est une requête POST
     if (event.httpMethod !== 'POST') {
@@ -15,24 +13,43 @@ exports.handler = async function(event, context) {
             throw new Error('Aucun fichier fourni');
         }
 
-        // Créer une instance d'Octokit avec le token GitHub
-        const octokit = new Octokit({
-            auth: process.env.GITHUB_TOKEN
-        });
-
         // Générer un nom de fichier unique
         const timestamp = new Date().getTime();
         const filename = `images/${timestamp}-${file.name}`;
 
-        // Uploader le fichier sur GitHub
-        await octokit.repos.createOrUpdateFileContents({
-            owner: 'Natael21',
-            repo: 'blog-culinaire',
-            path: filename,
-            message: `Upload de l'image : ${file.name}`,
-            content: file.content,
-            branch: 'master'
+        // 1. Récupérer le SHA du dernier commit
+        const branchResponse = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/branches/master`, {
+            headers: {
+                'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
         });
+
+        if (!branchResponse.ok) {
+            throw new Error('Erreur lors de la récupération des informations de la branche');
+        }
+
+        const branchData = await branchResponse.json();
+        const lastCommitSha = branchData.commit.sha;
+
+        // 2. Créer le fichier
+        const createFileResponse = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${filename}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `Upload de l'image : ${file.name}`,
+                content: file.content,
+                branch: 'master'
+            })
+        });
+
+        if (!createFileResponse.ok) {
+            throw new Error('Erreur lors de la création du fichier');
+        }
 
         // Construire l'URL de l'image
         const imageUrl = `https://raw.githubusercontent.com/Natael21/blog-culinaire/master/${filename}`;
