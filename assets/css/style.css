@@ -1090,3 +1090,23 @@ footer {
     overflow: hidden;
     flex-grow: 0;
 }
+
+.view-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .view-buttons,
+    .view-btn {
+        display: none !important;
+    }
+
+    .search-and-view {
+        justify-content: center;
+    }
+
+    .search-input-wrapper {
+        width: 100%;
+    }
+}
