@@ -164,35 +164,12 @@
 
 /* Header
 ------------------------- */
-.restaurant-header {
-    height: 500px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .restaurant-header-content {
     text-align: center;
     padding: 2rem;
     color: white;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.restaurant-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 3rem;
-    margin: 0 0 1rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .restaurant-location {
@@ -206,32 +183,6 @@
 }
 
 .restaurant-location i {
-    color: var(--accent-color);
-}
-
-.restaurant-meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 1rem;
-}
-
-.restaurant-meta .style,
-.restaurant-meta .diet-type,
-.restaurant-meta .date,
-.restaurant-meta .price {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-}
-
-.restaurant-meta .style i,
-.restaurant-meta .diet-type i,
-.restaurant-meta .date i,
-.restaurant-meta .price i {
     color: var(--accent-color);
 }
 
@@ -249,6 +200,14 @@
     transition: all 0.2s ease;
     vertical-align: middle;
     cursor: pointer;
+}
+
+.restaurant-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .restaurant-meta .rating:hover {
@@ -381,15 +340,20 @@
 }
 
 .rating {
-    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
 }
 
 .rating-bar {
-    width: 100px;
+    flex-grow: 1;
     height: 8px;
-    background: rgba(221, 221, 221, 0.2);
+    background-color: var(--border-color);
     border-radius: 4px;
     overflow: hidden;
+    min-width: 100px;
+    max-width: 200px;
     position: relative;
 }
 
@@ -425,9 +389,11 @@
 .rating-fill[data-rating="9"] { width: 90%; }
 .rating-fill[data-rating="10"] { width: 100%; }
 
-.rating .score {
-    font-weight: 600;
-    font-size: 1rem;
+.score {
+    color: var(--secondary-color);
+    font-weight: bold;
+    min-width: 45px;
+    text-align: right;
 }
 
 .criteria {
@@ -472,9 +438,9 @@
 .rating-link {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem;
     text-decoration: none;
-    color: white;
+    color: inherit;
     cursor: pointer;
     transition: transform 0.2s ease;
 }
@@ -544,92 +510,6 @@ html {
 
 /* Responsive Design
 ------------------------- */
-@media (max-width: 768px) and (orientation: landscape) {
-    .restaurant-header {
-        height: 400px;
-    }
-
-    .restaurant-header h1 {
-        font-size: 2.5rem;
-    }
-
-    .restaurant-location {
-        font-size: 1.1rem;
-    }
-
-    .restaurant-meta {
-        margin-top: 0.8rem;
-    }
-
-    .restaurant-meta .style,
-    .restaurant-meta .diet-type,
-    .restaurant-meta .date,
-    .restaurant-meta .price {
-        font-size: 0.95rem;
-    }
-}
-
-@media (max-width: 768px) and (orientation: portrait) {
-    .restaurant-header {
-        height: 300px;
-    }
-
-    .restaurant-header-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-
-    .restaurant-header h1 {
-        font-size: 1.8rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .restaurant-location {
-        font-size: 0.9rem;
-        margin: 0.5rem 0;
-    }
-
-    .rating {
-        margin: 0.3rem 0;
-    }
-
-    .restaurant-meta {
-        flex-direction: column;
-        gap: 0.3rem;
-        margin-top: 0.3rem;
-        width: 100%;
-    }
-
-    .meta-line {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        justify-content: center;
-    }
-
-    .restaurant-meta .style,
-    .restaurant-meta .diet-type,
-    .restaurant-meta .date,
-    .restaurant-meta .price {
-        font-size: 0.85rem;
-    }
-
-    .restaurant-meta .rating {
-        margin-bottom: 0.5rem;
-    }
-
-    html {
-        scroll-padding-top: 1rem;
-    }
-
-    #ratings-section {
-        scroll-margin-top: 1rem;
-    }
-}
-
 @media (max-width: 768px) {
     .ratings-section {
         padding: 1.5rem;
@@ -657,12 +537,7 @@ html {
     }
 
     .rating-bar {
-        width: 80px;
-        height: 6px;
-    }
-
-    .rating .score {
-        font-size: 0.9rem;
+        width: 150px;
     }
 
     .restaurant-navigation {

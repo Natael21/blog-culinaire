@@ -13,43 +13,39 @@ comments: true
         <i class="fas fa-map-marker-alt"></i>
         <span>{{ page.address }}</span>
       </div>
-      <div class="rating">
-        <a href="#ratings-section" class="rating-link">
-          <div class="rating-bar">
-            <div class="rating-fill" data-rating="{{ page.note }}"></div>
-          </div>
-          <span class="score">{{ page.note }}/10</span>
-        </a>
-      </div>
       <div class="restaurant-meta">
-        <div class="meta-line">
-          <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
-          {% if page.diet %}
-          <span class="diet-type">
-            {% if page.diet == "vegetarian" %}
-            <i class="fas fa-carrot"></i> 100% Végétarien
-            {% elsif page.diet == "vegan" %}
-            <i class="fas fa-leaf"></i> 100% Végétalien
-            {% elsif page.diet == "vegetarian-friendly" %}
-            <i class="fas fa-carrot"></i> Options végétariennes
-            {% elsif page.diet == "vegan-friendly" %}
-            <i class="fas fa-leaf"></i> Options végétaliennes
-            {% endif %}
-          </span>
+        <div class="rating">
+          <a href="#ratings-section" class="rating-link">
+            <div class="rating-bar">
+              <div class="rating-fill" data-rating="{{ page.note }}"></div>
+            </div>
+            <span class="score">{{ page.note }}/10</span>
+          </a>
+        </div>
+        <span class="style"><i class="fas fa-utensils"></i> {{ page.style }}</span>
+        {% if page.diet %}
+        <span class="diet-type">
+          {% if page.diet == "vegetarian" %}
+          <i class="fas fa-carrot"></i> 100% Végétarien
+          {% elsif page.diet == "vegan" %}
+          <i class="fas fa-leaf"></i> 100% Végétalien
+          {% elsif page.diet == "vegetarian-friendly" %}
+          <i class="fas fa-carrot"></i> Options végétariennes
+          {% elsif page.diet == "vegan-friendly" %}
+          <i class="fas fa-leaf"></i> Options végétaliennes
           {% endif %}
-        </div>
-        <div class="meta-line">
-          <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
-          <span class="price">
-            {% if page.price == "budget" %}
-              <i class="fas fa-dollar-sign"></i>
-            {% elsif page.price == "medium" %}
-              <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
-            {% elsif page.price == "expensive" %}
-              <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
-            {% endif %}
-          </span>
-        </div>
+        </span>
+        {% endif %}
+        <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
+        <span class="price">
+          {% if page.price == "budget" %}
+            <i class="fas fa-dollar-sign"></i>
+          {% elsif page.price == "medium" %}
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+          {% elsif page.price == "expensive" %}
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+          {% endif %}
+        </span>
       </div>
     </div>
   </div>
