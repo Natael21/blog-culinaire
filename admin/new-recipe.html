@@ -679,48 +679,6 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             });
         }
 
-        // Fonction pour uploader toutes les images
-        async function uploadAllImages() {
-            const images = [];
-            
-            // Ajouter l'image principale
-            if (mainImageFile) {
-                const mainImageBase64 = await getBase64(mainImageFile);
-                images.push({
-                    image: mainImageBase64,
-                    filename: mainImageFile.name,
-                    isMain: true
-                });
-            }
-
-            // Ajouter les images de la galerie
-            for (let file of galleryImageFiles) {
-                const galleryImageBase64 = await getBase64(file);
-                images.push({
-                    image: galleryImageBase64,
-                    filename: file.name,
-                    isMain: false
-                });
-            }
-
-            // Envoyer toutes les images à la fonction Netlify
-            const response = await fetch('/.netlify/functions/upload-images', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ images })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Erreur lors de l\'upload des images');
-            }
-
-            const data = await response.json();
-            return data.urls;
-        }
-
         // Gérer la soumission du formulaire
         document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -728,44 +686,13 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             const submitButton = document.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
             submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Upload des images...';
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Préparation des données...';
 
             try {
                 // Vérifier si une image principale est sélectionnée
                 if (!mainImageFile) {
                     throw new Error('Veuillez sélectionner une image principale');
                 }
-
-                // Uploader toutes les images d'abord
-                const imageUrls = await uploadAllImages();
-                console.log('Images uploadées:', imageUrls);
-
-                // Mettre à jour les URLs des images dans le formulaire
-                if (imageUrls.mainImage) {
-                    document.getElementById('mainImageUrl').value = imageUrls.mainImage;
-                }
-
-                // Créer des champs cachés pour les URLs de la galerie
-                const existingContainer = document.getElementById('galleryUrlsContainer');
-                if (existingContainer) {
-                    existingContainer.remove();
-                }
-                
-                const galleryUrlsContainer = document.createElement('div');
-                galleryUrlsContainer.id = 'galleryUrlsContainer';
-                if (imageUrls.gallery && imageUrls.gallery.length > 0) {
-                    imageUrls.gallery.forEach(url => {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'galleryUrls[]';
-                        input.value = url;
-                        galleryUrlsContainer.appendChild(input);
-                    });
-                }
-                document.getElementById('restaurantForm').appendChild(galleryUrlsContainer);
-
-                // Mettre à jour le texte du bouton
-                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enregistrement du restaurant...';
 
                 // Vérifier tous les champs requis
                 const requiredFields = {
@@ -817,12 +744,62 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
                     throw new Error(`Veuillez remplir les champs suivants :\n- ${missingFields.join('\n- ')}`);
                 }
 
-                // Mettre à jour l'aperçu markdown avec les nouvelles URLs
-                updateMarkdownPreview();
+                // Préparer les images
+                const images = [];
+                if (mainImageFile) {
+                    const mainImageBase64 = await getBase64(mainImageFile);
+                    images.push({
+                        image: mainImageBase64,
+                        filename: mainImageFile.name,
+                        isMain: true
+                    });
+                }
 
-                // Si tout est valide, générer le markdown et sauvegarder
+                for (let file of galleryImageFiles) {
+                    const galleryImageBase64 = await getBase64(file);
+                    images.push({
+                        image: galleryImageBase64,
+                        filename: file.name,
+                        isMain: false
+                    });
+                }
+
+                // Générer le markdown
                 const markdown = generateMarkdown();
-                await saveToGitHub(markdown);
+
+                // Préparer le nom du fichier
+                const title = document.getElementById('title').value;
+                const filename = title.toLowerCase()
+                    .replace(/[éèêë]/g, 'e')
+                    .replace(/[àâä]/g, 'a')
+                    .replace(/[ùûü]/g, 'u')
+                    .replace(/[îï]/g, 'i')
+                    .replace(/[ôö]/g, 'o')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                const date = new Date().toISOString().split('T')[0];
+                const fullFilename = `_posts/${date}-${filename}.md`;
+
+                // Envoyer tout en une seule requête
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Envoi en cours...';
+
+                const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        filename: fullFilename,
+                        content: markdown,
+                        title: title,
+                        images: images
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur lors de la création du restaurant');
+                }
 
                 // Afficher un message de succès
                 showAlert('success', 'Restaurant enregistré avec succès !');
@@ -898,51 +875,6 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             previewContainer.appendChild(img);
             previewContainer.appendChild(deleteBtn);
             container.appendChild(previewContainer);
-        }
-
-        async function saveToGitHub(content) {
-            const token = localStorage.getItem('githubToken');
-            if (!token) {
-                throw new Error('Token GitHub non trouvé. Veuillez configurer votre token dans la page d\'administration.');
-            }
-
-            const title = document.getElementById('title').value;
-            const filename = title.toLowerCase()
-                .replace(/[éèêë]/g, 'e')
-                .replace(/[àâä]/g, 'a')
-                .replace(/[ùûü]/g, 'u')
-                .replace(/[îï]/g, 'i')
-                .replace(/[ôö]/g, 'o')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-
-            const date = new Date().toISOString().split('T')[0];
-            const fullFilename = `_posts/${date}-${filename}.md`;
-
-            try {
-                const response = await fetch('/.netlify/functions/create-restaurant', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        filename: fullFilename,
-                        content: content,
-                        title: title
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la création du restaurant');
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur lors de la sauvegarde sur GitHub:', error);
-                throw new Error(`Erreur lors de la sauvegarde sur GitHub: ${error.message}`);
-            }
         }
     </script>
 </body>

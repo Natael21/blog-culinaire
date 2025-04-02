@@ -192,17 +192,6 @@
                     <i class="fas fa-cog"></i> Paramètres
                 </a>
             </div>
-
-            <div id="token-section" class="admin-card">
-                <h3 class="admin-card-title">Configuration GitHub</h3>
-                <div class="mb-3">
-                    <label for="githubToken" class="form-label">Token GitHub</label>
-                    <input type="password" class="form-control" id="githubToken" placeholder="Entrez votre token GitHub">
-                </div>
-                <button class="action-button" onclick="saveToken()">
-                    <i class="fas fa-save"></i> Sauvegarder le token
-                </button>
-            </div>
         </div>
     </div>
 
@@ -225,7 +214,6 @@
             const loading = document.getElementById('loading');
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
-            const tokenSection = document.getElementById('token-section');
 
             loading.style.display = 'none';
 
@@ -234,29 +222,10 @@
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
                 document.getElementById('user-email').textContent = user.email;
-
-                // Vérifier si le token GitHub est déjà sauvegardé
-                const savedToken = localStorage.getItem('githubToken');
-                if (savedToken) {
-                    tokenSection.style.display = 'none';
-                } else {
-                    tokenSection.style.display = 'block';
-                }
             } else {
                 console.log('Aucun utilisateur connecté');
                 loginContainer.style.display = 'block';
                 adminContent.style.display = 'none';
-            }
-        }
-
-        function saveToken() {
-            const token = document.getElementById('githubToken').value.trim();
-            if (token) {
-                localStorage.setItem('githubToken', token);
-                document.getElementById('token-section').style.display = 'none';
-                alert('Token GitHub sauvegardé avec succès !');
-            } else {
-                alert('Veuillez entrer un token GitHub valide.');
             }
         }
 
@@ -285,7 +254,6 @@
 
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
-                localStorage.removeItem('githubToken');
                 updateUI(null);
             });
 
