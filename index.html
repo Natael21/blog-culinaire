@@ -424,9 +424,13 @@ title: Accueil
 
 /* Spécifique pour l'orientation portrait sur mobile */
 @media (max-width: 768px) and (orientation: portrait) {
+  .main-content {
+    padding: 0;
+  }
+
   .filters-container {
-    padding: 1rem;
-    margin: 1rem;
+    padding: 1rem 0;
+    margin: 1rem 0;
     background: transparent;
     box-shadow: none;
   }
@@ -442,11 +446,11 @@ title: Accueil
     width: 100%;
     max-width: none;
     padding: 0;
-    margin-left: -1rem;
+    margin-left: -2rem;
   }
 
   .search-input-wrapper {
-    width: calc(100% + 2rem);
+    width: calc(100% + 4rem);
     margin: 0;
     position: relative;
   }
@@ -476,9 +480,9 @@ title: Accueil
   }
 
   .advanced-filters-btn {
-    width: 100%;
+    width: calc(100% - 2rem);
     max-width: none;
-    margin: 1rem 0 0;
+    margin: 1rem auto 0;
     padding: 0.9rem;
     border-radius: 12px;
     background-color: #2c3e50;
