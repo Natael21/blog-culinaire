@@ -899,6 +899,51 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             previewContainer.appendChild(deleteBtn);
             container.appendChild(previewContainer);
         }
+
+        async function saveToGitHub(content) {
+            const token = localStorage.getItem('githubToken');
+            if (!token) {
+                throw new Error('Token GitHub non trouvé. Veuillez configurer votre token dans la page d\'administration.');
+            }
+
+            const title = document.getElementById('title').value;
+            const filename = title.toLowerCase()
+                .replace(/[éèêë]/g, 'e')
+                .replace(/[àâä]/g, 'a')
+                .replace(/[ùûü]/g, 'u')
+                .replace(/[îï]/g, 'i')
+                .replace(/[ôö]/g, 'o')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+
+            const date = new Date().toISOString().split('T')[0];
+            const fullFilename = `_posts/${date}-${filename}.md`;
+
+            try {
+                const response = await fetch('/.netlify/functions/create-restaurant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        filename: fullFilename,
+                        content: content,
+                        title: title
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur lors de la création du restaurant');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde sur GitHub:', error);
+                throw new Error(`Erreur lors de la sauvegarde sur GitHub: ${error.message}`);
+            }
+        }
     </script>
 </body>
 </html> 
