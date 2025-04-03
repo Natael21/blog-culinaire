@@ -352,7 +352,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
 }
 
 .rating-title {
@@ -374,19 +374,14 @@
     gap: 1rem;
 }
 
-.rating-details {
-    margin-top: 0.5rem;
-}
-
-.rating-details .criteria {
+.criteria {
     color: var(--text-light);
     font-style: italic;
-    margin: 0;
-    margin-bottom: 0.2rem;
+    margin: 0.2rem 0 0.5rem 0;
     font-size: 0.9rem;
 }
 
-.rating-details .comment {
+.comment {
     color: var(--text-color);
     line-height: 1.6;
     margin: 0;

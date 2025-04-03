@@ -109,10 +109,15 @@ comments: true
       </div>
       
       {% if details.criteria %}
-      <div class="rating-details" style="margin-top: 0.5rem;">
-        <p class="criteria" style="margin: 0; margin-bottom: 0.2rem;"><em>{{ details.criteria }}</em></p>
-        <p class="comment" style="margin: 0;">{{ details.comment }}</p>
-      </div>
+      <p class="criteria" style="margin: 0 0 0.5rem 0;"><em>{{ details.criteria }}</em></p>
+      {% elsif category == 'value' %}
+      <p class="criteria" style="margin: 0 0 0.5rem 0;"><em>Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</em></p>
+      {% elsif category == 'originality' %}
+      <p class="criteria" style="margin: 0 0 0.5rem 0;"><em>Innovation culinaire, créativité des recettes, authenticité, concept unique</em></p>
+      {% endif %}
+      
+      {% if details.comment %}
+      <p class="comment">{{ details.comment }}</p>
       {% endif %}
     </div>
     {% endfor %}
