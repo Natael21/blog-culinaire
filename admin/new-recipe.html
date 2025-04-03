@@ -391,6 +391,25 @@
             border-bottom: 2px solid #eee;
             z-index: 1;
         }
+        .is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+        .invalid-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+        .is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+        .editor-invalid {
+            border-color: #dc3545 !important;
+        }
+        .form-check-input.is-invalid ~ .form-check-label {
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -859,59 +878,67 @@ ${detailedDescription}`;
         document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // Réinitialiser tous les états d'invalidité
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.editor-invalid').forEach(el => {
+                el.classList.remove('editor-invalid');
+            });
+
             const submitButton = document.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Préparation des données...';
 
             try {
-                // Vérifier si une image principale est sélectionnée
+                let missingFields = [];
+
+                // Vérifier l'image principale
                 if (!mainImageFile) {
-                    throw new Error('Veuillez sélectionner une image principale');
+                    missingFields.push('Image principale');
+                    document.getElementById('mainImage').classList.add('is-invalid');
                 }
 
-                // Vérifier tous les champs requis
+                // Vérifier les champs de base
                 const requiredFields = {
                     'title': 'Nom du restaurant',
-                    'description': 'Description',
+                    'date': 'Date de visite',
+                    'description': 'Résumé',
                     'address': 'Adresse',
                     'style': 'Style de cuisine',
-                    'price': 'Gamme de prix',
-                    'diet': 'Régime alimentaire'
+                    'price': 'Gamme de prix'
                 };
 
-                let missingFields = [];
                 for (const [fieldId, fieldName] of Object.entries(requiredFields)) {
                     const field = document.getElementById(fieldId);
                     if (!field.value.trim()) {
                         missingFields.push(fieldName);
                         field.classList.add('is-invalid');
-                    } else {
-                        field.classList.remove('is-invalid');
                     }
                 }
 
-                // Vérifier les notes
-                const ratings = ['food', 'service', 'ambiance', 'value', 'originality'];
+                // Vérifier les notes et commentaires
+                const ratings = ['food', 'service', 'ambiance', 'value', 'originality', 'overallExperience'];
                 for (const rating of ratings) {
-                    const ratingInput = document.getElementById(rating + 'Score');
-                    const ratingComment = document.getElementById(rating + 'Comment');
-                    if (!ratingInput.value || !ratingComment.value.trim()) {
-                        missingFields.push(`Note et commentaire pour ${rating}`);
-                        ratingInput.classList.add('is-invalid');
-                        ratingComment.classList.add('is-invalid');
-                    } else {
-                        ratingInput.classList.remove('is-invalid');
-                        ratingComment.classList.remove('is-invalid');
+                    const scoreField = document.getElementById(`${rating}Score`);
+                    const commentField = document.getElementById(`${rating}Comment`);
+                    
+                    if (!scoreField.value || scoreField.value < 0 || scoreField.value > 10) {
+                        missingFields.push(`Note pour ${rating}`);
+                        scoreField.classList.add('is-invalid');
+                    }
+                    
+                    if (!commentField.value.trim()) {
+                        missingFields.push(`Commentaire pour ${rating}`);
+                        commentField.classList.add('is-invalid');
                     }
                 }
 
-                // Vérifier les commentaires utilisateurs
+                // Vérifier l'éditeur de description détaillée
                 if (!editor || !editor.getHTML().trim()) {
-                    missingFields.push('Description détaillée du restaurant');
-                    document.querySelector('#editor').classList.add('is-invalid');
-                } else {
-                    document.querySelector('#editor').classList.remove('is-invalid');
+                    missingFields.push('Description détaillée');
+                    document.querySelector('.ProseMirror').classList.add('editor-invalid');
                 }
 
                 if (missingFields.length > 0) {
