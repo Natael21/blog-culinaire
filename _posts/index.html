@@ -65,7 +65,7 @@ title: Accueil
 
   <div class="post-grid" id="restaurant-grid">
     {% for post in site.posts %}
-      {% if post.layout == 'restaurant' %}
+      {% if post.layout == 'restaurant' and post.state == 'ready' %}
       <div class="post-card" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-rating="{{ post.note }}" data-style="{{ post.style }}" data-price="{{ post.price }}" data-diet="{{ post.diet }}">
         <a href="{{ post.url | relative_url }}" class="post-link">
           <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
