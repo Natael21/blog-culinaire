@@ -6,7 +6,7 @@
     <title>Nouveau Restaurant - Administration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/qagffr3pkuv17a8on1afax661irst1hbr4e6tbv888sz91jc/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -511,14 +511,14 @@
         tinymce.init({
             selector: '#detailedDescription',
             height: 400,
-            menubar: false,
+            menubar: true,
             plugins: [
                 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'table', 'wordcount'
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
             ],
-            toolbar: 'undo redo | formatselect | ' +
-                'bold italic backcolor | alignleft aligncenter ' +
+            toolbar: 'undo redo | blocks | ' +
+                'bold italic forecolor | alignleft aligncenter ' +
                 'alignright alignjustify | bullist numlist outdent indent | ' +
                 'removeformat | help',
             content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; }'
