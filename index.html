@@ -338,16 +338,14 @@ title: Accueil
 }
 
 .reset-filters {
-  width: 100%;
-  padding: 0.8rem;
-  margin-top: 1rem;
+  grid-column: 1 / -1;
+  padding: 0.8rem 1.5rem;
   background: #f8f8f8;
   color: var(--primary-color);
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
   cursor: pointer;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -359,6 +357,10 @@ title: Accueil
   background: #eee;
   border-color: var(--accent-color);
   transform: translateY(-1px);
+}
+
+.reset-filters i {
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
