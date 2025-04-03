@@ -74,9 +74,7 @@
             position: sticky;
             top: 20px;
             height: calc(100vh - 40px);
-            background: var(--card-bg);
-            box-shadow: var(--box-shadow);
-            border-radius: var(--border-radius);
+            overflow-y: auto;
         }
 
         .admin-header {
@@ -159,19 +157,19 @@
 
         .form-check {
             margin-bottom: 12px;
-            padding-left: 35px;
+            padding-left: 0;
             position: relative;
             display: flex;
             align-items: center;
+            gap: 12px;
             min-height: 32px;
         }
 
         .form-check-input {
-            position: absolute;
-            left: 0;
+            position: relative;
             margin: 0;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border: 2px solid var(--input-border);
             border-radius: 6px;
             cursor: pointer;
@@ -179,13 +177,14 @@
             appearance: none;
             -webkit-appearance: none;
             background-color: var(--input-bg);
+            flex-shrink: 0;
         }
 
         .form-check-input:checked {
             background-color: var(--accent-color);
             border-color: var(--accent-color);
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23fff' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
-            background-size: 16px;
+            background-size: 14px;
             background-position: center;
             background-repeat: no-repeat;
         }
@@ -199,8 +198,9 @@
             font-weight: 500;
             color: var(--text-color);
             cursor: pointer;
-            margin-left: 8px;
+            margin: 0;
             user-select: none;
+            line-height: 1.4;
         }
 
         .editor-toolbar {
@@ -520,6 +520,78 @@
         .address-suggestion.selected {
             background-color: rgba(52, 152, 219, 0.1);
         }
+
+        .form-control.is-invalid {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.4) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .invalid-feedback {
+            display: block !important;
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .error-icon {
+            display: block !important;
+            position: absolute;
+            right: 16px;
+            top: 45px;
+            color: var(--secondary-color);
+        }
+
+        .ProseMirror.editor-invalid {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .upload-zone.is-invalid {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .preview-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            padding: 35px 35px 15px;
+            border-bottom: 2px solid #edf2f7;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            box-shadow: var(--box-shadow);
+        }
+
+        .markdown-preview {
+            background: var(--card-bg);
+            padding: 0 35px 35px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-top: -30px;
+        }
+
+        #markdownPreview {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-width: 100%;
+            overflow-x: auto;
+            padding-top: 30px;
+        }
     </style>
 
     <script>
@@ -628,7 +700,50 @@
         }
 
         function selectAddress(suggestion, input, container) {
-            input.value = suggestion.display_name;
+            // Formater l'adresse de manière plus concise
+            let formattedAddress = '';
+            
+            if (suggestion.address) {
+                const addr = suggestion.address;
+                const components = [];
+
+                // Ajouter le numéro de rue s'il existe
+                if (addr.house_number) {
+                    components.push(addr.house_number);
+                }
+
+                // Ajouter le nom de la rue
+                if (addr.road) {
+                    components.push(addr.road);
+                }
+
+                // Ajouter la ville
+                if (addr.city || addr.town || addr.village) {
+                    components.push(addr.city || addr.town || addr.village);
+                }
+
+                // Ajouter la province/état
+                if (addr.state) {
+                    components.push(addr.state);
+                }
+
+                // Ajouter le code postal s'il existe
+                if (addr.postcode) {
+                    components.push(addr.postcode);
+                }
+
+                // Ajouter le pays
+                if (addr.country) {
+                    components.push(addr.country);
+                }
+
+                formattedAddress = components.join(', ');
+            } else {
+                // Fallback si la structure d'adresse n'est pas disponible
+                formattedAddress = suggestion.display_name.split(',').slice(0, 4).join(',');
+            }
+
+            input.value = formattedAddress;
             container.style.display = 'none';
             selectedIndex = -1;
             input.classList.add('is-valid');
@@ -1026,20 +1141,14 @@
             }
             const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
 
-            const mainImageUrl = document.getElementById('mainImageUrl').value;
-            const galleryUrls = Array.from(document.getElementsByName('galleryUrls[]')).map(input => input.value);
+            // Utiliser un placeholder pour les images en attendant l'upload
+            const mainImagePlaceholder = mainImageFile ? `[${mainImageFile.name}]` : '';
+            const galleryPlaceholders = galleryImageFiles.map(file => `  - image: "[${file.name}]"`);
+
             const overallRating = calculateOverallRating();
             
             // Obtenir le contenu de l'éditeur TipTap
             const detailedDescription = editor ? editor.getHTML() : '';
-
-            // Collecter les images supplémentaires
-            const additionalImages = [];
-            document.querySelectorAll('#additionalImages input').forEach(input => {
-                if (input.value) {
-                    additionalImages.push(`  - image: "${input.value}"`);
-                }
-            });
 
             // Générer les évaluations
             const ratings = {
@@ -1083,10 +1192,10 @@ diet: "${diet}"
 description: "${description}"
 price: "${price}"
 address: "${address}"
-image: "${mainImageUrl}"
+image: "${mainImagePlaceholder}"
 images:
-  - image: "${mainImageUrl}"
-${additionalImages.join('\n')}
+  - image: "${mainImagePlaceholder}"
+${galleryPlaceholders.join('\n')}
 ratings:
   food:
     score: ${ratings.food.score}
@@ -1143,14 +1252,35 @@ ${detailedDescription}`;
             return average;
         }
 
-        // Ajouter les écouteurs d'événements pour la mise à jour en direct
-        document.querySelectorAll('input, textarea, select').forEach(element => {
-            element.addEventListener('input', function() {
-                if (this.classList.contains('rating-input') && this.id !== 'overallRating') {
+        // Ajouter les écouteurs d'événements pour les champs de notation
+        document.addEventListener('DOMContentLoaded', function() {
+            const ratingInputs = document.querySelectorAll('.rating-input:not([readonly])');
+            ratingInputs.forEach(input => {
+                input.addEventListener('input', function() {
                     calculateOverallRating();
-                }
-                updateMarkdownPreview();
+                    updateMarkdownPreview();
+                });
+
+                // Ajouter une validation pour limiter les valeurs entre 0 et 10
+                input.addEventListener('change', function() {
+                    let value = parseFloat(this.value);
+                    if (isNaN(value)) {
+                        this.value = 5;
+                    } else {
+                        this.value = Math.min(Math.max(value, 0), 10);
+                    }
+                    calculateOverallRating();
+                    updateMarkdownPreview();
+                });
             });
+
+            // Calculer la note initiale
+            calculateOverallRating();
+        });
+
+        // Ajouter les écouteurs d'événements pour la mise à jour en direct
+        document.querySelectorAll('input:not(.rating-input), textarea, select').forEach(element => {
+            element.addEventListener('input', updateMarkdownPreview);
         });
 
         // Variables globales pour stocker les images temporairement
