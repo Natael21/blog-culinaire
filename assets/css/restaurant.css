@@ -462,7 +462,7 @@ html {
 }
 
 .back-button:hover {
-    background-color: var(--primary-color);
+    background-color: var(--accent-color) !important;
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

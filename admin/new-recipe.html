@@ -6,7 +6,8 @@
     <title>Nouveau Restaurant - Administration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.tiny.cloud/1/qagffr3pkuv17a8on1afax661irst1hbr4e6tbv888sz91jc/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -359,15 +360,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="diet">Régime alimentaire</label>
-                    <select class="form-control" id="diet" name="diet" required>
-                        <option value="">Sélectionner un régime</option>
-                        <option value="standard">Standard</option>
-                        <option value="vegetarian-friendly">Options végétariennes</option>
-                        <option value="vegetarian">100% Végétarien</option>
-                        <option value="vegan-friendly">Options végétaliennes</option>
-                        <option value="vegan">100% Végétalien</option>
-                    </select>
+                    <label>Options alimentaires disponibles</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
+                        <label class="form-check-label" for="vegetarian">
+                            Options végétariennes
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
+                        <label class="form-check-label" for="vegan">
+                            Options végétaliennes
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -485,9 +490,8 @@
             <div class="form-section">
                 <h2 class="form-section-title">Description détaillée</h2>
                 <div class="mb-3">
-                    <label for="detailedDescription" class="form-label">Description complète du restaurant</label>
-                    <textarea class="form-control" id="detailedDescription" rows="8" required 
-                        placeholder="Décrivez en détail votre expérience au restaurant..."></textarea>
+                    <label for="editor" class="form-label">Description complète du restaurant</label>
+                    <div id="editor" style="height: 300px;"></div>
                 </div>
             </div>
 
@@ -507,21 +511,19 @@
     </div>
 
     <script>
-        // Initialiser TinyMCE
-        tinymce.init({
-            selector: '#detailedDescription',
-            height: 400,
-            menubar: true,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | ' +
-                'bold italic forecolor | alignleft aligncenter ' +
-                'alignright alignjustify | bullist numlist outdent indent | ' +
-                'removeformat | help',
-            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; }'
+        // Initialiser Quill
+        var quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'header': [1, 2, 3, false] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Décrivez en détail votre expérience au restaurant...'
         });
 
         function addImage() {
@@ -545,11 +547,21 @@
             const address = document.getElementById('address').value;
             const style = document.getElementById('style').value;
             const price = document.getElementById('price').value;
-            const diet = document.getElementById('diet').value;
+            
+            // Gérer les options alimentaires multiples
+            const dietOptions = [];
+            if (document.getElementById('vegetarian').checked) {
+                dietOptions.push('vegetarian-friendly');
+            }
+            if (document.getElementById('vegan').checked) {
+                dietOptions.push('vegan-friendly');
+            }
+            const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
+
             const mainImageUrl = document.getElementById('mainImageUrl').value;
             const galleryUrls = Array.from(document.getElementsByName('galleryUrls[]')).map(input => input.value);
             const overallRating = calculateOverallRating();
-            const detailedDescription = tinymce.get('detailedDescription').getContent();
+            const detailedDescription = quill.root.innerHTML;
 
             // Collecter les images supplémentaires
             const additionalImages = [];
@@ -780,9 +792,9 @@ ${detailedDescription}`;
                 }
 
                 // Vérifier les commentaires utilisateurs
-                if (!document.getElementById('detailedDescription').value.trim()) {
+                if (!document.getElementById('editor').value.trim()) {
                     missingFields.push('Description détaillée du restaurant');
-                    document.getElementById('detailedDescription').classList.add('is-invalid');
+                    document.getElementById('editor').classList.add('is-invalid');
                 }
 
                 if (missingFields.length > 0) {
