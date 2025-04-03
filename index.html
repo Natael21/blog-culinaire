@@ -42,10 +42,10 @@ title: Accueil
         <div class="filter-item">
           <label for="sort-by">Trier par</label>
           <select id="sort-by" class="filter-select">
+            <option value="date-desc" selected>Date (récent-vieux)</option>
+            <option value="date-asc">Date (vieux-récent)</option>
             <option value="name-asc">Nom (A-Z)</option>
             <option value="name-desc">Nom (Z-A)</option>
-            <option value="date-desc">Date (récent-vieux)</option>
-            <option value="date-asc">Date (vieux-récent)</option>
             <option value="rating-desc">Note (plus élevé à faible)</option>
             <option value="rating-asc">Note (faible à plus élevé)</option>
           </select>
@@ -55,7 +55,7 @@ title: Accueil
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
           <select id="style-filter" class="filter-select">
-            <option value="">Tous les styles</option>
+            <option value="" selected>Tous les styles</option>
             <option value="Asiatique">Asiatique</option>
             <option value="Italien">Italien</option>
             <option value="Mexicain">Mexicain</option>
@@ -77,7 +77,7 @@ title: Accueil
         <div class="filter-item">
           <label for="price-filter">Fourchette de prix</label>
           <select id="price-filter" class="filter-select">
-            <option value="">Tous les prix</option>
+            <option value="" selected>Tous les prix</option>
             <option value="$ (0-20$)">$ (0-20$)</option>
             <option value="$$ (20-40$)">$$ (20-40$)</option>
             <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
@@ -1015,25 +1015,15 @@ function updateMapMarkers() {
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
     
-    // Nouvelle logique pour le régime alimentaire
+    // Gestion du régime alimentaire
     let dietMatch = true;
     if (selectedDiet && selectedDiet !== 'all') {
-      switch(selectedDiet) {
-        case 'vegetarian':
-          dietMatch = diet === 'vegetarian';
-          break;
-        case 'vegan':
-          dietMatch = diet === 'vegan';
-          break;
-        case 'vegetarian-friendly':
-          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
-          break;
-        case 'vegan-friendly':
-          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
-          break;
-        case 'standard':
-          dietMatch = diet === 'standard';
-          break;
+      dietMatch = false;
+      if (selectedDiet === 'vegetarian' && diet === 'vegetarian-friendly') {
+        dietMatch = true;
+      }
+      if (selectedDiet === 'vegan' && diet === 'vegan-friendly') {
+        dietMatch = true;
       }
     }
     
@@ -1101,25 +1091,15 @@ function filterRestaurants() {
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
     
-    // Nouvelle logique pour le régime alimentaire
+    // Gestion du régime alimentaire
     let dietMatch = true;
     if (selectedDiet && selectedDiet !== 'all') {
-      switch(selectedDiet) {
-        case 'vegetarian':
-          dietMatch = diet === 'vegetarian';
-          break;
-        case 'vegan':
-          dietMatch = diet === 'vegan';
-          break;
-        case 'vegetarian-friendly':
-          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
-          break;
-        case 'vegan-friendly':
-          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
-          break;
-        case 'standard':
-          dietMatch = diet === 'standard';
-          break;
+      dietMatch = false;
+      if (selectedDiet === 'vegetarian' && diet === 'vegetarian-friendly') {
+        dietMatch = true;
+      }
+      if (selectedDiet === 'vegan' && diet === 'vegan-friendly') {
+        dietMatch = true;
       }
     }
     
