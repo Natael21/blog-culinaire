@@ -318,7 +318,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin-top: 2rem;
-    scroll-margin-top: 2rem; /* Pour compenser la hauteur du header fixe si présent */
+    scroll-margin-top: 2rem;
 }
 
 #ratings-section h2 {
@@ -374,71 +374,19 @@
     gap: 1rem;
 }
 
-.rating {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: relative;
+.rating-details {
+    margin-top: 0.5rem;
 }
 
-.rating-bar {
-    flex-grow: 1;
-    height: 8px;
-    background-color: var(--border-color);
-    border-radius: 4px;
-    overflow: hidden;
-    min-width: 100px;
-    max-width: 200px;
-    position: relative;
-}
-
-.rating-bar::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--border-color);
-    border-radius: 4px;
-    z-index: 1;
-}
-
-.rating-fill {
-    height: 100%;
-    background: linear-gradient(to right, var(--rating-good), var(--rating-better));
-    border-radius: 4px;
-    transition: width var(--transition-speed);
-    position: relative;
-    z-index: 2;
-}
-
-.rating-fill[data-rating="1"] { width: 10%; }
-.rating-fill[data-rating="2"] { width: 20%; }
-.rating-fill[data-rating="3"] { width: 30%; }
-.rating-fill[data-rating="4"] { width: 40%; }
-.rating-fill[data-rating="5"] { width: 50%; }
-.rating-fill[data-rating="6"] { width: 60%; }
-.rating-fill[data-rating="7"] { width: 70%; }
-.rating-fill[data-rating="8"] { width: 80%; }
-.rating-fill[data-rating="9"] { width: 90%; }
-.rating-fill[data-rating="10"] { width: 100%; }
-
-.score {
-    color: var(--secondary-color);
-    font-weight: bold;
-    min-width: 45px;
-    text-align: right;
-}
-
-.criteria {
+.rating-details .criteria {
     color: var(--text-light);
     font-style: italic;
-    margin: 0.2rem 0;
+    margin: 0;
+    margin-bottom: 0.2rem;
     font-size: 0.9rem;
 }
 
-.comment {
+.rating-details .comment {
     color: var(--text-color);
     line-height: 1.6;
     margin: 0;
@@ -675,14 +623,12 @@ html {
     }
 }
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ratingFills = document.querySelectorAll('.rating-fill[data-rating]');
-    ratingFills.forEach(fill => {
-        const rating = parseFloat(fill.getAttribute('data-rating'));
-        if (!isNaN(rating)) {
-            fill.style.width = `${rating * 10}%`;
-        }
-    });
-});
-</script> 
+@media (max-width: 768px) and (orientation: landscape) {
+    .restaurant-header {
+        height: 300px;
+    }
+
+    .view-buttons {
+        display: none;
+    }
+} 
