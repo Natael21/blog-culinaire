@@ -161,23 +161,36 @@
             margin-bottom: 12px;
             padding-left: 35px;
             position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 32px;
         }
 
         .form-check-input {
             position: absolute;
             left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 22px;
-            height: 22px;
             margin: 0;
+            width: 24px;
+            height: 24px;
             border: 2px solid var(--input-border);
             border-radius: 6px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: var(--input-bg);
         }
 
         .form-check-input:checked {
             background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23fff' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+            background-size: 16px;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .form-check-input:hover {
             border-color: var(--accent-color);
         }
 
@@ -186,6 +199,8 @@
             font-weight: 500;
             color: var(--text-color);
             cursor: pointer;
+            margin-left: 8px;
+            user-select: none;
         }
 
         .editor-toolbar {
@@ -391,7 +406,307 @@
                 padding: 25px;
             }
         }
+
+        .upload-zone {
+            border: 2px dashed var(--input-border);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            background: var(--input-bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: var(--text-color);
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+
+        .gallery-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .pac-container {
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            border: 2px solid var(--input-border);
+            border-top: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: -2px;
+            font-family: inherit;
+        }
+
+        .pac-item {
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pac-item:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .pac-icon {
+            margin-right: 10px;
+        }
+
+        .pac-item-query {
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .address-suggestions {
+            position: absolute;
+            width: 100%;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: -2px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .address-suggestion {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .address-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .address-suggestion:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .address-suggestion.selected {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
     </style>
+
+    <script>
+        // Remplacer la fonction d'initialisation de l'autocomplétion
+        let debounceTimer;
+        let selectedIndex = -1;
+        let suggestions = [];
+
+        async function searchAddress(query) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erreur lors de la recherche d\'adresse:', error);
+                return [];
+            }
+        }
+
+        function initializeAddressAutocomplete() {
+            const input = document.getElementById('address');
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'address-suggestions';
+            input.parentNode.appendChild(suggestionsContainer);
+
+            input.addEventListener('input', async function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+
+                if (query.length < 3) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                debounceTimer = setTimeout(async () => {
+                    suggestions = await searchAddress(query);
+                    displaySuggestions(suggestions, suggestionsContainer);
+                }, 300);
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (!['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
+                
+                const suggestionElements = suggestionsContainer.getElementsByClassName('address-suggestion');
+                
+                if (e.key === 'Escape') {
+                    suggestionsContainer.style.display = 'none';
+                    selectedIndex = -1;
+                    return;
+                }
+
+                if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    selectAddress(suggestions[selectedIndex], input, suggestionsContainer);
+                    return;
+                }
+
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, suggestionElements.length - 1);
+                }
+
+                Array.from(suggestionElements).forEach((el, index) => {
+                    el.classList.toggle('selected', index === selectedIndex);
+                });
+            });
+
+            // Fermer les suggestions en cliquant en dehors
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        function displaySuggestions(suggestions, container) {
+            if (!suggestions.length) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = '';
+            suggestions.forEach((suggestion, index) => {
+                const div = document.createElement('div');
+                div.className = 'address-suggestion';
+                div.textContent = suggestion.display_name;
+                
+                div.addEventListener('click', () => {
+                    selectAddress(suggestion, document.getElementById('address'), container);
+                });
+
+                div.addEventListener('mouseenter', () => {
+                    selectedIndex = index;
+                    Array.from(container.children).forEach((el, i) => {
+                        el.classList.toggle('selected', i === index);
+                    });
+                });
+
+                container.appendChild(div);
+            });
+
+            container.style.display = 'block';
+        }
+
+        function selectAddress(suggestion, input, container) {
+            input.value = suggestion.display_name;
+            container.style.display = 'none';
+            selectedIndex = -1;
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+            updateMarkdownPreview();
+        }
+
+        // Gérer le glisser-déposer pour les zones d'upload
+        function initializeDropZones() {
+            const zones = ['mainImageZone', 'galleryZone'];
+            
+            zones.forEach(zoneId => {
+                const zone = document.getElementById(zoneId);
+                const input = zone.querySelector('input[type="file"]');
+
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => {
+                        zone.classList.add('dragover');
+                    });
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => {
+                        zone.classList.remove('dragover');
+                    });
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+
+                    if (zoneId === 'mainImageZone' && files.length > 0) {
+                        input.files = files;
+                        handleMainImageUpload(files[0]);
+                    } else if (zoneId === 'galleryZone') {
+                        input.files = files;
+                        handleGalleryUpload(files);
+                    }
+                });
+            });
+        }
+
+        function handleMainImageUpload(file) {
+            if (file && file.type.startsWith('image/')) {
+                mainImageFile = file;
+                const container = document.getElementById('mainImagePreview');
+                container.innerHTML = '';
+                createImagePreview(file, container, true);
+                updateMarkdownPreview();
+            }
+        }
+
+        function handleGalleryUpload(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    galleryImageFiles.push(file);
+                }
+            });
+            updateGalleryPreview();
+            updateMarkdownPreview();
+        }
+
+        // Initialiser les fonctionnalités au chargement de la page
+        window.addEventListener('load', () => {
+            initializeAddressAutocomplete();
+            initializeDropZones();
+            // ... rest of your existing load event handlers ...
+        });
+    </script>
 </head>
 <body>
     <div class="page-container">
@@ -428,7 +743,9 @@
 
                     <div class="form-group">
                         <label for="address">Adresse</label>
-                        <input type="text" id="address" name="address" required>
+                        <input type="text" id="address" name="address" class="form-control" required placeholder="Commencez à taper une adresse...">
+                        <i class="fas fa-exclamation-circle error-icon"></i>
+                        <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
                     </div>
 
                     <div class="form-group">
@@ -474,19 +791,28 @@
 
                     <div class="form-group">
                         <label for="mainImage">Image principale</label>
-                        <div class="image-upload-container">
+                        <div class="upload-zone" id="mainImageZone">
                             <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
-                            <input type="hidden" id="mainImageUrl" name="mainImageUrl">
-                            <div id="mainImagePreview" class="image-preview-container"></div>
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">Glissez et déposez votre image principale ici</div>
+                            <div class="upload-subtext">ou cliquez pour sélectionner un fichier</div>
                         </div>
+                        <div id="mainImagePreview" class="image-preview-container mt-3"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Images de la galerie</label>
-                        <div class="gallery-upload-container">
+                        <div class="upload-zone" id="galleryZone">
                             <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
-                            <div id="galleryPreview" class="gallery-preview"></div>
+                            <div class="upload-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="upload-text">Glissez et déposez vos images ici</div>
+                            <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
                         </div>
+                        <div id="galleryPreview" class="gallery-preview"></div>
                     </div>
                 </div>
 
