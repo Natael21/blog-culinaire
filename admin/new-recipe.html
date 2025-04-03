@@ -60,14 +60,43 @@
             margin: 0;
             min-height: 100vh;
             padding: 20px;
-            padding-top: 80px;
+            padding-top: 100px;  /* Espace pour le header */
             position: relative;
         }
 
+        .header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--background-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .admin-header {
+            margin: 0;
+            text-align: left;
+        }
+
+        .admin-title {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 800;
+            position: relative;
+            display: inline-block;
+            background: linear-gradient(120deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
         .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
             padding: 12px 24px;
             background: var(--primary-color);
             color: white;
@@ -80,6 +109,7 @@
             gap: 8px;
             transition: all 0.3s ease;
             text-decoration: none;
+            margin-left: auto;
         }
 
         .back-button:hover {
@@ -87,42 +117,34 @@
             transform: translateY(-2px);
         }
 
-        .back-button i {
-            font-size: 1.1rem;
-        }
-
         .form-column {
             flex: 1;
             max-width: 60%;
-            background: transparent;
         }
 
         .preview-column {
             flex: 1;
             max-width: 40%;
-            margin-top: 40px;
         }
 
-        .admin-header {
-            margin-bottom: 40px;
-            text-align: left;
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+        .form-section:first-child,
+        .preview-title {
+            margin-top: 0;
         }
 
-        .admin-title {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            font-weight: 800;
-            position: relative;
-            display: inline-block;
-            background: linear-gradient(120deg, #2c3e50, #3498db);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
+        /* Masquer les messages d'erreur par défaut */
+        .invalid-feedback {
+            display: none !important;
+        }
+
+        .error-icon {
+            display: none !important;
+        }
+
+        /* Ne montrer les erreurs que lorsque la classe show-error est présente */
+        .form-control.show-error.is-invalid + .error-icon,
+        .form-control.show-error.is-invalid + .error-icon + .invalid-feedback {
+            display: block !important;
         }
 
         .form-section {
@@ -348,22 +370,6 @@
             background-color: #fff5f5 !important;
         }
 
-        .invalid-feedback {
-            display: none !important;
-            color: var(--secondary-color);
-            font-size: 0.875rem;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        .error-icon {
-            display: none !important;
-            position: absolute;
-            right: 16px;
-            top: 45px;
-            color: var(--secondary-color);
-        }
-
         .image-preview-container {
             position: relative;
             display: inline-block;
@@ -562,22 +568,6 @@
             background-color: #fff5f5 !important;
         }
 
-        .invalid-feedback {
-            display: block !important;
-            color: var(--secondary-color);
-            font-size: 0.875rem;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        .error-icon {
-            display: block !important;
-            position: absolute;
-            right: 16px;
-            top: 45px;
-            color: var(--secondary-color);
-        }
-
         .ProseMirror.editor-invalid {
             border-color: var(--secondary-color) !important;
             box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
@@ -632,14 +622,6 @@
             border-color: var(--secondary-color) !important;
             box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.4) !important;
             background-color: #fff5f5 !important;
-        }
-
-        .form-control.show-error.is-invalid + .error-icon {
-            display: block !important;
-        }
-
-        .form-control.show-error.is-invalid + .error-icon + .invalid-feedback {
-            display: block !important;
         }
 
         .ProseMirror.show-error.editor-invalid {
@@ -885,16 +867,18 @@
     </script>
 </head>
 <body>
-    <div class="page-container">
+    <div class="header-container">
+        <div class="admin-header">
+            <h1 class="admin-title">Nouveau Restaurant</h1>
+        </div>
         <a href="index.html" class="back-button">
             <i class="fas fa-arrow-left"></i>
             Retour à l'administration
         </a>
-        <div class="form-column">
-            <div class="admin-header">
-                <h1 class="admin-title">Nouveau Restaurant</h1>
-            </div>
+    </div>
 
+    <div class="page-container">
+        <div class="form-column">
             <form id="restaurantForm" class="form-card">
                 <!-- Informations de base -->
                 <div class="form-section">
