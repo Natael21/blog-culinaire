@@ -125,6 +125,12 @@
         .preview-column {
             flex: 1;
             max-width: 40%;
+            position: sticky;
+            top: 100px; /* Ajuster en fonction de la hauteur du header */
+            height: calc(100vh - 120px); /* Hauteur de la fenêtre moins header et padding */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .form-section:first-child,
@@ -180,30 +186,8 @@
             letter-spacing: -0.2px;
         }
 
-        .form-control {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--input-border);
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: var(--input-bg);
-            color: var(--text-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .form-control:focus {
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
-            outline: none;
-        }
-
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 45px;
+        .form-check-container {
+            padding-left: 16px;
         }
 
         .form-check {
@@ -433,8 +417,9 @@
 
             .preview-column {
                 position: relative;
-                height: auto;
-                min-height: 500px;
+                top: 0;
+                height: 500px;
+                margin-top: 40px;
             }
 
             .form-section {
@@ -583,7 +568,6 @@
         .preview-title {
             color: var(--primary-color);
             font-size: 1.5rem;
-            margin-bottom: 30px;
             padding: 35px 35px 15px;
             border-bottom: 2px solid #edf2f7;
             font-weight: 700;
@@ -591,6 +575,7 @@
             background: var(--card-bg);
             border-radius: var(--border-radius) var(--border-radius) 0 0;
             box-shadow: var(--box-shadow);
+            margin: 0;
         }
 
         .markdown-preview {
@@ -598,7 +583,8 @@
             padding: 0 35px 35px;
             border-radius: 0 0 var(--border-radius) var(--border-radius);
             box-shadow: var(--box-shadow);
-            margin-top: -30px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         #markdownPreview {
@@ -608,7 +594,6 @@
             font-size: 0.9rem;
             line-height: 1.5;
             max-width: 100%;
-            overflow-x: auto;
             padding-top: 30px;
         }
 
@@ -939,17 +924,19 @@
 
                     <div class="form-group">
                         <label>Options alimentaires disponibles</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
-                            <label class="form-check-label" for="vegetarian">
-                                Options végétariennes
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
-                            <label class="form-check-label" for="vegan">
-                                Options végétaliennes
-                            </label>
+                        <div class="form-check-container">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
+                                <label class="form-check-label" for="vegetarian">
+                                    Options végétariennes
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
+                                <label class="form-check-label" for="vegan">
+                                    Options végétaliennes
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -1400,6 +1387,9 @@ ${detailedDescription}`;
             document.querySelectorAll('.editor-invalid').forEach(el => {
                 el.classList.remove('editor-invalid');
             });
+            document.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.style.display = 'none';
+            });
 
             const submitButton = document.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
@@ -1414,6 +1404,7 @@ ${detailedDescription}`;
                     missingFields.push('Image principale');
                     const mainImageZone = document.getElementById('mainImageZone');
                     mainImageZone.classList.add('is-invalid', 'show-error');
+                    mainImageZone.closest('.form-group').classList.add('show-error');
                 }
 
                 // Vérifier les champs de base
@@ -1430,7 +1421,8 @@ ${detailedDescription}`;
                     const field = document.getElementById(fieldId);
                     if (!field.value.trim()) {
                         missingFields.push(fieldName);
-                        field.classList.add('is-invalid', 'show-error');
+                        field.classList.add('is-invalid');
+                        field.closest('.form-group').classList.add('show-error');
                     }
                 }
 
@@ -1442,23 +1434,36 @@ ${detailedDescription}`;
                     
                     if (!scoreField.value || scoreField.value < 0 || scoreField.value > 10) {
                         missingFields.push(`Note pour ${rating}`);
-                        scoreField.classList.add('is-invalid', 'show-error');
+                        scoreField.classList.add('is-invalid');
+                        scoreField.closest('.form-group').classList.add('show-error');
                     }
                     
                     if (!commentField.value.trim()) {
                         missingFields.push(`Commentaire pour ${rating}`);
-                        commentField.classList.add('is-invalid', 'show-error');
+                        commentField.classList.add('is-invalid');
+                        commentField.closest('.form-group').classList.add('show-error');
                     }
                 }
 
                 // Vérifier l'éditeur de description détaillée
                 if (!editor || !editor.getHTML().trim()) {
                     missingFields.push('Description détaillée');
-                    document.querySelector('.ProseMirror').classList.add('editor-invalid', 'show-error');
+                    const editorElement = document.querySelector('.ProseMirror');
+                    editorElement.classList.add('editor-invalid');
+                    editorElement.closest('.form-group').classList.add('show-error');
                 }
 
                 if (missingFields.length > 0) {
-                    throw new Error(`Veuillez remplir les champs suivants :\n- ${missingFields.join('\n- ')}`);
+                    // Afficher un message d'erreur global
+                    showAlert('danger', `Veuillez remplir les champs suivants :\n- ${missingFields.join('\n- ')}`);
+                    
+                    // Faire défiler jusqu'au premier champ en erreur
+                    const firstError = document.querySelector('.show-error');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    
+                    throw new Error('Formulaire incomplet');
                 }
 
                 // Préparer les images
