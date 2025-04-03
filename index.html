@@ -38,32 +38,43 @@ title: Accueil
 
       <!-- Filtres avancés (cachés par défaut) -->
       <div id="advanced-filters" class="advanced-filters" style="display: none;">
-        <!-- Tri -->
-        <div class="filter-item">
-          <label for="sort-by">Trier par</label>
-          <select id="sort-by" class="filter-select">
-            <option value="date-desc" selected>Date (récent-vieux)</option>
-            <option value="date-asc">Date (vieux-récent)</option>
-            <option value="name-asc">Nom (A-Z)</option>
-            <option value="name-desc">Nom (Z-A)</option>
-            <option value="rating-desc">Note (plus élevé à faible)</option>
-            <option value="rating-asc">Note (faible à plus élevé)</option>
-          </select>
-        </div>
-
         <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
           <select id="style-filter" class="filter-select">
-            <option value="" selected>Tous les styles</option>
+            <option value="all">Tous les styles</option>
             <option value="Asiatique">Asiatique</option>
-            <option value="Mexicain & Latino">Mexicain & Latino</option>
-            <option value="Bistro & Café">Bistro & Café</option>
             <option value="Américain">Américain</option>
             <option value="Moyen-Orient">Moyen-Orient</option>
-            <option value="Indien & Épicé">Indien & Épicé</option>
-            <option value="Italien">Italien</option>
+            <option value="Mexicain & Latino">Mexicain & Latino</option>
+            <option value="Bistro & Café">Bistro & Café</option>
             <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
+            <option value="Italien">Italien</option>
+            <option value="Indien & Épicé">Indien & Épicé</option>
+          </select>
+        </div>
+
+        <!-- Note -->
+        <div class="filter-item">
+          <label for="rating-filter">Note</label>
+          <select id="rating-filter" class="filter-select">
+            <option value="">Toutes les notes</option>
+            <option value="8">Recommandés (8 à 10/10)</option>
+            <option value="6">Corrects (6 à 7/10)</option>
+            <option value="5">Non recommandés (5/10 et moins)</option>
+          </select>
+        </div>
+
+        <!-- Régime alimentaire -->
+        <div class="filter-item">
+          <label for="diet-filter">Régime alimentaire</label>
+          <select id="diet-filter" class="filter-select">
+            <option value="all">Tous les régimes</option>
+            <option value="standard">Standard</option>
+            <option value="vegetarian-friendly">Options végétariennes</option>
+            <option value="vegetarian">100% Végétarien</option>
+            <option value="vegan-friendly">Options végétaliennes</option>
+            <option value="vegan">100% Végétalien</option>
           </select>
         </div>
 
@@ -71,26 +82,11 @@ title: Accueil
         <div class="filter-item">
           <label for="price-filter">Fourchette de prix</label>
           <select id="price-filter" class="filter-select">
-            <option value="" selected>Tous les prix</option>
-            <option value="$ (0-20$)">$ (0-20$)</option>
-            <option value="$$ (20-40$)">$$ (20-40$)</option>
-            <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
+            <option value="">Tous les prix</option>
+            <option value="budget">$ (0-20$)</option>
+            <option value="medium">$$ (20-40$)</option>
+            <option value="expensive">$$$ (40$ et +)</option>
           </select>
-        </div>
-
-        <!-- Régime alimentaire -->
-        <div class="filter-item">
-          <label>Régime alimentaire</label>
-          <div class="diet-options">
-            <div class="diet-option">
-              <input type="checkbox" id="vegetarian-option" value="vegetarian-friendly">
-              <label for="vegetarian-option">Options végétariennes</label>
-            </div>
-            <div class="diet-option">
-              <input type="checkbox" id="vegan-option" value="vegan-friendly">
-              <label for="vegan-option">Options végétaliennes</label>
-            </div>
-          </div>
         </div>
 
         <!-- Bouton de réinitialisation -->
@@ -353,10 +349,6 @@ title: Accueil
   background: #eee;
   border-color: var(--accent-color);
   transform: translateY(-1px);
-}
-
-.reset-filters i {
-  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
@@ -886,86 +878,6 @@ title: Accueil
     margin: 0 -0.5rem;
   }
 }
-
-/* Styles pour les filtres avancés */
-.advanced-filters {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 10px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-item label {
-  font-weight: 600;
-  color: #2c3e50;
-  font-size: 0.9rem;
-}
-
-.filter-select {
-  padding: 0.8rem;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  width: 100%;
-  background-color: white;
-  cursor: pointer;
-}
-
-.diet-options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.diet-option {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.diet-option input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.diet-option label {
-  cursor: pointer;
-  font-weight: normal;
-}
-
-.reset-filters {
-  grid-column: 1 / -1;
-  padding: 0.8rem 1.5rem;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.reset-filters:hover {
-  background: #c0392b;
-}
-
-.reset-filters i {
-  font-size: 1rem;
-}
 </style>
 
 <script>
@@ -1013,15 +925,25 @@ function updateMapMarkers() {
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
     
-    // Gestion du régime alimentaire
+    // Nouvelle logique pour le régime alimentaire
     let dietMatch = true;
     if (selectedDiet && selectedDiet !== 'all') {
-      dietMatch = false;
-      if (selectedDiet === 'vegetarian' && diet === 'vegetarian-friendly') {
-        dietMatch = true;
-      }
-      if (selectedDiet === 'vegan' && diet === 'vegan-friendly') {
-        dietMatch = true;
+      switch(selectedDiet) {
+        case 'vegetarian':
+          dietMatch = diet === 'vegetarian';
+          break;
+        case 'vegan':
+          dietMatch = diet === 'vegan';
+          break;
+        case 'vegetarian-friendly':
+          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
+          break;
+        case 'vegan-friendly':
+          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
+          break;
+        case 'standard':
+          dietMatch = diet === 'standard';
+          break;
       }
     }
     
@@ -1089,15 +1011,25 @@ function filterRestaurants() {
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
     
-    // Gestion du régime alimentaire
+    // Nouvelle logique pour le régime alimentaire
     let dietMatch = true;
     if (selectedDiet && selectedDiet !== 'all') {
-      dietMatch = false;
-      if (selectedDiet === 'vegetarian' && diet === 'vegetarian-friendly') {
-        dietMatch = true;
-      }
-      if (selectedDiet === 'vegan' && diet === 'vegan-friendly') {
-        dietMatch = true;
+      switch(selectedDiet) {
+        case 'vegetarian':
+          dietMatch = diet === 'vegetarian';
+          break;
+        case 'vegan':
+          dietMatch = diet === 'vegan';
+          break;
+        case 'vegetarian-friendly':
+          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
+          break;
+        case 'vegan-friendly':
+          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
+          break;
+        case 'standard':
+          dietMatch = diet === 'standard';
+          break;
       }
     }
     
@@ -1187,20 +1119,23 @@ function addMarker(restaurant, coords) {
 
 // Modifier la fonction resetFilters pour mettre à jour aussi les marqueurs
 function resetFilters() {
-  // Réinitialiser les valeurs des filtres
   titleSearch.value = '';
-  styleFilter.value = '';
+  styleFilter.value = 'all';
+  ratingFilter.value = '';
   priceFilter.value = '';
-  vegetarianOption.checked = false;
-  veganOption.checked = false;
-  sortSelect.value = 'date-desc';
-  
-  // Fermer le menu des filtres avancés
+  document.getElementById('diet-filter').value = 'all';
   advancedFilters.style.display = 'none';
   advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
   
-  // Appliquer les filtres
-  filterRestaurants();
+  // Réafficher tous les restaurants
+  restaurants.forEach(restaurant => {
+    restaurant.style.display = '';
+  });
+
+  // Mettre à jour les marqueurs si on est en vue carte
+  if (map) {
+    updateMapMarkers();
+  }
 }
 
 // Ajouter l'event listener pour le filtre de régime alimentaire
