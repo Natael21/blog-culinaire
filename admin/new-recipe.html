@@ -336,20 +336,13 @@
                     <select class="form-control" id="style" name="style" required>
                         <option value="">Sélectionner un style</option>
                         <option value="Asiatique">Asiatique</option>
-                        <option value="Italien">Italien</option>
-                        <option value="Mexicain">Mexicain</option>
-                        <option value="Bistro">Bistro</option>
                         <option value="Américain">Américain</option>
                         <option value="Moyen-Orient">Moyen-Orient</option>
-                        <option value="Vietnamien">Vietnamien</option>
-                        <option value="Indien">Indien</option>
-                        <option value="Café-Bistro">Café-Bistro</option>
+                        <option value="Mexicain & Latino">Mexicain & Latino</option>
+                        <option value="Bistro & Café">Bistro & Café</option>
                         <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
-                        <option value="Français">Français</option>
-                        <option value="Fusion">Fusion</option>
-                        <option value="Méditerranéen">Méditerranéen</option>
-                        <option value="Fast-food">Fast-food</option>
-                        <option value="Autre">Autre</option>
+                        <option value="Italien">Italien</option>
+                        <option value="Indien & Épicé">Indien & Épicé</option>
                     </select>
                 </div>
 
@@ -368,11 +361,10 @@
                     <select class="form-control" id="diet" name="diet" required>
                         <option value="">Sélectionner un régime</option>
                         <option value="standard">Standard</option>
-                        <option value="vegetarian-friendly">Végétarien</option>
-                        <option value="vegan-friendly">Végétalien</option>
-                        <option value="gluten-free">Sans gluten</option>
-                        <option value="halal">Halal</option>
-                        <option value="kosher">Kasher</option>
+                        <option value="vegetarian-friendly">Options végétariennes</option>
+                        <option value="vegetarian">100% Végétarien</option>
+                        <option value="vegan-friendly">Options végétaliennes</option>
+                        <option value="vegan">100% Végétalien</option>
                     </select>
                 </div>
 
@@ -399,7 +391,8 @@
                 <h2 class="form-section-title">Évaluations</h2>
                 <div class="mb-3">
                     <label for="overallRating" class="form-label">Note globale (sur 10)</label>
-                    <input type="number" class="form-control rating-input" id="overallRating" min="0" max="10" step="0.1" required>
+                    <input type="number" class="form-control rating-input" id="overallRating" readonly style="background-color: #e9ecef;">
+                    <small class="text-muted">Calculée automatiquement à partir des critères détaillés</small>
                 </div>
                 
                 <!-- Critères d'évaluation -->
@@ -411,7 +404,7 @@
                         <h4 class="h6">Nourriture</h4>
                         <div class="row">
                             <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="foodScore" min="0" max="10" step="1" placeholder="Note" required>
+                                <input type="number" class="form-control rating-input" id="foodScore" min="0" max="10" step="1" placeholder="Note" required value="5">
                             </div>
                             <div class="col-md-10">
                                 <textarea class="form-control" id="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
@@ -424,7 +417,7 @@
                         <h4 class="h6">Service</h4>
                         <div class="row">
                             <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="serviceScore" min="0" max="10" step="1" placeholder="Note" required>
+                                <input type="number" class="form-control rating-input" id="serviceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
                             </div>
                             <div class="col-md-10">
                                 <textarea class="form-control" id="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
@@ -437,7 +430,7 @@
                         <h4 class="h6">Ambiance</h4>
                         <div class="row">
                             <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="ambianceScore" min="0" max="10" step="1" placeholder="Note" required>
+                                <input type="number" class="form-control rating-input" id="ambianceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
                             </div>
                             <div class="col-md-10">
                                 <textarea class="form-control" id="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
@@ -450,7 +443,7 @@
                         <h4 class="h6">Rapport qualité/prix</h4>
                         <div class="row">
                             <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="valueScore" min="0" max="10" step="1" placeholder="Note" required>
+                                <input type="number" class="form-control rating-input" id="valueScore" min="0" max="10" step="1" placeholder="Note" required value="5">
                             </div>
                             <div class="col-md-10">
                                 <textarea class="form-control" id="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
@@ -463,10 +456,23 @@
                         <h4 class="h6">Originalité</h4>
                         <div class="row">
                             <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="originalityScore" min="0" max="10" step="1" placeholder="Note" required>
+                                <input type="number" class="form-control rating-input" id="originalityScore" min="0" max="10" step="1" placeholder="Note" required value="5">
                             </div>
                             <div class="col-md-10">
                                 <textarea class="form-control" id="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expérience globale -->
+                    <div class="card mb-3 p-3">
+                        <h4 class="h6">Expérience globale</h4>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <input type="number" class="form-control rating-input" id="overallExperienceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
+                            </div>
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
                             </div>
                         </div>
                     </div>
@@ -475,14 +481,11 @@
 
             <!-- Commentaires -->
             <div class="form-section">
-                <h2 class="form-section-title">Commentaires</h2>
+                <h2 class="form-section-title">Description détaillée</h2>
                 <div class="mb-3">
-                    <label for="nataelComment" class="form-label">Commentaire de Nataël</label>
-                    <textarea class="form-control" id="nataelComment" rows="4" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="nicolasComment" class="form-label">Commentaire de Nicolas</label>
-                    <textarea class="form-control" id="nicolasComment" rows="4" required></textarea>
+                    <label for="detailedDescription" class="form-label">Description complète du restaurant</label>
+                    <textarea class="form-control" id="detailedDescription" rows="8" required 
+                        placeholder="Décrivez en détail votre expérience au restaurant..."></textarea>
                 </div>
             </div>
 
@@ -526,7 +529,7 @@
             const diet = document.getElementById('diet').value;
             const mainImageUrl = document.getElementById('mainImageUrl').value;
             const galleryUrls = Array.from(document.getElementsByName('galleryUrls[]')).map(input => input.value);
-            const overallRating = document.getElementById('overallRating').value || '0';
+            const overallRating = calculateOverallRating();
 
             // Collecter les images supplémentaires
             const additionalImages = [];
@@ -557,6 +560,10 @@
                 originality: {
                     score: document.getElementById('originalityScore').value || '0',
                     comment: document.getElementById('originalityComment').value || ''
+                },
+                overallExperience: {
+                    score: document.getElementById('overallExperienceScore').value || '0',
+                    comment: document.getElementById('overallExperienceComment').value || ''
                 }
             };
 
@@ -597,19 +604,17 @@ ratings:
   originality:
     score: ${ratings.originality.score}
     comment: "${ratings.originality.comment}"
+  overallExperience:
+    score: ${ratings.overallExperience.score}
+    criteria: "Expérience globale"
+    comment: "${ratings.overallExperience.comment}"
   overall:
     score: ${overallRating}
     criteria: "Facteur \\"wow\\""
     comment: "Une expérience culinaire à découvrir."
 ---
 
-**Nataël** :
-
-${document.getElementById('nataelComment').value || '[Commentaire de Nataël]'}
-
-**Nicolas** :
-
-${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}`;
+${document.getElementById('detailedDescription').value || 'Description détaillée du restaurant'}`;
         }
 
         function updateMarkdownPreview() {
@@ -617,9 +622,33 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
             preview.textContent = generateMarkdown();
         }
 
+        // Fonction pour calculer la moyenne des notes
+        function calculateOverallRating() {
+            const ratings = ['food', 'service', 'ambiance', 'value', 'originality', 'overallExperience'];
+            let sum = 0;
+            let count = 0;
+
+            for (const rating of ratings) {
+                const score = parseFloat(document.getElementById(rating + 'Score').value);
+                if (!isNaN(score)) {
+                    sum += score;
+                    count++;
+                }
+            }
+
+            const average = count > 0 ? (sum / count).toFixed(1) : '0.0';
+            document.getElementById('overallRating').value = average;
+            return average;
+        }
+
         // Ajouter les écouteurs d'événements pour la mise à jour en direct
         document.querySelectorAll('input, textarea, select').forEach(element => {
-            element.addEventListener('input', updateMarkdownPreview);
+            element.addEventListener('input', function() {
+                if (this.classList.contains('rating-input') && this.id !== 'overallRating') {
+                    calculateOverallRating();
+                }
+                updateMarkdownPreview();
+            });
         });
 
         // Variables globales pour stocker les images temporairement
@@ -731,13 +760,9 @@ ${document.getElementById('nicolasComment').value || '[Commentaire de Nicolas]'}
                 }
 
                 // Vérifier les commentaires utilisateurs
-                if (!document.getElementById('nataelComment').value.trim()) {
-                    missingFields.push('Commentaire de Nataël');
-                    document.getElementById('nataelComment').classList.add('is-invalid');
-                }
-                if (!document.getElementById('nicolasComment').value.trim()) {
-                    missingFields.push('Commentaire de Nicolas');
-                    document.getElementById('nicolasComment').classList.add('is-invalid');
+                if (!document.getElementById('detailedDescription').value.trim()) {
+                    missingFields.push('Description détaillée du restaurant');
+                    document.getElementById('detailedDescription').classList.add('is-invalid');
                 }
 
                 if (missingFields.length > 0) {

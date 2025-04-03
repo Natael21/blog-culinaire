@@ -21,6 +21,16 @@ exports.handler = async (event, context) => {
         
         const { filename, content, images, title } = body;
 
+        // Forcer l'état à "draft" dans le contenu markdown
+        let updatedContent = content;
+        if (content.includes("state:")) {
+            // Remplacer l'état existant par "draft"
+            updatedContent = content.replace(/state:.*$/m, "state: draft");
+        } else {
+            // Ajouter l'état "draft" après le titre si non présent
+            updatedContent = content.replace(/title:.*$/m, `$&\nstate: draft`);
+        }
+
         // Utiliser le token GitHub depuis les variables d'environnement
         const githubToken = process.env.GITHUB_TOKEN;
         const owner = process.env.GITHUB_OWNER;
@@ -84,7 +94,6 @@ exports.handler = async (event, context) => {
         // 2. Créer les blobs pour les images
         console.log("Création des blobs pour les images...");
         const imageBlobs = [];
-        let updatedContent = content;
 
         for (let i = 0; i < images.length; i++) {
             const imageData = images[i];
