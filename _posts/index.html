@@ -14,12 +14,12 @@ title: Accueil
       <h3>Filtres</h3>
       <label for="sort-by">Trier par</label>
       <select id="sort-by" class="filter-select">
-        <option value="date-desc">Date (Plus récent)</option>
-        <option value="date-asc">Date (Plus ancien)</option>
         <option value="name-asc">Nom (A-Z)</option>
         <option value="name-desc">Nom (Z-A)</option>
-        <option value="rating-desc">Note (Plus haute)</option>
-        <option value="rating-asc">Note (Plus basse)</option>
+        <option value="date-desc">Date (récent-vieux)</option>
+        <option value="date-asc">Date (vieux-récent)</option>
+        <option value="rating-desc">Note (plus élevé à faible)</option>
+        <option value="rating-asc">Note (faible à plus élevé)</option>
       </select>
 
       <label for="style-filter">Style de cuisine</label>
@@ -41,22 +41,32 @@ title: Accueil
         <option value="Boulangerie-Café">Boulangerie-Café</option>
       </select>
 
-      <label for="rating-filter">Note</label>
-      <select id="rating-filter" class="filter-select">
-        <option value="">Toutes les notes</option>
-        <option value="5">5 étoiles</option>
-        <option value="4">4 étoiles</option>
-        <option value="3">3 étoiles</option>
-        <option value="2">2 étoiles</option>
-        <option value="1">1 étoile</option>
+      <label for="price-filter">Fourchette de prix</label>
+      <select id="price-filter" class="filter-select">
+        <option value="">Tous les prix</option>
+        <option value="$ (0-20$)">$ (0-20$)</option>
+        <option value="$$ (20-40$)">$$ (20-40$)</option>
+        <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
       </select>
+
+      <label>Régime alimentaire</label>
+      <div class="diet-options">
+        <div class="diet-option">
+          <input type="checkbox" id="vegetarian-option" value="vegetarian-friendly">
+          <label for="vegetarian-option">Options végétariennes</label>
+        </div>
+        <div class="diet-option">
+          <input type="checkbox" id="vegan-option" value="vegan-friendly">
+          <label for="vegan-option">Options végétaliennes</label>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="post-grid" id="restaurant-grid">
     {% for post in site.posts %}
       {% if post.layout == 'restaurant' %}
-      <div class="post-card" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-rating="{{ post.note }}" data-style="{{ post.style }}">
+      <div class="post-card" data-date="{{ post.date | date: '%Y-%m-%d' }}" data-rating="{{ post.note }}" data-style="{{ post.style }}" data-price="{{ post.price }}" data-diet="{{ post.diet }}">
         <a href="{{ post.url | relative_url }}" class="post-link">
           <div class="post-image" style="background-image: url('{{ post.image }}')"></div>
           <div class="content">
@@ -87,6 +97,32 @@ title: Accueil
   </div>
 </div>
 
+<style>
+.diet-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.diet-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diet-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.diet-option label {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+</style>
+
 <script>
   // Restore scroll position when returning to the page
   window.addEventListener('load', function() {
@@ -100,22 +136,41 @@ title: Accueil
   // Filtering functionality
   const sortSelect = document.getElementById('sort-by');
   const styleFilter = document.getElementById('style-filter');
-  const ratingFilter = document.getElementById('rating-filter');
+  const priceFilter = document.getElementById('price-filter');
+  const vegetarianOption = document.getElementById('vegetarian-option');
+  const veganOption = document.getElementById('vegan-option');
   const restaurantGrid = document.getElementById('restaurant-grid');
   let restaurants = Array.from(restaurantGrid.children);
 
   function filterRestaurants() {
     const selectedStyle = styleFilter.value;
-    const exactRating = ratingFilter.value;
+    const selectedPrice = priceFilter.value;
+    const isVegetarianChecked = vegetarianOption.checked;
+    const isVeganChecked = veganOption.checked;
     const sortValue = sortSelect.value;
 
-    // Filter by style and rating
+    // Filter by style, price and diet
     let filteredRestaurants = restaurants.filter(restaurant => {
       const style = restaurant.dataset.style;
-      const rating = parseFloat(restaurant.dataset.rating);
+      const price = restaurant.dataset.price;
+      const diet = restaurant.dataset.diet;
+      
       const styleMatch = !selectedStyle || style === selectedStyle;
-      const ratingMatch = !exactRating || rating === parseFloat(exactRating);
-      return styleMatch && ratingMatch;
+      const priceMatch = !selectedPrice || price === selectedPrice;
+      
+      // Gestion du régime alimentaire
+      let dietMatch = true;
+      if (isVegetarianChecked || isVeganChecked) {
+        dietMatch = false;
+        if (isVegetarianChecked && (diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan')) {
+          dietMatch = true;
+        }
+        if (isVeganChecked && (diet === 'vegan-friendly' || diet === 'vegan')) {
+          dietMatch = true;
+        }
+      }
+      
+      return styleMatch && priceMatch && dietMatch;
     });
 
     // Sort filtered restaurants
@@ -148,5 +203,52 @@ title: Accueil
   // Add event listeners
   sortSelect.addEventListener('change', filterRestaurants);
   styleFilter.addEventListener('change', filterRestaurants);
-  ratingFilter.addEventListener('change', filterRestaurants);
+  priceFilter.addEventListener('change', filterRestaurants);
+  vegetarianOption.addEventListener('change', filterRestaurants);
+  veganOption.addEventListener('change', filterRestaurants);
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const sortSelect = document.getElementById('sort-by');
+    const restaurantGrid = document.getElementById('restaurant-grid');
+    let restaurants = Array.from(restaurantGrid.children);
+
+    function sortRestaurants() {
+      const sortBy = sortSelect.value;
+      
+      restaurants.sort((a, b) => {
+        const titleA = a.querySelector('h2').textContent;
+        const titleB = b.querySelector('h2').textContent;
+        const dateA = new Date(a.dataset.date);
+        const dateB = new Date(b.dataset.date);
+        const ratingA = parseFloat(a.dataset.rating);
+        const ratingB = parseFloat(b.dataset.rating);
+
+        switch(sortBy) {
+          case 'name-asc':
+            return titleA.localeCompare(titleB, 'fr');
+          case 'name-desc':
+            return titleB.localeCompare(titleA, 'fr');
+          case 'date-desc':
+            return dateB - dateA;
+          case 'date-asc':
+            return dateA - dateB;
+          case 'rating-desc':
+            return ratingB - ratingA;
+          case 'rating-asc':
+            return ratingA - ratingB;
+          default:
+            return 0;
+        }
+      });
+
+      // Réorganiser les restaurants dans la grille
+      restaurantGrid.innerHTML = '';
+      restaurants.forEach(restaurant => {
+        restaurantGrid.appendChild(restaurant);
+      });
+    }
+
+    // Écouter les changements de tri
+    sortSelect.addEventListener('change', sortRestaurants);
+  });
 </script>
