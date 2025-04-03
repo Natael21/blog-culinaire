@@ -6,8 +6,12 @@
     <title>Nouveau Restaurant - Administration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script type="module">
+      import { Editor } from 'https://cdn.skypack.dev/@tiptap/core'
+      import StarterKit from 'https://cdn.skypack.dev/@tiptap/starter-kit'
+      window.Editor = Editor;
+      window.StarterKit = StarterKit;
+    </script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -301,229 +305,314 @@
             border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        /* Styles pour l'éditeur TipTap */
+        .ProseMirror {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 300px;
+            outline: none;
+        }
+        .ProseMirror p {
+            margin: 1em 0;
+        }
+        .editor-toolbar {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            background: #f8f9fa;
+        }
+        .editor-toolbar button {
+            margin-right: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+        .editor-toolbar button.is-active {
+            background: #e9ecef;
+        }
+        .page-container {
+            display: flex;
+            gap: 20px;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-column {
+            flex: 1;
+            max-width: 60%;
+        }
+        .preview-column {
+            flex: 1;
+            max-width: 40%;
+            position: sticky;
+            top: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .markdown-preview {
+            height: 100%;
+            overflow-y: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .preview-title {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px 0;
+            margin: 0;
+            border-bottom: 2px solid #eee;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1 class="admin-title">Nouveau Restaurant</h1>
+    <div class="page-container">
+        <div class="form-column">
+            <div class="admin-header">
+                <h1 class="admin-title">Nouveau Restaurant</h1>
+            </div>
+
+            <form id="restaurantForm" class="form-card">
+                <!-- Informations de base -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Informations de base</h2>
+                    <div class="form-group">
+                        <label for="title">Nom du restaurant</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Date de visite</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Résumé</label>
+                        <textarea id="description" name="description" maxlength="150" required></textarea>
+                        <small class="text-muted">Maximum 150 caractères</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Adresse</label>
+                        <input type="text" id="address" name="address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="style">Style de cuisine</label>
+                        <select class="form-control" id="style" name="style" required>
+                            <option value="">Sélectionner un style</option>
+                            <option value="Asiatique">Asiatique</option>
+                            <option value="Américain">Américain</option>
+                            <option value="Moyen-Orient">Moyen-Orient</option>
+                            <option value="Mexicain & Latino">Mexicain & Latino</option>
+                            <option value="Bistro & Café">Bistro & Café</option>
+                            <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
+                            <option value="Italien">Italien</option>
+                            <option value="Indien & Épicé">Indien & Épicé</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price">Gamme de prix</label>
+                        <select class="form-control" id="price" name="price" required>
+                            <option value="">Sélectionner une gamme de prix</option>
+                            <option value="$ (0-20$)">$ (0-20$)</option>
+                            <option value="$$ (20-40$)">$$ (20-40$)</option>
+                            <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Options alimentaires disponibles</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
+                            <label class="form-check-label" for="vegetarian">
+                                Options végétariennes
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
+                            <label class="form-check-label" for="vegan">
+                                Options végétaliennes
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mainImage">Image principale</label>
+                        <div class="image-upload-container">
+                            <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
+                            <input type="hidden" id="mainImageUrl" name="mainImageUrl">
+                            <div id="mainImagePreview" class="image-preview-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Images de la galerie</label>
+                        <div class="gallery-upload-container">
+                            <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
+                            <div id="galleryPreview" class="gallery-preview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Évaluations -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Évaluations</h2>
+                    <div class="mb-3">
+                        <label for="overallRating" class="form-label">Note globale (sur 10)</label>
+                        <input type="number" class="form-control rating-input" id="overallRating" readonly style="background-color: #e9ecef;">
+                        <small class="text-muted">Calculée automatiquement à partir des critères détaillés</small>
+                    </div>
+                    
+                    <!-- Critères d'évaluation -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Critères détaillés</h3>
+                        
+                        <!-- Nourriture -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Nourriture</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control rating-input" id="foodScore" min="0" max="10" step="1" placeholder="Note" required value="5">
+                                </div>
+                                <div class="col-md-10">
+                                    <textarea class="form-control" id="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Service</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control rating-input" id="serviceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
+                                </div>
+                                <div class="col-md-10">
+                                    <textarea class="form-control" id="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ambiance -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Ambiance</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control rating-input" id="ambianceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
+                                </div>
+                                <div class="col-md-10">
+                                    <textarea class="form-control" id="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rapport qualité/prix -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Rapport qualité/prix</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control rating-input" id="valueScore" min="0" max="10" step="1" placeholder="Note" required value="5">
+                                </div>
+                                <div class="col-md-10">
+                                    <textarea class="form-control" id="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Originalité -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Originalité</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control rating-input" id="originalityScore" min="0" max="10" step="1" placeholder="Note" required value="5">
+                                </div>
+                                <div class="col-md-10">
+                                    <textarea class="form-control" id="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expérience globale -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Expérience globale</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control rating-input" id="overallExperienceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
+                                </div>
+                                <div class="col-md-10">
+                                    <textarea class="form-control" id="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commentaires -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Description détaillée</h2>
+                    <div class="mb-3">
+                        <label for="editor" class="form-label">Description complète du restaurant</label>
+                        <div class="editor-toolbar">
+                            <button type="button" data-command="bold" title="Gras">B</button>
+                            <button type="button" data-command="italic" title="Italique">I</button>
+                            <button type="button" data-command="bulletList" title="Liste à puces">•</button>
+                            <button type="button" data-command="orderedList" title="Liste numérotée">1.</button>
+                        </div>
+                        <div id="editor"></div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="cancel-btn" onclick="window.location.href='index.html'">Annuler</button>
+                    <button type="submit" class="save-btn">Enregistrer le restaurant</button>
+                </div>
+            </form>
         </div>
 
-        <form id="restaurantForm" class="form-card">
-            <!-- Informations de base -->
-            <div class="form-section">
-                <h2 class="form-section-title">Informations de base</h2>
-                <div class="form-group">
-                    <label for="title">Nom du restaurant</label>
-                    <input type="text" id="title" name="title" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="date">Date de visite</label>
-                    <input type="date" id="date" name="date" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Résumé</label>
-                    <textarea id="description" name="description" maxlength="150" required></textarea>
-                    <small class="text-muted">Maximum 150 caractères</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="address">Adresse</label>
-                    <input type="text" id="address" name="address" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="style">Style de cuisine</label>
-                    <select class="form-control" id="style" name="style" required>
-                        <option value="">Sélectionner un style</option>
-                        <option value="Asiatique">Asiatique</option>
-                        <option value="Américain">Américain</option>
-                        <option value="Moyen-Orient">Moyen-Orient</option>
-                        <option value="Mexicain & Latino">Mexicain & Latino</option>
-                        <option value="Bistro & Café">Bistro & Café</option>
-                        <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
-                        <option value="Italien">Italien</option>
-                        <option value="Indien & Épicé">Indien & Épicé</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="price">Gamme de prix</label>
-                    <select class="form-control" id="price" name="price" required>
-                        <option value="">Sélectionner une gamme de prix</option>
-                        <option value="$ (0-20$)">$ (0-20$)</option>
-                        <option value="$$ (20-40$)">$$ (20-40$)</option>
-                        <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Options alimentaires disponibles</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
-                        <label class="form-check-label" for="vegetarian">
-                            Options végétariennes
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
-                        <label class="form-check-label" for="vegan">
-                            Options végétaliennes
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="mainImage">Image principale</label>
-                    <div class="image-upload-container">
-                        <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
-                        <input type="hidden" id="mainImageUrl" name="mainImageUrl">
-                        <div id="mainImagePreview" class="image-preview-container"></div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Images de la galerie</label>
-                    <div class="gallery-upload-container">
-                        <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
-                        <div id="galleryPreview" class="gallery-preview"></div>
-                    </div>
-                </div>
+        <div class="preview-column">
+            <h2 class="preview-title">Aperçu Markdown</h2>
+            <div class="markdown-preview">
+                <pre id="markdownPreview"></pre>
             </div>
-
-            <!-- Évaluations -->
-            <div class="form-section">
-                <h2 class="form-section-title">Évaluations</h2>
-                <div class="mb-3">
-                    <label for="overallRating" class="form-label">Note globale (sur 10)</label>
-                    <input type="number" class="form-control rating-input" id="overallRating" readonly style="background-color: #e9ecef;">
-                    <small class="text-muted">Calculée automatiquement à partir des critères détaillés</small>
-                </div>
-                
-                <!-- Critères d'évaluation -->
-                <div class="mb-4">
-                    <h3 class="h5 mb-3">Critères détaillés</h3>
-                    
-                    <!-- Nourriture -->
-                    <div class="card mb-3 p-3">
-                        <h4 class="h6">Nourriture</h4>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="foodScore" min="0" max="10" step="1" placeholder="Note" required value="5">
-                            </div>
-                            <div class="col-md-10">
-                                <textarea class="form-control" id="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Service -->
-                    <div class="card mb-3 p-3">
-                        <h4 class="h6">Service</h4>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="serviceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
-                            </div>
-                            <div class="col-md-10">
-                                <textarea class="form-control" id="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ambiance -->
-                    <div class="card mb-3 p-3">
-                        <h4 class="h6">Ambiance</h4>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="ambianceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
-                            </div>
-                            <div class="col-md-10">
-                                <textarea class="form-control" id="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Rapport qualité/prix -->
-                    <div class="card mb-3 p-3">
-                        <h4 class="h6">Rapport qualité/prix</h4>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="valueScore" min="0" max="10" step="1" placeholder="Note" required value="5">
-                            </div>
-                            <div class="col-md-10">
-                                <textarea class="form-control" id="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Originalité -->
-                    <div class="card mb-3 p-3">
-                        <h4 class="h6">Originalité</h4>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="originalityScore" min="0" max="10" step="1" placeholder="Note" required value="5">
-                            </div>
-                            <div class="col-md-10">
-                                <textarea class="form-control" id="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Expérience globale -->
-                    <div class="card mb-3 p-3">
-                        <h4 class="h6">Expérience globale</h4>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rating-input" id="overallExperienceScore" min="0" max="10" step="1" placeholder="Note" required value="5">
-                            </div>
-                            <div class="col-md-10">
-                                <textarea class="form-control" id="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Commentaires -->
-            <div class="form-section">
-                <h2 class="form-section-title">Description détaillée</h2>
-                <div class="mb-3">
-                    <label for="editor" class="form-label">Description complète du restaurant</label>
-                    <div id="editor" style="height: 300px;"></div>
-                </div>
-            </div>
-
-            <!-- Aperçu Markdown -->
-            <div class="form-section">
-                <h2 class="form-section-title">Aperçu Markdown</h2>
-                <div class="preview-section">
-                    <pre id="markdownPreview"></pre>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button type="button" class="cancel-btn" onclick="window.location.href='index.html'">Annuler</button>
-                <button type="submit" class="save-btn">Enregistrer le restaurant</button>
-            </div>
-        </form>
+        </div>
     </div>
 
     <script>
-        // Initialiser Quill
-        var quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'header': [1, 2, 3, false] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'align': [] }],
-                    ['clean']
-                ]
-            },
-            placeholder: 'Décrivez en détail votre expérience au restaurant...'
+        // Initialiser TipTap
+        let editor;
+        window.addEventListener('load', () => {
+            editor = new Editor({
+                element: document.querySelector('#editor'),
+                extensions: [
+                    StarterKit
+                ],
+                content: '',
+                onUpdate: ({ editor }) => {
+                    updateMarkdownPreview();
+                }
+            });
+
+            // Gérer les boutons de la barre d'outils
+            document.querySelectorAll('.editor-toolbar button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const command = button.dataset.command;
+                    editor.chain().focus()[command]().run();
+                    button.classList.toggle('is-active', editor.isActive(command));
+                });
+            });
         });
 
         function addImage() {
@@ -561,7 +650,9 @@
             const mainImageUrl = document.getElementById('mainImageUrl').value;
             const galleryUrls = Array.from(document.getElementsByName('galleryUrls[]')).map(input => input.value);
             const overallRating = calculateOverallRating();
-            const detailedDescription = quill.root.innerHTML;
+            
+            // Obtenir le contenu de l'éditeur TipTap
+            const detailedDescription = editor ? editor.getHTML() : '';
 
             // Collecter les images supplémentaires
             const additionalImages = [];
@@ -606,7 +697,7 @@
 layout: restaurant
 title: "${title}"
 date: ${today}
-state: ready
+state: draft
 note: ${overallRating}
 style: "${style}"
 diet: "${diet}"
@@ -792,9 +883,11 @@ ${detailedDescription}`;
                 }
 
                 // Vérifier les commentaires utilisateurs
-                if (!document.getElementById('editor').value.trim()) {
+                if (!editor || !editor.getHTML().trim()) {
                     missingFields.push('Description détaillée du restaurant');
-                    document.getElementById('editor').classList.add('is-invalid');
+                    document.querySelector('#editor').classList.add('is-invalid');
+                } else {
+                    document.querySelector('#editor').classList.remove('is-invalid');
                 }
 
                 if (missingFields.length > 0) {
