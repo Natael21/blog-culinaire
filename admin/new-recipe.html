@@ -121,6 +121,7 @@
         }
 
         .form-group {
+            position: relative;
             margin-bottom: 25px;
         }
 
@@ -175,6 +176,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-weight: 500;
+            min-width: 40px;
         }
 
         .editor-toolbar button:hover {
@@ -197,6 +199,31 @@
             min-height: 300px;
             font-size: 1rem;
             line-height: 1.6;
+        }
+
+        .ProseMirror p {
+            margin: 1em 0;
+        }
+
+        .ProseMirror strong {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .ProseMirror em {
+            font-style: italic;
+            color: var(--secondary-color);
+        }
+
+        .ProseMirror ul,
+        .ProseMirror ol {
+            padding-left: 1.5em;
+            margin: 1em 0;
+        }
+
+        .ProseMirror ul li,
+        .ProseMirror ol li {
+            margin: 0.5em 0;
         }
 
         .action-buttons {
@@ -317,12 +344,38 @@
 
         .is-invalid {
             border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+            background-color: #fff5f5 !important;
         }
 
         .invalid-feedback {
+            display: none;
             color: var(--secondary-color);
             font-size: 0.875rem;
             margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        .is-invalid ~ .invalid-feedback {
+            display: block !important;
+        }
+
+        .editor-invalid {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .error-icon {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            color: var(--secondary-color);
+        }
+
+        .is-invalid ~ .error-icon {
+            display: block;
         }
 
         .alert {
@@ -374,17 +427,23 @@
                     <h2 class="form-section-title">Informations de base</h2>
                     <div class="form-group">
                         <label for="title">Nom du restaurant</label>
-                        <input type="text" id="title" name="title" required>
+                        <input type="text" id="title" name="title" class="form-control" required>
+                        <i class="fas fa-exclamation-circle error-icon"></i>
+                        <div class="invalid-feedback">Veuillez entrer le nom du restaurant</div>
                     </div>
 
                     <div class="form-group">
                         <label for="date">Date de visite</label>
-                        <input type="date" id="date" name="date" required>
+                        <input type="date" id="date" name="date" class="form-control" required>
+                        <i class="fas fa-exclamation-circle error-icon"></i>
+                        <div class="invalid-feedback">Veuillez sélectionner la date de visite</div>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Résumé</label>
-                        <textarea id="description" name="description" maxlength="150" required></textarea>
+                        <textarea id="description" name="description" class="form-control" maxlength="150" required></textarea>
+                        <i class="fas fa-exclamation-circle error-icon"></i>
+                        <div class="invalid-feedback">Veuillez entrer un résumé</div>
                         <small class="text-muted">Maximum 150 caractères</small>
                     </div>
 
@@ -592,6 +651,7 @@
                     ListItem
                 ],
                 content: '',
+                editable: true,
                 onUpdate: ({ editor }) => {
                     updateMarkdownPreview();
                 }
@@ -599,11 +659,33 @@
 
             // Gérer les boutons de la barre d'outils
             document.querySelectorAll('.editor-toolbar button').forEach(button => {
-                button.addEventListener('click', () => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
                     const command = button.dataset.command;
-                    editor.chain().focus()[command]().run();
+                    editor.chain().focus();
+                    
+                    switch(command) {
+                        case 'bold':
+                            editor.chain().toggleBold().run();
+                            break;
+                        case 'italic':
+                            editor.chain().toggleItalic().run();
+                            break;
+                        case 'bulletList':
+                            editor.chain().toggleBulletList().run();
+                            break;
+                        case 'orderedList':
+                            editor.chain().toggleOrderedList().run();
+                            break;
+                    }
+                    
+                    // Mettre à jour l'état actif du bouton
                     button.classList.toggle('is-active', editor.isActive(command));
                 });
+
+                // Mettre à jour l'état initial des boutons
+                const command = button.dataset.command;
+                button.classList.toggle('is-active', editor.isActive(command));
             });
         });
 
