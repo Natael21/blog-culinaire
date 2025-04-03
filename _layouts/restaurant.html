@@ -82,7 +82,7 @@ comments: true
     {% assign details = rating[1] %}
     <div class="rating-category">
       <div class="rating-header">
-        <h3>
+        <h3 style="margin-bottom: 0.3rem;">
           <span class="rating-title">
             {% case category %}
             {% when 'food' %}
@@ -109,11 +109,11 @@ comments: true
       </div>
       
       {% if details.criteria %}
-      <p class="criteria" style="margin: 0 0 0.5rem 0;"><em>{{ details.criteria }}</em></p>
+      <p class="criteria" style="margin: 0 0 1rem 0;"><em>{{ details.criteria }}</em></p>
       {% elsif category == 'value' %}
-      <p class="criteria" style="margin: 0 0 0.5rem 0;"><em>Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</em></p>
+      <p class="criteria" style="margin: 0 0 1rem 0;"><em>Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</em></p>
       {% elsif category == 'originality' %}
-      <p class="criteria" style="margin: 0 0 0.5rem 0;"><em>Innovation culinaire, créativité des recettes, authenticité, concept unique</em></p>
+      <p class="criteria" style="margin: 0 0 1rem 0;"><em>Innovation culinaire, créativité des recettes, authenticité, concept unique</em></p>
       {% endif %}
       
       {% if details.comment %}
