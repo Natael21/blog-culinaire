@@ -7,10 +7,27 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
-      import { Editor } from 'https://cdn.skypack.dev/@tiptap/core'
-      import StarterKit from 'https://cdn.skypack.dev/@tiptap/starter-kit'
+      import { Editor } from 'https://esm.sh/@tiptap/core'
+      import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
+      import Document from 'https://esm.sh/@tiptap/extension-document'
+      import Paragraph from 'https://esm.sh/@tiptap/extension-paragraph'
+      import Text from 'https://esm.sh/@tiptap/extension-text'
+      import Bold from 'https://esm.sh/@tiptap/extension-bold'
+      import Italic from 'https://esm.sh/@tiptap/extension-italic'
+      import BulletList from 'https://esm.sh/@tiptap/extension-bullet-list'
+      import OrderedList from 'https://esm.sh/@tiptap/extension-ordered-list'
+      import ListItem from 'https://esm.sh/@tiptap/extension-list-item'
+
       window.Editor = Editor;
       window.StarterKit = StarterKit;
+      window.Document = Document;
+      window.Paragraph = Paragraph;
+      window.Text = Text;
+      window.Bold = Bold;
+      window.Italic = Italic;
+      window.BulletList = BulletList;
+      window.OrderedList = OrderedList;
+      window.ListItem = ListItem;
     </script>
     <style>
         body {
@@ -597,7 +614,14 @@
             editor = new Editor({
                 element: document.querySelector('#editor'),
                 extensions: [
-                    StarterKit
+                    Document,
+                    Paragraph,
+                    Text,
+                    Bold,
+                    Italic,
+                    BulletList,
+                    OrderedList,
+                    ListItem
                 ],
                 content: '',
                 onUpdate: ({ editor }) => {
