@@ -1,6 +1,7 @@
 require 'net/http'
 require 'json'
 require 'uri'
+require 'concurrent'
 
 module Jekyll
   class GeocodingGenerator < Generator
@@ -10,37 +11,34 @@ module Jekyll
     def generate(site)
       Jekyll.logger.info "Geocoding:", "Starting geocoding process..."
       
-      # Créer le dossier _data s'il n'existe pas
       data_dir = File.join(site.source, '_data')
       FileUtils.mkdir_p(data_dir) unless File.directory?(data_dir)
       
-      # Initialiser ou charger le cache
       cache_file = File.join(data_dir, 'geocoding_cache.json')
       cache = File.exist?(cache_file) ? JSON.parse(File.read(cache_file)) : {}
       
-      total_posts = site.posts.docs.count { |post| post.data['layout'] == 'restaurant' }
-      processed = 0
-      geocoded = 0
+      restaurants = site.posts.docs.select { |post| post.data['layout'] == 'restaurant' }
+      total_posts = restaurants.size
+      geocoded = Concurrent::AtomicFixnum.new(0)
       
-      site.posts.docs.each do |post|
-        next unless post.data['layout'] == 'restaurant'
-        processed += 1
-        
-        if !post.data['address']
-          Jekyll.logger.warn "Geocoding:", "No address found for #{post.data['title']}"
-          next
-        end
+      # Créer un pool de threads pour le géocodage parallèle
+      pool = Concurrent::FixedThreadPool.new(5)
+      futures = []
+
+      restaurants.each do |post|
+        next unless post.data['address']
         
         address = post.data['address']
-        Jekyll.logger.info "Geocoding:", "Processing (#{processed}/#{total_posts}): #{post.data['title']}"
         
         if cache[address]
           post.data['latitude'] = cache[address]['lat']
           post.data['longitude'] = cache[address]['lng']
-          geocoded += 1
+          geocoded.increment
           Jekyll.logger.info "Geocoding:", "Using cached coordinates for #{post.data['title']}"
-        else
-          # Ajouter "Sherbrooke, QC" si non présent dans l'adresse
+          next
+        end
+
+        futures << Concurrent::Future.execute(executor: pool) do
           full_address = address.downcase.include?('sherbrooke') ? address : "#{address}, Sherbrooke, QC"
           encoded_address = URI.encode_www_form_component(full_address)
           url = "https://nominatim.openstreetmap.org/search?q=#{encoded_address}&format=json&limit=1"
@@ -49,6 +47,8 @@ module Jekyll
             uri = URI(url)
             http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = true
+            http.read_timeout = 5
+            http.open_timeout = 5
             request = Net::HTTP::Get.new(uri)
             request["User-Agent"] = "BlogCulinaire/1.0"
             response = http.request(request)
@@ -64,24 +64,33 @@ module Jekyll
                   'lng' => post.data['longitude']
                 }
                 
-                File.write(cache_file, JSON.pretty_generate(cache))
-                geocoded += 1
+                geocoded.increment
                 Jekyll.logger.info "Geocoding:", "Successfully geocoded #{post.data['title']}"
+                true
               else
                 Jekyll.logger.error "Geocoding:", "No results found for #{post.data['title']} (#{full_address})"
+                false
               end
             else
               Jekyll.logger.error "Geocoding:", "HTTP error for #{post.data['title']}: #{response.code}"
+              false
             end
-            
-            sleep 1 # Respecter la politique d'utilisation équitable
           rescue => e
             Jekyll.logger.error "Geocoding:", "Failed to geocode #{post.data['title']}: #{e.message}"
+            false
+          ensure
+            sleep 0.2 # Réduit le délai d'attente à 200ms
           end
         end
       end
+
+      # Attendre que toutes les requêtes soient terminées
+      futures.each(&:value)
       
-      Jekyll.logger.info "Geocoding:", "Completed! #{geocoded}/#{total_posts} restaurants geocoded successfully"
+      # Sauvegarder le cache une seule fois à la fin
+      File.write(cache_file, JSON.pretty_generate(cache))
+      
+      Jekyll.logger.info "Geocoding:", "Completed! #{geocoded.value}/#{total_posts} restaurants geocoded successfully"
     end
   end
 end 
