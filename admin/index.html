@@ -230,6 +230,7 @@
             document.getElementById('error-message').textContent = message;
             document.getElementById('error-message').style.display = 'block';
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('login-container').style.display = 'block';
         }
 
         function updateUI(user) {
@@ -257,73 +258,43 @@
             }
         }
 
-        // Variable pour suivre l'état de la connexion
-        let isLoggingIn = false;
-
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
-            
-            // Initialiser Netlify Identity avec les options complètes
+            showLoading();
+
+            // Initialiser Netlify Identity
             if (window.netlifyIdentity) {
                 netlifyIdentity.init({
-                    locale: 'fr',
-                    enableAutoAuthorize: true,
-                    APIUrl: 'https://api.netlify.com'
+                    locale: 'fr'
                 });
             }
 
             // Configurer les écouteurs d'événements Netlify Identity
             netlifyIdentity.on('init', user => {
                 console.log('Netlify Identity initialized, user:', user);
-                if (!isLoggingIn) {
-                    updateUI(user);
-                }
+                updateUI(user);
             });
 
             netlifyIdentity.on('login', user => {
                 console.log('Login event, user:', user);
-                isLoggingIn = true;
-                showLoading();
-                
-                // Fermer la modal de connexion
                 netlifyIdentity.close();
-
-                // Attendre que la session soit complètement établie
+                
+                // Attendre un court instant pour que la session soit établie
                 setTimeout(() => {
-                    if (netlifyIdentity.currentUser()) {
-                        console.log('Session établie, rechargement de la page');
-                        window.location.href = window.location.pathname;
-                    } else {
-                        console.log('Attente de la session...');
-                        setTimeout(() => {
-                            window.location.href = window.location.pathname;
-                        }, 1000);
-                    }
-                }, 500);
+                    window.location.reload();
+                }, 300);
             });
 
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
-                isLoggingIn = false;
-                window.location.href = window.location.pathname;
+                window.location.reload();
             });
 
             netlifyIdentity.on('error', err => {
                 console.error('Netlify Identity error:', err);
-                isLoggingIn = false;
-                showError('Une erreur est survenue lors de l\'authentification.');
+                showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
             });
-
-            // Vérifier l'état initial
-            const currentUser = netlifyIdentity.currentUser();
-            if (currentUser) {
-                console.log('Utilisateur déjà connecté:', currentUser);
-                updateUI(currentUser);
-            } else {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('login-container').style.display = 'block';
-            }
         });
     </script>
 </body>
