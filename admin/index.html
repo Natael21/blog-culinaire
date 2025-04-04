@@ -257,6 +257,13 @@
                 console.log('Mise à jour UI avec utilisateur:', user);
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
+
+                // Activer tous les boutons
+                document.querySelectorAll('.action-button').forEach(button => {
+                    button.style.pointerEvents = 'auto';
+                    button.style.opacity = '1';
+                });
+
                 if (userEmail) {
                     // Vérifier si les métadonnées de l'utilisateur sont disponibles
                     if (!user.user_metadata || !user.user_metadata.full_name) {
@@ -273,6 +280,17 @@
                         user.user_metadata.full_name : 
                         user.email;
                     userEmail.textContent = displayName;
+
+                    // Vérifier si l'interface est complètement chargée
+                    setTimeout(() => {
+                        if (document.querySelectorAll('.action-button[style*="pointer-events: none"]').length > 0) {
+                            console.log('Réactivation des boutons...');
+                            document.querySelectorAll('.action-button').forEach(button => {
+                                button.style.pointerEvents = 'auto';
+                                button.style.opacity = '1';
+                            });
+                        }
+                    }, 1000);
                 }
             } else {
                 console.log('Mise à jour UI sans utilisateur');
@@ -281,6 +299,14 @@
                 // Réinitialiser le flag de rafraîchissement lors de la déconnexion
                 sessionStorage.removeItem('hasRefreshed');
             }
+        }
+
+        // Fonction pour activer l'interface
+        function enableInterface() {
+            document.querySelectorAll('.action-button').forEach(button => {
+                button.style.pointerEvents = 'auto';
+                button.style.opacity = '1';
+            });
         }
 
         // Initialisation
@@ -299,12 +325,14 @@
                     netlifyIdentity.on('init', user => {
                         console.log('Netlify Identity initialized');
                         updateUI(user);
+                        enableInterface(); // Activer l'interface après l'initialisation
                     });
 
                     netlifyIdentity.on('login', user => {
                         console.log('Login event');
                         netlifyIdentity.close();
                         updateUI(user);
+                        enableInterface(); // Activer l'interface après la connexion
                     });
 
                     netlifyIdentity.on('logout', () => {
@@ -319,7 +347,10 @@
 
                     // Vérifier l'état de connexion initial
                     const currentUser = netlifyIdentity.currentUser();
-                    updateUI(currentUser);
+                    if (currentUser) {
+                        updateUI(currentUser);
+                        enableInterface(); // Activer l'interface si l'utilisateur est déjà connecté
+                    }
                 } else {
                     console.error('Netlify Identity non chargé');
                     showError('Erreur de chargement de l\'authentification');
