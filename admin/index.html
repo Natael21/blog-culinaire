@@ -376,22 +376,27 @@
         // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                const response = await fetch('/admin/config.yml');
-                const config = await response.text();
-                const collection = config.match(/collection:\s*"([^"]+)"/)[1];
-                
-                const posts = await fetch(`/admin/api/collections/${collection}/entries`).then(r => r.json());
+                // Récupérer directement les entrées de la collection restaurants
+                const posts = await fetch('/admin/api/collections/restaurants/entries')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération des données');
+                        }
+                        return response.json();
+                    });
                 
                 let publishedCount = 0;
                 let draftCount = 0;
                 
-                posts.forEach(post => {
-                    if (post.data.state === 'draft') {
-                        draftCount++;
-                    } else {
-                        publishedCount++;
-                    }
-                });
+                if (Array.isArray(posts)) {
+                    posts.forEach(post => {
+                        if (post.data && post.data.state === 'draft') {
+                            draftCount++;
+                        } else {
+                            publishedCount++;
+                        }
+                    });
+                }
                 
                 // Mettre à jour les compteurs
                 document.getElementById('published-count').textContent = publishedCount.toString();
