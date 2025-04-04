@@ -1183,7 +1183,7 @@ function filterRestaurants() {
         return coords ? [coords.lat, coords.lng] : null;
       }).filter(coord => coord !== null));
       
-      if (!bounds.isEmpty()) {
+      if (bounds.getNorth() !== bounds.getSouth() || bounds.getEast() !== bounds.getWest()) {
         map.fitBounds(bounds, { padding: [50, 50] });
       }
     }
