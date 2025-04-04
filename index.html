@@ -1149,18 +1149,20 @@ function filterRestaurants() {
     if (vegetarianChecked || veganChecked) {
       dietMatch = false;
       
-      if (vegetarianChecked && (
-          diet === 'vegetarian-friendly' || 
-          diet === 'vegetarian' || 
-          diet === 'vegan' || 
-          diet === 'vegan-friendly')) {
-        dietMatch = true;
-      }
-      
-      if (veganChecked && (
-          diet === 'vegan-friendly' || 
-          diet === 'vegan')) {
-        dietMatch = true;
+      // Si les deux options sont cochées, le restaurant doit avoir les deux régimes
+      if (vegetarianChecked && veganChecked) {
+        if (diet && diet.includes('vegetarian-friendly') && diet.includes('vegan-friendly')) {
+          dietMatch = true;
+        }
+      } else {
+        // Si seule l'option végétarienne est cochée
+        if (vegetarianChecked && diet && diet.includes('vegetarian-friendly')) {
+          dietMatch = true;
+        }
+        // Si seule l'option végétalienne est cochée
+        if (veganChecked && diet && diet.includes('vegan-friendly')) {
+          dietMatch = true;
+        }
       }
     }
     
