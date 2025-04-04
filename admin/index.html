@@ -373,18 +373,44 @@
             }
         }
 
+        // Debug function to find the correct localStorage key
+        function debugLocalStorage() {
+            console.log('All localStorage keys:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                console.log(`${key}: ${localStorage.getItem(key)}`);
+            }
+        }
+
         // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                // Récupérer les entrées depuis le localStorage
-                const entries = localStorage.getItem('netlify-cms-collection-posts');
-                if (entries) {
-                    const posts = JSON.parse(entries);
-                    
+                debugLocalStorage(); // Afficher toutes les clés pour debug
+
+                // Chercher la clé qui contient les posts
+                let postsData = null;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.includes('decap-cms-') || key.includes('netlify-cms-')) {
+                        console.log('Found CMS key:', key);
+                        const data = localStorage.getItem(key);
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (Array.isArray(parsed)) {
+                                postsData = parsed;
+                                break;
+                            }
+                        } catch (e) {
+                            console.log('Not valid JSON for key:', key);
+                        }
+                    }
+                }
+
+                if (postsData) {
                     let publishedCount = 0;
                     let draftCount = 0;
                     
-                    posts.forEach(post => {
+                    postsData.forEach(post => {
                         if (post.data && post.data.state === 'draft') {
                             draftCount++;
                         } else if (post.data && post.data.state === 'ready') {
@@ -395,6 +421,8 @@
                     document.getElementById('published-count').textContent = publishedCount.toString();
                     document.getElementById('draft-count').textContent = draftCount.toString();
                     document.getElementById('comments-count').textContent = '0';
+                } else {
+                    console.log('No posts data found in localStorage');
                 }
             } catch (error) {
                 console.error('Erreur lors de la mise à jour des statistiques:', error);
@@ -416,9 +444,14 @@
 
         // Mettre à jour les stats quand le localStorage change
         window.addEventListener('storage', (e) => {
-            if (e.key === 'netlify-cms-collection-posts') {
+            if (e.key.includes('decap-cms-') || e.key.includes('netlify-cms-')) {
                 updateStats();
             }
+        });
+
+        // Appeler debugLocalStorage au chargement pour voir toutes les clés
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(debugLocalStorage, 2000); // Attendre que tout soit chargé
         });
     </script>
 </body>
