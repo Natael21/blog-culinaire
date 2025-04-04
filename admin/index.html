@@ -279,7 +279,7 @@
             const currentUser = netlifyIdentity.currentUser();
             if (currentUser) {
                 console.log('Utilisateur déjà connecté');
-                updateUI(currentUser);
+                window.location.reload();
             } else {
                 console.log('Aucun utilisateur connecté');
                 hideLoading();
