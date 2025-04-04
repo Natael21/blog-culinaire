@@ -140,6 +140,16 @@
             background: #e74c3c;
             color: white;
         }
+        /* Style pour le widget Netlify Identity */
+        .netlify-identity-widget {
+            z-index: 1000;
+        }
+        
+        /* Style pour l'overlay du widget */
+        .netlify-identity-widget-overlay {
+            background: rgba(0, 0, 0, 0.5) !important;
+            z-index: 999 !important;
+        }
     </style>
 </head>
 <body>
@@ -162,7 +172,7 @@
                 <p class="admin-subtitle">Veuillez vous connecter pour accéder à l'administration</p>
             </div>
             <div class="admin-card text-center">
-                <button class="btn btn-primary btn-lg" onclick="netlifyIdentity.open('login');">Se connecter</button>
+                <button class="btn btn-primary btn-lg" onclick="openLoginModal();">Se connecter</button>
             </div>
         </div>
     </div>
@@ -278,61 +288,50 @@
             console.log('DOM Content Loaded');
             showLoading();
 
-            // Vérifier si Netlify Identity est chargé
-            if (!window.netlifyIdentity) {
-                console.error('Netlify Identity non chargé');
-                showError('Erreur de chargement de l\'authentification');
-                return;
+            // S'assurer que le script Netlify Identity est chargé
+            function initNetlifyIdentity() {
+                if (window.netlifyIdentity) {
+                    netlifyIdentity.init({
+                        locale: 'fr' // Forcer la locale en français
+                    });
+                    
+                    // Configurer les écouteurs d'événements
+                    netlifyIdentity.on('init', user => {
+                        console.log('Netlify Identity initialized');
+                        updateUI(user);
+                    });
+
+                    netlifyIdentity.on('login', user => {
+                        console.log('Login event');
+                        netlifyIdentity.close();
+                        updateUI(user);
+                    });
+
+                    netlifyIdentity.on('logout', () => {
+                        console.log('Logout event');
+                        updateUI(null);
+                    });
+
+                    netlifyIdentity.on('error', err => {
+                        console.error('Netlify Identity error:', err);
+                        showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
+                    });
+
+                    // Vérifier l'état de connexion initial
+                    const currentUser = netlifyIdentity.currentUser();
+                    updateUI(currentUser);
+                } else {
+                    console.error('Netlify Identity non chargé');
+                    showError('Erreur de chargement de l\'authentification');
+                }
             }
 
-            // Initialiser Netlify Identity avec une configuration plus sûre
-            netlifyIdentity.init({
-                APIUrl: window.location.origin,
-                setCookie: true
-            });
-
-            // Ajouter un gestionnaire d'erreur global pour les erreurs CORS
-            window.addEventListener('unhandledrejection', function(event) {
-                console.error('Unhandled promise rejection:', event.reason);
-                if (event.reason && event.reason.message && event.reason.message.includes('CORS')) {
-                    showError('Erreur de connexion au service d\'authentification. Veuillez réessayer.');
-                }
-            });
-
-            // Fonction sécurisée pour obtenir le nom d'affichage
-            function getDisplayName(user) {
-                if (!user) return '';
-                if (user.user_metadata && user.user_metadata.full_name) {
-                    return user.user_metadata.full_name;
-                }
-                return user.email || '';
+            // Attendre que le script soit complètement chargé
+            if (document.readyState === 'complete') {
+                initNetlifyIdentity();
+            } else {
+                window.addEventListener('load', initNetlifyIdentity);
             }
-
-            // Vérifier l'état de connexion initial
-            const currentUser = netlifyIdentity.currentUser();
-            updateUI(currentUser);
-
-            // Configurer les écouteurs d'événements
-            netlifyIdentity.on('init', user => {
-                console.log('Netlify Identity initialized');
-                updateUI(user);
-            });
-
-            netlifyIdentity.on('login', user => {
-                console.log('Login event');
-                netlifyIdentity.close();
-                updateUI(user);
-            });
-
-            netlifyIdentity.on('logout', () => {
-                console.log('Logout event');
-                updateUI(null);
-            });
-
-            netlifyIdentity.on('error', err => {
-                console.error('Netlify Identity error:', err);
-                showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
-            });
 
             // Fallback : si après 3 secondes rien ne s'affiche, montrer la page de connexion
             setTimeout(() => {
@@ -342,6 +341,15 @@
                 }
             }, 3000);
         });
+
+        // Fonction pour ouvrir le modal de connexion
+        function openLoginModal() {
+            if (window.netlifyIdentity) {
+                netlifyIdentity.open('login');
+            } else {
+                showError('Le système d\'authentification n\'est pas disponible');
+            }
+        }
     </script>
 </body>
 </html> 
