@@ -2,6 +2,7 @@ require 'net/http'
 require 'json'
 require 'uri'
 require 'concurrent'
+require 'digest'
 
 module Jekyll
   class GeocodingGenerator < Generator
@@ -20,35 +21,47 @@ module Jekyll
       restaurants = site.posts.docs.select { |post| post.data['layout'] == 'restaurant' }
       total_posts = restaurants.size
       geocoded = Concurrent::AtomicFixnum.new(0)
+      to_geocode = []
       
-      # Créer un pool de threads pour le géocodage parallèle
-      pool = Concurrent::FixedThreadPool.new(5)
-      futures = []
-
+      # Premier passage : utiliser le cache et identifier les restaurants à géocoder
       restaurants.each do |post|
         next unless post.data['address']
         
         address = post.data['address']
+        cache_key = Digest::MD5.hexdigest(address)
         
-        if cache[address]
-          post.data['latitude'] = cache[address]['lat']
-          post.data['longitude'] = cache[address]['lng']
+        if cache[cache_key]
+          post.data['latitude'] = cache[cache_key]['lat']
+          post.data['longitude'] = cache[cache_key]['lng']
           geocoded.increment
-          Jekyll.logger.info "Geocoding:", "Using cached coordinates for #{post.data['title']}"
           next
         end
-
+        
+        to_geocode << [post, address, cache_key]
+      end
+      
+      return if to_geocode.empty?
+      
+      # Configuration du pool de threads
+      thread_count = [to_geocode.size, 10].min
+      pool = Concurrent::FixedThreadPool.new(thread_count)
+      semaphore = Concurrent::Semaphore.new(5) # Limite les requêtes simultanées
+      futures = []
+      
+      # Géocodage en parallèle
+      to_geocode.each do |post, address, cache_key|
         futures << Concurrent::Future.execute(executor: pool) do
-          full_address = address.downcase.include?('sherbrooke') ? address : "#{address}, Sherbrooke, QC"
-          encoded_address = URI.encode_www_form_component(full_address)
-          url = "https://nominatim.openstreetmap.org/search?q=#{encoded_address}&format=json&limit=1"
-          
+          semaphore.acquire
           begin
+            full_address = address.downcase.include?('sherbrooke') ? address : "#{address}, Sherbrooke, QC"
+            encoded_address = URI.encode_www_form_component(full_address)
+            url = "https://nominatim.openstreetmap.org/search?q=#{encoded_address}&format=json&limit=1"
+            
             uri = URI(url)
             http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = true
-            http.read_timeout = 5
-            http.open_timeout = 5
+            http.read_timeout = 3
+            http.open_timeout = 3
             request = Net::HTTP::Get.new(uri)
             request["User-Agent"] = "BlogCulinaire/1.0"
             response = http.request(request)
@@ -59,35 +72,31 @@ module Jekyll
                 post.data['latitude'] = result[0]['lat'].to_f
                 post.data['longitude'] = result[0]['lon'].to_f
                 
-                cache[address] = {
+                cache[cache_key] = {
                   'lat' => post.data['latitude'],
-                  'lng' => post.data['longitude']
+                  'lng' => post.data['longitude'],
+                  'address' => address,
+                  'updated_at' => Time.now.to_i
                 }
                 
                 geocoded.increment
-                Jekyll.logger.info "Geocoding:", "Successfully geocoded #{post.data['title']}"
                 true
-              else
-                Jekyll.logger.error "Geocoding:", "No results found for #{post.data['title']} (#{full_address})"
-                false
               end
-            else
-              Jekyll.logger.error "Geocoding:", "HTTP error for #{post.data['title']}: #{response.code}"
-              false
             end
           rescue => e
             Jekyll.logger.error "Geocoding:", "Failed to geocode #{post.data['title']}: #{e.message}"
             false
           ensure
-            sleep 0.2 # Réduit le délai d'attente à 200ms
+            semaphore.release
+            sleep 0.1
           end
         end
       end
-
-      # Attendre que toutes les requêtes soient terminées
+      
+      # Attendre la fin des requêtes
       futures.each(&:value)
       
-      # Sauvegarder le cache une seule fois à la fin
+      # Sauvegarder le cache
       File.write(cache_file, JSON.pretty_generate(cache))
       
       Jekyll.logger.info "Geocoding:", "Completed! #{geocoded.value}/#{total_posts} restaurants geocoded successfully"
