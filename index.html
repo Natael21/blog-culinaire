@@ -997,11 +997,11 @@ function updateMapMarkers() {
 // Modifier la fonction filterRestaurants pour mettre à jour aussi les marqueurs
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
-  const selectedStyle = styleFilter.value;
-  const selectedRating = ratingFilter.value;
-  const selectedPrice = priceFilter.value;
-  const selectedDiet = document.getElementById('diet-filter').value;
-  const selectedSort = document.getElementById('sort-filter').value;
+  const selectedStyle = styleFilter ? styleFilter.value : 'all';
+  const selectedRating = ratingFilter ? ratingFilter.value : '';
+  const selectedPrice = priceFilter ? priceFilter.value : '';
+  const selectedDiet = document.getElementById('diet-filter') ? document.getElementById('diet-filter').value : 'all';
+  const selectedSort = document.getElementById('sort-filter') ? document.getElementById('sort-filter').value : 'date-desc';
 
   // Filtrer les restaurants
   let filteredRestaurants = restaurants.filter(restaurant => {
