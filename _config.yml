@@ -81,8 +81,9 @@ collections:
 # Performance Optimizations
 incremental: true
 liquid:
-  error_mode: strict
+  error_mode: warn
   strict_filters: true
+  strict_variables: false  # Pour éviter les erreurs non critiques
 
 # Cache settings
 cache:
@@ -90,16 +91,17 @@ cache:
   path: .jekyll-cache
 
 # Build optimizations
-limit_posts: 50
+limit_posts: 0  # Désactivé pour garder tous les posts
 future: false
 unpublished: false
+lsi: false  # Désactive l'indexation des posts similaires
+profile: false  # Désactive le profilage
 
 # Compression
 compress_html:
   clippings: all
-  comments: all
+  comments: ["<!-- ", " -->"]
   endings: all
-  startings: [html, head, body]
   blanklines: false
   profile: false
 
@@ -107,3 +109,21 @@ compress_html:
 sass:
   style: compressed
   sourcemap: never
+
+# Plugin settings
+jekyll-sitemap:
+  filename: "/sitemap.xml"
+
+# Exclude non-essential files from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .git
+  - .github
+  - README.md
+  - package.json
+  - package-lock.json
+  - netlify.toml
+  - "*.log"

@@ -1,11 +1,13 @@
 [build]
   publish = "."
-  command = "JEKYLL_ENV=production bundle exec jekyll build"
+  command = "JEKYLL_ENV=production bundle exec jekyll build --trace"
 
 [build.environment]
   NODE_VERSION = "18"
   JEKYLL_ENV = "production"
   RUBY_VERSION = "2.7.1"
+  BUNDLER_VERSION = "2.3.26"
+  CONCURRENT_DOWNLOAD = "true"
 
 [build.processing]
   skip_processing = false
@@ -29,6 +31,8 @@
   for = "/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
 
 [[headers]]
   for = "/assets/*"
@@ -41,7 +45,8 @@
     "vendor/bundle",
     "_site",
     ".jekyll-cache",
-    "node_modules"
+    "node_modules",
+    ".bundle"
   ]
 
 # Redirects
@@ -56,4 +61,11 @@
   status = 200
 
 [[plugins]]
-  package = "@netlify/plugin-lighthouse" 
+  package = "@netlify/plugin-lighthouse"
+
+# Build optimization
+[context.production]
+  command = "JEKYLL_ENV=production bundle exec jekyll build --trace"
+
+[context.deploy-preview]
+  command = "JEKYLL_ENV=production bundle exec jekyll build --trace --drafts" 

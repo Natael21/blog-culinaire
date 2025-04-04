@@ -18,6 +18,10 @@ gem "jekyll", "~> 3.8"
 gem "minima", "~> 2.5"
 gem "concurrent-ruby", "~> 1.2.0"
 
+# Performance optimizations
+gem "liquid-c", "~> 4.0"  # Accélère le rendu Liquid
+gem "sassc", "~> 2.4"     # Accélère le rendu Sass
+
 # If you have any plugins, put them here!
 group :jekyll_plugins do
   gem "jekyll-feed", "~> 0.11"
