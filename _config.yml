@@ -77,3 +77,33 @@ collections:
   upcoming:
     output: false
     permalink: /upcoming/:path/
+
+# Performance Optimizations
+incremental: true
+liquid:
+  error_mode: strict
+  strict_filters: true
+
+# Cache settings
+cache:
+  enabled: true
+  path: .jekyll-cache
+
+# Build optimizations
+limit_posts: 50
+future: false
+unpublished: false
+
+# Compression
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: [html, head, body]
+  blanklines: false
+  profile: false
+
+# Asset Pipeline
+sass:
+  style: compressed
+  sourcemap: never

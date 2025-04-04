@@ -1,6 +1,50 @@
 [build]
   publish = "."
+  command = "JEKYLL_ENV=production bundle exec jekyll build"
 
+[build.environment]
+  NODE_VERSION = "18"
+  JEKYLL_ENV = "production"
+  RUBY_VERSION = "2.7.1"
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.images]
+  compress = true
+
+[build.processing.html]
+  pretty_urls = true
+
+# Cache Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+# Build Cache
+[build.cache]
+  directories = [
+    "vendor/bundle",
+    "_site",
+    ".jekyll-cache",
+    "node_modules"
+  ]
+
+# Redirects
 [[redirects]]
   from = "/admin/*"
   to = "/admin/index.html"
@@ -10,9 +54,6 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
-[build.environment]
-  NODE_VERSION = "18"
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse" 
