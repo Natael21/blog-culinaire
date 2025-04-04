@@ -55,10 +55,15 @@ module Jekyll
       cache_file = File.join(data_dir, 'geocoding_cache.json')
       cache = File.exist?(cache_file) ? JSON.parse(File.read(cache_file)) : {}
       
+      # Charger la liste des restaurants déjà géocodés
+      geocoded_file = File.join(data_dir, 'geocoded_restaurants.json')
+      geocoded_restaurants = File.exist?(geocoded_file) ? JSON.parse(File.read(geocoded_file)) : []
+      
       restaurants = site.posts.docs.select { |post| post.data['layout'] == 'restaurant' }
       total_posts = restaurants.size
       geocoded = Concurrent::AtomicFixnum.new(0)
       to_geocode = []
+      newly_geocoded = []
       
       # Premier passage : utiliser le cache et identifier les restaurants à géocoder
       restaurants.each do |post|
@@ -67,10 +72,23 @@ module Jekyll
         address = post.data['address']
         cache_key = Digest::MD5.hexdigest(address)
         
+        # Vérifier si le restaurant est déjà dans le cache
         if cache[cache_key]
           post.data['latitude'] = cache[cache_key]['lat']
           post.data['longitude'] = cache[cache_key]['lng']
           geocoded.increment
+          
+          # Ajouter à la liste des restaurants géocodés s'il n'y est pas déjà
+          unless geocoded_restaurants.include?(post.data['title'])
+            newly_geocoded << post.data['title']
+          end
+          
+          next
+        end
+        
+        # Vérifier si le restaurant a déjà été géocodé lors d'un build précédent
+        if geocoded_restaurants.include?(post.data['title'])
+          Jekyll.logger.info "Geocoding:", "Skipping #{post.data['title']} - already geocoded in a previous build"
           next
         end
         
@@ -78,6 +96,8 @@ module Jekyll
       end
       
       return if to_geocode.empty?
+      
+      Jekyll.logger.info "Geocoding:", "Found #{to_geocode.size} new restaurants to geocode"
       
       # Configuration du pool de threads
       thread_count = [to_geocode.size, 3].min
@@ -104,6 +124,7 @@ module Jekyll
               }
               
               geocoded.increment
+              newly_geocoded << post.data['title']
               Jekyll.logger.info "Geocoding:", "Successfully geocoded #{post.data['title']}"
             else
               Jekyll.logger.error "Geocoding:", "No results found for #{post.data['title']} (#{address})"
@@ -123,7 +144,12 @@ module Jekyll
       # Sauvegarder le cache
       File.write(cache_file, JSON.pretty_generate(cache))
       
+      # Mettre à jour la liste des restaurants géocodés
+      geocoded_restaurants = (geocoded_restaurants + newly_geocoded).uniq
+      File.write(geocoded_file, JSON.pretty_generate(geocoded_restaurants))
+      
       Jekyll.logger.info "Geocoding:", "Completed! #{geocoded.value}/#{total_posts} restaurants geocoded successfully"
+      Jekyll.logger.info "Geocoding:", "#{newly_geocoded.size} new restaurants were geocoded in this build"
     end
   end
 end 
