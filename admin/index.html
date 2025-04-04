@@ -279,7 +279,9 @@
             const currentUser = netlifyIdentity.currentUser();
             if (currentUser) {
                 console.log('Utilisateur déjà connecté');
-                window.location.reload();
+                hideLoading();
+                document.getElementById('admin-content').style.display = 'block';
+                document.getElementById('user-email').textContent = currentUser.email;
             } else {
                 console.log('Aucun utilisateur connecté');
                 hideLoading();
@@ -290,7 +292,9 @@
             netlifyIdentity.on('init', user => {
                 console.log('Netlify Identity initialized');
                 if (user) {
-                    updateUI(user);
+                    hideLoading();
+                    document.getElementById('admin-content').style.display = 'block';
+                    document.getElementById('user-email').textContent = user.email;
                 } else {
                     hideLoading();
                     document.getElementById('login-container').style.display = 'block';
@@ -299,8 +303,10 @@
 
             netlifyIdentity.on('login', user => {
                 console.log('Login event');
-                // Rafraîchir la page immédiatement
-                window.location.reload();
+                netlifyIdentity.close();
+                hideLoading();
+                document.getElementById('admin-content').style.display = 'block';
+                document.getElementById('user-email').textContent = user.email;
             });
 
             netlifyIdentity.on('logout', () => {
