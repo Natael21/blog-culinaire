@@ -238,21 +238,17 @@
         }
 
         function updateUI(user) {
+            hideLoading();
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
             const userEmail = document.getElementById('user-email');
-
-            hideLoading();
 
             if (user) {
                 console.log('Mise à jour UI avec utilisateur:', user);
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
-                
-                // Afficher le nom complet si disponible, sinon l'email
-                const displayName = user.user_metadata?.full_name || user.email;
                 if (userEmail) {
-                    userEmail.textContent = displayName;
+                    userEmail.textContent = user.email;
                 }
             } else {
                 console.log('Mise à jour UI sans utilisateur');
@@ -267,53 +263,64 @@
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
+            showLoading(); // Afficher le chargement immédiatement
 
-            // S'assurer que Netlify Identity est chargé
+            // Vérifier si Netlify Identity est chargé
             if (!window.netlifyIdentity) {
+                console.error('Netlify Identity non chargé');
                 showError('Erreur de chargement de l\'authentification');
                 return;
             }
 
-            try {
-                // Initialiser Netlify Identity
-                netlifyIdentity.init();
+            // Initialiser Netlify Identity
+            netlifyIdentity.init();
 
-                // Configurer les écouteurs d'événements Netlify Identity
-                netlifyIdentity.on('init', user => {
-                    console.log('Netlify Identity initialized');
-                    updateUI(user);
-                });
-
-                netlifyIdentity.on('login', user => {
-                    console.log('Login event');
-                    try {
-                        netlifyIdentity.close();
-                        updateUI(user);
-                    } catch (error) {
-                        console.error('Erreur lors de la connexion:', error);
-                        showError('Une erreur est survenue lors de la connexion');
-                    }
-                });
-
-                netlifyIdentity.on('logout', () => {
-                    console.log('Logout event');
-                    try {
-                        updateUI(null);
-                        window.location.reload();
-                    } catch (error) {
-                        console.error('Erreur lors de la déconnexion:', error);
-                    }
-                });
-
-                netlifyIdentity.on('error', err => {
-                    console.error('Netlify Identity error:', err);
-                    showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
-                });
-
-            } catch (error) {
-                console.error('Erreur d\'initialisation:', error);
-                showError('Une erreur est survenue lors de l\'initialisation');
+            // Vérifier immédiatement l'état de connexion
+            const currentUser = netlifyIdentity.currentUser();
+            if (currentUser) {
+                console.log('Utilisateur déjà connecté');
+                updateUI(currentUser);
+            } else {
+                console.log('Aucun utilisateur connecté');
+                hideLoading();
+                document.getElementById('login-container').style.display = 'block';
             }
+
+            // Configurer les écouteurs d'événements
+            netlifyIdentity.on('init', user => {
+                console.log('Netlify Identity initialized');
+                if (user) {
+                    updateUI(user);
+                } else {
+                    hideLoading();
+                    document.getElementById('login-container').style.display = 'block';
+                }
+            });
+
+            netlifyIdentity.on('login', user => {
+                console.log('Login event');
+                netlifyIdentity.close();
+                updateUI(user);
+            });
+
+            netlifyIdentity.on('logout', () => {
+                console.log('Logout event');
+                document.getElementById('login-container').style.display = 'block';
+                document.getElementById('admin-content').style.display = 'none';
+            });
+
+            netlifyIdentity.on('error', err => {
+                console.error('Netlify Identity error:', err);
+                showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
+            });
+
+            // Fallback : si après 3 secondes rien ne s'affiche, montrer la page de connexion
+            setTimeout(() => {
+                if (document.getElementById('loading').style.display === 'block') {
+                    hideLoading();
+                    document.getElementById('login-container').style.display = 'block';
+                }
+            }, 3000);
         });
     </script>
 </body>
