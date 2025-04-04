@@ -13,7 +13,6 @@ module Jekyll
     INITIAL_TIMEOUT = 5
     MAX_TIMEOUT = 15
     BACKOFF_FACTOR = 1.5
-    BATCH_SIZE = 5 # Nombre de restaurants à géocoder par batch
 
     def geocode_with_retry(address, attempt = 1)
       timeout = [INITIAL_TIMEOUT * (BACKOFF_FACTOR ** (attempt - 1)), MAX_TIMEOUT].min
@@ -54,17 +53,7 @@ module Jekyll
       FileUtils.mkdir_p(data_dir) unless File.directory?(data_dir)
       
       cache_file = File.join(data_dir, 'geocoding_cache.json')
-      queue_file = File.join(data_dir, 'geocoding_queue.json')
-      
-      # Charger ou initialiser le cache
       cache = File.exist?(cache_file) ? JSON.parse(File.read(cache_file)) : {}
-      
-      # Charger ou initialiser la file d'attente
-      queue = if File.exist?(queue_file)
-        JSON.parse(File.read(queue_file))
-      else
-        []
-      end
       
       restaurants = site.posts.docs.select { |post| post.data['layout'] == 'restaurant' }
       total_posts = restaurants.size
@@ -85,36 +74,19 @@ module Jekyll
           next
         end
         
-        # Ajouter à la file d'attente si pas déjà présent
-        queue_entry = {
-          'title' => post.data['title'],
-          'address' => address,
-          'cache_key' => cache_key,
-          'attempts' => 0
-        }
-        
-        unless queue.any? { |entry| entry['cache_key'] == cache_key }
-          queue << queue_entry
-        end
-        
         to_geocode << [post, address, cache_key]
       end
       
-      # Sauvegarder la file d'attente mise à jour
-      File.write(queue_file, JSON.pretty_generate(queue))
-      
-      # Géocoder seulement un batch pendant le build
-      batch = to_geocode.take(BATCH_SIZE)
-      return if batch.empty?
+      return if to_geocode.empty?
       
       # Configuration du pool de threads
-      thread_count = [batch.size, 3].min
+      thread_count = [to_geocode.size, 3].min
       pool = Concurrent::FixedThreadPool.new(thread_count)
       semaphore = Concurrent::Semaphore.new(2)
       futures = []
       
-      # Géocodage en parallèle du batch
-      batch.each do |post, address, cache_key|
+      # Géocodage en parallèle
+      to_geocode.each do |post, address, cache_key|
         futures << Concurrent::Future.execute(executor: pool) do
           semaphore.acquire
           begin
@@ -131,10 +103,6 @@ module Jekyll
                 'updated_at' => Time.now.to_i
               }
               
-              # Mettre à jour la file d'attente
-              queue.delete_if { |entry| entry['cache_key'] == cache_key }
-              File.write(queue_file, JSON.pretty_generate(queue))
-              
               geocoded.increment
               Jekyll.logger.info "Geocoding:", "Successfully geocoded #{post.data['title']}"
             else
@@ -149,14 +117,13 @@ module Jekyll
         end
       end
       
-      # Attendre la fin des requêtes du batch
+      # Attendre la fin des requêtes
       futures.each(&:value)
       
       # Sauvegarder le cache
       File.write(cache_file, JSON.pretty_generate(cache))
       
       Jekyll.logger.info "Geocoding:", "Completed! #{geocoded.value}/#{total_posts} restaurants geocoded successfully"
-      Jekyll.logger.info "Geocoding:", "#{queue.size} restaurants remaining in queue for client-side geocoding"
     end
   end
 end 
