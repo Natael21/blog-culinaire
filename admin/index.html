@@ -248,6 +248,16 @@
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
                 if (userEmail) {
+                    // Vérifier si les métadonnées de l'utilisateur sont disponibles
+                    if (!user.user_metadata || !user.user_metadata.full_name) {
+                        // Stocker un flag dans sessionStorage pour éviter une boucle infinie
+                        if (!sessionStorage.getItem('hasRefreshed')) {
+                            console.log('Métadonnées utilisateur non disponibles, rafraîchissement...');
+                            sessionStorage.setItem('hasRefreshed', 'true');
+                            window.location.reload();
+                            return;
+                        }
+                    }
                     // Utiliser l'email comme fallback si full_name n'est pas disponible
                     const displayName = user.user_metadata && user.user_metadata.full_name ? 
                         user.user_metadata.full_name : 
@@ -258,6 +268,8 @@
                 console.log('Mise à jour UI sans utilisateur');
                 loginContainer.style.display = 'block';
                 adminContent.style.display = 'none';
+                // Réinitialiser le flag de rafraîchissement lors de la déconnexion
+                sessionStorage.removeItem('hasRefreshed');
             }
         }
 
