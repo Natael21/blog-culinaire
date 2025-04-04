@@ -38,6 +38,19 @@ title: Accueil
 
       <!-- Filtres avancés (cachés par défaut) -->
       <div id="advanced-filters" class="advanced-filters" style="display: none;">
+        <!-- Tri -->
+        <div class="filter-item">
+          <label for="sort-filter">Trier par</label>
+          <select id="sort-filter" class="filter-select">
+            <option value="date-desc" selected>Plus récent d'abord</option>
+            <option value="date-asc">Plus ancien d'abord</option>
+            <option value="name-asc">Nom (A à Z)</option>
+            <option value="name-desc">Nom (Z à A)</option>
+            <option value="rating-desc">Note (plus haute à plus basse)</option>
+            <option value="rating-asc">Note (plus basse à plus haute)</option>
+          </select>
+        </div>
+
         <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
