@@ -300,7 +300,10 @@
             netlifyIdentity.on('login', user => {
                 console.log('Login event');
                 netlifyIdentity.close();
-                updateUI(user);
+                // Rafraîchir la page après une courte pause pour permettre la fermeture de la modal
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
             });
 
             netlifyIdentity.on('logout', () => {
