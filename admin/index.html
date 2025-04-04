@@ -248,15 +248,16 @@
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
                 if (userEmail) {
-                    userEmail.textContent = user.email;
+                    // Utiliser l'email comme fallback si full_name n'est pas disponible
+                    const displayName = user.user_metadata && user.user_metadata.full_name ? 
+                        user.user_metadata.full_name : 
+                        user.email;
+                    userEmail.textContent = displayName;
                 }
             } else {
                 console.log('Mise à jour UI sans utilisateur');
                 loginContainer.style.display = 'block';
                 adminContent.style.display = 'none';
-                if (userEmail) {
-                    userEmail.textContent = '';
-                }
             }
         }
 
