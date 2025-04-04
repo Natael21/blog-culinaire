@@ -892,6 +892,121 @@ const restaurantGrid = document.getElementById('restaurant-grid');
 let restaurants = Array.from(restaurantGrid.children);
 let map = null;
 let markers = new Map(); // Pour stocker les marqueurs
+let geocodedCoordinates = new Map(); // Pour stocker les coordonnées géocodées
+
+// Cache pour le géocodage
+const geocodeCache = {
+  save: function(address, coords) {
+    try {
+      localStorage.setItem(`geocode_${address}`, JSON.stringify(coords));
+    } catch (e) {
+      console.warn('Impossible de sauvegarder dans le cache:', e);
+    }
+  },
+  get: function(address) {
+    try {
+      const cached = localStorage.getItem(`geocode_${address}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+};
+
+// Fonction pour attendre un certain temps
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Fonction pour formater l'adresse
+function formatAddress(address) {
+  return address
+    .replace(/ N,/g, ' Nord,')
+    .replace(/ S,/g, ' Sud,')
+    .replace(/ E,/g, ' Est,')
+    .replace(/ O,/g, ' Ouest,')
+    .replace(/ E\./g, ' Est')
+    .replace(/ O\./g, ' Ouest')
+    .replace(/ N\./g, ' Nord')
+    .replace(/ S\./g, ' Sud')
+    .replace(/\bRue\b/g, 'rue')
+    .replace(/\bAvenue\b/g, 'avenue')
+    .replace(/\bBoulevard\b/g, 'boulevard')
+    .trim();
+}
+
+// Fonction pour extraire le code postal
+function extractPostalCode(address) {
+  const match = address.match(/[A-Z]\d[A-Z]\s?\d[A-Z]\d/i);
+  return match ? match[0] : null;
+}
+
+// Fonction de géocodage
+async function geocodeAddress(address, retryCount = 0) {
+  // Vérifier le cache d'abord
+  const cached = geocodeCache.get(address);
+  if (cached) {
+    console.log('✅ Coordonnées trouvées dans le cache pour:', address);
+    return cached;
+  }
+
+  const maxRetries = 3;
+  const formattedAddress = formatAddress(address);
+  const cleanAddress = formattedAddress.replace(/[^\w\s,-]/g, '').trim();
+  const encodedAddress = encodeURIComponent(cleanAddress + ', Sherbrooke, Quebec, Canada');
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1&countrycodes=ca`;
+  
+  try {
+    console.log(`Tentative de géocodage pour: ${address}`);
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'BlogCulinaireSherbrooke/1.0'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    if (data && data.length > 0) {
+      const coords = {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+      // Sauvegarder dans le cache
+      geocodeCache.save(address, coords);
+      return coords;
+    }
+    
+    // Si l'adresse complète échoue, essayer avec le code postal
+    const postalCode = extractPostalCode(address);
+    if (postalCode) {
+      const postalUrl = `https://nominatim.openstreetmap.org/search?q=${postalCode}&format=json&limit=1&countrycodes=ca`;
+      const postalResponse = await fetch(postalUrl, {
+        headers: {
+          'User-Agent': 'BlogCulinaireSherbrooke/1.0'
+        }
+      });
+      
+      if (postalResponse.ok) {
+        const postalData = await postalResponse.json();
+        if (postalData && postalData.length > 0) {
+          const coords = {
+            lat: parseFloat(postalData[0].lat),
+            lng: parseFloat(postalData[0].lon)
+          };
+          // Sauvegarder dans le cache
+          geocodeCache.save(address, coords);
+          return coords;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ Erreur de géocodage pour', address, ':', error);
+  }
+  return null;
+}
 
 // Toggle des filtres avancés
 advancedFiltersToggle.addEventListener('click', function() {
@@ -1182,137 +1297,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const viewButtons = document.querySelectorAll('.view-btn');
   const restaurantGrid = document.getElementById('restaurant-grid');
   const mapContainer = document.getElementById('map-container');
-  let geocodedCoordinates = new Map();
 
-  // Cache pour le géocodage
-  const geocodeCache = {
-    save: function(address, coords) {
-      try {
-        localStorage.setItem(`geocode_${address}`, JSON.stringify(coords));
-      } catch (e) {
-        console.warn('Impossible de sauvegarder dans le cache:', e);
-      }
-    },
-    get: function(address) {
-      try {
-        const cached = localStorage.getItem(`geocode_${address}`);
-        return cached ? JSON.parse(cached) : null;
-      } catch (e) {
-        return null;
-      }
-    }
-  };
-
-  // Fonction pour attendre un certain temps
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  // Fonction pour formater l'adresse
-  function formatAddress(address) {
-    return address
-      .replace(/ N,/g, ' Nord,')
-      .replace(/ S,/g, ' Sud,')
-      .replace(/ E,/g, ' Est,')
-      .replace(/ O,/g, ' Ouest,')
-      .replace(/ E\./g, ' Est')
-      .replace(/ O\./g, ' Ouest')
-      .replace(/ N\./g, ' Nord')
-      .replace(/ S\./g, ' Sud')
-      .replace(/\bRue\b/g, 'rue')
-      .replace(/\bAvenue\b/g, 'avenue')
-      .replace(/\bBoulevard\b/g, 'boulevard')
-      .trim();
-  }
-
-  // Fonction pour extraire le code postal
-  function extractPostalCode(address) {
-    const match = address.match(/[A-Z]\d[A-Z]\s?\d[A-Z]\d/i);
-    return match ? match[0] : null;
-  }
-
-  // Fonction de géocodage
-  async function geocodeAddress(address, retryCount = 0) {
-    // Vérifier le cache d'abord
-    const cached = geocodeCache.get(address);
-    if (cached) {
-      console.log('✅ Coordonnées trouvées dans le cache pour:', address);
-      return cached;
-    }
-
-    const maxRetries = 3;
-    const formattedAddress = formatAddress(address);
-    const cleanAddress = formattedAddress.replace(/[^\w\s,-]/g, '').trim();
-    const encodedAddress = encodeURIComponent(cleanAddress + ', Sherbrooke, Quebec, Canada');
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1&countrycodes=ca`;
-    
-    try {
-      console.log(`Tentative de géocodage pour: ${address}`);
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'BlogCulinaireSherbrooke/1.0'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data && data.length > 0) {
-        const coords = {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        };
-        // Sauvegarder dans le cache
-        geocodeCache.save(address, coords);
-        return coords;
-      }
-      
-      // Si l'adresse complète échoue, essayer avec le code postal
-      const postalCode = extractPostalCode(address);
-      if (postalCode) {
-        const postalUrl = `https://nominatim.openstreetmap.org/search?q=${postalCode}&format=json&limit=1&countrycodes=ca`;
-        const postalResponse = await fetch(postalUrl, {
-          headers: {
-            'User-Agent': 'BlogCulinaireSherbrooke/1.0'
-          }
-        });
-        
-        if (postalResponse.ok) {
-          const postalData = await postalResponse.json();
-          if (postalData && postalData.length > 0) {
-            const coords = {
-              lat: parseFloat(postalData[0].lat),
-              lng: parseFloat(postalData[0].lon)
-            };
-            // Sauvegarder dans le cache
-            geocodeCache.save(address, coords);
-            return coords;
-          }
-        }
-      }
-    } catch (error) {
-      console.error('❌ Erreur de géocodage pour', address, ':', error);
-    }
-    return null;
-  }
-
-  // Vérifier si nous sommes sur la page d'accueil
-  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
-  
   // Vérifier si nous revenons d'une page de restaurant
   const returningFromRestaurant = document.referrer.includes(window.location.host);
   
   // Récupérer la dernière vue utilisée
   let currentView = localStorage.getItem('selectedView');
   
-  // Si nous sommes sur la page d'accueil et que nous ne revenons pas d'une page de restaurant
-  if (isHomePage && !returningFromRestaurant) {
-    currentView = 'grid'; // Vue par défaut
-    localStorage.setItem('selectedView', currentView);
+  // Si nous revenons d'une page de restaurant, ne rien faire
+  if (returningFromRestaurant) {
+    return;
   }
-  
+
   // Si aucune vue n'est définie, utiliser la vue en pastilles
   if (!currentView) {
     currentView = 'grid';
