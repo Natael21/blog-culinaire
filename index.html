@@ -69,15 +69,17 @@ title: Accueil
 
         <!-- Régime alimentaire -->
         <div class="filter-item">
-          <label for="diet-filter">Régime alimentaire</label>
-          <select id="diet-filter" class="filter-select">
-            <option value="all">Tous les régimes</option>
-            <option value="standard">Standard</option>
-            <option value="vegetarian-friendly">Options végétariennes</option>
-            <option value="vegetarian">100% Végétarien</option>
-            <option value="vegan-friendly">Options végétaliennes</option>
-            <option value="vegan">100% Végétalien</option>
-          </select>
+          <label>Régime alimentaire</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="vegetarian-options" class="diet-checkbox" data-value="vegetarian-friendly">
+              <label for="vegetarian-options">Options végétariennes</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="vegan-options" class="diet-checkbox" data-value="vegan-friendly">
+              <label for="vegan-options">Options végétaliennes</label>
+            </div>
+          </div>
         </div>
 
         <!-- Prix -->
@@ -880,6 +882,33 @@ title: Accueil
     margin: 0 -0.5rem;
   }
 }
+
+/* Styles pour les cases à cocher */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diet-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-item label {
+  font-weight: normal;
+  margin-bottom: 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
 </style>
 
 <script>
@@ -1091,12 +1120,16 @@ function updateMapMarkers() {
   }
 }
 
-// Modifier la fonction filterRestaurants pour mettre à jour aussi les marqueurs
+// Modifier la fonction filterRestaurants pour gérer les cases à cocher
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
   const selectedStyle = styleFilter ? styleFilter.value : 'all';
   const selectedPrice = priceFilter ? priceFilter.value : '';
-  const selectedDiet = document.getElementById('diet-filter') ? document.getElementById('diet-filter').value : 'all';
+  
+  // Récupérer les valeurs des cases à cocher
+  const vegetarianChecked = document.getElementById('vegetarian-options') ? document.getElementById('vegetarian-options').checked : false;
+  const veganChecked = document.getElementById('vegan-options') ? document.getElementById('vegan-options').checked : false;
+  
   const selectedSort = document.getElementById('sort-filter') ? document.getElementById('sort-filter').value : 'date-desc';
 
   // Filtrer les restaurants
@@ -1110,25 +1143,24 @@ function filterRestaurants() {
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
     
-    // Nouvelle logique pour le régime alimentaire
+    // Nouvelle logique pour le régime alimentaire avec cases à cocher
     let dietMatch = true;
-    if (selectedDiet && selectedDiet !== 'all') {
-      switch(selectedDiet) {
-        case 'vegetarian':
-          dietMatch = diet === 'vegetarian';
-          break;
-        case 'vegan':
-          dietMatch = diet === 'vegan';
-          break;
-        case 'vegetarian-friendly':
-          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
-          break;
-        case 'vegan-friendly':
-          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
-          break;
-        case 'standard':
-          dietMatch = diet === 'standard';
-          break;
+    
+    if (vegetarianChecked || veganChecked) {
+      dietMatch = false;
+      
+      if (vegetarianChecked && (
+          diet === 'vegetarian-friendly' || 
+          diet === 'vegetarian' || 
+          diet === 'vegan' || 
+          diet === 'vegan-friendly')) {
+        dietMatch = true;
+      }
+      
+      if (veganChecked && (
+          diet === 'vegan-friendly' || 
+          diet === 'vegan')) {
+        dietMatch = true;
       }
     }
     
@@ -1246,12 +1278,16 @@ function addMarker(restaurant, coords) {
   return marker;
 }
 
-// Modifier la fonction resetFilters pour mettre à jour aussi les marqueurs
+// Modifier la fonction resetFilters pour réinitialiser les cases à cocher
 function resetFilters() {
   if (titleSearch) titleSearch.value = '';
   if (styleFilter) styleFilter.value = 'all';
   if (priceFilter) priceFilter.value = '';
-  if (document.getElementById('diet-filter')) document.getElementById('diet-filter').value = 'all';
+  
+  // Réinitialiser les cases à cocher
+  if (document.getElementById('vegetarian-options')) document.getElementById('vegetarian-options').checked = false;
+  if (document.getElementById('vegan-options')) document.getElementById('vegan-options').checked = false;
+  
   if (document.getElementById('sort-filter')) document.getElementById('sort-filter').value = 'date-desc';
   if (advancedFilters) advancedFilters.style.display = 'none';
   if (advancedFiltersToggle) advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
@@ -1289,8 +1325,18 @@ function resetFilters() {
   }
 }
 
-// Ajouter l'event listener pour le filtre de régime alimentaire
-document.getElementById('diet-filter').addEventListener('change', filterRestaurants);
+// Ajouter les event listeners pour les cases à cocher
+document.addEventListener('DOMContentLoaded', function() {
+  // ... existing code ...
+  
+  // Ajouter les event listeners pour les cases à cocher
+  const dietCheckboxes = document.querySelectorAll('.diet-checkbox');
+  dietCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', filterRestaurants);
+  });
+  
+  // ... rest of the code ...
+});
 
 // Ajouter l'event listener pour le filtre de tri
 document.getElementById('sort-filter').addEventListener('change', filterRestaurants);
