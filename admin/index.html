@@ -256,12 +256,23 @@
             console.log('DOM Content Loaded');
             showLoading();
 
-            let initCalled = false;
+            // Initialiser Netlify Identity
+            if (window.netlifyIdentity) {
+                netlifyIdentity.init({
+                    locale: 'fr'
+                });
+            }
+
+            // Vérifier immédiatement si un utilisateur est déjà connecté
+            const currentUser = netlifyIdentity.currentUser();
+            if (currentUser) {
+                console.log('Utilisateur déjà connecté:', currentUser);
+                updateUI(currentUser);
+            }
 
             // Configurer les écouteurs d'événements Netlify Identity
             netlifyIdentity.on('init', user => {
                 console.log('Netlify Identity initialized, user:', user);
-                initCalled = true;
                 updateUI(user);
             });
 
@@ -274,6 +285,8 @@
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
                 updateUI(null);
+                // Rediriger vers la page de connexion après déconnexion
+                window.location.reload();
             });
 
             netlifyIdentity.on('error', err => {
@@ -281,10 +294,9 @@
                 showError('Une erreur est survenue lors de l\'authentification.');
             });
 
-            // Timeout pour éviter le chargement infini
+            // Si après 2 secondes rien ne s'est passé, on affiche la page de connexion
             setTimeout(() => {
-                if (!initCalled) {
-                    console.log('Init timeout - forcing UI update');
+                if (document.getElementById('loading').style.display === 'block') {
                     updateUI(null);
                 }
             }, 2000);
