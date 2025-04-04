@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -377,27 +377,33 @@
         // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                // Utiliser l'API de Netlify CMS pour récupérer les entrées
-                const collection = await window.CMS.getBackend().listEntries({
-                    collection: 'restaurants'
-                });
-                
-                let publishedCount = 0;
-                let draftCount = 0;
-                
-                collection.entries.forEach(entry => {
-                    if (entry.data.state === 'draft') {
-                        draftCount++;
-                    } else {
-                        publishedCount++;
-                    }
-                });
-                
-                // Mettre à jour les compteurs
-                document.getElementById('published-count').textContent = publishedCount.toString();
-                document.getElementById('draft-count').textContent = draftCount.toString();
-                document.getElementById('comments-count').textContent = '0'; // Pour l'instant
-                
+                // Récupérer les entrées depuis le localStorage
+                const entries = localStorage.getItem('netlify-cms-collections');
+                if (entries) {
+                    const collections = JSON.parse(entries);
+                    const restaurants = collections.restaurants || [];
+                    
+                    let publishedCount = 0;
+                    let draftCount = 0;
+                    
+                    restaurants.forEach(restaurant => {
+                        if (restaurant.status === 'draft') {
+                            draftCount++;
+                        } else {
+                            publishedCount++;
+                        }
+                    });
+                    
+                    // Mettre à jour les compteurs
+                    document.getElementById('published-count').textContent = publishedCount.toString();
+                    document.getElementById('draft-count').textContent = draftCount.toString();
+                    document.getElementById('comments-count').textContent = '0'; // Pour l'instant
+                } else {
+                    // Si pas d'entrées, mettre les compteurs à 0
+                    document.getElementById('published-count').textContent = '0';
+                    document.getElementById('draft-count').textContent = '0';
+                    document.getElementById('comments-count').textContent = '0';
+                }
             } catch (error) {
                 console.error('Erreur lors de la mise à jour des statistiques:', error);
                 // En cas d'erreur, on met tous les compteurs à 0
@@ -407,14 +413,16 @@
             }
         }
 
-        // Attendre que le CMS soit initialisé avant d'appeler updateStats
-        if (window.CMS) {
-            window.CMS.registerEventListener({
-                name: 'preSave',
-                handler: () => {
-                    // Mettre à jour les statistiques après chaque sauvegarde
-                    setTimeout(updateStats, 1000);
-                },
+        // Initialiser le CMS et les écouteurs d'événements
+        if (window.decapCMS) {
+            window.decapCMS.init();
+            
+            window.decapCMS.on('publish', () => {
+                setTimeout(updateStats, 1000);
+            });
+            
+            window.decapCMS.on('unpublish', () => {
+                setTimeout(updateStats, 1000);
             });
         }
 
