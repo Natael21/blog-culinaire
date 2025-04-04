@@ -8,7 +8,7 @@ style: "Bistro & Café"
 diet: "standard"
 description: "Un bistro offrant des plats classiques comme des côtes levées et des frites dans une ambiance chaleureuse"
 price: "medium"
-address: "1269 Rue King E, Sherbrooke, QC J1G 1E7"
+address: "1269 Rue King Est, Sherbrooke, QC J1G 1E7"
 image: "/images/Le Dauphin.jpg"
 images:
   - image: "/images/Le Dauphin.jpg"

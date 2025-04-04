@@ -8,7 +8,7 @@ style: "Indien & Épicé"
 diet: "vegetarian-friendly"
 description: "Sabhee ko namaskaar ! Par une longue semaine de pluie, un excellent restaurant indien orné de reliques qui pimentent votre journée."
 price: "medium"
-address: "61 Rue Wellington N, Sherbrooke, QC J1H 5A9"
+address: "61 Rue Wellington Nord, Sherbrooke, QC J1H 5A9"
 image: "/images/Masala café.png"
 images:
   - image: "/images/Masala café.png"

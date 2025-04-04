@@ -376,40 +376,22 @@
         // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                const token = netlifyIdentity.currentUser().token.access_token;
-                const response = await fetch('/.netlify/git/github/contents/content/restaurants', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                const response = await fetch('/admin/config.yml');
+                const config = await response.text();
+                const collection = config.match(/collection:\s*"([^"]+)"/)[1];
                 
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des statistiques');
-                }
-
-                const entries = await response.json();
+                const posts = await fetch(`/admin/api/collections/${collection}/entries`).then(r => r.json());
                 
-                // Compter les restaurants publiés et en brouillon
                 let publishedCount = 0;
                 let draftCount = 0;
                 
-                for (const entry of entries) {
-                    if (entry.name.endsWith('.md')) {
-                        const contentResponse = await fetch(entry.download_url, {
-                            headers: {
-                                'Authorization': `Bearer ${token}`
-                            }
-                        });
-                        const content = await contentResponse.text();
-                        
-                        // Vérifier si le restaurant est en brouillon
-                        if (content.includes('draft: true')) {
-                            draftCount++;
-                        } else {
-                            publishedCount++;
-                        }
+                posts.forEach(post => {
+                    if (post.data.state === 'draft') {
+                        draftCount++;
+                    } else {
+                        publishedCount++;
                     }
-                }
+                });
                 
                 // Mettre à jour les compteurs
                 document.getElementById('published-count').textContent = publishedCount.toString();

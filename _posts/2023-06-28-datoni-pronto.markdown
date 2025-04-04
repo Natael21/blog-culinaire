@@ -8,7 +8,7 @@ style: "Italien"
 diet: "vegetarian-friendly"
 description: "Une pizzéria authentique avec des produits d'origine italienne et une ambiance parfaite pour les rendez-vous galants !"
 price: "medium"
-address: "42 Bd Jacques-Cartier N, Sherbrooke, QC J1J 2Z8"
+address: "42 Bd Jacques-Cartier Nord, Sherbrooke, QC J1J 2Z8"
 image: "/images/datoni pronto.jpg"
 images:
   - image: "/images/datoni pronto.jpg"
