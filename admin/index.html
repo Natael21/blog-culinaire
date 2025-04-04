@@ -329,20 +329,38 @@
             }
         }
 
+        // Debug function to find the correct localStorage key
+        function debugLocalStorage() {
+            console.log('All localStorage keys:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                console.log(`${key}: ${localStorage.getItem(key)}`);
+            }
+        }
+
         // Fonction pour mettre à jour les statistiques
         async function updateStats() {
             try {
-                const response = await fetch('/_posts/index.html');
-                const text = await response.text();
-                
-                // Compter les restaurants par état
-                const readyCount = (text.match(/state: ready/g) || []).length;
-                const draftCount = (text.match(/state: draft/g) || []).length;
-                
-                // Mettre à jour l'interface
-                document.getElementById('published-count').textContent = readyCount;
-                document.getElementById('draft-count').textContent = draftCount;
-                document.getElementById('comments-count').textContent = '0';
+                // Récupérer les entrées depuis le localStorage
+                const entries = localStorage.getItem('netlify-cms-collection-posts');
+                if (entries) {
+                    const posts = JSON.parse(entries);
+                    
+                    let publishedCount = 0;
+                    let draftCount = 0;
+                    
+                    posts.forEach(post => {
+                        if (post.data && post.data.state === 'draft') {
+                            draftCount++;
+                        } else if (post.data && post.data.state === 'ready') {
+                            publishedCount++;
+                        }
+                    });
+                    
+                    document.getElementById('published-count').textContent = publishedCount.toString();
+                    document.getElementById('draft-count').textContent = draftCount.toString();
+                    document.getElementById('comments-count').textContent = '0';
+                }
             } catch (error) {
                 console.error('Erreur lors de la mise à jour des statistiques:', error);
                 // En cas d'erreur, afficher 0 partout
@@ -362,9 +380,16 @@
             setTimeout(updateStats, 1000);
         }
 
+        // Mettre à jour les stats quand le localStorage change
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'netlify-cms-collection-posts') {
+                updateStats();
+            }
+        });
+
         // Appeler debugLocalStorage au chargement pour voir toutes les clés
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(debugLocalStorage, 2000);
+            setTimeout(debugLocalStorage, 2000); // Attendre que tout soit chargé
         });
     </script>
 </body>
