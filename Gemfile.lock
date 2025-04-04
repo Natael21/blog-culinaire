@@ -53,6 +53,7 @@ GEM
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
     public_suffix (3.0.3)
+    rake (12.3.3)
     rb-fsevent (0.10.3)
     rb-inotify (0.10.0)
       ffi (~> 1.0)
@@ -79,6 +80,7 @@ DEPENDENCIES
   jekyll-sitemap (~> 1.2.0)
   liquid-c (~> 4.0.0)
   minima (~> 2.5.0)
+  rake (~> 12.3.3)
   sassc (~> 2.0.1)
   tzinfo-data
 
