@@ -226,20 +226,23 @@
             document.getElementById('error-message').style.display = 'none';
         }
 
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
         function showError(message) {
             document.getElementById('error-message').textContent = message;
             document.getElementById('error-message').style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
+            hideLoading();
             document.getElementById('login-container').style.display = 'block';
         }
 
         function updateUI(user) {
-            const loading = document.getElementById('loading');
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
             const userEmail = document.getElementById('user-email');
 
-            loading.style.display = 'none';
+            hideLoading();
 
             if (user) {
                 console.log('Mise à jour UI avec utilisateur:', user);
@@ -261,13 +264,19 @@
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
-            showLoading();
 
             // Initialiser Netlify Identity
             if (window.netlifyIdentity) {
-                netlifyIdentity.init({
-                    locale: 'fr'
-                });
+                netlifyIdentity.init();
+
+                // Vérifier immédiatement si un utilisateur est connecté
+                const currentUser = netlifyIdentity.currentUser();
+                if (currentUser) {
+                    updateUI(currentUser);
+                } else {
+                    document.getElementById('login-container').style.display = 'block';
+                    hideLoading();
+                }
             }
 
             // Configurer les écouteurs d'événements Netlify Identity
@@ -279,16 +288,12 @@
             netlifyIdentity.on('login', user => {
                 console.log('Login event, user:', user);
                 netlifyIdentity.close();
-                
-                // Attendre un court instant pour que la session soit établie
-                setTimeout(() => {
-                    window.location.reload();
-                }, 300);
+                updateUI(user);
             });
 
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
-                window.location.reload();
+                updateUI(null);
             });
 
             netlifyIdentity.on('error', err => {
