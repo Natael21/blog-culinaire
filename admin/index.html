@@ -193,15 +193,15 @@
             </div>
 
             <div class="admin-stats">
-                <div class="stats-card">
+                <div class="stat-card">
                     <div class="stat-number" id="published-count">0</div>
                     <div class="stat-label">Restaurants publiés</div>
                 </div>
-                <div class="stats-card">
+                <div class="stat-card">
                     <div class="stat-number" id="draft-count">0</div>
                     <div class="stat-label">Restaurants en brouillon</div>
                 </div>
-                <div class="stats-card">
+                <div class="stat-card">
                     <div class="stat-number" id="comments-count">0</div>
                     <div class="stat-label">Commentaires</div>
                 </div>
@@ -376,23 +376,32 @@
         // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                const response = await fetch('/.netlify/functions/get-stats', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
+                // Récupérer le contenu du dossier content/restaurants
+                const response = await fetch('https://api.github.com/repos/natsxn/blog-culinaire/contents/content/restaurants');
+                
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des statistiques');
                 }
 
-                const stats = await response.json();
+                const files = await response.json();
+                
+                // Compter les fichiers .md (chaque fichier est un restaurant)
+                let publishedCount = 0;
+                let draftCount = 0;
+                
+                files.forEach(file => {
+                    if (file.name.endsWith('.md')) {
+                        // Pour l'instant, on considère tous les fichiers comme publiés
+                        // On pourra affiner plus tard avec la lecture du contenu
+                        publishedCount++;
+                    }
+                });
                 
                 // Mettre à jour les compteurs
-                document.getElementById('published-count').textContent = stats.publishedCount || '0';
-                document.getElementById('draft-count').textContent = stats.draftCount || '0';
-                document.getElementById('comments-count').textContent = stats.commentsCount || '0';
+                document.getElementById('published-count').textContent = publishedCount.toString();
+                document.getElementById('draft-count').textContent = '0'; // Pour l'instant
+                document.getElementById('comments-count').textContent = '0'; // Pour l'instant
+                
             } catch (error) {
                 console.error('Erreur lors de la mise à jour des statistiques:', error);
             }
