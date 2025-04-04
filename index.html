@@ -1184,66 +1184,24 @@ document.addEventListener('DOMContentLoaded', function() {
   const mapContainer = document.getElementById('map-container');
   let geocodedCoordinates = new Map();
 
-  // Vérifier si nous sommes sur la page d'accueil
-  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
-  
-  // Vérifier si nous revenons d'une page de restaurant
-  const returningFromRestaurant = document.referrer.includes(window.location.host);
-  
-  // Récupérer la dernière vue utilisée
-  let currentView = localStorage.getItem('selectedView');
-  
-  // Si nous sommes sur la page d'accueil et que nous ne revenons pas d'une page de restaurant
-  if (isHomePage && !returningFromRestaurant) {
-    currentView = 'grid'; // Vue par défaut
-    localStorage.setItem('selectedView', currentView);
-  }
-  
-  // Si aucune vue n'est définie, utiliser la vue en pastilles
-  if (!currentView) {
-    currentView = 'grid';
-    localStorage.setItem('selectedView', currentView);
-  }
-
-  // Fonction pour mettre à jour l'interface selon la vue
-  async function updateView(view) {
-    // Mettre à jour les classes des boutons
-    viewButtons.forEach(btn => {
-      btn.classList.remove('active');
-      if (btn.dataset.view === view) {
-        btn.classList.add('active');
+  // Cache pour le géocodage
+  const geocodeCache = {
+    save: function(address, coords) {
+      try {
+        localStorage.setItem(`geocode_${address}`, JSON.stringify(coords));
+      } catch (e) {
+        console.warn('Impossible de sauvegarder dans le cache:', e);
       }
-    });
-
-    // Mettre à jour l'affichage
-    restaurantGrid.classList.remove('list-view');
-    restaurantGrid.style.display = 'grid';
-    mapContainer.style.display = 'none';
-
-    if (view === 'list') {
-      restaurantGrid.classList.add('list-view');
-      restaurantGrid.style.display = 'flex';
-    } else if (view === 'map') {
-      restaurantGrid.style.display = 'none';
-      mapContainer.style.display = 'block';
-      await initMap();
+    },
+    get: function(address) {
+      try {
+        const cached = localStorage.getItem(`geocode_${address}`);
+        return cached ? JSON.parse(cached) : null;
+      } catch (e) {
+        return null;
+      }
     }
-
-    // Sauvegarder la vue actuelle
-    localStorage.setItem('selectedView', view);
-  }
-
-  // Ajouter les événements de clic sur les boutons de vue
-  viewButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const view = button.dataset.view;
-      await updateView(view);
-    });
-  });
-
-  // Appliquer la vue actuelle au chargement
-  updateView(currentView);
+  };
 
   // Fonction pour attendre un certain temps
   function sleep(ms) {
@@ -1272,25 +1230,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const match = address.match(/[A-Z]\d[A-Z]\s?\d[A-Z]\d/i);
     return match ? match[0] : null;
   }
-
-  // Cache pour le géocodage
-  const geocodeCache = {
-    save: function(address, coords) {
-      try {
-        localStorage.setItem(`geocode_${address}`, JSON.stringify(coords));
-      } catch (e) {
-        console.warn('Impossible de sauvegarder dans le cache:', e);
-      }
-    },
-    get: function(address) {
-      try {
-        const cached = localStorage.getItem(`geocode_${address}`);
-        return cached ? JSON.parse(cached) : null;
-      } catch (e) {
-        return null;
-      }
-    }
-  };
 
   // Fonction de géocodage
   async function geocodeAddress(address, retryCount = 0) {
@@ -1359,6 +1298,67 @@ document.addEventListener('DOMContentLoaded', function() {
     return null;
   }
 
+  // Vérifier si nous sommes sur la page d'accueil
+  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+  
+  // Vérifier si nous revenons d'une page de restaurant
+  const returningFromRestaurant = document.referrer.includes(window.location.host);
+  
+  // Récupérer la dernière vue utilisée
+  let currentView = localStorage.getItem('selectedView');
+  
+  // Si nous sommes sur la page d'accueil et que nous ne revenons pas d'une page de restaurant
+  if (isHomePage && !returningFromRestaurant) {
+    currentView = 'grid'; // Vue par défaut
+    localStorage.setItem('selectedView', currentView);
+  }
+  
+  // Si aucune vue n'est définie, utiliser la vue en pastilles
+  if (!currentView) {
+    currentView = 'grid';
+    localStorage.setItem('selectedView', currentView);
+  }
+
+  // Fonction pour mettre à jour l'interface selon la vue
+  async function updateView(view) {
+    // Mettre à jour les classes des boutons
+    viewButtons.forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.view === view) {
+        btn.classList.add('active');
+      }
+    });
+
+    // Mettre à jour l'affichage
+    restaurantGrid.classList.remove('list-view');
+    restaurantGrid.style.display = 'grid';
+    mapContainer.style.display = 'none';
+
+    if (view === 'list') {
+      restaurantGrid.classList.add('list-view');
+      restaurantGrid.style.display = 'flex';
+    } else if (view === 'map') {
+      restaurantGrid.style.display = 'none';
+      mapContainer.style.display = 'block';
+      await initMap();
+    }
+
+    // Sauvegarder la vue actuelle
+    localStorage.setItem('selectedView', view);
+  }
+
+  // Ajouter les événements de clic sur les boutons de vue
+  viewButtons.forEach(button => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const view = button.dataset.view;
+      await updateView(view);
+    });
+  });
+
+  // Appliquer la vue actuelle au chargement
+  updateView(currentView);
+
   // Précharger les coordonnées en arrière-plan
   async function preloadCoordinates() {
     const restaurants = document.querySelectorAll('.post-card');
@@ -1375,7 +1375,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Si on a déjà les coordonnées, les utiliser
       if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-        geocodedCoordinates.set(address, { lat, lng });
+        geocodedCoordinates.set(restaurant.id, { lat, lng });
         successCount++;
         console.log(`ℹ️ Coordonnées existantes pour ${title}: ${lat}, ${lng}`);
         return;
@@ -1384,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Sinon, géocoder l'adresse
       const coords = await geocodeAddress(address);
       if (coords) {
-        geocodedCoordinates.set(address, coords);
+        geocodedCoordinates.set(restaurant.id, coords);
         restaurant.dataset.lat = coords.lat;
         restaurant.dataset.lng = coords.lng;
         successCount++;
@@ -1436,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && address) {
           const coords = await geocodeAddress(address);
           if (coords) {
-            geocodedCoordinates.set(address, coords);
+            geocodedCoordinates.set(restaurant.id, coords);
             restaurant.dataset.lat = coords.lat;
             restaurant.dataset.lng = coords.lng;
             addMarker(restaurant, coords);
