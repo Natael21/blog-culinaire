@@ -376,44 +376,25 @@
         // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                const token = netlifyIdentity.currentUser().token.access_token;
-                const owner = 'Natael21';
-                const repo = 'blog-culinaire';
-                const path = '_posts';
-
-                const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
-                    headers: {
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Authorization': `token ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const files = await response.json();
-                    const mdFiles = Array.isArray(files) ? files.filter(file => file.name.endsWith('.md')) : [];
+                // Récupérer les entrées depuis le localStorage de Netlify CMS
+                const entries = localStorage.getItem('netlify-cms-collection-restaurants');
+                if (entries) {
+                    const restaurants = JSON.parse(entries);
                     
                     let publishedCount = 0;
                     let draftCount = 0;
-
-                    // Récupérer le contenu de chaque fichier
-                    for (const file of mdFiles) {
-                        const contentResponse = await fetch(file.download_url);
-                        const content = await contentResponse.text();
-                        
-                        // Vérifier l'état dans le frontmatter
-                        if (content.includes('state: draft')) {
+                    
+                    restaurants.forEach(restaurant => {
+                        if (restaurant.data && restaurant.data.state === 'draft') {
                             draftCount++;
-                        } else if (content.includes('state: ready')) {
+                        } else if (restaurant.data && restaurant.data.state === 'ready') {
                             publishedCount++;
                         }
-                    }
+                    });
                     
                     document.getElementById('published-count').textContent = publishedCount.toString();
                     document.getElementById('draft-count').textContent = draftCount.toString();
                     document.getElementById('comments-count').textContent = '0';
-                } else {
-                    console.error('Erreur API GitHub:', await response.text());
-                    throw new Error('Erreur lors de la récupération des fichiers');
                 }
             } catch (error) {
                 console.error('Erreur lors de la mise à jour des statistiques:', error);
@@ -432,6 +413,13 @@
         if (netlifyIdentity.currentUser()) {
             setTimeout(updateStats, 1000);
         }
+
+        // Mettre à jour les stats quand le localStorage change
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'netlify-cms-collection-restaurants') {
+                updateStats();
+            }
+        });
     </script>
 </body>
 </html> 
