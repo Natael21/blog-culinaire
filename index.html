@@ -1257,13 +1257,35 @@ function resetFilters() {
   if (advancedFiltersToggle) advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
   
   // Réafficher tous les restaurants
+  restaurantGrid.innerHTML = '';
   restaurants.forEach(restaurant => {
     restaurant.style.display = '';
+    restaurantGrid.appendChild(restaurant);
   });
 
   // Mettre à jour les marqueurs si on est en vue carte
   if (map) {
-    updateMapMarkers();
+    // Supprimer tous les marqueurs existants
+    markers.forEach(marker => marker.remove());
+    markers.clear();
+
+    // Ajouter les marqueurs pour tous les restaurants
+    restaurants.forEach(restaurant => {
+      const coords = geocodedCoordinates.get(restaurant.id);
+      if (coords) {
+        addMarker(restaurant, coords);
+      }
+    });
+
+    // Ajuster la vue de la carte pour montrer tous les marqueurs
+    const bounds = L.latLngBounds(restaurants.map(restaurant => {
+      const coords = geocodedCoordinates.get(restaurant.id);
+      return coords ? [coords.lat, coords.lng] : null;
+    }).filter(coord => coord !== null));
+    
+    if (bounds.getNorth() !== bounds.getSouth() || bounds.getEast() !== bounds.getWest()) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
   }
 }
 
