@@ -885,7 +885,6 @@ title: Accueil
 <script>
 const titleSearch = document.getElementById('title-search');
 const styleFilter = document.getElementById('style-filter');
-const ratingFilter = document.getElementById('rating-filter');
 const priceFilter = document.getElementById('price-filter');
 const advancedFiltersToggle = document.getElementById('advanced-filters-toggle');
 const advancedFilters = document.getElementById('advanced-filters');
@@ -909,7 +908,6 @@ function updateMapMarkers() {
 
   const searchTitle = titleSearch.value.toLowerCase();
   const selectedStyle = styleFilter.value;
-  const selectedRating = ratingFilter.value;
   const selectedPrice = priceFilter.value;
   const selectedDiet = document.getElementById('diet-filter').value;
 
@@ -919,7 +917,6 @@ function updateMapMarkers() {
 
     const title = restaurant.dataset.title;
     const style = restaurant.dataset.style;
-    const rating = parseFloat(restaurant.dataset.rating);
     const price = restaurant.dataset.price;
     const diet = restaurant.dataset.diet;
     
@@ -948,23 +945,8 @@ function updateMapMarkers() {
           break;
       }
     }
-    
-    let ratingMatch = true;
-    if (selectedRating) {
-      switch(selectedRating) {
-        case "8":
-          ratingMatch = rating >= 8;
-          break;
-        case "6":
-          ratingMatch = rating >= 6 && rating < 8;
-          break;
-        case "5":
-          ratingMatch = rating < 6;
-          break;
-      }
-    }
 
-    if (titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch) {
+    if (titleMatch && styleMatch && priceMatch && dietMatch) {
       if (!map.hasLayer(marker)) {
         marker.addTo(map);
       }
@@ -998,7 +980,6 @@ function updateMapMarkers() {
 function filterRestaurants() {
   const searchTitle = titleSearch.value.toLowerCase();
   const selectedStyle = styleFilter ? styleFilter.value : 'all';
-  const selectedRating = ratingFilter ? ratingFilter.value : '';
   const selectedPrice = priceFilter ? priceFilter.value : '';
   const selectedDiet = document.getElementById('diet-filter') ? document.getElementById('diet-filter').value : 'all';
   const selectedSort = document.getElementById('sort-filter') ? document.getElementById('sort-filter').value : 'date-desc';
@@ -1007,7 +988,6 @@ function filterRestaurants() {
   let filteredRestaurants = restaurants.filter(restaurant => {
     const title = restaurant.dataset.title;
     const style = restaurant.dataset.style;
-    const rating = parseFloat(restaurant.dataset.rating);
     const price = restaurant.dataset.price;
     const diet = restaurant.dataset.diet;
     
@@ -1037,22 +1017,7 @@ function filterRestaurants() {
       }
     }
     
-    let ratingMatch = true;
-    if (selectedRating) {
-      switch(selectedRating) {
-        case "8":
-          ratingMatch = rating >= 8;
-          break;
-        case "6":
-          ratingMatch = rating >= 6 && rating < 8;
-          break;
-        case "5":
-          ratingMatch = rating < 6;
-          break;
-      }
-    }
-    
-    return titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch;
+    return titleMatch && styleMatch && priceMatch && dietMatch;
   });
 
   // Trier les restaurants filtrés
@@ -1146,14 +1111,13 @@ function addMarker(restaurant, coords) {
 
 // Modifier la fonction resetFilters pour mettre à jour aussi les marqueurs
 function resetFilters() {
-  titleSearch.value = '';
-  styleFilter.value = 'all';
-  ratingFilter.value = '';
-  priceFilter.value = '';
-  document.getElementById('diet-filter').value = 'all';
-  document.getElementById('sort-filter').value = 'date-desc';
-  advancedFilters.style.display = 'none';
-  advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
+  if (titleSearch) titleSearch.value = '';
+  if (styleFilter) styleFilter.value = 'all';
+  if (priceFilter) priceFilter.value = '';
+  if (document.getElementById('diet-filter')) document.getElementById('diet-filter').value = 'all';
+  if (document.getElementById('sort-filter')) document.getElementById('sort-filter').value = 'date-desc';
+  if (advancedFilters) advancedFilters.style.display = 'none';
+  if (advancedFiltersToggle) advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
   
   // Réafficher tous les restaurants
   restaurants.forEach(restaurant => {
@@ -1175,7 +1139,6 @@ document.getElementById('sort-filter').addEventListener('change', filterRestaura
 // Ajout des event listeners
 titleSearch.addEventListener('input', filterRestaurants);
 styleFilter.addEventListener('change', filterRestaurants);
-ratingFilter.addEventListener('change', filterRestaurants);
 priceFilter.addEventListener('change', filterRestaurants);
 
 // Fonction pour sauvegarder la vue actuelle
@@ -1231,38 +1194,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Mettre à jour l'affichage
+    restaurantGrid.classList.remove('list-view');
+    restaurantGrid.style.display = 'grid';
+    mapContainer.style.display = 'none';
+
     if (view === 'list') {
       restaurantGrid.classList.add('list-view');
       restaurantGrid.style.display = 'flex';
-      mapContainer.style.display = 'none';
-    } else if (view === 'grid') {
-      restaurantGrid.classList.remove('list-view');
-      restaurantGrid.style.display = 'grid';
-      mapContainer.style.display = 'none';
     } else if (view === 'map') {
       restaurantGrid.style.display = 'none';
       mapContainer.style.display = 'block';
       await initMap();
     }
+
+    // Sauvegarder la vue actuelle
+    localStorage.setItem('selectedView', view);
   }
 
   // Ajouter les événements de clic sur les boutons de vue
   viewButtons.forEach(button => {
-    button.addEventListener('click', async () => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
       const view = button.dataset.view;
-      localStorage.setItem('selectedView', view);
       await updateView(view);
     });
   });
 
-  // Ajouter l'événement de clic sur les liens des restaurants
-  document.querySelectorAll('.post-link').forEach(link => {
-    link.addEventListener('click', () => {
-      // La vue actuelle est déjà sauvegardée dans le localStorage
-    });
-  });
-
-  // Appliquer la vue actuelle
+  // Appliquer la vue actuelle au chargement
   updateView(currentView);
 
   // Fonction pour attendre un certain temps
