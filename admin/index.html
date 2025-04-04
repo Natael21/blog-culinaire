@@ -258,6 +258,17 @@
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
 
+                // Si c'est la première fois qu'on affiche l'interface admin
+                if (!sessionStorage.getItem('adminLoaded')) {
+                    console.log('Premier chargement de l\'interface admin, rafraîchissement prévu...');
+                    sessionStorage.setItem('adminLoaded', 'true');
+                    // Rafraîchir la page après 1 seconde
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                    return;
+                }
+
                 // Activer tous les boutons
                 document.querySelectorAll('.action-button').forEach(button => {
                     button.style.pointerEvents = 'auto';
@@ -265,39 +276,19 @@
                 });
 
                 if (userEmail) {
-                    // Vérifier si les métadonnées de l'utilisateur sont disponibles
-                    if (!user.user_metadata || !user.user_metadata.full_name) {
-                        // Stocker un flag dans sessionStorage pour éviter une boucle infinie
-                        if (!sessionStorage.getItem('hasRefreshed')) {
-                            console.log('Métadonnées utilisateur non disponibles, rafraîchissement...');
-                            sessionStorage.setItem('hasRefreshed', 'true');
-                            window.location.reload();
-                            return;
-                        }
-                    }
                     // Utiliser l'email comme fallback si full_name n'est pas disponible
                     const displayName = user.user_metadata && user.user_metadata.full_name ? 
                         user.user_metadata.full_name : 
                         user.email;
                     userEmail.textContent = displayName;
-
-                    // Vérifier si l'interface est complètement chargée
-                    setTimeout(() => {
-                        if (document.querySelectorAll('.action-button[style*="pointer-events: none"]').length > 0) {
-                            console.log('Réactivation des boutons...');
-                            document.querySelectorAll('.action-button').forEach(button => {
-                                button.style.pointerEvents = 'auto';
-                                button.style.opacity = '1';
-                            });
-                        }
-                    }, 1000);
                 }
             } else {
                 console.log('Mise à jour UI sans utilisateur');
                 loginContainer.style.display = 'block';
                 adminContent.style.display = 'none';
-                // Réinitialiser le flag de rafraîchissement lors de la déconnexion
+                // Réinitialiser les flags de session lors de la déconnexion
                 sessionStorage.removeItem('hasRefreshed');
+                sessionStorage.removeItem('adminLoaded');
             }
         }
 
