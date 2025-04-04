@@ -5,7 +5,7 @@ date: 2024-11-15
 state: ready
 note: 7.3
 style: "Asiatique"
-diet: "vegetarian-friendly"
+diet: "vegetarian-friendly, vegan-friendly"
 description: "Fusion asiatique-québécoise avec ambiance musicale douce et prix abordables."
 price: "budget"
 address: "70 Rue Wellington N, Sherbrooke, QC J1H 5B9"
