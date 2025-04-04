@@ -256,22 +256,19 @@
             console.log('DOM Content Loaded');
             showLoading();
 
-            // Vérifier si l'utilisateur est déjà connecté
-            const currentUser = netlifyIdentity.currentUser();
-            if (currentUser) {
-                console.log('Utilisateur déjà connecté:', currentUser);
-                updateUI(currentUser);
-            }
+            let initCalled = false;
 
             // Configurer les écouteurs d'événements Netlify Identity
             netlifyIdentity.on('init', user => {
                 console.log('Netlify Identity initialized, user:', user);
+                initCalled = true;
                 updateUI(user);
             });
 
             netlifyIdentity.on('login', user => {
                 console.log('Login event, user:', user);
                 updateUI(user);
+                netlifyIdentity.close();
             });
 
             netlifyIdentity.on('logout', () => {
@@ -283,6 +280,14 @@
                 console.error('Netlify Identity error:', err);
                 showError('Une erreur est survenue lors de l\'authentification.');
             });
+
+            // Timeout pour éviter le chargement infini
+            setTimeout(() => {
+                if (!initCalled) {
+                    console.log('Init timeout - forcing UI update');
+                    updateUI(null);
+                }
+            }, 2000);
         });
     </script>
 </body>
