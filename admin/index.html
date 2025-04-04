@@ -236,6 +236,7 @@
             const loading = document.getElementById('loading');
             const loginContainer = document.getElementById('login-container');
             const adminContent = document.getElementById('admin-content');
+            const userEmail = document.getElementById('user-email');
 
             loading.style.display = 'none';
 
@@ -243,7 +244,14 @@
                 console.log('Utilisateur connecté:', user);
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
-                document.getElementById('user-email').textContent = user.email;
+                if (userEmail) {
+                    userEmail.textContent = user.email;
+                }
+
+                // S'assurer que tous les boutons sont cliquables
+                document.querySelectorAll('.action-button').forEach(button => {
+                    button.style.pointerEvents = 'auto';
+                });
             } else {
                 console.log('Aucun utilisateur connecté');
                 loginContainer.style.display = 'block';
@@ -273,20 +281,28 @@
             // Configurer les écouteurs d'événements Netlify Identity
             netlifyIdentity.on('init', user => {
                 console.log('Netlify Identity initialized, user:', user);
-                updateUI(user);
+                if (user) {
+                    updateUI(user);
+                } else {
+                    // Si pas d'utilisateur après init, afficher la page de connexion
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('login-container').style.display = 'block';
+                }
             });
 
             netlifyIdentity.on('login', user => {
                 console.log('Login event, user:', user);
-                updateUI(user);
                 netlifyIdentity.close();
+                // Petit délai pour s'assurer que la modal est fermée
+                setTimeout(() => {
+                    updateUI(user);
+                }, 100);
             });
 
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
                 updateUI(null);
-                // Rediriger vers la page de connexion après déconnexion
-                window.location.reload();
+                window.location.href = window.location.pathname;
             });
 
             netlifyIdentity.on('error', err => {
@@ -297,7 +313,8 @@
             // Si après 2 secondes rien ne s'est passé, on affiche la page de connexion
             setTimeout(() => {
                 if (document.getElementById('loading').style.display === 'block') {
-                    updateUI(null);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('login-container').style.display = 'block';
                 }
             }, 2000);
         });
