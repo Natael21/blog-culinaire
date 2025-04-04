@@ -264,7 +264,7 @@
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
-            showLoading(); // Afficher le chargement immédiatement
+            showLoading();
 
             // Vérifier si Netlify Identity est chargé
             if (!window.netlifyIdentity) {
@@ -273,47 +273,39 @@
                 return;
             }
 
-            // Initialiser Netlify Identity
-            netlifyIdentity.init();
+            // Initialiser Netlify Identity avec une configuration plus sûre
+            netlifyIdentity.init({
+                APIUrl: 'https://api.netlify.com'
+            });
 
-            // Vérifier immédiatement l'état de connexion
-            const currentUser = netlifyIdentity.currentUser();
-            if (currentUser) {
-                console.log('Utilisateur déjà connecté');
-                hideLoading();
-                document.getElementById('admin-content').style.display = 'block';
-                document.getElementById('user-email').textContent = currentUser.email;
-            } else {
-                console.log('Aucun utilisateur connecté');
-                hideLoading();
-                document.getElementById('login-container').style.display = 'block';
+            // Fonction sécurisée pour obtenir le nom d'affichage
+            function getDisplayName(user) {
+                if (!user) return '';
+                if (user.user_metadata && user.user_metadata.full_name) {
+                    return user.user_metadata.full_name;
+                }
+                return user.email || '';
             }
+
+            // Vérifier l'état de connexion initial
+            const currentUser = netlifyIdentity.currentUser();
+            updateUI(currentUser);
 
             // Configurer les écouteurs d'événements
             netlifyIdentity.on('init', user => {
                 console.log('Netlify Identity initialized');
-                if (user) {
-                    hideLoading();
-                    document.getElementById('admin-content').style.display = 'block';
-                    document.getElementById('user-email').textContent = user.email;
-                } else {
-                    hideLoading();
-                    document.getElementById('login-container').style.display = 'block';
-                }
+                updateUI(user);
             });
 
             netlifyIdentity.on('login', user => {
                 console.log('Login event');
                 netlifyIdentity.close();
-                hideLoading();
-                document.getElementById('admin-content').style.display = 'block';
-                document.getElementById('user-email').textContent = user.email;
+                updateUI(user);
             });
 
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
-                document.getElementById('login-container').style.display = 'block';
-                document.getElementById('admin-content').style.display = 'none';
+                updateUI(null);
             });
 
             netlifyIdentity.on('error', err => {
