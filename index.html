@@ -38,19 +38,6 @@ title: Accueil
 
       <!-- Filtres avancés (cachés par défaut) -->
       <div id="advanced-filters" class="advanced-filters" style="display: none;">
-        <!-- Tri -->
-        <div class="filter-item">
-          <label for="sort-filter">Trier par</label>
-          <select id="sort-filter" class="filter-select">
-            <option value="date-desc" selected>Plus récent d'abord</option>
-            <option value="date-asc">Plus ancien d'abord</option>
-            <option value="name-asc">Nom (A à Z)</option>
-            <option value="name-desc">Nom (Z à A)</option>
-            <option value="rating-desc">Note (plus haute à plus basse)</option>
-            <option value="rating-asc">Note (plus basse à plus haute)</option>
-          </select>
-        </div>
-
         <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
@@ -67,6 +54,17 @@ title: Accueil
           </select>
         </div>
 
+        <!-- Prix -->
+        <div class="filter-item">
+          <label for="price-filter">Fourchette de prix</label>
+          <select id="price-filter" class="filter-select">
+            <option value="">Tous les prix</option>
+            <option value="budget">$ (0-20$)</option>
+            <option value="medium">$$ (20-40$)</option>
+            <option value="expensive">$$$ (40$ et +)</option>
+          </select>
+        </div>
+
         <!-- Régime alimentaire -->
         <div class="filter-item">
           <label>Régime alimentaire</label>
@@ -80,17 +78,6 @@ title: Accueil
               <label for="vegan-options">Options végétaliennes</label>
             </div>
           </div>
-        </div>
-
-        <!-- Prix -->
-        <div class="filter-item">
-          <label for="price-filter">Fourchette de prix</label>
-          <select id="price-filter" class="filter-select">
-            <option value="">Tous les prix</option>
-            <option value="budget">$ (0-20$)</option>
-            <option value="medium">$$ (20-40$)</option>
-            <option value="expensive">$$$ (40$ et +)</option>
-          </select>
         </div>
 
         <!-- Bouton de réinitialisation -->
