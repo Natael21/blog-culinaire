@@ -1,6 +1,12 @@
 [build]
   publish = "."
-  command = "gem install bundler -v '1.17.1' && JEKYLL_ENV=production bundle exec jekyll build --trace"
+  command = """
+    gem install bundler -v '1.17.1' && \
+    bundle config --local deployment false && \
+    bundle install && \
+    bundle config --local deployment true && \
+    JEKYLL_ENV=production bundle exec jekyll build --trace
+  """
 
 [build.environment]
   NODE_VERSION = "18"
@@ -8,6 +14,7 @@
   RUBY_VERSION = "2.7.1"
   BUNDLER_VERSION = "1.17.1"
   CONCURRENT_DOWNLOAD = "true"
+  BUNDLE_DEPLOYMENT = "false"
 
 [build.processing]
   skip_processing = false
