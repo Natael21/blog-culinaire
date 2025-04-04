@@ -1298,17 +1298,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const restaurantGrid = document.getElementById('restaurant-grid');
   const mapContainer = document.getElementById('map-container');
 
+  // Vérifier si nous sommes sur la page d'accueil
+  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+  
   // Vérifier si nous revenons d'une page de restaurant
   const returningFromRestaurant = document.referrer.includes(window.location.host);
   
   // Récupérer la dernière vue utilisée
   let currentView = localStorage.getItem('selectedView');
   
-  // Si nous revenons d'une page de restaurant, ne rien faire
-  if (returningFromRestaurant) {
-    return;
+  // Si nous sommes sur la page d'accueil et que nous ne revenons pas d'une page de restaurant
+  if (isHomePage && !returningFromRestaurant) {
+    currentView = 'grid'; // Vue par défaut
+    localStorage.setItem('selectedView', currentView);
   }
-
+  
   // Si aucune vue n'est définie, utiliser la vue en pastilles
   if (!currentView) {
     currentView = 'grid';
