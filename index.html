@@ -42,7 +42,7 @@ title: Accueil
         <div class="filter-item">
           <label for="sort-filter">Trier par</label>
           <select id="sort-filter" class="filter-select">
-            <option value="date-desc">Date (récent-vieux)</option>
+            <option value="date-desc" selected>Date (récent-vieux)</option>
             <option value="date-asc">Date (vieux-récent)</option>
             <option value="name-asc">Nom (A-Z)</option>
             <option value="name-desc">Nom (Z-A)</option>
@@ -64,17 +64,6 @@ title: Accueil
             <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
             <option value="Italien">Italien</option>
             <option value="Indien & Épicé">Indien & Épicé</option>
-          </select>
-        </div>
-
-        <!-- Note -->
-        <div class="filter-item">
-          <label for="rating-filter">Note</label>
-          <select id="rating-filter" class="filter-select">
-            <option value="">Toutes les notes</option>
-            <option value="8">Recommandés (8 à 10/10)</option>
-            <option value="6">Corrects (6 à 7/10)</option>
-            <option value="5">Non recommandés (5/10 et moins)</option>
           </select>
         </div>
 
@@ -1012,8 +1001,10 @@ function filterRestaurants() {
   const selectedRating = ratingFilter.value;
   const selectedPrice = priceFilter.value;
   const selectedDiet = document.getElementById('diet-filter').value;
+  const selectedSort = document.getElementById('sort-filter').value;
 
-  restaurants.forEach(restaurant => {
+  // Filtrer les restaurants
+  let filteredRestaurants = restaurants.filter(restaurant => {
     const title = restaurant.dataset.title;
     const style = restaurant.dataset.style;
     const rating = parseFloat(restaurant.dataset.rating);
@@ -1061,11 +1052,34 @@ function filterRestaurants() {
       }
     }
     
-    if (titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch) {
-      restaurant.style.display = '';
-    } else {
-      restaurant.style.display = 'none';
+    return titleMatch && styleMatch && ratingMatch && priceMatch && dietMatch;
+  });
+
+  // Trier les restaurants filtrés
+  filteredRestaurants.sort((a, b) => {
+    switch(selectedSort) {
+      case 'date-desc':
+        return new Date(b.dataset.date) - new Date(a.dataset.date);
+      case 'date-asc':
+        return new Date(a.dataset.date) - new Date(b.dataset.date);
+      case 'name-asc':
+        return a.querySelector('h2').textContent.localeCompare(b.querySelector('h2').textContent);
+      case 'name-desc':
+        return b.querySelector('h2').textContent.localeCompare(a.querySelector('h2').textContent);
+      case 'rating-desc':
+        return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+      case 'rating-asc':
+        return parseFloat(a.dataset.rating) - parseFloat(b.dataset.rating);
+      default:
+        return 0;
     }
+  });
+
+  // Mettre à jour l'affichage
+  restaurantGrid.innerHTML = '';
+  filteredRestaurants.forEach(restaurant => {
+    restaurant.style.display = '';
+    restaurantGrid.appendChild(restaurant);
   });
 
   // Mettre à jour les marqueurs si on est en vue carte
@@ -1137,6 +1151,7 @@ function resetFilters() {
   ratingFilter.value = '';
   priceFilter.value = '';
   document.getElementById('diet-filter').value = 'all';
+  document.getElementById('sort-filter').value = 'date-desc';
   advancedFilters.style.display = 'none';
   advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
   
@@ -1153,6 +1168,9 @@ function resetFilters() {
 
 // Ajouter l'event listener pour le filtre de régime alimentaire
 document.getElementById('diet-filter').addEventListener('change', filterRestaurants);
+
+// Ajouter l'event listener pour le filtre de tri
+document.getElementById('sort-filter').addEventListener('change', filterRestaurants);
 
 // Ajout des event listeners
 titleSearch.addEventListener('input', filterRestaurants);
