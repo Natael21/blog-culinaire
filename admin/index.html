@@ -376,18 +376,18 @@
         // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                // Récupérer les entrées depuis le localStorage de Netlify CMS
-                const entries = localStorage.getItem('netlify-cms-collection-restaurants');
+                // Récupérer les entrées depuis le localStorage
+                const entries = localStorage.getItem('netlify-cms-collection-posts');
                 if (entries) {
-                    const restaurants = JSON.parse(entries);
+                    const posts = JSON.parse(entries);
                     
                     let publishedCount = 0;
                     let draftCount = 0;
                     
-                    restaurants.forEach(restaurant => {
-                        if (restaurant.data && restaurant.data.state === 'draft') {
+                    posts.forEach(post => {
+                        if (post.data && post.data.state === 'draft') {
                             draftCount++;
-                        } else if (restaurant.data && restaurant.data.state === 'ready') {
+                        } else if (post.data && post.data.state === 'ready') {
                             publishedCount++;
                         }
                     });
@@ -416,7 +416,7 @@
 
         // Mettre à jour les stats quand le localStorage change
         window.addEventListener('storage', (e) => {
-            if (e.key === 'netlify-cms-collection-restaurants') {
+            if (e.key === 'netlify-cms-collection-posts') {
                 updateStats();
             }
         });
