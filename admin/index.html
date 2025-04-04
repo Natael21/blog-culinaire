@@ -193,16 +193,16 @@
             </div>
 
             <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
+                <div class="stats-card">
+                    <div class="stat-number" id="published-count">0</div>
                     <div class="stat-label">Restaurants publiés</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
+                <div class="stats-card">
+                    <div class="stat-number" id="draft-count">0</div>
                     <div class="stat-label">Restaurants en brouillon</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">0</div>
+                <div class="stats-card">
+                    <div class="stat-number" id="comments-count">0</div>
                     <div class="stat-label">Commentaires</div>
                 </div>
             </div>
@@ -372,6 +372,36 @@
                 showError('Le système d\'authentification n\'est pas disponible');
             }
         }
+
+        // Mettre à jour les statistiques
+        async function updateStats() {
+            try {
+                const response = await fetch('/.netlify/functions/get-stats', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des statistiques');
+                }
+
+                const stats = await response.json();
+                
+                // Mettre à jour les compteurs
+                document.getElementById('published-count').textContent = stats.publishedCount || '0';
+                document.getElementById('draft-count').textContent = stats.draftCount || '0';
+                document.getElementById('comments-count').textContent = stats.commentsCount || '0';
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour des statistiques:', error);
+            }
+        }
+
+        // Appeler updateStats au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
+        });
     </script>
 </body>
 </html> 
