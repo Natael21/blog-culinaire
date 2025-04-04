@@ -257,38 +257,61 @@
             }
         }
 
+        // Variable pour suivre l'état de la connexion
+        let isLoggingIn = false;
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
             
-            // Initialiser Netlify Identity
+            // Initialiser Netlify Identity avec les options complètes
             if (window.netlifyIdentity) {
                 netlifyIdentity.init({
-                    locale: 'fr'
+                    locale: 'fr',
+                    enableAutoAuthorize: true,
+                    APIUrl: 'https://api.netlify.com'
                 });
             }
 
             // Configurer les écouteurs d'événements Netlify Identity
             netlifyIdentity.on('init', user => {
                 console.log('Netlify Identity initialized, user:', user);
-                updateUI(user);
+                if (!isLoggingIn) {
+                    updateUI(user);
+                }
             });
 
             netlifyIdentity.on('login', user => {
                 console.log('Login event, user:', user);
+                isLoggingIn = true;
+                showLoading();
+                
+                // Fermer la modal de connexion
                 netlifyIdentity.close();
-                // Recharger la page après la connexion
-                window.location.reload();
+
+                // Attendre que la session soit complètement établie
+                setTimeout(() => {
+                    if (netlifyIdentity.currentUser()) {
+                        console.log('Session établie, rechargement de la page');
+                        window.location.href = window.location.pathname;
+                    } else {
+                        console.log('Attente de la session...');
+                        setTimeout(() => {
+                            window.location.href = window.location.pathname;
+                        }, 1000);
+                    }
+                }, 500);
             });
 
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
-                // Rediriger vers la page de connexion
+                isLoggingIn = false;
                 window.location.href = window.location.pathname;
             });
 
             netlifyIdentity.on('error', err => {
                 console.error('Netlify Identity error:', err);
+                isLoggingIn = false;
                 showError('Une erreur est survenue lors de l\'authentification.');
             });
 
