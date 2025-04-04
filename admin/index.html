@@ -276,24 +276,13 @@
 
             netlifyIdentity.on('login', user => {
                 console.log('Login event, user:', user);
-                // Fermer la modal de connexion
                 netlifyIdentity.close();
-                
-                // Mettre à jour l'interface immédiatement
-                updateUI(user);
-                
-                // Forcer une mise à jour après un court délai pour s'assurer que tout est bien affiché
-                setTimeout(() => {
-                    const currentUser = netlifyIdentity.currentUser();
-                    if (currentUser) {
-                        updateUI(currentUser);
-                    }
-                }, 500);
+                // Recharger la page après la connexion
+                window.location.reload();
             });
 
             netlifyIdentity.on('logout', () => {
                 console.log('Logout event');
-                updateUI(null);
                 // Rediriger vers la page de connexion
                 window.location.href = window.location.pathname;
             });
