@@ -249,15 +249,46 @@
 
         function updateUI(user) {
             hideLoading();
+            const loginContainer = document.getElementById('login-container');
+            const adminContent = document.getElementById('admin-content');
+            const userEmail = document.getElementById('user-email');
+
             if (user) {
-                document.getElementById('user-email').textContent = user.email;
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('admin-content').style.display = 'block';
-                enableInterface();
-                updateStats();
+                console.log('Mise à jour UI avec utilisateur:', user);
+                loginContainer.style.display = 'none';
+                adminContent.style.display = 'block';
+
+                // Si c'est la première fois qu'on affiche l'interface admin
+                if (!sessionStorage.getItem('adminLoaded')) {
+                    console.log('Premier chargement de l\'interface admin, rafraîchissement prévu...');
+                    sessionStorage.setItem('adminLoaded', 'true');
+                    // Rafraîchir la page après 1 seconde
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                    return;
+                }
+
+                // Activer tous les boutons
+                document.querySelectorAll('.action-button').forEach(button => {
+                    button.style.pointerEvents = 'auto';
+                    button.style.opacity = '1';
+                });
+
+                if (userEmail) {
+                    // Utiliser l'email comme fallback si full_name n'est pas disponible
+                    const displayName = user.user_metadata && user.user_metadata.full_name ? 
+                        user.user_metadata.full_name : 
+                        user.email;
+                    userEmail.textContent = displayName;
+                }
             } else {
-                document.getElementById('login-container').style.display = 'block';
-                document.getElementById('admin-content').style.display = 'none';
+                console.log('Mise à jour UI sans utilisateur');
+                loginContainer.style.display = 'block';
+                adminContent.style.display = 'none';
+                // Réinitialiser les flags de session lors de la déconnexion
+                sessionStorage.removeItem('hasRefreshed');
+                sessionStorage.removeItem('adminLoaded');
             }
         }
 
@@ -274,41 +305,63 @@
             console.log('DOM Content Loaded');
             showLoading();
 
-            // Initialiser Netlify Identity
-            if (window.netlifyIdentity) {
-                netlifyIdentity.init({
-                    locale: 'fr'
-                });
+            // S'assurer que le script Netlify Identity est chargé
+            function initNetlifyIdentity() {
+                if (window.netlifyIdentity) {
+                    netlifyIdentity.init({
+                        locale: 'fr' // Forcer la locale en français
+                    });
+                    
+                    // Configurer les écouteurs d'événements
+                    netlifyIdentity.on('init', user => {
+                        console.log('Netlify Identity initialized');
+                        updateUI(user);
+                        enableInterface(); // Activer l'interface après l'initialisation
+                    });
 
-                // Vérifier si l'utilisateur est déjà connecté
-                const currentUser = netlifyIdentity.currentUser();
-                if (currentUser) {
-                    updateUI(currentUser);
+                    netlifyIdentity.on('login', user => {
+                        console.log('Login event');
+                        netlifyIdentity.close();
+                        updateUI(user);
+                        enableInterface(); // Activer l'interface après la connexion
+                    });
+
+                    netlifyIdentity.on('logout', () => {
+                        console.log('Logout event');
+                        updateUI(null);
+                    });
+
+                    netlifyIdentity.on('error', err => {
+                        console.error('Netlify Identity error:', err);
+                        showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
+                    });
+
+                    // Vérifier l'état de connexion initial
+                    const currentUser = netlifyIdentity.currentUser();
+                    if (currentUser) {
+                        updateUI(currentUser);
+                        enableInterface(); // Activer l'interface si l'utilisateur est déjà connecté
+                    }
                 } else {
+                    console.error('Netlify Identity non chargé');
+                    showError('Erreur de chargement de l\'authentification');
+                }
+            }
+
+            // Attendre que le script soit complètement chargé
+            if (document.readyState === 'complete') {
+                initNetlifyIdentity();
+            } else {
+                window.addEventListener('load', initNetlifyIdentity);
+            }
+
+            // Fallback : si après 3 secondes rien ne s'affiche, montrer la page de connexion
+            setTimeout(() => {
+                if (document.getElementById('loading').style.display === 'block') {
                     hideLoading();
                     document.getElementById('login-container').style.display = 'block';
                 }
-
-                // Configurer les écouteurs d'événements
-                netlifyIdentity.on('login', user => {
-                    console.log('Login event');
-                    netlifyIdentity.close();
-                    updateUI(user);
-                });
-
-                netlifyIdentity.on('logout', () => {
-                    console.log('Logout event');
-                    updateUI(null);
-                });
-
-                netlifyIdentity.on('error', err => {
-                    console.error('Netlify Identity error:', err);
-                    showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
-                });
-            } else {
-                console.error('Netlify Identity non chargé');
-                showError('Erreur de chargement de l\'authentification');
-            }
+            }, 3000);
         });
 
         // Fonction pour ouvrir le modal de connexion
@@ -329,27 +382,35 @@
             }
         }
 
-        // Debug function to find the correct localStorage key
-        function debugLocalStorage() {
-            console.log('All localStorage keys:');
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                console.log(`${key}: ${localStorage.getItem(key)}`);
-            }
-        }
-
-        // Fonction pour mettre à jour les statistiques
+        // Mettre à jour les statistiques
         async function updateStats() {
             try {
-                // Récupérer les entrées depuis le localStorage
-                const entries = localStorage.getItem('netlify-cms-collection-posts');
-                if (entries) {
-                    const posts = JSON.parse(entries);
-                    
+                debugLocalStorage(); // Afficher toutes les clés pour debug
+
+                // Chercher la clé qui contient les posts
+                let postsData = null;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.includes('decap-cms-') || key.includes('netlify-cms-')) {
+                        console.log('Found CMS key:', key);
+                        const data = localStorage.getItem(key);
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (Array.isArray(parsed)) {
+                                postsData = parsed;
+                                break;
+                            }
+                        } catch (e) {
+                            console.log('Not valid JSON for key:', key);
+                        }
+                    }
+                }
+
+                if (postsData) {
                     let publishedCount = 0;
                     let draftCount = 0;
                     
-                    posts.forEach(post => {
+                    postsData.forEach(post => {
                         if (post.data && post.data.state === 'draft') {
                             draftCount++;
                         } else if (post.data && post.data.state === 'ready') {
@@ -360,10 +421,11 @@
                     document.getElementById('published-count').textContent = publishedCount.toString();
                     document.getElementById('draft-count').textContent = draftCount.toString();
                     document.getElementById('comments-count').textContent = '0';
+                } else {
+                    console.log('No posts data found in localStorage');
                 }
             } catch (error) {
                 console.error('Erreur lors de la mise à jour des statistiques:', error);
-                // En cas d'erreur, afficher 0 partout
                 document.getElementById('published-count').textContent = '0';
                 document.getElementById('draft-count').textContent = '0';
                 document.getElementById('comments-count').textContent = '0';
@@ -382,7 +444,7 @@
 
         // Mettre à jour les stats quand le localStorage change
         window.addEventListener('storage', (e) => {
-            if (e.key === 'netlify-cms-collection-posts') {
+            if (e.key.includes('decap-cms-') || e.key.includes('netlify-cms-')) {
                 updateStats();
             }
         });
