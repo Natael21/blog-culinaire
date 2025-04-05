@@ -248,47 +248,24 @@
         }
 
         function updateUI(user) {
-            hideLoading();
-            const loginContainer = document.getElementById('login-container');
-            const adminContent = document.getElementById('admin-content');
-            const userEmail = document.getElementById('user-email');
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+            updateRestaurantCounts();
+        }
 
-            if (user) {
-                console.log('Mise à jour UI avec utilisateur:', user);
-                loginContainer.style.display = 'none';
-                adminContent.style.display = 'block';
-
-                // Si c'est la première fois qu'on affiche l'interface admin
-                if (!sessionStorage.getItem('adminLoaded')) {
-                    console.log('Premier chargement de l\'interface admin, rafraîchissement prévu...');
-                    sessionStorage.setItem('adminLoaded', 'true');
-                    // Rafraîchir la page après 1 seconde
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                    return;
-                }
-
-                // Activer tous les boutons
-                document.querySelectorAll('.action-button').forEach(button => {
-                    button.style.pointerEvents = 'auto';
-                    button.style.opacity = '1';
-                });
-
-                if (userEmail) {
-                    // Utiliser l'email comme fallback si full_name n'est pas disponible
-                    const displayName = user.user_metadata && user.user_metadata.full_name ? 
-                        user.user_metadata.full_name : 
-                        user.email;
-                    userEmail.textContent = displayName;
-                }
-            } else {
-                console.log('Mise à jour UI sans utilisateur');
-                loginContainer.style.display = 'block';
-                adminContent.style.display = 'none';
-                // Réinitialiser les flags de session lors de la déconnexion
-                sessionStorage.removeItem('hasRefreshed');
-                sessionStorage.removeItem('adminLoaded');
+        async function updateRestaurantCounts() {
+            try {
+                const response = await fetch('/.netlify/functions/get-restaurant-counts');
+                const data = await response.json();
+                
+                document.getElementById('published-count').textContent = data.ready;
+                document.getElementById('draft-count').textContent = data.draft;
+                // Les commentaires restent à 0 pour l'instant
+                document.getElementById('comments-count').textContent = '0';
+            } catch (error) {
+                console.error('Erreur lors de la récupération des compteurs:', error);
+                showError('Impossible de charger les statistiques');
             }
         }
 
