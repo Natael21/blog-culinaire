@@ -187,22 +187,35 @@
 
             <div class="user-info">
                 <span class="user-email">Connecté en tant que : <span id="user-email"></span></span>
-                <button class="logout-button" onclick="netlifyIdentity.logout();">
+                <button class="logout-button" onclick="handleLogout()">
                     <i class="fas fa-sign-out-alt"></i> Se déconnecter
                 </button>
             </div>
 
             <div class="admin-stats">
+                {% assign published_count = 0 %}
+                {% assign draft_count = 0 %}
+
+                {% for post in site.posts %}
+                    {% if post.layout == 'restaurant' %}
+                        {% if post.state == 'ready' %}
+                            {% assign published_count = published_count | plus: 1 %}
+                        {% else %}
+                            {% assign draft_count = draft_count | plus: 1 %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
                 <div class="stat-card">
-                    <div class="stat-number" id="published-count">0</div>
+                    <div class="stat-number">{{ published_count }}</div>
                     <div class="stat-label">Restaurants publiés</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="draft-count">0</div>
+                    <div class="stat-number">{{ draft_count }}</div>
                     <div class="stat-label">Restaurants en brouillon</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="comments-count">0</div>
+                    <div class="stat-number">0</div>
                     <div class="stat-label">Commentaires</div>
                 </div>
             </div>
