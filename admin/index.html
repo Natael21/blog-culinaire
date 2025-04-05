@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: admin
 title: Administration - Blog Culinaire
 ---
 
@@ -7,6 +7,13 @@ title: Administration - Blog Culinaire
     <div class="admin-header">
         <h1 class="admin-title">Tableau de bord</h1>
         <p class="admin-subtitle">Bienvenue dans votre espace d'administration</p>
+    </div>
+
+    <div class="user-info">
+        <span class="user-email">Connecté en tant que : <span id="user-email"></span></span>
+        <button class="logout-button" onclick="netlifyIdentity.logout();">
+            <i class="fas fa-sign-out-alt"></i> Se déconnecter
+        </button>
     </div>
 
     <div class="admin-stats">
@@ -141,4 +148,64 @@ title: Administration - Blog Culinaire
             padding: 0 1rem;
         }
     }
-</style> 
+
+    .user-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .user-email {
+        font-size: 1.2rem;
+        color: #2c3e50;
+    }
+
+    .logout-button {
+        background: none;
+        border: 1px solid #e74c3c;
+        color: #e74c3c;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .logout-button:hover {
+        background: #e74c3c;
+        color: white;
+    }
+</style>
+
+<script>
+    // Désactiver les logs de débogage
+    console.log = function() {};
+    console.error = function() {};
+    console.warn = function() {};
+    console.info = function() {};
+    console.debug = function() {};
+
+    // Afficher le nom d'utilisateur
+    netlifyIdentity.on('init', user => {
+        if (user) {
+            const displayName = user.user_metadata && user.user_metadata.full_name ? 
+                user.user_metadata.full_name : 
+                user.email;
+            document.getElementById('user-email').textContent = displayName;
+        }
+    });
+
+    netlifyIdentity.on('login', user => {
+        const displayName = user.user_metadata && user.user_metadata.full_name ? 
+            user.user_metadata.full_name : 
+            user.email;
+        document.getElementById('user-email').textContent = displayName;
+    });
+</script> 
