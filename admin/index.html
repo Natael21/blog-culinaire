@@ -251,22 +251,7 @@
             document.getElementById('user-email').textContent = user.email;
             document.getElementById('login-container').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
-            updateRestaurantCounts();
-        }
-
-        async function updateRestaurantCounts() {
-            try {
-                const response = await fetch('/.netlify/functions/get-restaurant-counts');
-                const data = await response.json();
-                
-                document.getElementById('published-count').textContent = data.ready;
-                document.getElementById('draft-count').textContent = data.draft;
-                // Les commentaires restent à 0 pour l'instant
-                document.getElementById('comments-count').textContent = '0';
-            } catch (error) {
-                console.error('Erreur lors de la récupération des compteurs:', error);
-                showError('Impossible de charger les statistiques');
-            }
+            updateStats();
         }
 
         // Fonction pour activer l'interface

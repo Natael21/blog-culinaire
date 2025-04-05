@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "bundle install --deployment && npm install && JEKYLL_ENV=production bundle exec jekyll build --trace"
+  command = "bundle install --deployment && JEKYLL_ENV=production bundle exec jekyll build --trace"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -68,8 +68,4 @@
   command = "JEKYLL_ENV=production bundle exec jekyll build --trace"
 
 [context.deploy-preview]
-  command = "JEKYLL_ENV=production bundle exec jekyll build --trace --drafts"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild" 
+  command = "JEKYLL_ENV=production bundle exec jekyll build --trace --drafts" 
