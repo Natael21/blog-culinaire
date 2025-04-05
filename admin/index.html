@@ -1,458 +1,144 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Blog Culinaire</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-        }
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .admin-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .admin-title {
-            color: #2c3e50;
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        .admin-subtitle {
-            color: #7f8c8d;
-            font-size: 1.2rem;
-        }
-        .admin-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .admin-card-title {
-            color: #2c3e50;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        .admin-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #3498db;
-        }
-        .stat-label {
-            color: #7f8c8d;
-            margin-top: 0.5rem;
-        }
+---
+layout: default
+title: Administration - Blog Culinaire
+---
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Tableau de bord</h1>
+        <p class="admin-subtitle">Bienvenue dans votre espace d'administration</p>
+    </div>
+
+    <div class="admin-stats">
+        {% assign published_count = 0 %}
+        {% assign draft_count = 0 %}
+
+        {% for post in site.posts %}
+            {% if post.layout == 'restaurant' %}
+                {% if post.state == 'ready' %}
+                    {% assign published_count = published_count | plus: 1 %}
+                {% else %}
+                    {% assign draft_count = draft_count | plus: 1 %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <div class="stat-card">
+            <div class="stat-number">{{ published_count }}</div>
+            <div class="stat-label">Restaurants publiés</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ draft_count }}</div>
+            <div class="stat-label">Restaurants en brouillon</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Commentaires</div>
+        </div>
+    </div>
+
+    <div class="admin-actions">
+        <a href="new-recipe.html" class="action-button">
+            <i class="fas fa-plus"></i> Nouveau restaurant
+        </a>
+        <a href="#" class="action-button">
+            <i class="fas fa-list"></i> Gérer les restaurants
+        </a>
+        <a href="#" class="action-button">
+            <i class="fas fa-comments"></i> Gérer les commentaires
+        </a>
+        <a href="#" class="action-button">
+            <i class="fas fa-images"></i> Gérer les images
+        </a>
+        <a href="#" class="action-button">
+            <i class="fas fa-cog"></i> Paramètres
+        </a>
+    </div>
+</div>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+    }
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .admin-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .admin-title {
+        color: #2c3e50;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .admin-subtitle {
+        color: #7f8c8d;
+        font-size: 1.2rem;
+    }
+    .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #3498db;
+    }
+    .stat-label {
+        color: #7f8c8d;
+        margin-top: 0.5rem;
+    }
+    .admin-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 0 auto;
+        max-width: 1400px;
+    }
+    .action-button {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        padding: 1.25rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 500;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(135deg, #2980b9, #2c3e50);
+        color: white;
+    }
+    .action-button i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+    @media (max-width: 768px) {
         .admin-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 0 auto;
-            max-width: 1400px;
+            grid-template-columns: 1fr;
+            padding: 0 1rem;
         }
-        .action-button {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            padding: 1.25rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            font-weight: 500;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .action-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            background: linear-gradient(135deg, #2980b9, #2c3e50);
-            color: white;
-        }
-        .action-button i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-        @media (max-width: 768px) {
-            .admin-actions {
-                grid-template-columns: 1fr;
-                padding: 0 1rem;
-            }
-        }
-        #loading {
-            text-align: center;
-            padding: 2rem;
-        }
-        .error-message {
-            color: #e74c3c;
-            text-align: center;
-            margin: 1rem 0;
-        }
-        .user-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-        .user-email {
-            font-size: 1.2rem;
-            color: #2c3e50;
-        }
-        .logout-button {
-            background: none;
-            border: 1px solid #e74c3c;
-            color: #e74c3c;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .logout-button:hover {
-            background: #e74c3c;
-            color: white;
-        }
-        /* Style pour le widget Netlify Identity */
-        .netlify-identity-widget {
-            z-index: 1000;
-        }
-        
-        /* Style pour l'overlay du widget */
-        .netlify-identity-widget-overlay {
-            background: rgba(0, 0, 0, 0.5) !important;
-            z-index: 999 !important;
-        }
-    </style>
-</head>
-<body>
-    <!-- Loading -->
-    <div id="loading" style="display: none;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-2">Chargement...</p>
-    </div>
-
-    <!-- Error message -->
-    <div id="error-message" class="error-message" style="display: none;"></div>
-
-    <!-- Login section -->
-    <div id="login-container" style="display: none;">
-        <div class="admin-container">
-            <div class="admin-header">
-                <h1 class="admin-title">Administration</h1>
-                <p class="admin-subtitle">Veuillez vous connecter pour accéder à l'administration</p>
-            </div>
-            <div class="admin-card text-center">
-                <button class="btn btn-primary btn-lg" onclick="openLoginModal();">Se connecter</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Admin content -->
-    <div id="admin-content" style="display: none;">
-        <div class="admin-container">
-            <div class="admin-header">
-                <h1 class="admin-title">Tableau de bord</h1>
-                <p class="admin-subtitle">Bienvenue dans votre espace d'administration</p>
-            </div>
-
-            <div class="user-info">
-                <span class="user-email">Connecté en tant que : <span id="user-email"></span></span>
-                <button class="logout-button" onclick="netlifyIdentity.logout();">
-                    <i class="fas fa-sign-out-alt"></i> Se déconnecter
-                </button>
-            </div>
-
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="published-count">0</div>
-                    <div class="stat-label">Restaurants publiés</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="draft-count">0</div>
-                    <div class="stat-label">Restaurants en brouillon</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="comments-count">0</div>
-                    <div class="stat-label">Commentaires</div>
-                </div>
-            </div>
-
-            <div class="admin-actions">
-                <a href="new-recipe.html" class="action-button">
-                    <i class="fas fa-plus"></i> Nouveau restaurant
-                </a>
-                <a href="#" class="action-button">
-                    <i class="fas fa-list"></i> Gérer les restaurants
-                </a>
-                <a href="#" class="action-button">
-                    <i class="fas fa-comments"></i> Gérer les commentaires
-                </a>
-                <a href="#" class="action-button">
-                    <i class="fas fa-images"></i> Gérer les images
-                </a>
-                <a href="#" class="action-button">
-                    <i class="fas fa-cog"></i> Paramètres
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Fonctions utilitaires
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('admin-content').style.display = 'none';
-            document.getElementById('error-message').style.display = 'none';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function showError(message) {
-            document.getElementById('error-message').textContent = message;
-            document.getElementById('error-message').style.display = 'block';
-            hideLoading();
-            document.getElementById('login-container').style.display = 'block';
-        }
-
-        function updateUI(user) {
-            hideLoading();
-            const loginContainer = document.getElementById('login-container');
-            const adminContent = document.getElementById('admin-content');
-            const userEmail = document.getElementById('user-email');
-
-            if (user) {
-                console.log('Mise à jour UI avec utilisateur:', user);
-                loginContainer.style.display = 'none';
-                adminContent.style.display = 'block';
-
-                // Si c'est la première fois qu'on affiche l'interface admin
-                if (!sessionStorage.getItem('adminLoaded')) {
-                    console.log('Premier chargement de l\'interface admin, rafraîchissement prévu...');
-                    sessionStorage.setItem('adminLoaded', 'true');
-                    // Rafraîchir la page après 1 seconde
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                    return;
-                }
-
-                // Activer tous les boutons
-                document.querySelectorAll('.action-button').forEach(button => {
-                    button.style.pointerEvents = 'auto';
-                    button.style.opacity = '1';
-                });
-
-                if (userEmail) {
-                    // Utiliser l'email comme fallback si full_name n'est pas disponible
-                    const displayName = user.user_metadata && user.user_metadata.full_name ? 
-                        user.user_metadata.full_name : 
-                        user.email;
-                    userEmail.textContent = displayName;
-                }
-            } else {
-                console.log('Mise à jour UI sans utilisateur');
-                loginContainer.style.display = 'block';
-                adminContent.style.display = 'none';
-                // Réinitialiser les flags de session lors de la déconnexion
-                sessionStorage.removeItem('hasRefreshed');
-                sessionStorage.removeItem('adminLoaded');
-            }
-        }
-
-        // Fonction pour activer l'interface
-        function enableInterface() {
-            document.querySelectorAll('.action-button').forEach(button => {
-                button.style.pointerEvents = 'auto';
-                button.style.opacity = '1';
-            });
-        }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
-            showLoading();
-
-            // S'assurer que le script Netlify Identity est chargé
-            function initNetlifyIdentity() {
-                if (window.netlifyIdentity) {
-                    netlifyIdentity.init({
-                        locale: 'fr' // Forcer la locale en français
-                    });
-                    
-                    // Configurer les écouteurs d'événements
-                    netlifyIdentity.on('init', user => {
-                        console.log('Netlify Identity initialized');
-                        updateUI(user);
-                        enableInterface(); // Activer l'interface après l'initialisation
-                    });
-
-                    netlifyIdentity.on('login', user => {
-                        console.log('Login event');
-                        netlifyIdentity.close();
-                        updateUI(user);
-                        enableInterface(); // Activer l'interface après la connexion
-                    });
-
-                    netlifyIdentity.on('logout', () => {
-                        console.log('Logout event');
-                        updateUI(null);
-                    });
-
-                    netlifyIdentity.on('error', err => {
-                        console.error('Netlify Identity error:', err);
-                        showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
-                    });
-
-                    // Vérifier l'état de connexion initial
-                    const currentUser = netlifyIdentity.currentUser();
-                    if (currentUser) {
-                        updateUI(currentUser);
-                        enableInterface(); // Activer l'interface si l'utilisateur est déjà connecté
-                    }
-                } else {
-                    console.error('Netlify Identity non chargé');
-                    showError('Erreur de chargement de l\'authentification');
-                }
-            }
-
-            // Attendre que le script soit complètement chargé
-            if (document.readyState === 'complete') {
-                initNetlifyIdentity();
-            } else {
-                window.addEventListener('load', initNetlifyIdentity);
-            }
-
-            // Fallback : si après 3 secondes rien ne s'affiche, montrer la page de connexion
-            setTimeout(() => {
-                if (document.getElementById('loading').style.display === 'block') {
-                    hideLoading();
-                    document.getElementById('login-container').style.display = 'block';
-                }
-            }, 3000);
-        });
-
-        // Fonction pour ouvrir le modal de connexion
-        function openLoginModal() {
-            if (window.netlifyIdentity) {
-                netlifyIdentity.open('login');
-            } else {
-                showError('Le système d\'authentification n\'est pas disponible');
-            }
-        }
-
-        // Debug function to find the correct localStorage key
-        function debugLocalStorage() {
-            console.log('All localStorage keys:');
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                console.log(`${key}: ${localStorage.getItem(key)}`);
-            }
-        }
-
-        // Mettre à jour les statistiques
-        async function updateStats() {
-            try {
-                debugLocalStorage(); // Afficher toutes les clés pour debug
-
-                // Chercher la clé qui contient les posts
-                let postsData = null;
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key.includes('decap-cms-') || key.includes('netlify-cms-')) {
-                        console.log('Found CMS key:', key);
-                        const data = localStorage.getItem(key);
-                        try {
-                            const parsed = JSON.parse(data);
-                            if (Array.isArray(parsed)) {
-                                postsData = parsed;
-                                break;
-                            }
-                        } catch (e) {
-                            console.log('Not valid JSON for key:', key);
-                        }
-                    }
-                }
-
-                if (postsData) {
-                    let publishedCount = 0;
-                    let draftCount = 0;
-                    
-                    postsData.forEach(post => {
-                        if (post.data && post.data.state === 'draft') {
-                            draftCount++;
-                        } else if (post.data && post.data.state === 'ready') {
-                            publishedCount++;
-                        }
-                    });
-                    
-                    document.getElementById('published-count').textContent = publishedCount.toString();
-                    document.getElementById('draft-count').textContent = draftCount.toString();
-                    document.getElementById('comments-count').textContent = '0';
-                } else {
-                    console.log('No posts data found in localStorage');
-                }
-            } catch (error) {
-                console.error('Erreur lors de la mise à jour des statistiques:', error);
-                document.getElementById('published-count').textContent = '0';
-                document.getElementById('draft-count').textContent = '0';
-                document.getElementById('comments-count').textContent = '0';
-            }
-        }
-
-        // Appeler updateStats après la connexion réussie
-        netlifyIdentity.on('login', () => {
-            setTimeout(updateStats, 1000);
-        });
-
-        // Appeler updateStats si l'utilisateur est déjà connecté
-        if (netlifyIdentity.currentUser()) {
-            setTimeout(updateStats, 1000);
-        }
-
-        // Mettre à jour les stats quand le localStorage change
-        window.addEventListener('storage', (e) => {
-            if (e.key.includes('decap-cms-') || e.key.includes('netlify-cms-')) {
-                updateStats();
-            }
-        });
-
-        // Appeler debugLocalStorage au chargement pour voir toutes les clés
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(debugLocalStorage, 2000); // Attendre que tout soit chargé
-        });
-    </script>
-</body>
-</html> 
+    }
+</style> 
