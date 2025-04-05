@@ -139,6 +139,9 @@ title: Administration - Blog Culinaire
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .logout-button:hover {
             background: #e74c3c;
@@ -191,7 +194,7 @@ title: Administration - Blog Culinaire
 
             <div class="user-info">
                 <span class="user-email">Connecté en tant que : <span id="user-email"></span></span>
-                <button class="logout-button" onclick="handleLogout()">
+                <button class="logout-button" onclick="netlifyIdentity.logout();">
                     <i class="fas fa-sign-out-alt"></i> Se déconnecter
                 </button>
             </div>
