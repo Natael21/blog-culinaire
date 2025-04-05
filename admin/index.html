@@ -11,7 +11,7 @@ title: Administration - Blog Culinaire
 
     <div class="user-info">
         <span class="user-email">Connecté en tant que : <span id="user-email"></span></span>
-        <button class="logout-button" onclick="netlifyIdentity.logout();">
+        <button class="logout-button" onclick="handleLogout()">
             <i class="fas fa-sign-out-alt"></i> Se déconnecter
         </button>
     </div>
@@ -192,20 +192,38 @@ title: Administration - Blog Culinaire
     console.info = function() {};
     console.debug = function() {};
 
-    // Afficher le nom d'utilisateur
-    netlifyIdentity.on('init', user => {
-        if (user) {
+    // Fonction de déconnexion
+    function handleLogout() {
+        if (netlifyIdentity) {
+            netlifyIdentity.logout();
+            window.location.href = "/";
+        }
+    }
+
+    // Initialisation de Netlify Identity
+    if (window.netlifyIdentity) {
+        netlifyIdentity.init();
+
+        // Vérifier si l'utilisateur est déjà connecté
+        const currentUser = netlifyIdentity.currentUser();
+        if (currentUser) {
+            const displayName = currentUser.user_metadata && currentUser.user_metadata.full_name ? 
+                currentUser.user_metadata.full_name : 
+                currentUser.email;
+            document.getElementById('user-email').textContent = displayName;
+        }
+
+        // Écouter les événements de connexion
+        netlifyIdentity.on('login', user => {
             const displayName = user.user_metadata && user.user_metadata.full_name ? 
                 user.user_metadata.full_name : 
                 user.email;
             document.getElementById('user-email').textContent = displayName;
-        }
-    });
+        });
 
-    netlifyIdentity.on('login', user => {
-        const displayName = user.user_metadata && user.user_metadata.full_name ? 
-            user.user_metadata.full_name : 
-            user.email;
-        document.getElementById('user-email').textContent = displayName;
-    });
+        // Écouter les événements de déconnexion
+        netlifyIdentity.on('logout', () => {
+            window.location.href = "/";
+        });
+    }
 </script> 
