@@ -1,3 +1,7 @@
+---
+layout: default
+title: Administration - Blog Culinaire
+---
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -11,8 +15,6 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
         }
         .admin-container {
             max-width: 1200px;
@@ -100,6 +102,21 @@
             margin-right: 10px;
             font-size: 1.2rem;
         }
+        @media (max-width: 768px) {
+            .admin-actions {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+        }
+        #loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin: 1rem 0;
+        }
         .user-info {
             display: flex;
             justify-content: space-between;
@@ -130,23 +147,15 @@
             background: #e74c3c;
             color: white;
         }
-        #loading {
-            text-align: center;
-            padding: 2rem;
+        /* Style pour le widget Netlify Identity */
+        .netlify-identity-widget {
+            z-index: 1000;
         }
-        .error-message {
-            color: #e74c3c;
-            text-align: center;
-            margin: 1rem 0;
-        }
-        @media (max-width: 768px) {
-            .admin-actions {
-                grid-template-columns: 1fr;
-                padding: 0 1rem;
-            }
-            .admin-container {
-                padding: 1rem;
-            }
+        
+        /* Style pour l'overlay du widget */
+        .netlify-identity-widget-overlay {
+            background: rgba(0, 0, 0, 0.5) !important;
+            z-index: 999 !important;
         }
     </style>
 </head>
@@ -285,41 +294,185 @@
                     button.style.pointerEvents = 'auto';
                     button.style.opacity = '1';
                 });
+
+                if (userEmail) {
+                    // Utiliser l'email comme fallback si full_name n'est pas disponible
+                    const displayName = user.user_metadata && user.user_metadata.full_name ? 
+                        user.user_metadata.full_name : 
+                        user.email;
+                    userEmail.textContent = displayName;
+                }
+            } else {
+                console.log('Mise à jour UI sans utilisateur');
+                loginContainer.style.display = 'block';
+                adminContent.style.display = 'none';
+                // Réinitialiser les flags de session lors de la déconnexion
+                sessionStorage.removeItem('hasRefreshed');
+                sessionStorage.removeItem('adminLoaded');
             }
+        }
+
+        // Fonction pour activer l'interface
+        function enableInterface() {
+            document.querySelectorAll('.action-button').forEach(button => {
+                button.style.pointerEvents = 'auto';
+                button.style.opacity = '1';
+            });
         }
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
             showLoading();
-            
-            if (netlifyIdentity) {
-                netlifyIdentity.on('init', user => {
-                    if (user) {
+
+            // S'assurer que le script Netlify Identity est chargé
+            function initNetlifyIdentity() {
+                if (window.netlifyIdentity) {
+                    netlifyIdentity.init({
+                        locale: 'fr' // Forcer la locale en français
+                    });
+                    
+                    // Configurer les écouteurs d'événements
+                    netlifyIdentity.on('init', user => {
+                        console.log('Netlify Identity initialized');
                         updateUI(user);
-                    } else {
-                        hideLoading();
-                        document.getElementById('login-container').style.display = 'block';
+                        enableInterface(); // Activer l'interface après l'initialisation
+                    });
+
+                    netlifyIdentity.on('login', user => {
+                        console.log('Login event');
+                        netlifyIdentity.close();
+                        updateUI(user);
+                        enableInterface(); // Activer l'interface après la connexion
+                    });
+
+                    netlifyIdentity.on('logout', () => {
+                        console.log('Logout event');
+                        updateUI(null);
+                    });
+
+                    netlifyIdentity.on('error', err => {
+                        console.error('Netlify Identity error:', err);
+                        showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
+                    });
+
+                    // Vérifier l'état de connexion initial
+                    const currentUser = netlifyIdentity.currentUser();
+                    if (currentUser) {
+                        updateUI(currentUser);
+                        enableInterface(); // Activer l'interface si l'utilisateur est déjà connecté
                     }
-                });
+                } else {
+                    console.error('Netlify Identity non chargé');
+                    showError('Erreur de chargement de l\'authentification');
+                }
+            }
 
-                netlifyIdentity.on('login', user => {
-                    updateUI(user);
-                });
-
-                netlifyIdentity.on('logout', () => {
-                    document.getElementById('login-container').style.display = 'block';
-                    document.getElementById('admin-content').style.display = 'none';
-                });
-
-                netlifyIdentity.init();
+            // Attendre que le script soit complètement chargé
+            if (document.readyState === 'complete') {
+                initNetlifyIdentity();
             } else {
-                showError('Erreur de chargement de l\'authentification');
+                window.addEventListener('load', initNetlifyIdentity);
+            }
+
+            // Fallback : si après 3 secondes rien ne s'affiche, montrer la page de connexion
+            setTimeout(() => {
+                if (document.getElementById('loading').style.display === 'block') {
+                    hideLoading();
+                    document.getElementById('login-container').style.display = 'block';
+                }
+            }, 3000);
+        });
+
+        // Fonction pour ouvrir le modal de connexion
+        function openLoginModal() {
+            if (window.netlifyIdentity) {
+                netlifyIdentity.open('login');
+            } else {
+                showError('Le système d\'authentification n\'est pas disponible');
+            }
+        }
+
+        // Debug function to find the correct localStorage key
+        function debugLocalStorage() {
+            console.log('All localStorage keys:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                console.log(`${key}: ${localStorage.getItem(key)}`);
+            }
+        }
+
+        // Mettre à jour les statistiques
+        async function updateStats() {
+            try {
+                debugLocalStorage(); // Afficher toutes les clés pour debug
+
+                // Chercher la clé qui contient les posts
+                let postsData = null;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.includes('decap-cms-') || key.includes('netlify-cms-')) {
+                        console.log('Found CMS key:', key);
+                        const data = localStorage.getItem(key);
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (Array.isArray(parsed)) {
+                                postsData = parsed;
+                                break;
+                            }
+                        } catch (e) {
+                            console.log('Not valid JSON for key:', key);
+                        }
+                    }
+                }
+
+                if (postsData) {
+                    let publishedCount = 0;
+                    let draftCount = 0;
+                    
+                    postsData.forEach(post => {
+                        if (post.data && post.data.state === 'draft') {
+                            draftCount++;
+                        } else if (post.data && post.data.state === 'ready') {
+                            publishedCount++;
+                        }
+                    });
+                    
+                    document.getElementById('published-count').textContent = publishedCount.toString();
+                    document.getElementById('draft-count').textContent = draftCount.toString();
+                    document.getElementById('comments-count').textContent = '0';
+                } else {
+                    console.log('No posts data found in localStorage');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour des statistiques:', error);
+                document.getElementById('published-count').textContent = '0';
+                document.getElementById('draft-count').textContent = '0';
+                document.getElementById('comments-count').textContent = '0';
+            }
+        }
+
+        // Appeler updateStats après la connexion réussie
+        netlifyIdentity.on('login', () => {
+            setTimeout(updateStats, 1000);
+        });
+
+        // Appeler updateStats si l'utilisateur est déjà connecté
+        if (netlifyIdentity.currentUser()) {
+            setTimeout(updateStats, 1000);
+        }
+
+        // Mettre à jour les stats quand le localStorage change
+        window.addEventListener('storage', (e) => {
+            if (e.key.includes('decap-cms-') || e.key.includes('netlify-cms-')) {
+                updateStats();
             }
         });
 
-        function openLoginModal() {
-            netlifyIdentity.open('login');
-        }
+        // Appeler debugLocalStorage au chargement pour voir toutes les clés
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(debugLocalStorage, 2000); // Attendre que tout soit chargé
+        });
     </script>
 </body>
 </html> 
