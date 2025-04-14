@@ -132,7 +132,7 @@ comments: true
 
 <!-- Navigation buttons -->
 <div class="restaurant-navigation">
-  {% assign posts = site.posts | where: "layout", "restaurant" | sort: "date" | reverse %}
+  {% assign posts = site.posts | where: "layout", "restaurant" | where: "state", "ready" | sort: "date" | reverse %}
   {% for post in posts %}
     {% if post.url == page.url %}
       {% assign current_index = forloop.index0 %}
