@@ -38,11 +38,11 @@ comments: true
         <span class="date"><i class="far fa-calendar"></i> {{ page.date | date: "%d/%m/%Y" }}</span>
         <span class="price">
           {% if page.price == "budget" %}
-            <i class="fas fa-dollar-sign"></i>
+            <i class="fas fa-dollar-sign"></i> (0-20$)
           {% elsif page.price == "medium" %}
-            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> (20-40$)
           {% elsif page.price == "expensive" %}
-            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i>
+            <i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> (40$+)
           {% endif %}
         </span>
       </div>
