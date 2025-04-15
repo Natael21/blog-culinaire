@@ -1064,26 +1064,33 @@ ratings:
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    // Retirer la classe active de tous les onglets et contenus
-                    tabs.forEach(t => t.classList.remove('active'));
-                    contents.forEach(c => c.classList.remove('active'));
+                    // Trouver le groupe parent (principal ou galerie)
+                    const parentGroup = tab.closest('.form-group');
+                    const groupTabs = parentGroup.querySelectorAll('.image-selector-tab');
+                    const groupContents = parentGroup.querySelectorAll('.image-selector-content');
+
+                    // Retirer la classe active de tous les onglets et contenus du groupe
+                    groupTabs.forEach(t => t.classList.remove('active'));
+                    groupContents.forEach(c => c.classList.remove('active'));
 
                     // Ajouter la classe active à l'onglet cliqué et son contenu
                     tab.classList.add('active');
-                    const content = document.querySelector(`[data-content="${tab.dataset.tab}"]`);
+                    const content = parentGroup.querySelector(`[data-content="${tab.dataset.tab}"]`);
                     content.classList.add('active');
 
                     // Si on sélectionne l'onglet GitHub, charger les images
                     if (tab.dataset.tab === 'github') {
-                        loadGithubImages();
+                        loadGithubImages('githubImagesGrid', false);
+                    } else if (tab.dataset.tab === 'github-gallery') {
+                        loadGithubImages('githubGalleryGrid', true);
                     }
                 });
             });
         }
 
         // Fonction pour charger les images depuis le dossier GitHub
-        async function loadGithubImages() {
-            const grid = document.getElementById('githubImagesGrid');
+        async function loadGithubImages(targetGridId, isGallery = false) {
+            const grid = document.getElementById(targetGridId);
             grid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Chargement des images...</div>';
 
             try {
@@ -1118,9 +1125,16 @@ ratings:
                     `;
                     
                     item.addEventListener('click', () => {
-                        document.querySelectorAll('.github-image-item').forEach(i => i.classList.remove('selected'));
-                        item.classList.add('selected');
-                        handleGithubImageSelection(image);
+                        if (!isGallery) {
+                            // Pour l'image principale
+                            document.querySelectorAll('#githubImagesGrid .github-image-item').forEach(i => i.classList.remove('selected'));
+                            item.classList.add('selected');
+                            handleGithubImageSelection(image);
+                        } else {
+                            // Pour la galerie
+                            item.classList.toggle('selected');
+                            handleGithubGalleryImageSelection(image, item.classList.contains('selected'));
+                        }
                     });
 
                     grid.appendChild(item);
@@ -1131,34 +1145,68 @@ ratings:
             }
         }
 
-        // Fonction pour gérer la sélection d'une image GitHub
-        function handleGithubImageSelection(image) {
-            mainImageFile = {
-                name: image.name,
-                path: image.path,
-                isGithubImage: true
-            };
+        // Fonction pour gérer la sélection d'une image de la galerie depuis GitHub
+        function handleGithubGalleryImageSelection(image, isSelected) {
+            if (isSelected) {
+                // Ajouter l'image à la galerie
+                const galleryImage = {
+                    name: image.name,
+                    path: image.path,
+                    isGithubImage: true
+                };
+                galleryImageFiles.push(galleryImage);
+            } else {
+                // Retirer l'image de la galerie
+                galleryImageFiles = galleryImageFiles.filter(img => 
+                    !(img.isGithubImage && img.path === image.path)
+                );
+            }
             
-            const container = document.getElementById('mainImagePreview');
-            container.innerHTML = '';
-            const div = document.createElement('div');
-            div.className = 'image-preview-container';
-            div.innerHTML = `
-                <img src="${image.path}" class="image-preview" alt="${image.name}">
-                <button type="button" class="delete-image">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            div.querySelector('.delete-image').addEventListener('click', function() {
-                div.remove();
-                mainImageFile = null;
-                document.querySelectorAll('.github-image-item').forEach(i => i.classList.remove('selected'));
-                updateMarkdownPreview();
-            });
-            
-            container.appendChild(div);
+            updateGalleryPreview();
             updateMarkdownPreview();
+        }
+
+        // Mettre à jour la fonction updateGalleryPreview pour gérer les images GitHub
+        function updateGalleryPreview() {
+            const container = document.getElementById('galleryPreview');
+            container.innerHTML = '';
+            galleryImageFiles.forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'image-preview-container';
+                
+                if (file.isGithubImage) {
+                    div.innerHTML = `
+                        <img src="${file.path}" class="image-preview" alt="${file.name}">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                } else {
+                    createImagePreview(file, div);
+                }
+                
+                div.querySelector('.delete-image').addEventListener('click', function() {
+                    div.remove();
+                    if (file.isGithubImage) {
+                        // Retirer la sélection de l'image dans la grille GitHub
+                        const githubItem = document.querySelector(`#githubGalleryGrid .github-image-item img[src="${file.path}"]`);
+                        if (githubItem) {
+                            githubItem.parentElement.classList.remove('selected');
+                        }
+                        galleryImageFiles = galleryImageFiles.filter(img => 
+                            !(img.isGithubImage && img.path === file.path)
+                        );
+                    } else {
+                        const index = galleryImageFiles.indexOf(file);
+                        if (index > -1) {
+                            galleryImageFiles.splice(index, 1);
+                        }
+                    }
+                    updateMarkdownPreview();
+                });
+                
+                container.appendChild(div);
+            });
         }
     </script>
 </head>
@@ -1281,14 +1329,32 @@ ratings:
 
                     <div class="form-group">
                         <label>Images de la galerie</label>
-                        <div class="upload-zone" id="galleryZone">
-                            <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
-                            <div class="upload-icon">
-                                <i class="fas fa-images"></i>
-                            </div>
-                            <div class="upload-text">Glissez et déposez vos images ici</div>
-                            <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
+                        <div class="image-selector-tabs">
+                            <button type="button" class="image-selector-tab active" data-tab="upload-gallery">
+                                <i class="fas fa-upload"></i> Upload local
+                            </button>
+                            <button type="button" class="image-selector-tab" data-tab="github-gallery">
+                                <i class="fab fa-github"></i> Images GitHub
+                            </button>
                         </div>
+                        
+                        <div class="image-selector-content active" data-content="upload-gallery">
+                            <div class="upload-zone" id="galleryZone">
+                                <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
+                                <div class="upload-icon">
+                                    <i class="fas fa-images"></i>
+                                </div>
+                                <div class="upload-text">Glissez et déposez vos images ici</div>
+                                <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
+                            </div>
+                        </div>
+                        
+                        <div class="image-selector-content" data-content="github-gallery">
+                            <div class="github-images-grid" id="githubGalleryGrid">
+                                <!-- Les images seront chargées dynamiquement ici -->
+                            </div>
+                        </div>
+
                         <div id="galleryPreview" class="gallery-preview"></div>
                     </div>
                 </div>
