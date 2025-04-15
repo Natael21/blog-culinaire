@@ -79,17 +79,20 @@
         }
 
         .admin-header {
-            padding: 1rem;
+            padding: 1rem 2rem;
             margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            box-shadow: var(--box-shadow);
         }
 
         .admin-title {
             color: var(--primary-color);
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin: 0;
-            font-weight: 800;
-            position: relative;
-            display: inline-block;
+            font-weight: 700;
             background: linear-gradient(120deg, #2c3e50, #3498db);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -932,6 +935,7 @@ ratings:
 </head>
 <body>
     <header class="admin-header">
+        <h1 class="admin-title">Nouveau Restaurant</h1>
         <a href="index.html" class="action-button">
             <i class="fas fa-arrow-left"></i> Retour à l'administration
         </a>
