@@ -1054,7 +1054,43 @@ ratings:
         function updateGalleryPreview() {
             const container = document.getElementById('galleryPreview');
             container.innerHTML = '';
-            galleryImageFiles.forEach(file => createImagePreview(file, container));
+            galleryImageFiles.forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'image-preview-container';
+                
+                if (file.isGithubImage) {
+                    div.innerHTML = `
+                        <img src="${file.path}" class="image-preview" alt="${file.name}">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                } else {
+                    createImagePreview(file, div);
+                }
+                
+                div.querySelector('.delete-image').addEventListener('click', function() {
+                    div.remove();
+                    if (file.isGithubImage) {
+                        // Retirer la sélection de l'image dans la grille GitHub
+                        const githubItem = document.querySelector(`#githubGalleryGrid .github-image-item img[src="${file.path}"]`);
+                        if (githubItem) {
+                            githubItem.parentElement.classList.remove('selected');
+                        }
+                        galleryImageFiles = galleryImageFiles.filter(img => 
+                            !(img.isGithubImage && img.path === file.path)
+                        );
+                    } else {
+                        const index = galleryImageFiles.indexOf(file);
+                        if (index > -1) {
+                            galleryImageFiles.splice(index, 1);
+                        }
+                    }
+                    updateMarkdownPreview();
+                });
+                
+                container.appendChild(div);
+            });
         }
 
         // Ajouter la gestion des onglets pour le sélecteur d'images
@@ -1094,26 +1130,11 @@ ratings:
             grid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Chargement des images...</div>';
 
             try {
-                const images = [
-                    { name: 'restaurant-test.jpg', path: '/images/restaurant-test.jpg' },
-                    { name: 'pho loc.PNG', path: '/images/pho loc.PNG' },
-                    { name: 'lotus blanc.png', path: '/images/lotus blanc.png' },
-                    { name: 'la brigade resto.jpg', path: '/images/la brigade resto.jpg' },
-                    { name: 'datoni pronto.jpg', path: '/images/datoni pronto.jpg' },
-                    { name: 'chanchai.jpeg', path: '/images/chanchai.jpeg' },
-                    { name: 'Village de chine.PNG', path: '/images/Village de chine.PNG' },
-                    { name: 'Taverne Alexandre.PNG', path: '/images/Taverne Alexandre.PNG' },
-                    { name: 'Saveur et délice.jpg', path: '/images/Saveur et délice.jpg' },
-                    { name: 'Restaurant Persépolis.jpg', path: '/images/Restaurant Persépolis.jpg' },
-                    { name: 'Le Refuge des Brasseurs - Microbrasserie.jpg', path: '/images/Le Refuge des Brasseurs - Microbrasserie.jpg' },
-                    { name: 'Le Dauphin.jpg', path: '/images/Le Dauphin.jpg' },
-                    { name: 'La buvette.PNG', path: '/images/La buvette.PNG' },
-                    { name: 'Habenaros Grill Mexicain.JPG', path: '/images/Habenaros Grill Mexicain.JPG' },
-                    { name: 'Guacamole y tequila.png', path: '/images/Guacamole y tequila.png' },
-                    { name: 'El Tabernaco.jpg', path: '/images/El Tabernaco.jpg' },
-                    { name: 'El Chupa Resto.png', path: '/images/El Chupa Resto.png' },
-                    { name: 'Café Restaurant L.png', path: '/images/Café Restaurant L.png' }
-                ];
+                const response = await fetch('list-images.php');
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des images');
+                }
+                const images = await response.json();
 
                 grid.innerHTML = '';
                 images.forEach(image => {
