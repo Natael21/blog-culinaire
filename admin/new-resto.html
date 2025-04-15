@@ -1125,7 +1125,7 @@ ratings:
                     `;
                     
                     item.addEventListener('click', () => {
-                        if (!isGallery) {
+                        if (targetGridId === 'githubImagesGrid') {
                             // Pour l'image principale
                             document.querySelectorAll('#githubImagesGrid .github-image-item').forEach(i => i.classList.remove('selected'));
                             item.classList.add('selected');
@@ -1143,6 +1143,36 @@ ratings:
                 grid.innerHTML = '<div class="text-center text-danger">Erreur lors du chargement des images</div>';
                 console.error('Erreur lors du chargement des images:', error);
             }
+        }
+
+        // Fonction pour gérer la sélection d'une image principale depuis GitHub
+        function handleGithubImageSelection(image) {
+            mainImageFile = {
+                name: image.name,
+                path: image.path,
+                isGithubImage: true
+            };
+            
+            const container = document.getElementById('mainImagePreview');
+            container.innerHTML = '';
+            const div = document.createElement('div');
+            div.className = 'image-preview-container';
+            div.innerHTML = `
+                <img src="${image.path}" class="image-preview" alt="${image.name}">
+                <button type="button" class="delete-image">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            div.querySelector('.delete-image').addEventListener('click', function() {
+                div.remove();
+                mainImageFile = null;
+                document.querySelectorAll('#githubImagesGrid .github-image-item').forEach(i => i.classList.remove('selected'));
+                updateMarkdownPreview();
+            });
+            
+            container.appendChild(div);
+            updateMarkdownPreview();
         }
 
         // Fonction pour gérer la sélection d'une image de la galerie depuis GitHub
@@ -1164,49 +1194,6 @@ ratings:
             
             updateGalleryPreview();
             updateMarkdownPreview();
-        }
-
-        // Mettre à jour la fonction updateGalleryPreview pour gérer les images GitHub
-        function updateGalleryPreview() {
-            const container = document.getElementById('galleryPreview');
-            container.innerHTML = '';
-            galleryImageFiles.forEach(file => {
-                const div = document.createElement('div');
-                div.className = 'image-preview-container';
-                
-                if (file.isGithubImage) {
-                    div.innerHTML = `
-                        <img src="${file.path}" class="image-preview" alt="${file.name}">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                } else {
-                    createImagePreview(file, div);
-                }
-                
-                div.querySelector('.delete-image').addEventListener('click', function() {
-                    div.remove();
-                    if (file.isGithubImage) {
-                        // Retirer la sélection de l'image dans la grille GitHub
-                        const githubItem = document.querySelector(`#githubGalleryGrid .github-image-item img[src="${file.path}"]`);
-                        if (githubItem) {
-                            githubItem.parentElement.classList.remove('selected');
-                        }
-                        galleryImageFiles = galleryImageFiles.filter(img => 
-                            !(img.isGithubImage && img.path === file.path)
-                        );
-                    } else {
-                        const index = galleryImageFiles.indexOf(file);
-                        if (index > -1) {
-                            galleryImageFiles.splice(index, 1);
-                        }
-                    }
-                    updateMarkdownPreview();
-                });
-                
-                container.appendChild(div);
-            });
         }
     </script>
 </head>
