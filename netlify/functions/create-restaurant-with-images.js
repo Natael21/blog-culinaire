@@ -54,11 +54,10 @@ exports.handler = async (event, context) => {
             throw new Error("Variables d'environnement manquantes. Veuillez configurer GITHUB_TOKEN, GITHUB_OWNER et GITHUB_REPO");
         }
 
-        if (!filename || !content || !images || !title) {
+        if (!filename || !content || !title) {
             console.error("Paramètres manquants:", {
                 hasFilename: !!filename,
                 hasContent: !!content,
-                hasImages: !!images,
                 hasTitle: !!title
             });
             return {
@@ -94,50 +93,59 @@ exports.handler = async (event, context) => {
         // 2. Créer les blobs pour les images
         console.log("Création des blobs pour les images...");
         const imageBlobs = [];
+        const imagePlaceholders = {};
 
-        for (let i = 0; i < images.length; i++) {
-            const imageData = images[i];
-            if (!imageData || !imageData.data) {
-                console.error(`Image ${i} invalide:`, imageData);
-                continue;
+        if (images && images.length > 0) {
+            for (let i = 0; i < images.length; i++) {
+                const imageData = images[i];
+                if (!imageData || !imageData.data) {
+                    console.error(`Image ${i} invalide:`, imageData);
+                    continue;
+                }
+
+                // Extraire le type MIME et les données base64
+                const [mimeType, base64Data] = imageData.data.split(',');
+                if (!base64Data) {
+                    console.error(`Format d'image ${i} invalide:`, mimeType);
+                    continue;
+                }
+
+                const blobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({
+                        content: base64Data,
+                        encoding: "base64"
+                    })
+                });
+
+                if (!blobResponse.ok) {
+                    const errorData = await blobResponse.json();
+                    console.error(`Erreur lors de la création du blob pour l'image ${i}:`, errorData);
+                    throw new Error(`GitHub API Error: ${errorData.message}`);
+                }
+
+                const blobData = await blobResponse.json();
+                const imagePath = `images/${imageData.name}`;
+                imageBlobs.push({
+                    path: imagePath,
+                    sha: blobData.sha,
+                    mode: "100644",
+                    type: "blob"
+                });
+
+                // Stocker le placeholder pour le remplacement
+                imagePlaceholders[imageData.name] = `/${imagePath}`;
             }
-
-            // Extraire le type MIME et les données base64
-            const [mimeType, base64Data] = imageData.data.split(',');
-            if (!base64Data) {
-                console.error(`Format d'image ${i} invalide:`, mimeType);
-                continue;
-            }
-
-            const blobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
-                method: "POST",
-                headers,
-                body: JSON.stringify({
-                    content: base64Data,
-                    encoding: "base64"
-                })
-            });
-
-            if (!blobResponse.ok) {
-                console.error(`Erreur lors de la création du blob pour l'image ${i}:`, await blobResponse.json());
-                continue;
-            }
-
-            const blobData = await blobResponse.json();
-            const imagePath = `images/${imageData.filename}`;
-            imageBlobs.push({
-                path: imagePath,
-                sha: blobData.sha,
-                mode: "100644",
-                type: "blob"
-            });
-
-            // Mettre à jour les chemins d'images dans le contenu markdown
-            const placeholder = imageData.placeholder || imageData.filename;
-            updatedContent = updatedContent.replace(placeholder, `/${imagePath}`);
         }
 
-        // 3. Créer le blob pour le contenu markdown avec les chemins d'images mis à jour
+        // 3. Mettre à jour les chemins d'images dans le contenu markdown
+        console.log("Mise à jour des chemins d'images dans le markdown...");
+        for (const [placeholder, path] of Object.entries(imagePlaceholders)) {
+            updatedContent = updatedContent.replace(new RegExp(placeholder, 'g'), path);
+        }
+
+        // 4. Créer le blob pour le contenu markdown
         console.log("Création du blob pour le contenu markdown...");
         const markdownBlobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
             method: "POST",
@@ -149,13 +157,14 @@ exports.handler = async (event, context) => {
         });
 
         if (!markdownBlobResponse.ok) {
-            console.error("Erreur lors de la création du blob markdown:", await markdownBlobResponse.json());
-            throw new Error("Erreur lors de la création du blob markdown");
+            const errorData = await markdownBlobResponse.json();
+            console.error("Erreur lors de la création du blob markdown:", errorData);
+            throw new Error(`GitHub API Error: ${errorData.message}`);
         }
 
         const markdownBlob = await markdownBlobResponse.json();
 
-        // 4. Créer le nouveau tree
+        // 5. Créer le nouveau tree
         const tree = [
             ...imageBlobs,
             {
@@ -177,13 +186,14 @@ exports.handler = async (event, context) => {
         });
 
         if (!treeResponse.ok) {
-            console.error("Erreur lors de la création du tree:", await treeResponse.json());
-            throw new Error("Erreur lors de la création du tree");
+            const errorData = await treeResponse.json();
+            console.error("Erreur lors de la création du tree:", errorData);
+            throw new Error(`GitHub API Error: ${errorData.message}`);
         }
 
         const treeData = await treeResponse.json();
 
-        // 5. Créer le commit
+        // 6. Créer le commit
         console.log("Création du commit...");
         const commitResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/commits`, {
             method: "POST",
@@ -196,13 +206,14 @@ exports.handler = async (event, context) => {
         });
 
         if (!commitResponse.ok) {
-            console.error("Erreur lors de la création du commit:", await commitResponse.json());
-            throw new Error("Erreur lors de la création du commit");
+            const errorData = await commitResponse.json();
+            console.error("Erreur lors de la création du commit:", errorData);
+            throw new Error(`GitHub API Error: ${errorData.message}`);
         }
 
         const commitData = await commitResponse.json();
 
-        // 6. Mettre à jour la référence
+        // 7. Mettre à jour la référence
         console.log("Mise à jour de la référence...");
         const updateRefResponse = await fetch(
             `${baseUrl}/repos/${owner}/${repo}/git/refs/heads/${branch}`,
@@ -211,14 +222,15 @@ exports.handler = async (event, context) => {
                 headers,
                 body: JSON.stringify({
                     sha: commitData.sha,
-                    force: true
+                    force: false
                 })
             }
         );
 
         if (!updateRefResponse.ok) {
-            console.error("Erreur lors de la mise à jour de la référence:", await updateRefResponse.json());
-            throw new Error("Erreur lors de la mise à jour de la référence");
+            const errorData = await updateRefResponse.json();
+            console.error("Erreur lors de la mise à jour de la référence:", errorData);
+            throw new Error(`GitHub API Error: ${errorData.message}`);
         }
 
         console.log("Restaurant créé avec succès!");
