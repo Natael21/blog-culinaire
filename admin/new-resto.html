@@ -703,12 +703,66 @@
             font-weight: 600;
             color: var(--accent-color);
         }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--box-shadow);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification.success i {
+            color: #2ecc71;
+        }
+
+        .notification.error i {
+            color: var(--secondary-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 
     <script>
         // Variables globales pour stocker les fichiers d'images
         let mainImageFile = null;
         let galleryImageFiles = [];
+        
+        // Variables globales pour l'autocomplétion d'adresse
+        let debounceTimer;
+        let selectedIndex = -1;
+        let suggestions = [];
 
         // Initialiser TipTap
         let editor;
@@ -754,11 +808,9 @@
                             break;
                     }
                     
-                    // Mettre à jour l'état actif du bouton
                     button.classList.toggle('is-active', editor.isActive(command));
                 });
 
-                // Mettre à jour l'état initial des boutons
                 const command = button.dataset.command;
                 button.classList.toggle('is-active', editor.isActive(command));
             });
@@ -801,9 +853,332 @@
                 }
             });
 
+            // Gérer la soumission du formulaire
+            document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!validateForm()) {
+                    return;
+                }
+
+                try {
+                    // Générer le nom du fichier à partir du titre
+                    const title = document.getElementById('title').value;
+                    const filename = title.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .replace(/[^a-z0-9]/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-|-$/g, '');
+                    
+                    const date = new Date().toISOString().split('T')[0];
+                    const filePath = `_restaurants/${date}-${filename}.md`;
+
+                    // Préparer les données pour l'envoi
+                    const formData = new FormData();
+                    formData.append('filename', filePath);
+                    formData.append('title', title);
+                    formData.append('content', generateMarkdown());
+
+                    // Ajouter l'image principale
+                    if (mainImageFile) {
+                        formData.append('images', mainImageFile);
+                    }
+
+                    // Ajouter les images de la galerie
+                    galleryImageFiles.forEach(file => {
+                        formData.append('images', file);
+                    });
+
+                    // Envoyer les données à la fonction Netlify
+                    const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la sauvegarde');
+                    }
+
+                    showNotification('Restaurant enregistré avec succès !', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
+                }
+            });
+
             // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
         });
+
+        async function searchAddress(query) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erreur lors de la recherche d\'adresse:', error);
+                return [];
+            }
+        }
+
+        function initializeAddressAutocomplete() {
+            const input = document.getElementById('address');
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'address-suggestions';
+            input.parentNode.appendChild(suggestionsContainer);
+
+            input.addEventListener('input', async function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+
+                if (query.length < 3) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                debounceTimer = setTimeout(async () => {
+                    suggestions = await searchAddress(query);
+                    displaySuggestions(suggestions, suggestionsContainer);
+                }, 300);
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (!['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
+                
+                const suggestionElements = suggestionsContainer.getElementsByClassName('address-suggestion');
+                
+                if (e.key === 'Escape') {
+                    suggestionsContainer.style.display = 'none';
+                    selectedIndex = -1;
+                    return;
+                }
+
+                if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    selectAddress(suggestions[selectedIndex], input, suggestionsContainer);
+                    return;
+                }
+
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, suggestionElements.length - 1);
+                }
+
+                Array.from(suggestionElements).forEach((el, index) => {
+                    el.classList.toggle('selected', index === selectedIndex);
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        function displaySuggestions(suggestions, container) {
+            if (!suggestions.length) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = '';
+            suggestions.forEach((suggestion, index) => {
+                const div = document.createElement('div');
+                div.className = 'address-suggestion';
+                div.textContent = suggestion.display_name;
+                
+                div.addEventListener('click', () => {
+                    selectAddress(suggestion, document.getElementById('address'), container);
+                });
+
+                div.addEventListener('mouseenter', () => {
+                    selectedIndex = index;
+                    Array.from(container.children).forEach((el, i) => {
+                        el.classList.toggle('selected', i === index);
+                    });
+                });
+
+                container.appendChild(div);
+            });
+
+            container.style.display = 'block';
+        }
+
+        function selectAddress(suggestion, input, container) {
+            let formattedAddress = '';
+            
+            if (suggestion.address) {
+                const addr = suggestion.address;
+                const components = [];
+
+                if (addr.house_number) {
+                    components.push(addr.house_number);
+                }
+
+                if (addr.road) {
+                    components.push(addr.road);
+                }
+
+                if (addr.city || addr.town || addr.village) {
+                    components.push(addr.city || addr.town || addr.village);
+                }
+
+                if (addr.state) {
+                    components.push(addr.state);
+                }
+
+                if (addr.postcode) {
+                    components.push(addr.postcode);
+                }
+
+                if (addr.country) {
+                    components.push(addr.country);
+                }
+
+                formattedAddress = components.join(', ');
+            } else {
+                formattedAddress = suggestion.display_name.split(',').slice(0, 4).join(',');
+            }
+
+            input.value = formattedAddress;
+            container.style.display = 'none';
+            selectedIndex = -1;
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+            updateMarkdownPreview();
+        }
+
+        function initializeDropZones() {
+            const zones = ['mainImageZone', 'galleryZone'];
+            
+            zones.forEach(zoneId => {
+                const zone = document.getElementById(zoneId);
+                const input = zone.querySelector('input[type="file"]');
+
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => {
+                        zone.classList.add('dragover');
+                    });
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => {
+                        zone.classList.remove('dragover');
+                    });
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+
+                    if (zoneId === 'mainImageZone' && files.length > 0) {
+                        input.files = files;
+                        handleMainImageUpload(files[0]);
+                    } else if (zoneId === 'galleryZone') {
+                        input.files = files;
+                        handleGalleryUpload(files);
+                    }
+                });
+            });
+        }
+
+        function handleMainImageUpload(file) {
+            if (file && file.type.startsWith('image/')) {
+                mainImageFile = file;
+                const container = document.getElementById('mainImagePreview');
+                container.innerHTML = '';
+                createImagePreview(file, container, true);
+                updateMarkdownPreview();
+            }
+        }
+
+        function handleGalleryUpload(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    galleryImageFiles.push(file);
+                }
+            });
+            updateGalleryPreview();
+            updateMarkdownPreview();
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const requiredFields = [
+                'title', 'date', 'description', 'address', 'style', 'price',
+                'foodScore', 'foodComment', 'serviceScore', 'serviceComment',
+                'ambianceScore', 'ambianceComment', 'valueScore', 'valueComment',
+                'originalityScore', 'originalityComment', 'overallExperienceScore',
+                'overallExperienceComment'
+            ];
+
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('show-error', 'is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('show-error', 'is-invalid');
+                }
+            });
+
+            const mainImage = document.getElementById('mainImage');
+            if (!mainImageFile) {
+                mainImage.classList.add('show-error', 'is-invalid');
+                isValid = false;
+            } else {
+                mainImage.classList.remove('show-error', 'is-invalid');
+            }
+
+            return isValid;
+        }
+
+        function getSelectedDiets() {
+            const diets = [];
+            if (document.getElementById('vegetarian').checked) {
+                diets.push('vegetarian-friendly');
+            }
+            if (document.getElementById('vegan').checked) {
+                diets.push('vegan-friendly');
+            }
+            return diets.join(',');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
 
         function generateMarkdown() {
             const title = document.getElementById('title').value;
@@ -813,7 +1188,6 @@
             const style = document.getElementById('style').value;
             const price = document.getElementById('price').value;
             
-            // Gérer les options alimentaires multiples
             const dietOptions = [];
             if (document.getElementById('vegetarian').checked) {
                 dietOptions.push('vegetarian-friendly');
@@ -823,16 +1197,13 @@
             }
             const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
 
-            // Utiliser un placeholder pour les images en attendant l'upload
             const mainImagePlaceholder = mainImageFile ? `[${mainImageFile.name}]` : '';
             const galleryPlaceholders = galleryImageFiles.map(file => `  - image: "[${file.name}]"`);
 
             const overallRating = calculateOverallRating();
             
-            // Obtenir le contenu de l'éditeur TipTap
             const detailedDescription = editor ? editor.getHTML() : '';
 
-            // Générer les évaluations
             const ratings = {
                 food: {
                     score: document.getElementById('foodScore').value || '0',
@@ -862,7 +1233,6 @@
 
             const today = new Date().toISOString().split('T')[0];
 
-            // Générer le markdown
             return `---
 layout: restaurant
 title: "${title}"
@@ -908,7 +1278,6 @@ ratings:
 ---`;
         }
 
-        // Fonction pour calculer la note globale
         function calculateOverallRating() {
             const scores = [
                 parseFloat(document.getElementById('foodScore').value) || 0,
@@ -926,13 +1295,11 @@ ratings:
             return average;
         }
 
-        // Mettre à jour l'aperçu markdown
         function updateMarkdownPreview() {
             const preview = document.getElementById('markdownPreview');
             preview.textContent = generateMarkdown();
         }
 
-        // Fonction pour créer une prévisualisation d'image
         function createImagePreview(file, container, isMainImage = false) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -963,7 +1330,6 @@ ratings:
             reader.readAsDataURL(file);
         }
 
-        // Fonction pour mettre à jour la prévisualisation de la galerie
         function updateGalleryPreview() {
             const container = document.getElementById('galleryPreview');
             container.innerHTML = '';
@@ -1230,227 +1596,5 @@ ratings:
             </div>
         </div>
     </div>
-
-    <script>
-        // Remplacer la fonction d'initialisation de l'autocomplétion
-        let debounceTimer;
-        let selectedIndex = -1;
-        let suggestions = [];
-
-        async function searchAddress(query) {
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Erreur lors de la recherche d\'adresse:', error);
-                return [];
-            }
-        }
-
-        function initializeAddressAutocomplete() {
-            const input = document.getElementById('address');
-            const suggestionsContainer = document.createElement('div');
-            suggestionsContainer.className = 'address-suggestions';
-            input.parentNode.appendChild(suggestionsContainer);
-
-            input.addEventListener('input', async function() {
-                clearTimeout(debounceTimer);
-                const query = this.value.trim();
-
-                if (query.length < 3) {
-                    suggestionsContainer.style.display = 'none';
-                    return;
-                }
-
-                debounceTimer = setTimeout(async () => {
-                    suggestions = await searchAddress(query);
-                    displaySuggestions(suggestions, suggestionsContainer);
-                }, 300);
-            });
-
-            input.addEventListener('keydown', function(e) {
-                if (!['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
-                
-                const suggestionElements = suggestionsContainer.getElementsByClassName('address-suggestion');
-                
-                if (e.key === 'Escape') {
-                    suggestionsContainer.style.display = 'none';
-                    selectedIndex = -1;
-                    return;
-                }
-
-                if (e.key === 'Enter' && selectedIndex >= 0) {
-                    e.preventDefault();
-                    selectAddress(suggestions[selectedIndex], input, suggestionsContainer);
-                    return;
-                }
-
-                if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = Math.max(selectedIndex - 1, 0);
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = Math.min(selectedIndex + 1, suggestionElements.length - 1);
-                }
-
-                Array.from(suggestionElements).forEach((el, index) => {
-                    el.classList.toggle('selected', index === selectedIndex);
-                });
-            });
-
-            // Fermer les suggestions en cliquant en dehors
-            document.addEventListener('click', function(e) {
-                if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
-                    suggestionsContainer.style.display = 'none';
-                }
-            });
-        }
-
-        function displaySuggestions(suggestions, container) {
-            if (!suggestions.length) {
-                container.style.display = 'none';
-                return;
-            }
-
-            container.innerHTML = '';
-            suggestions.forEach((suggestion, index) => {
-                const div = document.createElement('div');
-                div.className = 'address-suggestion';
-                div.textContent = suggestion.display_name;
-                
-                div.addEventListener('click', () => {
-                    selectAddress(suggestion, document.getElementById('address'), container);
-                });
-
-                div.addEventListener('mouseenter', () => {
-                    selectedIndex = index;
-                    Array.from(container.children).forEach((el, i) => {
-                        el.classList.toggle('selected', i === index);
-                    });
-                });
-
-                container.appendChild(div);
-            });
-
-            container.style.display = 'block';
-        }
-
-        function selectAddress(suggestion, input, container) {
-            // Formater l'adresse de manière plus concise
-            let formattedAddress = '';
-            
-            if (suggestion.address) {
-                const addr = suggestion.address;
-                const components = [];
-
-                // Ajouter le numéro de rue s'il existe
-                if (addr.house_number) {
-                    components.push(addr.house_number);
-                }
-
-                // Ajouter le nom de la rue
-                if (addr.road) {
-                    components.push(addr.road);
-                }
-
-                // Ajouter la ville
-                if (addr.city || addr.town || addr.village) {
-                    components.push(addr.city || addr.town || addr.village);
-                }
-
-                // Ajouter la province/état
-                if (addr.state) {
-                    components.push(addr.state);
-                }
-
-                // Ajouter le code postal s'il existe
-                if (addr.postcode) {
-                    components.push(addr.postcode);
-                }
-
-                // Ajouter le pays
-                if (addr.country) {
-                    components.push(addr.country);
-                }
-
-                formattedAddress = components.join(', ');
-            } else {
-                // Fallback si la structure d'adresse n'est pas disponible
-                formattedAddress = suggestion.display_name.split(',').slice(0, 4).join(',');
-            }
-
-            input.value = formattedAddress;
-            container.style.display = 'none';
-            selectedIndex = -1;
-            input.classList.add('is-valid');
-            input.classList.remove('is-invalid');
-            updateMarkdownPreview();
-        }
-
-        // Gérer le glisser-déposer pour les zones d'upload
-        function initializeDropZones() {
-            const zones = ['mainImageZone', 'galleryZone'];
-            
-            zones.forEach(zoneId => {
-                const zone = document.getElementById(zoneId);
-                const input = zone.querySelector('input[type="file"]');
-
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    zone.addEventListener(eventName, preventDefaults, false);
-                });
-
-                function preventDefaults(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    zone.addEventListener(eventName, () => {
-                        zone.classList.add('dragover');
-                    });
-                });
-
-                ['dragleave', 'drop'].forEach(eventName => {
-                    zone.addEventListener(eventName, () => {
-                        zone.classList.remove('dragover');
-                    });
-                });
-
-                zone.addEventListener('drop', (e) => {
-                    const dt = e.dataTransfer;
-                    const files = dt.files;
-
-                    if (zoneId === 'mainImageZone' && files.length > 0) {
-                        input.files = files;
-                        handleMainImageUpload(files[0]);
-                    } else if (zoneId === 'galleryZone') {
-                        input.files = files;
-                        handleGalleryUpload(files);
-                    }
-                });
-            });
-        }
-
-        function handleMainImageUpload(file) {
-            if (file && file.type.startsWith('image/')) {
-                mainImageFile = file;
-                const container = document.getElementById('mainImagePreview');
-                container.innerHTML = '';
-                createImagePreview(file, container, true);
-                updateMarkdownPreview();
-            }
-        }
-
-        function handleGalleryUpload(files) {
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    galleryImageFiles.push(file);
-                }
-            });
-            updateGalleryPreview();
-            updateMarkdownPreview();
-        }
-    </script>
 </body>
 </html>
