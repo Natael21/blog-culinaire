@@ -764,6 +764,16 @@
         let selectedIndex = -1;
         let suggestions = [];
 
+        // Fonction pour convertir un fichier en base64
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         // Initialiser TipTap
         let editor;
         window.addEventListener('load', () => {
@@ -874,30 +884,45 @@
                     const date = new Date().toISOString().split('T')[0];
                     const filePath = `_restaurants/${date}-${filename}.md`;
 
-                    // Préparer les données pour l'envoi
-                    const formData = new FormData();
-                    formData.append('filename', filePath);
-                    formData.append('title', title);
-                    formData.append('content', generateMarkdown());
-
-                    // Ajouter l'image principale
+                    // Convertir les images en base64
+                    const images = [];
                     if (mainImageFile) {
-                        formData.append('images', mainImageFile);
+                        const mainImageBase64 = await fileToBase64(mainImageFile);
+                        images.push({
+                            name: 'main.jpg',
+                            data: mainImageBase64
+                        });
                     }
 
-                    // Ajouter les images de la galerie
-                    galleryImageFiles.forEach(file => {
-                        formData.append('images', file);
-                    });
+                    for (let i = 0; i < galleryImageFiles.length; i++) {
+                        const galleryImageBase64 = await fileToBase64(galleryImageFiles[i]);
+                        images.push({
+                            name: `gallery-${i + 1}.jpg`,
+                            data: galleryImageBase64
+                        });
+                    }
+
+                    // Préparer les données pour l'envoi
+                    const data = {
+                        filename: filePath,
+                        title: title,
+                        content: generateMarkdown(),
+                        images: images
+                    };
 
                     // Envoyer les données à la fonction Netlify
                     const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
                         method: 'POST',
-                        body: formData
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
                     });
 
                     if (!response.ok) {
-                        throw new Error('Erreur lors de la sauvegarde');
+                        const errorData = await response.json();
+                        console.error('Erreur détaillée:', errorData);
+                        throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
                     }
 
                     showNotification('Restaurant enregistré avec succès !', 'success');
@@ -908,7 +933,7 @@
 
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
+                    showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
                 }
             });
 
