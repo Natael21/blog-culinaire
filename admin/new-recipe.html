@@ -79,8 +79,8 @@
         }
 
         .admin-header {
-            margin: 0;
-            text-align: left;
+            padding: 1rem;
+            margin-bottom: 2rem;
         }
 
         .admin-title {
@@ -239,12 +239,13 @@
         }
 
         .editor-toolbar {
-            background: #f8f9fa;
+            background: white;
             border: 2px solid var(--input-border);
             border-radius: var(--border-radius) var(--border-radius) 0 0;
             padding: 12px;
             display: flex;
             gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .editor-toolbar button {
@@ -258,6 +259,10 @@
             font-weight: 600;
             min-width: 40px;
             font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .editor-toolbar button:hover {
@@ -265,12 +270,14 @@
             color: white;
             border-color: var(--accent-color);
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
         }
 
         .editor-toolbar button.is-active {
             background: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
         }
 
         .ProseMirror {
@@ -620,6 +627,43 @@
             box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
             background-color: #fff5f5 !important;
         }
+
+        .action-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            font-size: 0.95rem;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+        }
+
+        .action-button.cancel {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .action-button.cancel:hover {
+            background: linear-gradient(135deg, #c0392b, #a93224);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .action-button i {
+            font-size: 1rem;
+        }
     </style>
 
     <script>
@@ -887,15 +931,11 @@ ratings:
     </script>
 </head>
 <body>
-    <div class="header-container">
-        <div class="admin-header">
-            <h1 class="admin-title">Nouveau Restaurant</h1>
-        </div>
-        <a href="index.html" class="action-button" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
-            <i class="fas fa-arrow-left"></i>
-            Retour à l'administration
+    <header class="admin-header">
+        <a href="index.html" class="action-button">
+            <i class="fas fa-arrow-left"></i> Retour à l'administration
         </a>
-    </div>
+    </header>
 
     <div class="page-container">
         <div class="form-column">
@@ -1101,10 +1141,10 @@ ratings:
                     <div class="mb-3">
                         <label for="editor" class="form-label">Description complète du restaurant</label>
                         <div class="editor-toolbar">
-                            <button type="button" data-command="bold" title="Gras">B</button>
-                            <button type="button" data-command="italic" title="Italique">I</button>
-                            <button type="button" data-command="bulletList" title="Liste à puces">•</button>
-                            <button type="button" data-command="orderedList" title="Liste numérotée">1.</button>
+                            <button type="button" data-command="bold" title="Gras"><i class="fas fa-bold"></i></button>
+                            <button type="button" data-command="italic" title="Italique"><i class="fas fa-italic"></i></button>
+                            <button type="button" data-command="bulletList" title="Liste à puces"><i class="fas fa-list-ul"></i></button>
+                            <button type="button" data-command="orderedList" title="Liste numérotée"><i class="fas fa-list-ol"></i></button>
                         </div>
                         <div id="editor"></div>
                     </div>
@@ -1115,7 +1155,7 @@ ratings:
                         <button type="submit" class="action-button">
                             <i class="fas fa-save"></i> Enregistrer un brouillon
                         </button>
-                        <a href="index.html" class="action-button" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                        <a href="index.html" class="action-button cancel">
                             <i class="fas fa-times"></i> Annuler
                         </a>
                     </div>
