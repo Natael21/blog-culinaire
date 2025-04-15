@@ -752,7 +752,6 @@
         .github-image-item.selected {
             border-color: var(--accent-color);
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-            transform: translateY(-2px);
         }
 
         .image-name {
@@ -789,377 +788,207 @@
         .image-selector-tab i {
             margin-right: 0.5rem;
         }
+
+        .github-image-item i.fa-check-circle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            padding: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .github-image-item.selected i.fa-check-circle {
+            opacity: 1;
+        }
+
+        #githubGalleryGrid .github-image-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #githubGalleryGrid .github-image-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        #githubGalleryGrid .github-image-item.selected {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        #githubGalleryGrid .github-image-item.selected img {
+            filter: brightness(1.05);
+        }
     </style>
 
     <script>
-        // Variables globales pour stocker les fichiers d'images
         let mainImageFile = null;
         let galleryImageFiles = [];
+        let selectedGithubGalleryImages = [];
 
-        // Initialiser TipTap
-        let editor;
-        window.addEventListener('load', () => {
-            editor = new Editor({
-                element: document.querySelector('#editor'),
-                extensions: [
-                    Document,
-                    Paragraph,
-                    Text,
-                    Bold,
-                    Italic,
-                    BulletList,
-                    OrderedList,
-                    ListItem
-                ],
-                content: '',
-                editable: true,
-                onUpdate: ({ editor }) => {
-                    updateMarkdownPreview();
-                }
-            });
-
-            // Gérer les boutons de la barre d'outils
-            document.querySelectorAll('.editor-toolbar button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const command = button.dataset.command;
-                    editor.chain().focus();
-                    
-                    switch(command) {
-                        case 'bold':
-                            editor.chain().toggleBold().run();
-                            break;
-                        case 'italic':
-                            editor.chain().toggleItalic().run();
-                            break;
-                        case 'bulletList':
-                            editor.chain().toggleBulletList().run();
-                            break;
-                        case 'orderedList':
-                            editor.chain().toggleOrderedList().run();
-                            break;
-                    }
-                    
-                    // Mettre à jour l'état actif du bouton
-                    button.classList.toggle('is-active', editor.isActive(command));
-                });
-
-                // Mettre à jour l'état initial des boutons
-                const command = button.dataset.command;
-                button.classList.toggle('is-active', editor.isActive(command));
-            });
-
-            // Initialiser les autres fonctionnalités
-            initializeAddressAutocomplete();
-            initializeDropZones();
+        function handleGithubGallerySelection(imageUrl) {
+            const index = selectedGithubGalleryImages.indexOf(imageUrl);
+            const imageItem = document.querySelector(`#githubGalleryGrid img[src="${imageUrl}"]`).parentElement;
             
-            // Écouter les changements dans les champs de notation
-            document.querySelectorAll('.rating-input').forEach(input => {
-                input.addEventListener('input', () => {
-                    calculateOverallRating();
-                    updateMarkdownPreview();
-                });
-            });
-
-            // Écouter les changements dans tous les champs du formulaire
-            document.querySelectorAll('input, textarea, select').forEach(element => {
-                element.addEventListener('input', updateMarkdownPreview);
-            });
-
-            // Écouter les changements dans les checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', updateMarkdownPreview);
-            });
-
-            // Écouter les changements d'image principale
-            document.getElementById('mainImage').addEventListener('change', function(e) {
-                if (this.files && this.files[0]) {
-                    handleMainImageUpload(this.files[0]);
-                }
-            });
-
-            // Écouter les changements d'images de galerie
-            document.getElementById('galleryImages').addEventListener('change', function(e) {
-                if (this.files) {
-                    handleGalleryUpload(this.files);
-                }
-            });
-
-            // Initialiser l'aperçu markdown au chargement
-            updateMarkdownPreview();
-
-            // Ajouter la gestion des onglets pour le sélecteur d'images
-            initializeImageSelector();
-        });
-
-        function generateMarkdown() {
-            const title = document.getElementById('title').value;
-            const date = document.getElementById('date').value;
-            const description = document.getElementById('description').value;
-            const address = document.getElementById('address').value;
-            const style = document.getElementById('style').value;
-            const price = document.getElementById('price').value;
-            
-            // Gérer les options alimentaires multiples
-            const dietOptions = [];
-            if (document.getElementById('vegetarian').checked) {
-                dietOptions.push('vegetarian-friendly');
+            if (index === -1) {
+                selectedGithubGalleryImages.push(imageUrl);
+                imageItem.classList.add('selected');
+            } else {
+                selectedGithubGalleryImages.splice(index, 1);
+                imageItem.classList.remove('selected');
             }
-            if (document.getElementById('vegan').checked) {
-                dietOptions.push('vegan-friendly');
-            }
-            const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
 
-            // Utiliser un placeholder pour les images en attendant l'upload
-            const mainImagePlaceholder = mainImageFile ? `[${mainImageFile.name}]` : '';
-            const galleryPlaceholders = galleryImageFiles.map(file => `  - image: "[${file.name}]"`);
-
-            const overallRating = calculateOverallRating();
-            
-            // Obtenir le contenu de l'éditeur TipTap
-            const detailedDescription = editor ? editor.getHTML() : '';
-
-            // Générer les évaluations
-            const ratings = {
-                food: {
-                    score: document.getElementById('foodScore').value || '0',
-                    comment: document.getElementById('foodComment').value || ''
-                },
-                service: {
-                    score: document.getElementById('serviceScore').value || '0',
-                    comment: document.getElementById('serviceComment').value || ''
-                },
-                ambiance: {
-                    score: document.getElementById('ambianceScore').value || '0',
-                    comment: document.getElementById('ambianceComment').value || ''
-                },
-                value: {
-                    score: document.getElementById('valueScore').value || '0',
-                    comment: document.getElementById('valueComment').value || ''
-                },
-                originality: {
-                    score: document.getElementById('originalityScore').value || '0',
-                    comment: document.getElementById('originalityComment').value || ''
-                },
-                overallExperience: {
-                    score: document.getElementById('overallExperienceScore').value || '0',
-                    comment: document.getElementById('overallExperienceComment').value || ''
-                }
-            };
-
-            const today = new Date().toISOString().split('T')[0];
-
-            // Générer le markdown
-            return `---
-layout: restaurant
-title: "${title}"
-date: ${today}
-state: draft
-note: ${overallRating}
-style: "${style}"
-diet: "${diet}"
-description: "${description}"
-price: "${price}"
-address: "${address}"
-image: "${mainImagePlaceholder}"
-images:
-  - image: "${mainImagePlaceholder}"
-${galleryPlaceholders.join('\n')}
-ratings:
-  food:
-    score: ${ratings.food.score}
-    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
-    comment: "${ratings.food.comment}"
-  service:
-    score: ${ratings.service.score}
-    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
-    comment: "${ratings.service.comment}"
-  ambiance:
-    score: ${ratings.ambiance.score}
-    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
-    comment: "${ratings.ambiance.comment}"
-  value:
-    score: ${ratings.value.score}
-    comment: "${ratings.value.comment}"
-  originality:
-    score: ${ratings.originality.score}
-    comment: "${ratings.originality.comment}"
-  overallExperience:
-    score: ${ratings.overallExperience.score}
-    criteria: "Expérience globale"
-    comment: "${ratings.overallExperience.comment}"
-  overall:
-    score: ${overallRating}
-    criteria: "Facteur \\"wow\\""
-    comment: "Une expérience culinaire à découvrir."
----`;
+            updateGalleryPreview();
         }
 
-        // Fonction pour calculer la note globale
-        function calculateOverallRating() {
-            const scores = [
-                parseFloat(document.getElementById('foodScore').value) || 0,
-                parseFloat(document.getElementById('serviceScore').value) || 0,
-                parseFloat(document.getElementById('ambianceScore').value) || 0,
-                parseFloat(document.getElementById('valueScore').value) || 0,
-                parseFloat(document.getElementById('originalityScore').value) || 0,
-                parseFloat(document.getElementById('overallExperienceScore').value) || 0
-            ];
-            
-            const sum = scores.reduce((a, b) => a + b, 0);
-            const average = (sum / scores.length).toFixed(1);
-            
-            document.getElementById('overallRating').value = average;
-            return average;
-        }
-
-        // Mettre à jour l'aperçu markdown
-        function updateMarkdownPreview() {
-            const preview = document.getElementById('markdownPreview');
-            preview.textContent = generateMarkdown();
-        }
-
-        // Fonction pour créer une prévisualisation d'image
-        function createImagePreview(file, container, isMainImage = false) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'image-preview-container';
-                div.innerHTML = `
-                    <img src="${e.target.result}" class="image-preview" alt="Image preview">
-                    <button type="button" class="delete-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                
-                div.querySelector('.delete-image').addEventListener('click', function() {
-                    div.remove();
-                    if (isMainImage) {
-                        mainImageFile = null;
-                    } else {
-                        const index = galleryImageFiles.indexOf(file);
-                        if (index > -1) {
-                            galleryImageFiles.splice(index, 1);
-                        }
-                    }
-                    updateMarkdownPreview();
-                });
-                
-                container.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Fonction pour mettre à jour la prévisualisation de la galerie
         function updateGalleryPreview() {
-            const container = document.getElementById('galleryPreview');
-            container.innerHTML = '';
-            galleryImageFiles.forEach(file => createImagePreview(file, container));
-        }
+            const galleryPreview = document.getElementById('galleryPreview');
+            galleryPreview.innerHTML = '';
 
-        // Ajouter la gestion des onglets pour le sélecteur d'images
-        function initializeImageSelector() {
-            const tabs = document.querySelectorAll('.image-selector-tab');
-            const contents = document.querySelectorAll('.image-selector-content');
+            // Afficher les images téléchargées localement
+            galleryImageFiles.forEach((file, index) => {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('preview-image');
+                
+                const container = document.createElement('div');
+                container.classList.add('preview-container');
+                container.appendChild(img);
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Retirer la classe active de tous les onglets et contenus
-                    tabs.forEach(t => t.classList.remove('active'));
-                    contents.forEach(c => c.classList.remove('active'));
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.classList.add('remove-image');
+                removeBtn.onclick = () => {
+                    galleryImageFiles.splice(index, 1);
+                    updateGalleryPreview();
+                };
+                container.appendChild(removeBtn);
+                
+                galleryPreview.appendChild(container);
+            });
 
-                    // Ajouter la classe active à l'onglet cliqué et son contenu
-                    tab.classList.add('active');
-                    const content = document.querySelector(`[data-content="${tab.dataset.tab}"]`);
-                    content.classList.add('active');
+            // Afficher les images sélectionnées depuis GitHub
+            selectedGithubGalleryImages.forEach((url, index) => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.classList.add('preview-image');
+                
+                const container = document.createElement('div');
+                container.classList.add('preview-container');
+                container.appendChild(img);
 
-                    // Si on sélectionne l'onglet GitHub, charger les images
-                    if (tab.dataset.tab === 'github') {
-                        loadGithubImages();
-                    }
-                });
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.classList.add('remove-image');
+                removeBtn.onclick = () => {
+                    const githubImage = document.querySelector(`#githubGalleryGrid img[src="${url}"]`).parentElement;
+                    githubImage.classList.remove('selected');
+                    selectedGithubGalleryImages.splice(index, 1);
+                    updateGalleryPreview();
+                };
+                container.appendChild(removeBtn);
+                
+                galleryPreview.appendChild(container);
             });
         }
 
-        // Fonction pour charger les images depuis le dossier GitHub
-        async function loadGithubImages() {
-            const grid = document.getElementById('githubImagesGrid');
-            grid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Chargement des images...</div>';
-
-            try {
-                const images = [
-                    { name: 'restaurant-test.jpg', path: '/images/restaurant-test.jpg' },
-                    { name: 'pho loc.PNG', path: '/images/pho loc.PNG' },
-                    { name: 'lotus blanc.png', path: '/images/lotus blanc.png' },
-                    { name: 'la brigade resto.jpg', path: '/images/la brigade resto.jpg' },
-                    { name: 'datoni pronto.jpg', path: '/images/datoni pronto.jpg' },
-                    { name: 'chanchai.jpeg', path: '/images/chanchai.jpeg' },
-                    { name: 'Village de chine.PNG', path: '/images/Village de chine.PNG' },
-                    { name: 'Taverne Alexandre.PNG', path: '/images/Taverne Alexandre.PNG' },
-                    { name: 'Saveur et délice.jpg', path: '/images/Saveur et délice.jpg' },
-                    { name: 'Restaurant Persépolis.jpg', path: '/images/Restaurant Persépolis.jpg' },
-                    { name: 'Le Refuge des Brasseurs - Microbrasserie.jpg', path: '/images/Le Refuge des Brasseurs - Microbrasserie.jpg' },
-                    { name: 'Le Dauphin.jpg', path: '/images/Le Dauphin.jpg' },
-                    { name: 'La buvette.PNG', path: '/images/La buvette.PNG' },
-                    { name: 'Habenaros Grill Mexicain.JPG', path: '/images/Habenaros Grill Mexicain.JPG' },
-                    { name: 'Guacamole y tequila.png', path: '/images/Guacamole y tequila.png' },
-                    { name: 'El Tabernaco.jpg', path: '/images/El Tabernaco.jpg' },
-                    { name: 'El Chupa Resto.png', path: '/images/El Chupa Resto.png' },
-                    { name: 'Café Restaurant L.png', path: '/images/Café Restaurant L.png' }
-                ];
-
-                grid.innerHTML = '';
-                images.forEach(image => {
-                    const item = document.createElement('div');
-                    item.className = 'github-image-item';
-                    item.innerHTML = `
-                        <img src="${image.path}" alt="${image.name}" loading="lazy">
-                        <div class="image-name">${image.name.split('.')[0]}</div>
-                    `;
-                    
-                    item.addEventListener('click', () => {
-                        document.querySelectorAll('.github-image-item').forEach(i => i.classList.remove('selected'));
-                        item.classList.add('selected');
-                        handleGithubImageSelection(image);
+        function createImagePreview(imageUrl, gridId, isGallery = false) {
+            const div = document.createElement('div');
+            div.className = 'github-image-item';
+            
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = 'GitHub Image';
+            
+            const checkIcon = document.createElement('i');
+            checkIcon.className = 'fas fa-check-circle';
+            
+            div.appendChild(img);
+            div.appendChild(checkIcon);
+            
+            if (isGallery) {
+                div.onclick = () => handleGithubGallerySelection(imageUrl);
+            } else {
+                div.onclick = () => {
+                    document.querySelectorAll(`#${gridId} .github-image-item`).forEach(item => {
+                        item.classList.remove('selected');
                     });
+                    div.classList.add('selected');
+                    document.getElementById('mainImageInput').value = imageUrl;
+                };
+            }
+            
+            return div;
+        }
 
-                    grid.appendChild(item);
+        async function loadGithubImages(gridId, isGallery = false) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '<p>Chargement des images...</p>';
+            
+            try {
+                const response = await fetch('https://api.github.com/repos/nataelbaffou/blog-culinaire/contents/images');
+                if (!response.ok) throw new Error('Erreur lors du chargement des images');
+                
+                const data = await response.json();
+                grid.innerHTML = '';
+                
+                data.forEach(file => {
+                    if (file.type === 'file' && file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                        const imagePreview = createImagePreview(file.download_url, gridId, isGallery);
+                        grid.appendChild(imagePreview);
+                    }
                 });
             } catch (error) {
-                grid.innerHTML = '<div class="text-center text-danger">Erreur lors du chargement des images</div>';
-                console.error('Erreur lors du chargement des images:', error);
+                grid.innerHTML = `<p>Erreur: ${error.message}</p>`;
             }
         }
 
-        // Fonction pour gérer la sélection d'une image GitHub
-        function handleGithubImageSelection(image) {
-            mainImageFile = {
-                name: image.name,
-                path: image.path,
-                isGithubImage: true
-            };
+        document.getElementById('galleryImageInput').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            galleryImageFiles = [...galleryImageFiles, ...files];
+            updateGalleryPreview();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainImageTabs = document.querySelectorAll('#mainImageTabs .nav-link');
+            const mainImageContent = document.querySelectorAll('#mainImageTabContent .tab-pane');
             
-            const container = document.getElementById('mainImagePreview');
-            container.innerHTML = '';
-            const div = document.createElement('div');
-            div.className = 'image-preview-container';
-            div.innerHTML = `
-                <img src="${image.path}" class="image-preview" alt="${image.name}">
-                <button type="button" class="delete-image">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            div.querySelector('.delete-image').addEventListener('click', function() {
-                div.remove();
-                mainImageFile = null;
-                document.querySelectorAll('.github-image-item').forEach(i => i.classList.remove('selected'));
-                updateMarkdownPreview();
+            const galleryTabs = document.querySelectorAll('#galleryTabs .nav-link');
+            const galleryContent = document.querySelectorAll('#galleryTabContent .tab-pane');
+
+            function switchTabs(tabs, content, clickedTab) {
+                tabs.forEach(tab => tab.classList.remove('active'));
+                content.forEach(pane => pane.classList.remove('active'));
+                
+                clickedTab.classList.add('active');
+                const targetId = clickedTab.getAttribute('data-target');
+                document.querySelector(targetId).classList.add('active');
+            }
+
+            mainImageTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTabs(mainImageTabs, mainImageContent, tab);
+                    if (tab.getAttribute('data-target') === '#githubMainTab') {
+                        loadGithubImages('githubMainGrid');
+                    }
+                });
             });
-            
-            container.appendChild(div);
-            updateMarkdownPreview();
-        }
+
+            galleryTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTabs(galleryTabs, galleryContent, tab);
+                    if (tab.getAttribute('data-target') === '#githubGalleryTab') {
+                        loadGithubImages('githubGalleryGrid', true);
+                    }
+                });
+            });
+        });
     </script>
 </head>
 <body>
@@ -1281,14 +1110,32 @@ ratings:
 
                     <div class="form-group">
                         <label>Images de la galerie</label>
-                        <div class="upload-zone" id="galleryZone">
-                            <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
-                            <div class="upload-icon">
-                                <i class="fas fa-images"></i>
-                            </div>
-                            <div class="upload-text">Glissez et déposez vos images ici</div>
-                            <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
+                        <div class="image-selector-tabs">
+                            <button type="button" class="image-selector-tab active" data-tab="upload-gallery">
+                                <i class="fas fa-upload"></i> Upload local
+                            </button>
+                            <button type="button" class="image-selector-tab" data-tab="github-gallery">
+                                <i class="fab fa-github"></i> Images GitHub
+                            </button>
                         </div>
+                        
+                        <div class="image-selector-content active" data-content="upload-gallery">
+                            <div class="upload-zone" id="galleryZone">
+                                <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
+                                <div class="upload-icon">
+                                    <i class="fas fa-images"></i>
+                                </div>
+                                <div class="upload-text">Glissez et déposez vos images ici</div>
+                                <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
+                            </div>
+                        </div>
+                        
+                        <div class="image-selector-content" data-content="github-gallery">
+                            <div class="github-images-grid" id="githubGalleryGrid">
+                                <!-- Les images seront chargées dynamiquement ici -->
+                            </div>
+                        </div>
+
                         <div id="galleryPreview" class="gallery-preview"></div>
                     </div>
                 </div>
