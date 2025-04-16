@@ -1247,44 +1247,44 @@
 
             return `---
 layout: restaurant
-title: "${title}"
+title: '${title}'
 date: ${today}
 state: draft
 note: ${overallRating}
-style: "${style}"
-diet: "${diet}"
-description: "${description}"
-price: "${price}"
-address: "${address}"
-image: "${mainImagePath}"
+style: '${style}'
+diet: '${diet}'
+description: '${description}'
+price: '${price}'
+address: '${address}'
+image: '${mainImagePath}'
 images:
-  - image: "${mainImagePath}"
+  - image: '${mainImagePath}'
 ${galleryPaths.join('\n')}
 ratings:
   food:
     score: ${ratings.food.score}
-    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
-    comment: "${ratings.food.comment}"
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: '${ratings.food.comment}'
   service:
     score: ${ratings.service.score}
-    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
-    comment: "${ratings.service.comment}"
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: '${ratings.service.comment}'
   ambiance:
     score: ${ratings.ambiance.score}
-    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
-    comment: "${ratings.ambiance.comment}"
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: '${ratings.ambiance.comment}'
   value:
     score: ${ratings.value.score}
-    criteria: "Rapport qualité/prix, portions, prix par rapport au marché"
-    comment: "${ratings.value.comment}"
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: '${ratings.value.comment}'
   originality:
     score: ${ratings.originality.score}
-    criteria: "Innovation, créativité, authenticité"
-    comment: "${ratings.originality.comment}"
+    criteria: 'Innovation, créativité, authenticité'
+    comment: '${ratings.originality.comment}'
   overall:
     score: ${overallRating}
-    criteria: "Expérience globale, facteur \"wow\""
-    comment: "${ratings.overallExperience.comment}"
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: '${ratings.overallExperience.comment}'
 ---`;
         }
 
