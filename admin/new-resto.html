@@ -896,15 +896,16 @@
                     if (mainImageFile) {
                         const mainImageBase64 = await fileToBase64(mainImageFile);
                         draftData.images.push({
-                            name: 'main.jpg',
+                            name: mainImageFile.name,
                             data: mainImageBase64
                         });
                     }
 
                     for (let i = 0; i < galleryImageFiles.length; i++) {
-                        const galleryBase64 = await fileToBase64(galleryImageFiles[i]);
+                        const file = galleryImageFiles[i];
+                        const galleryBase64 = await fileToBase64(file);
                         draftData.images.push({
-                            name: `gallery-${i + 1}.jpg`,
+                            name: file.name,
                             data: galleryBase64
                         });
                     }
@@ -1209,8 +1210,8 @@
             }
             const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
 
-            const mainImagePath = mainImageFile ? `/images/main.jpg` : '';
-            const galleryPaths = galleryImageFiles.map((file, i) => `  - image: "/images/gallery-${i + 1}.jpg"`);
+            const mainImagePath = mainImageFile ? `/images/${mainImageFile.name}` : '';
+            const galleryPaths = galleryImageFiles.map(file => `  - image: "/images/${file.name}"`);
 
             const overallRating = calculateOverallRating();
             
