@@ -1275,18 +1275,16 @@ ratings:
     comment: "${ratings.ambiance.comment}"
   value:
     score: ${ratings.value.score}
+    criteria: "Rapport qualité/prix, portions, prix par rapport au marché"
     comment: "${ratings.value.comment}"
   originality:
     score: ${ratings.originality.score}
+    criteria: "Innovation, créativité, authenticité"
     comment: "${ratings.originality.comment}"
-  overallExperience:
-    score: ${ratings.overallExperience.score}
-    criteria: "Expérience globale"
-    comment: "${ratings.overallExperience.comment}"
   overall:
     score: ${overallRating}
-    criteria: "Facteur \"wow\""
-    comment: "Une expérience culinaire à découvrir."
+    criteria: "Expérience globale, facteur \"wow\""
+    comment: "${ratings.overallExperience.comment}"
 ---`;
         }
 
