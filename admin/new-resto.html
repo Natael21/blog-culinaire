@@ -884,48 +884,33 @@
                     const date = new Date().toISOString().split('T')[0];
                     const filePath = `_posts/${date}-${filename}.md`;
 
-                    // Convertir les images en base64
-                    const images = [];
+                    // Créer un objet pour stocker les données du brouillon
+                    const draftData = {
+                        filename: filePath,
+                        title: title,
+                        content: generateMarkdown(),
+                        images: []
+                    };
+
+                    // Sauvegarder les images localement
                     if (mainImageFile) {
-                        const mainImageBase64 = await fileToBase64(mainImageFile);
-                        images.push({
+                        draftData.images.push({
                             name: 'main.jpg',
-                            data: mainImageBase64
+                            file: mainImageFile
                         });
                     }
 
                     for (let i = 0; i < galleryImageFiles.length; i++) {
-                        const galleryImageBase64 = await fileToBase64(galleryImageFiles[i]);
-                        images.push({
+                        draftData.images.push({
                             name: `gallery-${i + 1}.jpg`,
-                            data: galleryImageBase64
+                            file: galleryImageFiles[i]
                         });
                     }
 
-                    // Préparer les données pour l'envoi
-                    const data = {
-                        filename: filePath,
-                        title: title,
-                        content: generateMarkdown(),
-                        images: images
-                    };
+                    // Sauvegarder le brouillon dans le localStorage
+                    localStorage.setItem('currentDraft', JSON.stringify(draftData));
 
-                    // Envoyer les données à la fonction Netlify
-                    const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        console.error('Erreur détaillée:', errorData);
-                        throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
-                    }
-
-                    showNotification('Restaurant enregistré avec succès !', 'success');
+                    showNotification('Brouillon enregistré avec succès !', 'success');
                     
                     setTimeout(() => {
                         window.location.href = 'index.html';
@@ -933,7 +918,7 @@
 
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
+                    showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
                 }
             });
 

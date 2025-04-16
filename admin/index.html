@@ -227,9 +227,9 @@ title: Administration - Blog Culinaire
                 </div>
             </div>
 
-            <div class="admin-actions">
+            <div class="action-buttons">
                 <a href="new-resto.html" class="action-button">
-                    <i class="fas fa-plus"></i> Nouveau restaurant
+                    <i class="fas fa-plus"></i> Nouveau Restaurant
                 </a>
                 <a href="#" class="action-button">
                     <i class="fas fa-list"></i> Gérer les restaurants
@@ -240,6 +240,12 @@ title: Administration - Blog Culinaire
                 <a href="#" class="action-button">
                     <i class="fas fa-images"></i> Gérer les images
                 </a>
+            </div>
+
+            <div class="action-buttons" style="margin-top: 20px;">
+                <button id="publishDraft" class="action-button" style="display: none;">
+                    <i class="fas fa-upload"></i> Publier les modifications
+                </button>
             </div>
         </div>
     </div>
@@ -469,6 +475,97 @@ title: Administration - Blog Culinaire
         // Appeler debugLocalStorage au chargement pour voir toutes les clés
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(debugLocalStorage, 2000); // Attendre que tout soit chargé
+        });
+
+        // Vérifier s'il y a un brouillon à publier
+        const currentDraft = localStorage.getItem('currentDraft');
+        const publishButton = document.getElementById('publishDraft');
+        
+        if (currentDraft) {
+            publishButton.style.display = 'flex';
+        }
+
+        // Fonction pour convertir un fichier en base64
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Gérer le clic sur le bouton de publication
+        publishButton.addEventListener('click', async function() {
+            try {
+                const draftData = JSON.parse(localStorage.getItem('currentDraft'));
+                
+                // Convertir les images en base64
+                const images = [];
+                for (const image of draftData.images) {
+                    const base64Data = await fileToBase64(image.file);
+                    images.push({
+                        name: image.name,
+                        data: base64Data
+                    });
+                }
+
+                // Préparer les données pour l'envoi
+                const data = {
+                    filename: draftData.filename,
+                    title: draftData.title,
+                    content: draftData.content,
+                    images: images
+                };
+
+                // Envoyer les données à la fonction Netlify
+                const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erreur lors de la publication');
+                }
+
+                // Supprimer le brouillon du localStorage après publication réussie
+                localStorage.removeItem('currentDraft');
+                
+                // Afficher une notification de succès
+                const notification = document.createElement('div');
+                notification.className = 'notification success';
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Restaurant publié avec succès !</span>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+
+                // Cacher le bouton de publication
+                publishButton.style.display = 'none';
+
+                // Rafraîchir la page après 1.5 secondes
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                const notification = document.createElement('div');
+                notification.className = 'notification error';
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${error.message || 'Erreur lors de la publication du restaurant'}</span>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+            }
         });
     </script>
 </body>
