@@ -892,18 +892,20 @@
                         images: []
                     };
 
-                    // Sauvegarder les images localement
+                    // Sauvegarder les images localement en base64
                     if (mainImageFile) {
+                        const mainImageBase64 = await fileToBase64(mainImageFile);
                         draftData.images.push({
                             name: 'main.jpg',
-                            file: mainImageFile
+                            data: mainImageBase64
                         });
                     }
 
                     for (let i = 0; i < galleryImageFiles.length; i++) {
+                        const galleryBase64 = await fileToBase64(galleryImageFiles[i]);
                         draftData.images.push({
                             name: `gallery-${i + 1}.jpg`,
-                            file: galleryImageFiles[i]
+                            data: galleryBase64
                         });
                     }
 
@@ -1207,8 +1209,8 @@
             }
             const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
 
-            const mainImagePlaceholder = mainImageFile ? `[${mainImageFile.name}]` : '';
-            const galleryPlaceholders = galleryImageFiles.map(file => `  - image: "[${file.name}]"`);
+            const mainImagePath = mainImageFile ? `/images/main.jpg` : '';
+            const galleryPaths = galleryImageFiles.map((file, i) => `  - image: "/images/gallery-${i + 1}.jpg"`);
 
             const overallRating = calculateOverallRating();
             
@@ -1254,10 +1256,10 @@ diet: "${diet}"
 description: "${description}"
 price: "${price}"
 address: "${address}"
-image: "${mainImagePlaceholder}"
+image: "${mainImagePath}"
 images:
-  - image: "${mainImagePlaceholder}"
-${galleryPlaceholders.join('\n')}
+  - image: "${mainImagePath}"
+${galleryPaths.join('\n')}
 ratings:
   food:
     score: ${ratings.food.score}
@@ -1283,7 +1285,7 @@ ratings:
     comment: "${ratings.overallExperience.comment}"
   overall:
     score: ${overallRating}
-    criteria: "Facteur \\"wow\\""
+    criteria: "Facteur \"wow\""
     comment: "Une expérience culinaire à découvrir."
 ---`;
         }

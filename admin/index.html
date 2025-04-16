@@ -416,15 +416,8 @@ title: Administration - Blog Culinaire
                         console.log('Bouton publication cliqué');
                         try {
                             const draftData = JSON.parse(localStorage.getItem('currentDraft'));
-                            // Convertir les images en base64
-                            const images = [];
-                            for (const image of draftData.images) {
-                                const base64Data = await fileToBase64(image.file);
-                                images.push({
-                                    name: image.name,
-                                    data: base64Data
-                                });
-                            }
+                            // Utiliser directement les images en base64 du brouillon
+                            const images = draftData.images || [];
                             // Préparer les données pour l'envoi
                             const data = {
                                 filename: draftData.filename,
