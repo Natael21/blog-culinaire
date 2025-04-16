@@ -1,0 +1,43 @@
+---
+layout: restaurant
+title: "stsadgsd"
+date: 2025-04-16
+state: draft
+note: 5.0
+style: "Asiatique"
+diet: "none"
+description: "213"
+price: "$ (0-20$)"
+address: "Kelilalina, Vatovavy, 312, Madagascar"
+image: "/images/main.jpg"
+images:
+  - image: "/images/main.jpg"
+  - image: "/images/gallery-1.jpg"
+ratings:
+  food:
+    score: 5
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "123"
+  service:
+    score: 5
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "132"
+  ambiance:
+    score: 5
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "123"
+  value:
+    score: 5
+    comment: "213"
+  originality:
+    score: 5
+    comment: "312"
+  overallExperience:
+    score: 5
+    criteria: "Expérience globale"
+    comment: "123"
+  overall:
+    score: 5.0
+    criteria: "Facteur "wow""
+    comment: "Une expérience culinaire à découvrir."
+---
