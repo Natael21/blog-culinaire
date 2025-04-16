@@ -173,6 +173,51 @@ title: Administration - Blog Culinaire
             background: linear-gradient(135deg, #c0392b, #a93224) !important;
             box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4) !important;
         }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.success {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .notification.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification.success i {
+            color: #2ecc71;
+        }
+
+        .notification.error i {
+            color: #e74c3c;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -483,19 +528,10 @@ title: Administration - Blog Culinaire
                     localStorage.removeItem('currentDraft');
                     publishButton.style.display = 'none';
                     cancelButton.style.display = 'none';
-                    // Notification
-                    const notification = document.createElement('div');
-                    notification.className = 'notification success';
-                    notification.innerHTML = `
-                        <div class="notification-content">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Brouillon annulé.</span>
-                        </div>
-                    `;
-                    document.body.appendChild(notification);
+                    showNotification('Brouillon annulé avec succès');
                     setTimeout(() => {
                         window.location.reload();
-                    }, 1000);
+                    }, 1500);
                 });
             }
         });
@@ -598,6 +634,26 @@ title: Administration - Blog Culinaire
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+
+            // Supprimer la notification après 3 secondes
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
         }
     </script>
 </body>
