@@ -242,7 +242,7 @@ title: Administration - Blog Culinaire
                 </a>
             </div>
 
-            <div class="action-buttons" style="margin-top: 20px;">
+            <div class="action-buttons" style="margin-top: 20px; justify-content: center;">
                 <button id="publishDraft" class="action-button" style="display: none;">
                     <i class="fas fa-upload"></i> Publier les modifications
                 </button>
@@ -385,6 +385,12 @@ title: Administration - Blog Culinaire
                     document.getElementById('login-container').style.display = 'block';
                 }
             }, 3000);
+
+            const currentDraft = localStorage.getItem('currentDraft');
+            const publishButton = document.getElementById('publishDraft');
+            if (currentDraft && publishButton) {
+                publishButton.style.display = 'flex';
+            }
         });
 
         // Fonction pour ouvrir le modal de connexion
@@ -476,14 +482,6 @@ title: Administration - Blog Culinaire
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(debugLocalStorage, 2000); // Attendre que tout soit chargé
         });
-
-        // Vérifier s'il y a un brouillon à publier
-        const currentDraft = localStorage.getItem('currentDraft');
-        const publishButton = document.getElementById('publishDraft');
-        
-        if (currentDraft) {
-            publishButton.style.display = 'flex';
-        }
 
         // Fonction pour convertir un fichier en base64
         async function fileToBase64(file) {
