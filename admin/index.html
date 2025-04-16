@@ -408,74 +408,82 @@ title: Administration - Blog Culinaire
             const currentDraft = localStorage.getItem('currentDraft');
             const publishButton = document.getElementById('publishDraft');
             const cancelButton = document.getElementById('cancelDraft');
+            console.log('publishButton:', publishButton);
+
+            function attachPublishHandler() {
+                if (publishButton && !publishButton._handlerAttached) {
+                    publishButton.addEventListener('click', async function() {
+                        console.log('Bouton publication cliqué');
+                        try {
+                            const draftData = JSON.parse(localStorage.getItem('currentDraft'));
+                            // Convertir les images en base64
+                            const images = [];
+                            for (const image of draftData.images) {
+                                const base64Data = await fileToBase64(image.file);
+                                images.push({
+                                    name: image.name,
+                                    data: base64Data
+                                });
+                            }
+                            // Préparer les données pour l'envoi
+                            const data = {
+                                filename: draftData.filename,
+                                title: draftData.title,
+                                content: draftData.content,
+                                images: images
+                            };
+                            // Envoyer les données à la fonction Netlify
+                            const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(data)
+                            });
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.error || 'Erreur lors de la publication');
+                            }
+                            // Supprimer le brouillon du localStorage après publication réussie
+                            localStorage.removeItem('currentDraft');
+                            // Afficher une notification de succès
+                            const notification = document.createElement('div');
+                            notification.className = 'notification success';
+                            notification.innerHTML = `
+                                <div class="notification-content">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Restaurant publié avec succès !</span>
+                                </div>
+                            `;
+                            document.body.appendChild(notification);
+                            // Cacher les boutons
+                            publishButton.style.display = 'none';
+                            cancelButton.style.display = 'none';
+                            // Rafraîchir la page après 1.5 secondes
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } catch (error) {
+                            console.error('Erreur:', error);
+                            const notification = document.createElement('div');
+                            notification.className = 'notification error';
+                            notification.innerHTML = `
+                                <div class="notification-content">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>${error.message || 'Erreur lors de la publication du restaurant'}</span>
+                                </div>
+                            `;
+                            document.body.appendChild(notification);
+                        }
+                    });
+                    publishButton._handlerAttached = true;
+                }
+            }
+
             if (currentDraft && publishButton && cancelButton) {
                 publishButton.style.display = 'flex';
                 cancelButton.style.display = 'flex';
-            }
-            if (publishButton) {
-                publishButton.addEventListener('click', async function() {
-                    try {
-                        const draftData = JSON.parse(localStorage.getItem('currentDraft'));
-                        // Convertir les images en base64
-                        const images = [];
-                        for (const image of draftData.images) {
-                            const base64Data = await fileToBase64(image.file);
-                            images.push({
-                                name: image.name,
-                                data: base64Data
-                            });
-                        }
-                        // Préparer les données pour l'envoi
-                        const data = {
-                            filename: draftData.filename,
-                            title: draftData.title,
-                            content: draftData.content,
-                            images: images
-                        };
-                        // Envoyer les données à la fonction Netlify
-                        const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(data)
-                        });
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.error || 'Erreur lors de la publication');
-                        }
-                        // Supprimer le brouillon du localStorage après publication réussie
-                        localStorage.removeItem('currentDraft');
-                        // Afficher une notification de succès
-                        const notification = document.createElement('div');
-                        notification.className = 'notification success';
-                        notification.innerHTML = `
-                            <div class="notification-content">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Restaurant publié avec succès !</span>
-                            </div>
-                        `;
-                        document.body.appendChild(notification);
-                        // Cacher les boutons
-                        publishButton.style.display = 'none';
-                        cancelButton.style.display = 'none';
-                        // Rafraîchir la page après 1.5 secondes
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } catch (error) {
-                        console.error('Erreur:', error);
-                        const notification = document.createElement('div');
-                        notification.className = 'notification error';
-                        notification.innerHTML = `
-                            <div class="notification-content">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span>${error.message || 'Erreur lors de la publication du restaurant'}</span>
-                            </div>
-                        `;
-                        document.body.appendChild(notification);
-                    }
-                });
+                attachPublishHandler();
             }
             if (cancelButton) {
                 cancelButton.addEventListener('click', function() {
