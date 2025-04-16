@@ -261,25 +261,12 @@ title: Administration - Blog Culinaire
             </div>
 
             <div class="admin-stats">
-                {% assign published_count = 0 %}
-                {% assign draft_count = 0 %}
-
-                {% for post in site.posts %}
-                    {% if post.layout == 'restaurant' %}
-                        {% if post.state == 'ready' %}
-                            {% assign published_count = published_count | plus: 1 %}
-                        {% else %}
-                            {% assign draft_count = draft_count | plus: 1 %}
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-
                 <div class="stat-card">
-                    <div class="stat-number">{{ published_count }}</div>
+                    <div class="stat-number" id="published-count">{{ site.posts | where: "state", "ready" | size }}</div>
                     <div class="stat-label">Restaurants publiés</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">{{ draft_count }}</div>
+                    <div class="stat-number" id="draft-count">{{ site.posts | where: "state", "draft" | size }}</div>
                     <div class="stat-label">Restaurants en brouillon</div>
                 </div>
                 <div class="stat-card">
@@ -463,13 +450,17 @@ title: Administration - Blog Culinaire
                             const draftData = JSON.parse(localStorage.getItem('currentDraft'));
                             // Utiliser directement les images en base64 du brouillon
                             const images = draftData.images || [];
+                            
                             // Préparer les données pour l'envoi
                             const data = {
-                                filename: draftData.filename,
+                                filename: `_posts/${draftData.filename}`,
                                 title: draftData.title,
                                 content: draftData.content,
                                 images: images
                             };
+
+                            console.log('Envoi des données:', data);
+                            
                             // Envoyer les données à la fonction Netlify
                             const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
                                 method: 'POST',
@@ -478,40 +469,29 @@ title: Administration - Blog Culinaire
                                 },
                                 body: JSON.stringify(data)
                             });
+
                             if (!response.ok) {
                                 const errorData = await response.json();
                                 throw new Error(errorData.error || 'Erreur lors de la publication');
                             }
+
                             // Supprimer le brouillon du localStorage après publication réussie
                             localStorage.removeItem('currentDraft');
+                            
                             // Afficher une notification de succès
-                            const notification = document.createElement('div');
-                            notification.className = 'notification success';
-                            notification.innerHTML = `
-                                <div class="notification-content">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Restaurant publié avec succès !</span>
-                                </div>
-                            `;
-                            document.body.appendChild(notification);
+                            showNotification('Restaurant sauvegardé avec succès !', 'success');
+                            
                             // Cacher les boutons
                             publishButton.style.display = 'none';
                             cancelButton.style.display = 'none';
+                            
                             // Rafraîchir la page après 1.5 secondes
                             setTimeout(() => {
                                 window.location.reload();
                             }, 1500);
                         } catch (error) {
                             console.error('Erreur:', error);
-                            const notification = document.createElement('div');
-                            notification.className = 'notification error';
-                            notification.innerHTML = `
-                                <div class="notification-content">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    <span>${error.message || 'Erreur lors de la publication du restaurant'}</span>
-                                </div>
-                            `;
-                            document.body.appendChild(notification);
+                            showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
                         }
                     });
                     publishButton._handlerAttached = true;
