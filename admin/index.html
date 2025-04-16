@@ -253,6 +253,9 @@ title: Administration - Blog Culinaire
                 <button id="publishDraft" class="action-button" style="display: none;">
                     <i class="fas fa-upload"></i> Publier les modifications
                 </button>
+                <button id="cancelDraft" class="action-button cancel" style="display: none; margin-left: 1rem;">
+                    <i class="fas fa-times"></i> Annuler les modifications
+                </button>
             </div>
         </div>
     </div>
@@ -395,8 +398,30 @@ title: Administration - Blog Culinaire
 
             const currentDraft = localStorage.getItem('currentDraft');
             const publishButton = document.getElementById('publishDraft');
-            if (currentDraft && publishButton) {
+            const cancelButton = document.getElementById('cancelDraft');
+            if (currentDraft && publishButton && cancelButton) {
                 publishButton.style.display = 'flex';
+                cancelButton.style.display = 'flex';
+            }
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    localStorage.removeItem('currentDraft');
+                    publishButton.style.display = 'none';
+                    cancelButton.style.display = 'none';
+                    // Notification
+                    const notification = document.createElement('div');
+                    notification.className = 'notification success';
+                    notification.innerHTML = `
+                        <div class="notification-content">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Brouillon annulé.</span>
+                        </div>
+                    `;
+                    document.body.appendChild(notification);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                });
             }
         });
 
