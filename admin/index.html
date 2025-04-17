@@ -163,6 +163,25 @@ title: Administration - Blog Culinaire
             align-items: center;
             min-height: 180px;
             width: 100%;
+            position: relative;
+        }
+        .spinner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+        .spinner-overlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #3498db;
         }
         #cancelDraft.action-button.cancel {
             background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
@@ -616,24 +635,85 @@ title: Administration - Blog Culinaire
             });
         }
 
-        function showNotification(message, type = 'success') {
+        function showSpinner(container) {
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner-overlay';
+            spinner.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Chargement...</span></div>';
+            container.appendChild(spinner);
+        }
+
+        function hideSpinner(container) {
+            const spinner = container.querySelector('.spinner-overlay');
+            if (spinner) {
+                spinner.remove();
+            }
+        }
+
+        function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.innerHTML = `
-                <div class="notification-content">
-                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
-                    <span>${message}</span>
-                </div>
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
             `;
             document.body.appendChild(notification);
-
-            // Supprimer la notification après 3 secondes
             setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
+                notification.remove();
             }, 3000);
+        }
+
+        // Modifier la fonction publishDraft
+        async function publishDraft() {
+            const container = document.querySelector('.publish-btn-container');
+            showSpinner(container);
+            try {
+                const response = await fetch('/.netlify/functions/publish-draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    showNotification('Publication réussie !', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error('Erreur lors de la publication');
+                }
+            } catch (error) {
+                showNotification('Erreur lors de la publication', 'error');
+            } finally {
+                hideSpinner(container);
+            }
+        }
+
+        // Modifier la fonction cancelDraft
+        async function cancelDraft() {
+            const container = document.querySelector('.publish-btn-container');
+            showSpinner(container);
+            try {
+                const response = await fetch('/.netlify/functions/cancel-draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    showNotification('Brouillon annulé avec succès', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error('Erreur lors de l\'annulation');
+                }
+            } catch (error) {
+                showNotification('Erreur lors de l\'annulation', 'error');
+            } finally {
+                hideSpinner(container);
+            }
         }
     </script>
 </body>
