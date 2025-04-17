@@ -1230,9 +1230,9 @@
         function validateForm() {
             console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
             let isValid = true;
-            let firstErrorField = null;
+            let errorFields = [];
 
-            // Fonction pour valider un champ individuel
+            // Fonction pour valider un champ individuel et collecter les erreurs
             function validateField(fieldId, fieldName, isRequired = true) {
                 const field = document.getElementById(fieldId);
                 const value = field ? field.value.trim() : '';
@@ -1248,9 +1248,7 @@
                     if (field) {
                         field.classList.add('is-invalid');
                         field.classList.add('show-error');
-                        if (!firstErrorField) {
-                            firstErrorField = field;
-                        }
+                        errorFields.push(field);
                     }
                     if (errorDiv) {
                         errorDiv.style.display = 'block';
@@ -1268,54 +1266,13 @@
                 }
             }
 
-            // Valider chaque champ individuellement
+            // Valider tous les champs dans l'ordre
             validateField('title', 'Nom du restaurant');
             validateField('date', 'Date de visite');
             validateField('description', 'Résumé');
             validateField('address', 'Adresse');
             validateField('style', 'Style de cuisine');
             validateField('price', 'Gamme de prix');
-            validateField('foodScore', 'Note nourriture');
-            validateField('foodComment', 'Commentaire nourriture');
-            validateField('serviceScore', 'Note service');
-            validateField('serviceComment', 'Commentaire service');
-            validateField('ambianceScore', 'Note ambiance');
-            validateField('ambianceComment', 'Commentaire ambiance');
-            validateField('valueScore', 'Note rapport qualité/prix');
-            validateField('valueComment', 'Commentaire rapport qualité/prix');
-            validateField('originalityScore', 'Note originalité');
-            validateField('originalityComment', 'Commentaire originalité');
-            validateField('overallExperienceScore', 'Note expérience globale');
-            validateField('overallExperienceComment', 'Commentaire expérience globale');
-
-            // Valider l'éditeur
-            console.log('\n=== VALIDATION DE L\'ÉDITEUR ===');
-            const editorContent = editor.getHTML();
-            console.log('Contenu HTML de l\'éditeur:', editorContent);
-            
-            const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
-            console.log('L\'éditeur est vide:', isEmpty);
-            
-            const editorElement = document.querySelector('.ProseMirror');
-            if (isEmpty) {
-                console.log('⚠️ L\'éditeur est vide - ajout de l\'état d\'erreur');
-                editorElement.classList.add('editor-invalid');
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'invalid-feedback';
-                errorDiv.textContent = 'Veuillez ajouter une description détaillée';
-                editorElement.parentNode.appendChild(errorDiv);
-                if (!firstErrorField) {
-                    firstErrorField = editorElement;
-                }
-                isValid = false;
-            } else {
-                console.log('✓ L\'éditeur contient du contenu');
-                editorElement.classList.remove('editor-invalid');
-                const existingError = editorElement.parentNode.querySelector('.invalid-feedback');
-                if (existingError) {
-                    existingError.remove();
-                }
-            }
 
             // Valider l'image principale
             console.log('\n=== VALIDATION DE L\'IMAGE PRINCIPALE ===');
@@ -1333,9 +1290,7 @@
                     errorDiv.textContent = 'Veuillez ajouter une image principale';
                     mainImageZone.parentNode.appendChild(errorDiv);
                 }
-                if (!firstErrorField) {
-                    firstErrorField = mainImageZone;
-                }
+                errorFields.push(mainImageZone);
                 isValid = false;
             } else {
                 console.log('✓ Image principale présente');
@@ -1346,9 +1301,64 @@
                 }
             }
 
-            // Faire défiler jusqu'au premier champ en erreur si présent
-            if (firstErrorField) {
-                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Valider l'éditeur
+            console.log('\n=== VALIDATION DE L\'ÉDITEUR ===');
+            const editorContent = editor.getHTML();
+            console.log('Contenu HTML de l\'éditeur:', editorContent);
+            
+            const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
+            console.log('L\'éditeur est vide:', isEmpty);
+            
+            const editorElement = document.querySelector('.ProseMirror');
+            if (isEmpty) {
+                console.log('⚠️ L\'éditeur est vide - ajout de l\'état d\'erreur');
+                editorElement.classList.add('editor-invalid');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                errorDiv.textContent = 'Veuillez ajouter une description détaillée';
+                editorElement.parentNode.appendChild(errorDiv);
+                errorFields.push(editorElement);
+                isValid = false;
+            } else {
+                console.log('✓ L\'éditeur contient du contenu');
+                editorElement.classList.remove('editor-invalid');
+                const existingError = editorElement.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            // Valider les critères détaillés
+            validateField('foodScore', 'Note nourriture');
+            validateField('foodComment', 'Commentaire nourriture');
+            validateField('serviceScore', 'Note service');
+            validateField('serviceComment', 'Commentaire service');
+            validateField('ambianceScore', 'Note ambiance');
+            validateField('ambianceComment', 'Commentaire ambiance');
+            validateField('valueScore', 'Note rapport qualité/prix');
+            validateField('valueComment', 'Commentaire rapport qualité/prix');
+            validateField('originalityScore', 'Note originalité');
+            validateField('originalityComment', 'Commentaire originalité');
+            validateField('overallExperienceScore', 'Note expérience globale');
+            validateField('overallExperienceComment', 'Commentaire expérience globale');
+
+            // Trouver le premier champ en erreur dans l'ordre du DOM
+            if (errorFields.length > 0) {
+                console.log('Recherche du premier champ en erreur dans l\'ordre du DOM');
+                const allElements = document.querySelectorAll('*');
+                let firstErrorInDOM = null;
+                
+                for (const element of allElements) {
+                    if (errorFields.includes(element)) {
+                        firstErrorInDOM = element;
+                        break;
+                    }
+                }
+
+                if (firstErrorInDOM) {
+                    console.log('Défilement vers le premier champ en erreur');
+                    firstErrorInDOM.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
 
             console.log(`\n=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
