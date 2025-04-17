@@ -76,21 +76,49 @@ title: Administration - Blog Culinaire
             max-width: 1400px;
         }
         .action-button {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
+            padding: 12px 24px;
             border: none;
-            padding: 1.25rem;
-            border-radius: 10px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            font-weight: 500;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            font-size: 0.95rem;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            position: relative;
+        }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            display: none;
+            margin-right: 4px;
+        }
+        .action-button.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .action-button.loading .spinner {
+            display: inline-block;
+        }
+        .action-button.loading span {
+            opacity: 0.7;
+        }
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
         .action-button:hover {
             transform: translateY(-2px);
@@ -292,10 +320,16 @@ title: Administration - Blog Culinaire
 
             <div class="publish-btn-container">
                 <button id="publishDraft" class="action-button" style="display: none;">
-                    <i class="fas fa-upload"></i> Publier les modifications
+                    <div class="spinner"></div>
+                    <span class="button-text">
+                        <i class="fas fa-upload"></i> Publier les modifications
+                    </span>
                 </button>
                 <button id="cancelDraft" class="action-button cancel" style="display: none; margin-left: 1rem;">
-                    <i class="fas fa-times"></i> Annuler les modifications
+                    <div class="spinner"></div>
+                    <span class="button-text">
+                        <i class="fas fa-times"></i> Annuler les modifications
+                    </span>
                 </button>
             </div>
         </div>
@@ -447,11 +481,12 @@ title: Administration - Blog Culinaire
                     publishButton.addEventListener('click', async function() {
                         console.log('Bouton publication cliqué');
                         try {
+                            // Afficher le spinner
+                            this.classList.add('loading');
+                            
                             const draftData = JSON.parse(localStorage.getItem('currentDraft'));
-                            // Utiliser directement les images en base64 du brouillon
                             const images = draftData.images || [];
                             
-                            // Préparer les données pour l'envoi
                             const data = {
                                 filename: `_posts/${draftData.filename}`,
                                 title: draftData.title,
@@ -461,7 +496,6 @@ title: Administration - Blog Culinaire
 
                             console.log('Envoi des données:', data);
                             
-                            // Envoyer les données à la fonction Netlify
                             const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
                                 method: 'POST',
                                 headers: {
@@ -475,23 +509,20 @@ title: Administration - Blog Culinaire
                                 throw new Error(errorData.error || 'Erreur lors de la publication');
                             }
 
-                            // Supprimer le brouillon du localStorage après publication réussie
                             localStorage.removeItem('currentDraft');
-                            
-                            // Afficher une notification de succès
                             showNotification('Restaurant sauvegardé avec succès !', 'success');
                             
-                            // Cacher les boutons
                             publishButton.style.display = 'none';
                             cancelButton.style.display = 'none';
                             
-                            // Rafraîchir la page après 1.5 secondes
                             setTimeout(() => {
                                 window.location.reload();
                             }, 1500);
                         } catch (error) {
                             console.error('Erreur:', error);
                             showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
+                            // Cacher le spinner en cas d'erreur
+                            this.classList.remove('loading');
                         }
                     });
                     publishButton._handlerAttached = true;
@@ -504,11 +535,19 @@ title: Administration - Blog Culinaire
                 attachPublishHandler();
             }
             if (cancelButton) {
-                cancelButton.addEventListener('click', function() {
+                cancelButton.addEventListener('click', async function() {
+                    // Afficher le spinner
+                    this.classList.add('loading');
+                    
                     localStorage.removeItem('currentDraft');
+                    showNotification('Brouillon annulé avec succès');
+                    
+                    // Attendre un peu pour montrer le spinner
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
                     publishButton.style.display = 'none';
                     cancelButton.style.display = 'none';
-                    showNotification('Brouillon annulé avec succès');
+                    
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);

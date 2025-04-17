@@ -646,7 +646,7 @@
             border-radius: var(--border-radius);
             font-weight: 600;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
@@ -656,6 +656,39 @@
             background: linear-gradient(135deg, #3498db, #2980b9);
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
             position: relative;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            display: none;
+            margin-right: 4px;
+        }
+
+        .action-button.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .action-button.loading .spinner {
+            display: inline-block;
+        }
+
+        .action-button.loading span {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .action-button:hover {
@@ -676,49 +709,12 @@
 
         .action-button i {
             font-size: 1rem;
-            margin-right: 4px;
         }
 
         .button-text {
             display: flex;
             align-items: center;
             gap: 4px;
-        }
-
-        .action-button .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 0.8s ease-in-out infinite;
-            margin-right: 8px;
-            flex-shrink: 0;
-        }
-
-        .action-button.loading {
-            opacity: 0.8;
-            cursor: wait;
-            pointer-events: none;
-        }
-
-        .action-button.loading .spinner {
-            display: inline-block;
-        }
-
-        .action-button.loading .button-text {
-            opacity: 0.7;
-        }
-
-        .action-button.loading:hover {
-            transform: none;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
         }
 
         .form-range {
@@ -863,130 +859,64 @@
         // Initialiser TipTap
         let editor;
         window.addEventListener('load', () => {
-            console.log('=== INITIALISATION DE LA PAGE ===');
+            console.log('=== DÉBUT DE L\'INITIALISATION ===');
             
-            // Fonction pour initialiser la structure d'un bouton
-            function initializeButton(button) {
-                // Vérifier si le bouton n'a pas déjà été initialisé
-                if (!button.querySelector('.spinner')) {
-                    const originalContent = button.innerHTML;
-                    const spinnerDiv = document.createElement('div');
-                    spinnerDiv.className = 'spinner';
-                    const textSpan = document.createElement('span');
-                    textSpan.className = 'button-text';
-                    textSpan.innerHTML = originalContent;
-                    button.innerHTML = '';
-                    button.appendChild(spinnerDiv);
-                    button.appendChild(textSpan);
-                }
-            }
-
-            // Initialiser tous les boutons d'action
-            document.querySelectorAll('.action-button').forEach(initializeButton);
-
-            // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
+            // Vérifier la présence du bouton et du spinner
             const saveButton = document.getElementById('saveButton');
-            console.log('Étape 2: Recherche du bouton de sauvegarde');
+            console.log('1. Recherche du bouton:', saveButton ? 'trouvé' : 'non trouvé');
             
             if (saveButton) {
-                console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
+                const spinner = saveButton.querySelector('.spinner');
+                console.log('2. Recherche du spinner dans le bouton:', spinner ? 'trouvé' : 'non trouvé');
+                console.log('3. Structure HTML du bouton:', saveButton.innerHTML);
+                
+                // Vérifier les styles
+                const spinnerStyles = spinner ? window.getComputedStyle(spinner) : null;
+                if (spinnerStyles) {
+                    console.log('4. Styles du spinner:', {
+                        display: spinnerStyles.display,
+                        width: spinnerStyles.width,
+                        height: spinnerStyles.height,
+                        border: spinnerStyles.border,
+                        animation: spinnerStyles.animation
+                    });
+                }
                 
                 saveButton.addEventListener('click', async function(e) {
-                    console.log('Étape 4: Clic sur le bouton détecté');
+                    console.log('5. Clic sur le bouton détecté');
                     e.preventDefault();
                     
-                    // Afficher l'état de chargement
-                    showLoadingState(this);
+                    console.log('6. Ajout de la classe loading');
+                    this.classList.add('loading');
+                    
+                    // Vérifier l'état après l'ajout de la classe
+                    const spinnerAfterLoading = this.querySelector('.spinner');
+                    const spinnerStylesAfterLoading = spinnerAfterLoading ? window.getComputedStyle(spinnerAfterLoading) : null;
+                    console.log('7. État du spinner après loading:', {
+                        spinnerExists: !!spinnerAfterLoading,
+                        display: spinnerStylesAfterLoading ? spinnerStylesAfterLoading.display : 'N/A',
+                        buttonClasses: this.className
+                    });
+                    
+                    console.log('8. Début du délai de 2 secondes');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    console.log('9. Fin du délai');
                     
                     const form = document.getElementById('restaurantForm');
+                    console.log('10. Recherche du formulaire:', form ? 'trouvé' : 'non trouvé');
+                    
                     if (form) {
-                        console.log('Étape 5: Formulaire trouvé, déclenchement de la soumission');
+                        console.log('11. Déclenchement de l\'événement submit');
                         form.dispatchEvent(new Event('submit'));
                     }
                     
-                    // Simuler un délai minimum pour le spinner (au moins 500ms)
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    console.log('12. Fin du gestionnaire de clic');
                 });
+                
+                console.log('13. Gestionnaire de clic ajouté avec succès');
             }
-
-            // Ajouter un gestionnaire d'événements sur le formulaire
-            const form = document.getElementById('restaurantForm');
-            console.log('Étape 9: Recherche du formulaire pour le gestionnaire de soumission');
             
-            if (form) {
-                console.log('Étape 10: Formulaire trouvé, ajout du gestionnaire de soumission');
-                form.addEventListener('submit', async function(e) {
-                    console.log('Étape 11: Événement de soumission du formulaire déclenché');
-                    e.preventDefault();
-                    console.log('Étape 12: Début de la validation');
-                    
-                    if (!validateForm()) {
-                        console.log('Étape 13: Validation échouée');
-                        return;
-                    }
-                    
-                    console.log('Étape 14: Validation réussie, traitement du formulaire');
-
-                    try {
-                        // Générer le nom du fichier à partir du titre
-                        const title = document.getElementById('title').value;
-                        const filename = title.toLowerCase()
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .replace(/[^a-z0-9]/g, '-')
-                            .replace(/-+/g, '-')
-                            .replace(/^-|-$/g, '');
-                        
-                        const date = new Date().toISOString().split('T')[0];
-                        const filePath = `${date}-${filename}.md`;
-
-                        // Créer un objet pour stocker les données du brouillon
-                        const draftData = {
-                            filename: filePath,
-                            title: title,
-                            content: generateMarkdown(),
-                            images: []
-                        };
-
-                        // Sauvegarder les images localement en base64
-                        if (mainImageFile) {
-                            const mainImageBase64 = await fileToBase64(mainImageFile);
-                            draftData.images.push({
-                                name: mainImageFile.name,
-                                data: mainImageBase64
-                            });
-                        }
-
-                        for (let i = 0; i < galleryImageFiles.length; i++) {
-                            const file = galleryImageFiles[i];
-                            const galleryBase64 = await fileToBase64(file);
-                            draftData.images.push({
-                                name: file.name,
-                                data: galleryBase64
-                            });
-                        }
-
-                        // Sauvegarder le brouillon dans le localStorage
-                        localStorage.setItem('currentDraft', JSON.stringify(draftData));
-
-                        showNotification('Brouillon enregistré avec succès !', 'success');
-                        
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 1500);
-
-                    } catch (error) {
-                        console.error('Erreur:', error);
-                        showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
-                        
-                        // En cas d'erreur, on cache le spinner
-                        const saveButton = document.getElementById('saveButton');
-                        if (saveButton) hideLoadingState(saveButton);
-                    }
-                });
-            } else {
-                console.error('Formulaire non trouvé !');
-            }
+            console.log('=== FIN DE L\'INITIALISATION ===');
 
             editor = new Editor({
                 element: document.querySelector('#editor'),
@@ -1076,6 +1006,33 @@
 
             // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
+        });
+
+        // Ajouter un observateur de mutations pour détecter les changements de classes
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const button = mutation.target;
+                    console.log('Mutation détectée:', {
+                        element: button.tagName,
+                        id: button.id,
+                        newClasses: button.className,
+                        hasLoadingClass: button.classList.contains('loading'),
+                        spinnerDisplay: button.querySelector('.spinner')?.style.display
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('load', () => {
+            const saveButton = document.getElementById('saveButton');
+            if (saveButton) {
+                observer.observe(saveButton, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+                console.log('Observateur de mutations configuré pour le bouton');
+            }
         });
 
         async function searchAddress(query) {
@@ -1613,26 +1570,6 @@ ${editorContent}`;
             container.innerHTML = '';
             galleryImageFiles.forEach(file => createImagePreview(file, container));
         }
-
-        function showLoadingState(button) {
-            const buttonText = button.querySelector('.button-text');
-            const spinner = button.querySelector('.spinner');
-            
-            button.classList.add('loading');
-            button.disabled = true;
-            if (spinner) spinner.style.display = 'inline-block';
-            if (buttonText) buttonText.style.opacity = '0.7';
-        }
-
-        function hideLoadingState(button) {
-            const buttonText = button.querySelector('.button-text');
-            const spinner = button.querySelector('.spinner');
-            
-            button.classList.remove('loading');
-            button.disabled = false;
-            if (spinner) spinner.style.display = 'none';
-            if (buttonText) buttonText.style.opacity = '1';
-        }
     </script>
 </head>
 <body>
@@ -1896,15 +1833,12 @@ ${editorContent}`;
                     <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
                         <button type="submit" class="action-button" id="saveButton">
                             <div class="spinner"></div>
-                            <span class="button-text">
-                                <i class="fas fa-save"></i> Enregistrer un brouillon
-                            </span>
+                            <i class="fas fa-save"></i>
+                            <span>Enregistrer un brouillon</span>
                         </button>
                         <a href="index.html" class="action-button cancel">
-                            <div class="spinner"></div>
-                            <span class="button-text">
-                                <i class="fas fa-times"></i> Annuler
-                            </span>
+                            <i class="fas fa-times"></i>
+                            <span>Annuler</span>
                         </a>
                     </div>
                 </div>
