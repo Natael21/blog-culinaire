@@ -561,8 +561,8 @@
 
         .ProseMirror.editor-invalid {
             border-color: var(--secondary-color) !important;
-            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
             background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
         }
 
         .upload-zone.is-invalid {
@@ -617,14 +617,14 @@
 
         .ProseMirror.show-error.editor-invalid {
             border-color: var(--secondary-color) !important;
-            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
             background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
         }
 
-        .upload-zone.show-error.is-invalid {
+        .upload-zone.show-error {
             border-color: var(--secondary-color) !important;
-            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
             background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
         }
 
         .action-button {
@@ -1160,7 +1160,6 @@
             if (!editorContent) {
                 editorElement.classList.add('show-error', 'editor-invalid');
                 isValid = false;
-                // Afficher un message d'erreur sous l'éditeur
                 let errorMessage = document.querySelector('#editor-error');
                 if (!errorMessage) {
                     errorMessage = document.createElement('div');
@@ -1178,12 +1177,28 @@
                 }
             }
 
-            const mainImage = document.getElementById('mainImage');
+            // Valider l'image principale
+            const mainImageZone = document.getElementById('mainImageZone');
             if (!mainImageFile) {
-                mainImage.classList.add('show-error', 'is-invalid');
+                mainImageZone.classList.add('show-error');
+                let errorMessage = document.querySelector('#mainImage-error');
+                if (!errorMessage) {
+                    errorMessage = document.createElement('div');
+                    errorMessage.id = 'mainImage-error';
+                    errorMessage.className = 'invalid-feedback';
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Veuillez ajouter une image principale';
+                    mainImageZone.parentNode.appendChild(errorMessage);
+                }
                 isValid = false;
+                // Faire défiler jusqu'à la zone d'image si ce n'est pas valide
+                mainImageZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
-                mainImage.classList.remove('show-error', 'is-invalid');
+                mainImageZone.classList.remove('show-error');
+                const errorMessage = document.querySelector('#mainImage-error');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
             }
 
             return isValid;
