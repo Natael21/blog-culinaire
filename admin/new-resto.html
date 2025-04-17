@@ -846,7 +846,53 @@
                     }
 
                     try {
-                        // ... rest of the submit handler ...
+                        // Générer le nom du fichier à partir du titre
+                        const title = document.getElementById('title').value;
+                        const filename = title.toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[^a-z0-9]/g, '-')
+                            .replace(/-+/g, '-')
+                            .replace(/^-|-$/g, '');
+                        
+                        const date = new Date().toISOString().split('T')[0];
+                        const filePath = `${date}-${filename}.md`;
+
+                        // Créer un objet pour stocker les données du brouillon
+                        const draftData = {
+                            filename: filePath,
+                            title: title,
+                            content: generateMarkdown(),
+                            images: []
+                        };
+
+                        // Sauvegarder les images localement en base64
+                        if (mainImageFile) {
+                            const mainImageBase64 = await fileToBase64(mainImageFile);
+                            draftData.images.push({
+                                name: mainImageFile.name,
+                                data: mainImageBase64
+                            });
+                        }
+
+                        for (let i = 0; i < galleryImageFiles.length; i++) {
+                            const file = galleryImageFiles[i];
+                            const galleryBase64 = await fileToBase64(file);
+                            draftData.images.push({
+                                name: file.name,
+                                data: galleryBase64
+                            });
+                        }
+
+                        // Sauvegarder le brouillon dans le localStorage
+                        localStorage.setItem('currentDraft', JSON.stringify(draftData));
+
+                        showNotification('Brouillon enregistré avec succès !', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+
                     } catch (error) {
                         console.error('Erreur:', error);
                         showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
