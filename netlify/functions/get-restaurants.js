@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 exports.handler = async function(event, context) {
     console.log('Début de la fonction get-restaurants');
     try {
@@ -13,7 +11,7 @@ exports.handler = async function(event, context) {
         console.log('Configuration GitHub:', { owner, repo, branch, path });
 
         // Récupérer la liste des fichiers dans le dossier _posts
-        const response = await axios.get(
+        const response = await fetch(
             `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
             {
                 headers: {
@@ -23,10 +21,15 @@ exports.handler = async function(event, context) {
             }
         );
 
-        console.log('Réponse GitHub:', response.data);
+        if (!response.ok) {
+            throw new Error(`Erreur GitHub: ${response.status} ${response.statusText}`);
+        }
+
+        const files = await response.json();
+        console.log('Réponse GitHub:', files);
 
         // Filtrer pour ne garder que les fichiers .md
-        const mdFiles = response.data.filter(file => file.name.endsWith('.md'));
+        const mdFiles = files.filter(file => file.name.endsWith('.md'));
         console.log('Fichiers .md trouvés:', mdFiles);
 
         // Lire chaque fichier et extraire les métadonnées
@@ -35,7 +38,7 @@ exports.handler = async function(event, context) {
                 console.log(`Traitement du fichier: ${file.name}`);
                 
                 // Récupérer le contenu du fichier
-                const contentResponse = await axios.get(
+                const contentResponse = await fetch(
                     `https://api.github.com/repos/${owner}/${repo}/contents/${path}/${file.name}`,
                     {
                         headers: {
@@ -45,7 +48,11 @@ exports.handler = async function(event, context) {
                     }
                 );
 
-                const content = contentResponse.data;
+                if (!contentResponse.ok) {
+                    throw new Error(`Erreur lors de la lecture de ${file.name}: ${contentResponse.status} ${contentResponse.statusText}`);
+                }
+
+                const content = await contentResponse.text();
                 console.log('Contenu du fichier:', content.substring(0, 200) + '...');
 
                 // Extraire les métadonnées du frontmatter
