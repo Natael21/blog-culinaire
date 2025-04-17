@@ -655,6 +655,7 @@
             font-size: 0.95rem;
             background: linear-gradient(135deg, #3498db, #2980b9);
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            position: relative;
         }
 
         .action-button:hover {
@@ -675,6 +676,40 @@
 
         .action-button i {
             font-size: 1rem;
+        }
+
+        .action-button .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        .action-button.loading {
+            opacity: 0.8;
+            cursor: wait;
+        }
+
+        .action-button.loading:hover {
+            transform: none;
+        }
+
+        .action-button.loading .spinner {
+            display: inline-block;
+        }
+
+        .action-button.loading .button-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .form-range {
@@ -828,24 +863,36 @@
             
             if (saveButton) {
                 console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
-                saveButton.addEventListener('click', function(e) {
+                
+                // Ajouter le spinner au bouton
+                const spinnerDiv = document.createElement('div');
+                spinnerDiv.className = 'spinner';
+                const textSpan = document.createElement('span');
+                textSpan.className = 'button-text';
+                textSpan.innerHTML = saveButton.innerHTML;
+                saveButton.innerHTML = '';
+                saveButton.appendChild(spinnerDiv);
+                saveButton.appendChild(textSpan);
+                
+                saveButton.addEventListener('click', async function(e) {
                     console.log('Étape 4: Clic sur le bouton détecté');
                     e.preventDefault();
-                    console.log('Étape 5: Comportement par défaut empêché');
+                    
+                    // Afficher l'état de chargement
+                    showLoadingState(this);
                     
                     const form = document.getElementById('restaurantForm');
-                    console.log('Étape 6: Recherche du formulaire');
-                    
                     if (form) {
-                        console.log('Étape 7: Formulaire trouvé, déclenchement de la soumission');
+                        console.log('Étape 5: Formulaire trouvé, déclenchement de la soumission');
                         form.dispatchEvent(new Event('submit'));
-                        console.log('Étape 8: Événement de soumission déclenché');
-                    } else {
-                        console.error('ERREUR: Formulaire non trouvé');
                     }
+                    
+                    // Simuler un délai minimum pour le spinner (au moins 500ms)
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Cacher l'état de chargement
+                    hideLoadingState(this);
                 });
-            } else {
-                console.error('ERREUR: Bouton de sauvegarde non trouvé');
             }
 
             // Ajouter un gestionnaire d'événements sur le formulaire
@@ -917,6 +964,10 @@
                     } catch (error) {
                         console.error('Erreur:', error);
                         showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
+                        
+                        // En cas d'erreur, on cache le spinner
+                        const saveButton = document.getElementById('saveButton');
+                        if (saveButton) hideLoadingState(saveButton);
                     }
                 });
             } else {
@@ -1547,6 +1598,26 @@ ${editorContent}`;
             const container = document.getElementById('galleryPreview');
             container.innerHTML = '';
             galleryImageFiles.forEach(file => createImagePreview(file, container));
+        }
+
+        function showLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.add('loading');
+            button.disabled = true;
+            if (spinner) spinner.style.display = 'inline-block';
+            if (buttonText) buttonText.style.opacity = '0.7';
+        }
+
+        function hideLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.remove('loading');
+            button.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+            if (buttonText) buttonText.style.opacity = '1';
         }
     </script>
 </head>
