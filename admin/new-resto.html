@@ -1201,126 +1201,92 @@
             console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
             let isValid = true;
 
-            // Vérifier les associations label-input
-            console.log('=== VÉRIFICATION DES LABELS ===');
-            document.querySelectorAll('label[for]').forEach(label => {
-                const forAttribute = label.getAttribute('for');
-                const associatedElement = document.getElementById(forAttribute);
-                console.log(`Label "${label.textContent.trim()}":`);
-                console.log(`- attribut for: ${forAttribute}`);
-                console.log(`- élément associé trouvé: ${associatedElement ? 'Oui' : 'Non'}`);
-                if (!associatedElement) {
-                    console.error(`⚠️ Label sans élément associé: "${label.textContent.trim()}"`);
-                }
-            });
+            // Fonction pour valider un champ individuel
+            function validateField(fieldId, fieldName, isRequired = true) {
+                const field = document.getElementById(fieldId);
+                const value = field ? field.value.trim() : '';
+                const wrapper = field ? field.closest('.input-wrapper') : null;
+                const errorDiv = wrapper ? wrapper.querySelector('.invalid-feedback') : null;
 
-            // Vérifier les champs sans label
-            console.log('\n=== VÉRIFICATION DES CHAMPS SANS LABEL ===');
-            document.querySelectorAll('input, select, textarea').forEach(field => {
-                const id = field.id;
-                const name = field.name;
-                const type = field.type;
-                const hasLabel = document.querySelector(`label[for="${id}"]`);
-                const isNested = field.closest('label');
-                console.log(`Champ ${type}:`);
-                console.log(`- id: ${id}`);
-                console.log(`- name: ${name}`);
-                console.log(`- a un label associé: ${hasLabel ? 'Oui' : 'Non'}`);
-                console.log(`- est imbriqué dans un label: ${isNested ? 'Oui' : 'Non'}`);
-                if (!hasLabel && !isNested) {
-                    console.error(`⚠️ Champ sans label: type=${type}, id=${id}, name=${name}`);
-                }
-            });
+                console.log(`\nValidation du champ ${fieldName}:`);
+                console.log(`- valeur: ${value}`);
+                console.log(`- requis: ${isRequired}`);
 
-            // Vérifier l'attribut autocomplete
-            console.log('\n=== VÉRIFICATION DE L\'AUTOCOMPLETE ===');
-            const autocompleteMappings = {
-                'title': 'organization',
-                'date': 'off',
-                'description': 'off',
-                'address': 'street-address',
-                'style': 'off',
-                'price': 'off'
-            };
-            
-            Object.entries(autocompleteMappings).forEach(([id, autocompleteValue]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    console.log(`Champ ${id}:`);
-                    console.log(`- autocomplete actuel: ${element.getAttribute('autocomplete')}`);
-                    console.log(`- autocomplete suggéré: ${autocompleteValue}`);
-                    // Ajouter l'attribut autocomplete
-                    element.setAttribute('autocomplete', autocompleteValue);
-                }
-            });
-
-            // Le reste de la validation existante
-            const requiredFields = [
-                { id: 'title', message: 'Veuillez entrer le nom du restaurant' },
-                { id: 'date', message: 'Veuillez sélectionner la date de visite' },
-                { id: 'description', message: 'Veuillez entrer un résumé' },
-                { id: 'address', message: 'Veuillez entrer une adresse' },
-                { id: 'style', message: 'Veuillez sélectionner un style de cuisine' },
-                { id: 'price', message: 'Veuillez sélectionner une gamme de prix' },
-                { id: 'foodScore', message: 'Veuillez noter la nourriture' },
-                { id: 'foodComment', message: 'Veuillez commenter la nourriture' },
-                { id: 'serviceScore', message: 'Veuillez noter le service' },
-                { id: 'serviceComment', message: 'Veuillez commenter le service' },
-                { id: 'ambianceScore', message: 'Veuillez noter l\'ambiance' },
-                { id: 'ambianceComment', message: 'Veuillez commenter l\'ambiance' },
-                { id: 'valueScore', message: 'Veuillez noter le rapport qualité/prix' },
-                { id: 'valueComment', message: 'Veuillez commenter le rapport qualité/prix' },
-                { id: 'originalityScore', message: 'Veuillez noter l\'originalité' },
-                { id: 'originalityComment', message: 'Veuillez commenter l\'originalité' },
-                { id: 'overallExperienceScore', message: 'Veuillez noter l\'expérience globale' },
-                { id: 'overallExperienceComment', message: 'Veuillez commenter l\'expérience globale' }
-            ];
-
-            // Réinitialiser tous les états d'erreur
-            document.querySelectorAll('.is-invalid').forEach(el => {
-                el.classList.remove('is-invalid');
-            });
-            document.querySelectorAll('.invalid-feedback').forEach(el => {
-                el.remove();
-            });
-
-            // Valider chaque champ requis
-            console.log('\n=== VALIDATION DES CHAMPS REQUIS ===');
-            requiredFields.forEach(field => {
-                const element = document.getElementById(field.id);
-                console.log(`Validation du champ ${field.id}:`);
-                if (element) {
-                    console.log(`- valeur: ${element.value}`);
-                    console.log(`- requis: ${element.required}`);
-                    if (!element.value.trim()) {
-                        element.classList.add('is-invalid');
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'invalid-feedback';
-                        errorDiv.textContent = field.message;
-                        element.parentNode.insertBefore(errorDiv, element.nextSibling);
-                        console.log(`⚠️ Champ invalide: ${field.id}`);
-                        isValid = false;
+                if (isRequired && !value) {
+                    console.log(`⚠️ Champ ${fieldName} vide - ajout de l'état d'erreur`);
+                    if (field) {
+                        field.classList.add('is-invalid');
+                        field.classList.add('show-error');
                     }
+                    if (errorDiv) {
+                        errorDiv.style.display = 'block';
+                    }
+                    isValid = false;
                 } else {
-                    console.error(`⚠️ Champ non trouvé: ${field.id}`);
+                    console.log(`✓ Champ ${fieldName} valide`);
+                    if (field) {
+                        field.classList.remove('is-invalid');
+                        field.classList.remove('show-error');
+                    }
+                    if (errorDiv) {
+                        errorDiv.style.display = 'none';
+                    }
                 }
-            });
+            }
+
+            // Valider chaque champ individuellement
+            validateField('title', 'Nom du restaurant');
+            validateField('date', 'Date de visite');
+            validateField('description', 'Résumé');
+            validateField('address', 'Adresse');
+            validateField('style', 'Style de cuisine');
+            validateField('price', 'Gamme de prix');
+            validateField('foodScore', 'Note nourriture');
+            validateField('foodComment', 'Commentaire nourriture');
+            validateField('serviceScore', 'Note service');
+            validateField('serviceComment', 'Commentaire service');
+            validateField('ambianceScore', 'Note ambiance');
+            validateField('ambianceComment', 'Commentaire ambiance');
+            validateField('valueScore', 'Note rapport qualité/prix');
+            validateField('valueComment', 'Commentaire rapport qualité/prix');
+            validateField('originalityScore', 'Note originalité');
+            validateField('originalityComment', 'Commentaire originalité');
+            validateField('overallExperienceScore', 'Note expérience globale');
+            validateField('overallExperienceComment', 'Commentaire expérience globale');
 
             // Valider l'éditeur
-            const editorContent = editor.getHTML().replace(/<[^>]*>/g, '').trim();
+            console.log('\n=== VALIDATION DE L\'ÉDITEUR ===');
+            const editorContent = editor.getHTML();
+            console.log('Contenu HTML de l\'éditeur:', editorContent);
+            
+            const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
+            console.log('L\'éditeur est vide:', isEmpty);
+            
             const editorElement = document.querySelector('.ProseMirror');
-            if (!editorContent) {
+            if (isEmpty) {
+                console.log('⚠️ L\'éditeur est vide - ajout de l\'état d\'erreur');
                 editorElement.classList.add('editor-invalid');
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'invalid-feedback';
                 errorDiv.textContent = 'Veuillez ajouter une description détaillée';
                 editorElement.parentNode.appendChild(errorDiv);
                 isValid = false;
+            } else {
+                console.log('✓ L\'éditeur contient du contenu');
+                editorElement.classList.remove('editor-invalid');
+                const existingError = editorElement.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
             }
 
             // Valider l'image principale
+            console.log('\n=== VALIDATION DE L\'IMAGE PRINCIPALE ===');
             const mainImageZone = document.getElementById('mainImageZone');
+            console.log('Image principale présente:', !!mainImageFile);
+            
             if (!mainImageFile) {
+                console.log('⚠️ Pas d\'image principale - ajout de l\'état d\'erreur');
                 mainImageZone.classList.add('show-error');
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'invalid-feedback';
@@ -1329,9 +1295,16 @@
                 mainImageZone.parentNode.appendChild(errorDiv);
                 mainImageZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 isValid = false;
+            } else {
+                console.log('✓ Image principale présente');
+                mainImageZone.classList.remove('show-error');
+                const existingError = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
             }
 
-            console.log(`=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
+            console.log(`\n=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
             return isValid;
         }
 
