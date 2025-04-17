@@ -898,19 +898,63 @@
                         buttonClasses: this.className
                     });
                     
-                    console.log('8. Début du délai de 2 secondes');
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    console.log('9. Fin du délai');
-                    
-                    const form = document.getElementById('restaurantForm');
-                    console.log('10. Recherche du formulaire:', form ? 'trouvé' : 'non trouvé');
-                    
-                    if (form) {
-                        console.log('11. Déclenchement de l\'événement submit');
-                        form.dispatchEvent(new Event('submit'));
+                    try {
+                        // Valider le formulaire
+                        if (!validateForm()) {
+                            console.log('Formulaire invalide, arrêt de la soumission');
+                            this.classList.remove('loading');
+                            return;
+                        }
+
+                        // Préparer les données du formulaire
+                        const formData = {
+                            title: document.getElementById('title').value,
+                            date: document.getElementById('date').value,
+                            description: document.getElementById('description').value,
+                            address: document.getElementById('address').value,
+                            style: document.getElementById('style').value,
+                            price: document.getElementById('price').value,
+                            content: editor.getHTML(),
+                            images: []
+                        };
+
+                        // Ajouter l'image principale si elle existe
+                        if (mainImageFile) {
+                            const mainImageBase64 = await fileToBase64(mainImageFile);
+                            formData.images.push({
+                                name: mainImageFile.name,
+                                data: mainImageBase64,
+                                isMain: true
+                            });
+                        }
+
+                        // Ajouter les images de la galerie
+                        for (const file of galleryImageFiles) {
+                            const imageBase64 = await fileToBase64(file);
+                            formData.images.push({
+                                name: file.name,
+                                data: imageBase64,
+                                isMain: false
+                            });
+                        }
+
+                        // Sauvegarder dans le localStorage
+                        localStorage.setItem('currentDraft', JSON.stringify(formData));
+                        console.log('Brouillon sauvegardé dans le localStorage');
+
+                        // Afficher la notification de succès
+                        showNotification('Brouillon sauvegardé avec succès !', 'success');
+
+                        // Attendre un peu pour que l'utilisateur voie la notification
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+
+                        // Rediriger vers la page admin
+                        window.location.href = 'index.html';
+                    } catch (error) {
+                        console.error('Erreur lors de la sauvegarde:', error);
+                        showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+                        this.classList.remove('loading');
                     }
-                    
-                    console.log('12. Fin du gestionnaire de clic');
                 });
                 
                 console.log('13. Gestionnaire de clic ajouté avec succès');
