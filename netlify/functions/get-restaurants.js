@@ -4,22 +4,15 @@ const path = require('path');
 exports.handler = async function(event, context) {
     console.log('Début de la fonction get-restaurants');
     try {
-        // Chemin vers le dossier des restaurants (à la racine du projet)
-        const currentDir = process.cwd();
-        console.log('Répertoire courant:', currentDir);
-        
-        // Remonter d'un niveau pour atteindre la racine du projet
-        const rootDir = path.join(currentDir, '..');
-        console.log('Racine du projet:', rootDir);
-        
-        const restaurantsDir = path.join(rootDir, '_posts');
-        console.log('Chemin complet du dossier _posts:', restaurantsDir);
+        // Chemin vers le dossier _posts (à la racine du projet)
+        const restaurantsDir = path.join(process.cwd(), '..', '..', '_posts');
+        console.log('Chemin du dossier _posts:', restaurantsDir);
         
         // Vérifier si le dossier existe
         if (!fs.existsSync(restaurantsDir)) {
             console.log('Le dossier _posts n\'existe pas');
-            console.log('Contenu du répertoire courant:', fs.readdirSync(currentDir));
-            console.log('Contenu de la racine:', fs.readdirSync(rootDir));
+            console.log('Répertoire courant:', process.cwd());
+            console.log('Contenu du répertoire courant:', fs.readdirSync(process.cwd()));
             return {
                 statusCode: 200,
                 body: JSON.stringify([])
@@ -42,7 +35,7 @@ exports.handler = async function(event, context) {
                 console.log('Chemin complet du fichier:', filePath);
                 
                 const content = fs.readFileSync(filePath, 'utf8');
-                console.log('Contenu du fichier:', content.substring(0, 200) + '...'); // Afficher les 200 premiers caractères
+                console.log('Contenu du fichier:', content.substring(0, 200) + '...');
                 
                 // Extraire les métadonnées du frontmatter
                 const frontmatterMatch = content.match(/---\n([\s\S]*?)\n---/);
