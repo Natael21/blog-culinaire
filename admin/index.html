@@ -759,53 +759,47 @@ title: Administration - Blog Culinaire
 
         // Modifier la fonction cancelDraft
         async function cancelDraft() {
-            // Créer et afficher le modal de confirmation
-            const modal = document.createElement('div');
-            modal.className = 'confirmation-modal';
-            modal.innerHTML = `
-                <div class="confirmation-content">
-                    <h3 class="confirmation-title">Confirmer l'annulation</h3>
-                    <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non publiées seront perdues.</p>
-                    <div class="confirmation-buttons">
-                        <button class="confirmation-button confirm">Confirmer</button>
-                        <button class="confirmation-button cancel">Annuler</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-
-            // Gérer les clics sur les boutons
-            const confirmButton = modal.querySelector('.confirmation-button.confirm');
-            const cancelButton = modal.querySelector('.confirmation-button.cancel');
-
             return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Confirmer</button>
+                            <button class="confirmation-button cancel">Annuler</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
                 confirmButton.onclick = async () => {
-                    modal.remove();
-                    const container = document.querySelector('.publish-btn-container');
-                    showSpinner(container);
                     try {
-                        const response = await fetch('/.netlify/functions/cancel-draft', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                        });
+                        // Supprimer le brouillon du localStorage
+                        localStorage.removeItem('currentDraft');
                         
-                        if (response.ok) {
-                            showNotification('Brouillon annulé avec succès', 'success');
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            throw new Error('Erreur lors de l\'annulation');
-                        }
+                        // Supprimer le modal
+                        modal.remove();
+                        
+                        // Afficher une notification de succès
+                        showNotification('Les modifications ont été annulées avec succès', 'success');
+                        
+                        // Rafraîchir la page après un court délai
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                        
+                        resolve(true);
                     } catch (error) {
-                        showNotification('Erreur lors de l\'annulation', 'error');
-                    } finally {
-                        hideSpinner(container);
+                        console.error('Erreur lors de l\'annulation:', error);
+                        showNotification('Erreur lors de l\'annulation des modifications', 'error');
+                        resolve(false);
                     }
-                    resolve(true);
                 };
 
                 cancelButton.onclick = () => {
