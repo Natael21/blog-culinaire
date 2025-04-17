@@ -77,7 +77,7 @@ exports.handler = async function(event, context) {
                 console.log(`Métadonnées extraites de ${file.name}:`, metadata);
 
                 // Déterminer l'état (draft ou ready)
-                const state = file.name.startsWith('draft-') ? 'draft' : 'ready';
+                const state = metadata.state || 'ready';
                 console.log(`État du fichier ${file.name}:`, state);
 
                 const restaurant = {
@@ -89,7 +89,7 @@ exports.handler = async function(event, context) {
                     address: metadata.address || '',
                     style: metadata.style || '',
                     price: metadata.price || '',
-                    rating: metadata.rating || '',
+                    rating: metadata.note || '',
                     content: content.split('---')[2].trim()
                 };
 
