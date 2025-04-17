@@ -759,6 +759,35 @@
                 opacity: 1;
             }
         }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-control.show-error.is-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .form-control.show-error.is-invalid ~ .invalid-feedback {
+            display: block !important;
+        }
+
+        .upload-zone.show-error {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .form-range.show-error {
+            background-color: #fff5f5 !important;
+        }
+
+        .form-range.show-error::-webkit-slider-thumb {
+            background-color: var(--secondary-color) !important;
+        }
     </style>
 
     <script>
@@ -1443,56 +1472,66 @@ ${editorContent}`;
                     <h2 class="form-section-title">Informations de base</h2>
                     <div class="form-group">
                         <label for="title">Nom du restaurant</label>
-                        <input type="text" id="title" name="title" class="form-control" required>
-                        <i class="fas fa-exclamation-circle error-icon"></i>
-                        <div class="invalid-feedback">Veuillez entrer le nom du restaurant</div>
+                        <div class="input-wrapper">
+                            <input type="text" id="title" name="title" class="form-control" required>
+                            <div class="invalid-feedback">Veuillez entrer le nom du restaurant</div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="date">Date de visite</label>
-                        <input type="date" id="date" name="date" class="form-control" required>
-                        <i class="fas fa-exclamation-circle error-icon"></i>
-                        <div class="invalid-feedback">Veuillez sélectionner la date de visite</div>
+                        <div class="input-wrapper">
+                            <input type="date" id="date" name="date" class="form-control" required>
+                            <div class="invalid-feedback">Veuillez sélectionner la date de visite</div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Résumé</label>
-                        <textarea id="description" name="description" class="form-control" maxlength="150" required></textarea>
-                        <i class="fas fa-exclamation-circle error-icon"></i>
-                        <div class="invalid-feedback">Veuillez entrer un résumé</div>
+                        <div class="input-wrapper">
+                            <textarea id="description" name="description" class="form-control" maxlength="150" required></textarea>
+                            <div class="invalid-feedback">Veuillez entrer un résumé</div>
+                        </div>
                         <small class="text-muted">Maximum 150 caractères</small>
                     </div>
 
                     <div class="form-group">
                         <label for="address">Adresse</label>
-                        <input type="text" id="address" name="address" class="form-control" required placeholder="Commencez à taper une adresse...">
-                        <i class="fas fa-exclamation-circle error-icon"></i>
-                        <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
+                        <div class="input-wrapper">
+                            <input type="text" id="address" name="address" class="form-control" required placeholder="Commencez à taper une adresse...">
+                            <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="style">Style de cuisine</label>
-                        <select class="form-control" id="style" name="style" required>
-                            <option value="">Sélectionner un style</option>
-                            <option value="Asiatique">Asiatique</option>
-                            <option value="Américain">Américain</option>
-                            <option value="Moyen-Orient">Moyen-Orient</option>
-                            <option value="Mexicain & Latino">Mexicain & Latino</option>
-                            <option value="Bistro & Café">Bistro & Café</option>
-                            <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
-                            <option value="Italien">Italien</option>
-                            <option value="Indien & Épicé">Indien & Épicé</option>
-                        </select>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="style" name="style" required>
+                                <option value="">Sélectionner un style</option>
+                                <option value="Asiatique">Asiatique</option>
+                                <option value="Américain">Américain</option>
+                                <option value="Moyen-Orient">Moyen-Orient</option>
+                                <option value="Mexicain & Latino">Mexicain & Latino</option>
+                                <option value="Bistro & Café">Bistro & Café</option>
+                                <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
+                                <option value="Italien">Italien</option>
+                                <option value="Indien & Épicé">Indien & Épicé</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner un style de cuisine</div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="price">Gamme de prix</label>
-                        <select class="form-control" id="price" name="price" required>
-                            <option value="">Sélectionner une gamme de prix</option>
-                            <option value="$ (0-20$)">$ (0-20$)</option>
-                            <option value="$$ (20-40$)">$$ (20-40$)</option>
-                            <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
-                        </select>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="price" name="price" required>
+                                <option value="">Sélectionner une gamme de prix</option>
+                                <option value="$ (0-20$)">$ (0-20$)</option>
+                                <option value="$$ (20-40$)">$$ (20-40$)</option>
+                                <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner une gamme de prix</div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -1562,9 +1601,13 @@ ${editorContent}`;
                                         <input type="range" class="form-range" id="foodScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
+                                    <div class="invalid-feedback">Veuillez noter la nourriture</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <textarea class="form-control" id="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control" id="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
+                                        <div class="invalid-feedback">Veuillez commenter la nourriture</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1578,9 +1621,13 @@ ${editorContent}`;
                                         <input type="range" class="form-range" id="serviceScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
+                                    <div class="invalid-feedback">Veuillez noter le service</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <textarea class="form-control" id="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control" id="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
+                                        <div class="invalid-feedback">Veuillez commenter le service</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1594,9 +1641,13 @@ ${editorContent}`;
                                         <input type="range" class="form-range" id="ambianceScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
+                                    <div class="invalid-feedback">Veuillez noter l'ambiance</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <textarea class="form-control" id="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control" id="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
+                                        <div class="invalid-feedback">Veuillez commenter l'ambiance</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1610,9 +1661,13 @@ ${editorContent}`;
                                         <input type="range" class="form-range" id="valueScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
+                                    <div class="invalid-feedback">Veuillez noter le rapport qualité/prix</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <textarea class="form-control" id="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control" id="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
+                                        <div class="invalid-feedback">Veuillez commenter le rapport qualité/prix</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1626,9 +1681,13 @@ ${editorContent}`;
                                         <input type="range" class="form-range" id="originalityScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
+                                    <div class="invalid-feedback">Veuillez noter l'originalité</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <textarea class="form-control" id="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control" id="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
+                                        <div class="invalid-feedback">Veuillez commenter l'originalité</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1642,9 +1701,13 @@ ${editorContent}`;
                                         <input type="range" class="form-range" id="overallExperienceScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
+                                    <div class="invalid-feedback">Veuillez noter l'expérience globale</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <textarea class="form-control" id="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control" id="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
+                                        <div class="invalid-feedback">Veuillez commenter l'expérience globale</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
