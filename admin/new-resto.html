@@ -676,31 +676,26 @@
 
         .action-button i {
             font-size: 1rem;
-            margin-right: 4px;
-        }
-
-        .button-text {
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
 
         .action-button .spinner {
             display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: #fff;
-            animation: spin 0.8s ease-in-out infinite;
+            animation: spin 1s linear infinite;
             margin-right: 8px;
-            flex-shrink: 0;
         }
 
         .action-button.loading {
             opacity: 0.8;
             cursor: wait;
-            pointer-events: none;
+        }
+
+        .action-button.loading:hover {
+            transform: none;
         }
 
         .action-button.loading .spinner {
@@ -709,10 +704,6 @@
 
         .action-button.loading .button-text {
             opacity: 0.7;
-        }
-
-        .action-button.loading:hover {
-            transform: none;
         }
 
         @keyframes spin {
@@ -864,32 +855,24 @@
         let editor;
         window.addEventListener('load', () => {
             console.log('=== INITIALISATION DE LA PAGE ===');
+            console.log('Étape 1: Début de l\'initialisation');
             
-            // Fonction pour initialiser la structure d'un bouton
-            function initializeButton(button) {
-                // Vérifier si le bouton n'a pas déjà été initialisé
-                if (!button.querySelector('.spinner')) {
-                    const originalContent = button.innerHTML;
-                    const spinnerDiv = document.createElement('div');
-                    spinnerDiv.className = 'spinner';
-                    const textSpan = document.createElement('span');
-                    textSpan.className = 'button-text';
-                    textSpan.innerHTML = originalContent;
-                    button.innerHTML = '';
-                    button.appendChild(spinnerDiv);
-                    button.appendChild(textSpan);
-                }
-            }
-
-            // Initialiser tous les boutons d'action
-            document.querySelectorAll('.action-button').forEach(initializeButton);
-
             // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
             const saveButton = document.getElementById('saveButton');
             console.log('Étape 2: Recherche du bouton de sauvegarde');
             
             if (saveButton) {
                 console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
+                
+                // Ajouter le spinner au bouton
+                const spinnerDiv = document.createElement('div');
+                spinnerDiv.className = 'spinner';
+                const textSpan = document.createElement('span');
+                textSpan.className = 'button-text';
+                textSpan.innerHTML = saveButton.innerHTML;
+                saveButton.innerHTML = '';
+                saveButton.appendChild(spinnerDiv);
+                saveButton.appendChild(textSpan);
                 
                 saveButton.addEventListener('click', async function(e) {
                     console.log('Étape 4: Clic sur le bouton détecté');
@@ -906,6 +889,9 @@
                     
                     // Simuler un délai minimum pour le spinner (au moins 500ms)
                     await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Cacher l'état de chargement
+                    hideLoadingState(this);
                 });
             }
 
@@ -1895,16 +1881,10 @@ ${editorContent}`;
                 <div class="form-actions">
                     <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
                         <button type="submit" class="action-button" id="saveButton">
-                            <div class="spinner"></div>
-                            <span class="button-text">
-                                <i class="fas fa-save"></i> Enregistrer un brouillon
-                            </span>
+                            <i class="fas fa-save"></i> Enregistrer un brouillon
                         </button>
                         <a href="index.html" class="action-button cancel">
-                            <div class="spinner"></div>
-                            <span class="button-text">
-                                <i class="fas fa-times"></i> Annuler
-                            </span>
+                            <i class="fas fa-times"></i> Annuler
                         </a>
                     </div>
                 </div>
