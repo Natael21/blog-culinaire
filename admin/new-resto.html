@@ -908,8 +908,10 @@
             // Gérer la soumission du formulaire
             document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
+                console.log('Formulaire soumis - début de la validation');
                 
                 if (!validateForm()) {
+                    console.log('Validation échouée - formulaire non soumis');
                     return;
                 }
 
@@ -1177,6 +1179,7 @@
         }
 
         function validateForm() {
+            console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
             let isValid = true;
 
             // Vérifier les associations label-input
@@ -1309,6 +1312,7 @@
                 isValid = false;
             }
 
+            console.log(`=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
             return isValid;
         }
 
@@ -1495,6 +1499,11 @@ ${editorContent}`;
             container.innerHTML = '';
             galleryImageFiles.forEach(file => createImagePreview(file, container));
         }
+
+        // Ajouter un gestionnaire d'événements directement sur le bouton pour le débogage
+        document.getElementById('saveButton').addEventListener('click', function(e) {
+            console.log('Bouton de sauvegarde cliqué');
+        });
     </script>
 </head>
 <body>
@@ -1756,7 +1765,7 @@ ${editorContent}`;
 
                 <div class="form-actions">
                     <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button type="submit" class="action-button">
+                        <button type="submit" class="action-button" id="saveButton">
                             <i class="fas fa-save"></i> Enregistrer un brouillon
                         </button>
                         <a href="index.html" class="action-button cancel">
