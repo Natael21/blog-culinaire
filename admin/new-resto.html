@@ -1178,6 +1178,61 @@
 
         function validateForm() {
             let isValid = true;
+
+            // Vérifier les associations label-input
+            console.log('=== VÉRIFICATION DES LABELS ===');
+            document.querySelectorAll('label[for]').forEach(label => {
+                const forAttribute = label.getAttribute('for');
+                const associatedElement = document.getElementById(forAttribute);
+                console.log(`Label "${label.textContent.trim()}":`);
+                console.log(`- attribut for: ${forAttribute}`);
+                console.log(`- élément associé trouvé: ${associatedElement ? 'Oui' : 'Non'}`);
+                if (!associatedElement) {
+                    console.error(`⚠️ Label sans élément associé: "${label.textContent.trim()}"`);
+                }
+            });
+
+            // Vérifier les champs sans label
+            console.log('\n=== VÉRIFICATION DES CHAMPS SANS LABEL ===');
+            document.querySelectorAll('input, select, textarea').forEach(field => {
+                const id = field.id;
+                const name = field.name;
+                const type = field.type;
+                const hasLabel = document.querySelector(`label[for="${id}"]`);
+                const isNested = field.closest('label');
+                console.log(`Champ ${type}:`);
+                console.log(`- id: ${id}`);
+                console.log(`- name: ${name}`);
+                console.log(`- a un label associé: ${hasLabel ? 'Oui' : 'Non'}`);
+                console.log(`- est imbriqué dans un label: ${isNested ? 'Oui' : 'Non'}`);
+                if (!hasLabel && !isNested) {
+                    console.error(`⚠️ Champ sans label: type=${type}, id=${id}, name=${name}`);
+                }
+            });
+
+            // Vérifier l'attribut autocomplete
+            console.log('\n=== VÉRIFICATION DE L\'AUTOCOMPLETE ===');
+            const autocompleteMappings = {
+                'title': 'organization',
+                'date': 'off',
+                'description': 'off',
+                'address': 'street-address',
+                'style': 'off',
+                'price': 'off'
+            };
+            
+            Object.entries(autocompleteMappings).forEach(([id, autocompleteValue]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    console.log(`Champ ${id}:`);
+                    console.log(`- autocomplete actuel: ${element.getAttribute('autocomplete')}`);
+                    console.log(`- autocomplete suggéré: ${autocompleteValue}`);
+                    // Ajouter l'attribut autocomplete
+                    element.setAttribute('autocomplete', autocompleteValue);
+                }
+            });
+
+            // Le reste de la validation existante
             const requiredFields = [
                 { id: 'title', message: 'Veuillez entrer le nom du restaurant' },
                 { id: 'date', message: 'Veuillez sélectionner la date de visite' },
@@ -1208,18 +1263,24 @@
             });
 
             // Valider chaque champ requis
+            console.log('\n=== VALIDATION DES CHAMPS REQUIS ===');
             requiredFields.forEach(field => {
                 const element = document.getElementById(field.id);
-                if (!element.value.trim()) {
-                    element.classList.add('is-invalid');
-                    
-                    // Créer et ajouter le message d'erreur
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'invalid-feedback';
-                    errorDiv.textContent = field.message;
-                    element.parentNode.insertBefore(errorDiv, element.nextSibling);
-                    
-                    isValid = false;
+                console.log(`Validation du champ ${field.id}:`);
+                if (element) {
+                    console.log(`- valeur: ${element.value}`);
+                    console.log(`- requis: ${element.required}`);
+                    if (!element.value.trim()) {
+                        element.classList.add('is-invalid');
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+                        errorDiv.textContent = field.message;
+                        element.parentNode.insertBefore(errorDiv, element.nextSibling);
+                        console.log(`⚠️ Champ invalide: ${field.id}`);
+                        isValid = false;
+                    }
+                } else {
+                    console.error(`⚠️ Champ non trouvé: ${field.id}`);
                 }
             });
 
