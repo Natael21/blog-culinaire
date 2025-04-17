@@ -168,7 +168,7 @@ exports.handler = async (event, context) => {
         const tree = [
             ...imageBlobs,
             {
-                path: `_posts/${filename}`,
+                path: filename,
                 mode: "100644",
                 type: "blob",
                 sha: markdownBlob.sha
