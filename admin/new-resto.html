@@ -1766,6 +1766,38 @@ ${editorContent}`;
             if (buttonText) buttonText.style.opacity = '1';
         }
 
+        function showConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Confirmer</button>
+                            <button class="confirmation-button cancel">Annuler</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
         function showFormConfirmationModal() {
             return new Promise((resolve) => {
                 const modal = document.createElement('div');
