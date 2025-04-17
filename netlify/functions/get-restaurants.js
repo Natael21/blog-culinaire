@@ -1,69 +1,80 @@
-const fs = require('fs');
-const path = require('path');
+const axios = require('axios');
 
 exports.handler = async function(event, context) {
     console.log('Début de la fonction get-restaurants');
     try {
-        // Chemin vers le dossier _posts (à la racine du projet)
-        const restaurantsDir = path.join(process.cwd(), '..', '..', '_posts');
-        console.log('Chemin du dossier _posts:', restaurantsDir);
-        
-        // Vérifier si le dossier existe
-        if (!fs.existsSync(restaurantsDir)) {
-            console.log('Le dossier _posts n\'existe pas');
-            console.log('Répertoire courant:', process.cwd());
-            console.log('Contenu du répertoire courant:', fs.readdirSync(process.cwd()));
-            return {
-                statusCode: 200,
-                body: JSON.stringify([])
-            };
-        }
-        
-        // Lire tous les fichiers du dossier
-        const files = fs.readdirSync(restaurantsDir);
-        console.log('Fichiers trouvés dans _posts:', files);
-        
+        // Configuration de l'API GitHub
+        const token = process.env.GITHUB_TOKEN;
+        const owner = process.env.GITHUB_OWNER || 'Natael21';
+        const repo = process.env.GITHUB_REPO || 'blog-culinaire';
+        const branch = process.env.GITHUB_BRANCH || 'master';
+        const path = '_posts';
+
+        console.log('Configuration GitHub:', { owner, repo, branch, path });
+
+        // Récupérer la liste des fichiers dans le dossier _posts
+        const response = await axios.get(
+            `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+            {
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            }
+        );
+
+        console.log('Réponse GitHub:', response.data);
+
         // Filtrer pour ne garder que les fichiers .md
-        const mdFiles = files.filter(file => file.endsWith('.md'));
+        const mdFiles = response.data.filter(file => file.name.endsWith('.md'));
         console.log('Fichiers .md trouvés:', mdFiles);
-        
+
         // Lire chaque fichier et extraire les métadonnées
-        const restaurants = mdFiles.map(filename => {
+        const restaurants = await Promise.all(mdFiles.map(async file => {
             try {
-                console.log(`Traitement du fichier: ${filename}`);
-                const filePath = path.join(restaurantsDir, filename);
-                console.log('Chemin complet du fichier:', filePath);
+                console.log(`Traitement du fichier: ${file.name}`);
                 
-                const content = fs.readFileSync(filePath, 'utf8');
+                // Récupérer le contenu du fichier
+                const contentResponse = await axios.get(
+                    `https://api.github.com/repos/${owner}/${repo}/contents/${path}/${file.name}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3.raw'
+                        }
+                    }
+                );
+
+                const content = contentResponse.data;
                 console.log('Contenu du fichier:', content.substring(0, 200) + '...');
-                
+
                 // Extraire les métadonnées du frontmatter
                 const frontmatterMatch = content.match(/---\n([\s\S]*?)\n---/);
                 if (!frontmatterMatch) {
-                    console.error(`Frontmatter non trouvé dans ${filename}`);
+                    console.error(`Frontmatter non trouvé dans ${file.name}`);
                     return null;
                 }
-                
+
                 const frontmatter = frontmatterMatch[1];
-                console.log(`Frontmatter de ${filename}:`, frontmatter);
-                
+                console.log(`Frontmatter de ${file.name}:`, frontmatter);
+
                 const metadata = {};
-                
+
                 frontmatter.split('\n').forEach(line => {
                     const [key, ...valueParts] = line.split(':');
                     if (key && valueParts.length > 0) {
                         metadata[key.trim()] = valueParts.join(':').trim();
                     }
                 });
-                
-                console.log(`Métadonnées extraites de ${filename}:`, metadata);
-                
+
+                console.log(`Métadonnées extraites de ${file.name}:`, metadata);
+
                 // Déterminer l'état (draft ou ready)
-                const state = filename.startsWith('draft-') ? 'draft' : 'ready';
-                console.log(`État du fichier ${filename}:`, state);
-                
+                const state = file.name.startsWith('draft-') ? 'draft' : 'ready';
+                console.log(`État du fichier ${file.name}:`, state);
+
                 const restaurant = {
-                    filename,
+                    filename: file.name,
                     state,
                     title: metadata.title || '',
                     date: metadata.date || '',
@@ -74,21 +85,22 @@ exports.handler = async function(event, context) {
                     rating: metadata.rating || '',
                     content: content.split('---')[2].trim()
                 };
-                
+
                 console.log(`Restaurant traité:`, restaurant);
                 return restaurant;
-                
+
             } catch (error) {
-                console.error(`Erreur lors de la lecture de ${filename}:`, error);
+                console.error(`Erreur lors de la lecture de ${file.name}:`, error);
                 return null;
             }
-        }).filter(restaurant => restaurant !== null);
-        
-        console.log('Liste finale des restaurants:', restaurants);
-        
+        }));
+
+        const validRestaurants = restaurants.filter(restaurant => restaurant !== null);
+        console.log('Liste finale des restaurants:', validRestaurants);
+
         return {
             statusCode: 200,
-            body: JSON.stringify(restaurants)
+            body: JSON.stringify(validRestaurants)
         };
     } catch (error) {
         console.error('Erreur globale:', error);
