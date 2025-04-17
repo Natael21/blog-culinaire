@@ -829,6 +829,79 @@
         .form-range.show-error::-webkit-slider-thumb {
             background-color: var(--secondary-color) !important;
         }
+
+        /* Styles pour le modal de confirmation */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .confirmation-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
+
+        .confirmation-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .confirmation-message {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .confirmation-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .confirmation-button.confirm {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .confirmation-button.confirm:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .confirmation-button.cancel {
+            background: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .confirmation-button.cancel:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
     </style>
 
     <script>
@@ -1618,6 +1691,49 @@ ${editorContent}`;
             button.disabled = false;
             if (spinner) spinner.style.display = 'none';
             if (buttonText) buttonText.style.opacity = '1';
+        }
+
+        function showConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Confirmer</button>
+                            <button class="confirmation-button cancel">Annuler</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Modifier la fonction d'annulation existante
+        async function cancelForm() {
+            const shouldCancel = await showConfirmationModal();
+            if (shouldCancel) {
+                // Supprimer le brouillon du localStorage
+                localStorage.removeItem('currentDraft');
+                // Rediriger vers la page d'administration
+                window.location.href = 'index.html';
+            }
         }
     </script>
 </head>

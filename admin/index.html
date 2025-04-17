@@ -227,6 +227,73 @@ title: Administration - Blog Culinaire
             color: #e74c3c;
         }
 
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .confirmation-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .confirmation-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-message {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .confirmation-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .confirmation-button.confirm {
+            background: #e74c3c;
+            color: white;
+            border: none;
+        }
+
+        .confirmation-button.confirm:hover {
+            background: #c0392b;
+        }
+
+        .confirmation-button.cancel {
+            background: white;
+            color: #2c3e50;
+            border: 1px solid #2c3e50;
+        }
+
+        .confirmation-button.cancel:hover {
+            background: #f8f9fa;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -520,18 +587,10 @@ title: Administration - Blog Culinaire
             if (currentDraft && publishButton && cancelButton) {
                 publishButton.style.display = 'flex';
                 cancelButton.style.display = 'flex';
-                attachPublishHandler();
-            }
-            if (cancelButton) {
-                cancelButton.addEventListener('click', function() {
-                    localStorage.removeItem('currentDraft');
-                    publishButton.style.display = 'none';
-                    cancelButton.style.display = 'none';
-                    showNotification('Brouillon annulé avec succès');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                });
+                
+                // Remplacer l'ancien gestionnaire par le nouveau avec spinner
+                publishButton.onclick = publishDraft;
+                cancelButton.onclick = cancelDraft;
             }
         });
 
@@ -691,29 +750,60 @@ title: Administration - Blog Culinaire
 
         // Modifier la fonction cancelDraft
         async function cancelDraft() {
-            const container = document.querySelector('.publish-btn-container');
-            showSpinner(container);
-            try {
-                const response = await fetch('/.netlify/functions/cancel-draft', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                
-                if (response.ok) {
-                    showNotification('Brouillon annulé avec succès', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    throw new Error('Erreur lors de l\'annulation');
-                }
-            } catch (error) {
-                showNotification('Erreur lors de l\'annulation', 'error');
-            } finally {
-                hideSpinner(container);
-            }
+            // Créer et afficher le modal de confirmation
+            const modal = document.createElement('div');
+            modal.className = 'confirmation-modal';
+            modal.innerHTML = `
+                <div class="confirmation-content">
+                    <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                    <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non publiées seront perdues.</p>
+                    <div class="confirmation-buttons">
+                        <button class="confirmation-button confirm">Confirmer</button>
+                        <button class="confirmation-button cancel">Annuler</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+
+            // Gérer les clics sur les boutons
+            const confirmButton = modal.querySelector('.confirmation-button.confirm');
+            const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+            return new Promise((resolve) => {
+                confirmButton.onclick = async () => {
+                    modal.remove();
+                    const container = document.querySelector('.publish-btn-container');
+                    showSpinner(container);
+                    try {
+                        const response = await fetch('/.netlify/functions/cancel-draft', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        
+                        if (response.ok) {
+                            showNotification('Brouillon annulé avec succès', 'success');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            throw new Error('Erreur lors de l\'annulation');
+                        }
+                    } catch (error) {
+                        showNotification('Erreur lors de l\'annulation', 'error');
+                    } finally {
+                        hideSpinner(container);
+                    }
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
         }
     </script>
 </body>
