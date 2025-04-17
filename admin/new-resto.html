@@ -819,6 +819,43 @@
         // Initialiser TipTap
         let editor;
         window.addEventListener('load', () => {
+            console.log('=== INITIALISATION DE LA PAGE ===');
+            
+            // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
+            const saveButton = document.getElementById('saveButton');
+            if (saveButton) {
+                console.log('Bouton de sauvegarde trouvé');
+                saveButton.addEventListener('click', function(e) {
+                    console.log('Bouton de sauvegarde cliqué');
+                });
+            } else {
+                console.error('Bouton de sauvegarde non trouvé !');
+            }
+
+            // Ajouter un gestionnaire d'événements sur le formulaire
+            const form = document.getElementById('restaurantForm');
+            if (form) {
+                console.log('Formulaire trouvé');
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    console.log('Formulaire soumis - début de la validation');
+                    
+                    if (!validateForm()) {
+                        console.log('Validation échouée - formulaire non soumis');
+                        return;
+                    }
+
+                    try {
+                        // ... rest of the submit handler ...
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
+                    }
+                });
+            } else {
+                console.error('Formulaire non trouvé !');
+            }
+
             editor = new Editor({
                 element: document.querySelector('#editor'),
                 extensions: [
@@ -902,70 +939,6 @@
             document.getElementById('galleryImages').addEventListener('change', function(e) {
                 if (this.files) {
                     handleGalleryUpload(this.files);
-                }
-            });
-
-            // Gérer la soumission du formulaire
-            document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                console.log('Formulaire soumis - début de la validation');
-                
-                if (!validateForm()) {
-                    console.log('Validation échouée - formulaire non soumis');
-                    return;
-                }
-
-                try {
-                    // Générer le nom du fichier à partir du titre
-                    const title = document.getElementById('title').value;
-                    const filename = title.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/[^a-z0-9]/g, '-')
-                        .replace(/-+/g, '-')
-                        .replace(/^-|-$/g, '');
-                    
-                    const date = new Date().toISOString().split('T')[0];
-                    const filePath = `${date}-${filename}.md`;
-
-                    // Créer un objet pour stocker les données du brouillon
-                    const draftData = {
-                        filename: filePath,
-                        title: title,
-                        content: generateMarkdown(),
-                        images: []
-                    };
-
-                    // Sauvegarder les images localement en base64
-                    if (mainImageFile) {
-                        const mainImageBase64 = await fileToBase64(mainImageFile);
-                        draftData.images.push({
-                            name: mainImageFile.name,
-                            data: mainImageBase64
-                        });
-                    }
-
-                    for (let i = 0; i < galleryImageFiles.length; i++) {
-                        const file = galleryImageFiles[i];
-                        const galleryBase64 = await fileToBase64(file);
-                        draftData.images.push({
-                            name: file.name,
-                            data: galleryBase64
-                        });
-                    }
-
-                    // Sauvegarder le brouillon dans le localStorage
-                    localStorage.setItem('currentDraft', JSON.stringify(draftData));
-
-                    showNotification('Brouillon enregistré avec succès !', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
                 }
             });
 
@@ -1499,11 +1472,6 @@ ${editorContent}`;
             container.innerHTML = '';
             galleryImageFiles.forEach(file => createImagePreview(file, container));
         }
-
-        // Ajouter un gestionnaire d'événements directement sur le bouton pour le débogage
-        document.getElementById('saveButton').addEventListener('click', function(e) {
-            console.log('Bouton de sauvegarde cliqué');
-        });
     </script>
 </head>
 <body>
