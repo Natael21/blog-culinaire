@@ -726,23 +726,32 @@ title: Administration - Blog Culinaire
             const container = document.querySelector('.publish-btn-container');
             showSpinner(container);
             try {
-                const response = await fetch('/.netlify/functions/publish-draft', {
+                const draftData = JSON.parse(localStorage.getItem('currentDraft'));
+                if (!draftData) {
+                    throw new Error('Aucun brouillon trouvé');
+                }
+
+                const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
+                    body: JSON.stringify(draftData)
                 });
                 
                 if (response.ok) {
+                    // Supprimer le brouillon du localStorage après publication réussie
+                    localStorage.removeItem('currentDraft');
                     showNotification('Publication réussie !', 'success');
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    throw new Error('Erreur lors de la publication');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erreur lors de la publication');
                 }
             } catch (error) {
-                showNotification('Erreur lors de la publication', 'error');
+                showNotification(error.message || 'Erreur lors de la publication', 'error');
             } finally {
                 hideSpinner(container);
             }
