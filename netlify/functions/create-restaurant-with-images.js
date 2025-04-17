@@ -8,16 +8,22 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        console.log("Début du traitement de la requête");
+        console.log("=== DÉBUT DU TRAITEMENT DE LA REQUÊTE ===");
         
         // Récupérer les données du corps de la requête
         const body = JSON.parse(event.body);
-        console.log("Corps de la requête reçu:", {
-            hasFilename: !!body.filename,
-            hasContent: !!body.content,
+        console.log("Détails de la requête:", {
+            filename: body.filename,
+            contentLength: body.content?.length,
             numberOfImages: body.images?.length,
-            hasTitle: !!body.title
+            title: body.title
         });
+
+        console.log("Détails des images reçues:", body.images?.map(img => ({
+            name: img.name,
+            dataLength: img.data?.length,
+            isBase64: img.data?.startsWith && !img.data?.startsWith('data:') // Vérifie si c'est du base64 pur
+        })));
         
         const { filename, content, images, title } = body;
 
@@ -91,24 +97,29 @@ exports.handler = async (event, context) => {
         console.log("Dernier commit SHA :", latestCommit);
 
         // 2. Créer les blobs pour les images
-        console.log("Création des blobs pour les images...");
+        console.log("\n=== CRÉATION DES BLOBS POUR LES IMAGES ===");
         const imageBlobs = [];
         const imagePlaceholders = {};
 
         if (images && images.length > 0) {
             for (let i = 0; i < images.length; i++) {
                 const imageData = images[i];
+                console.log(`\nTraitement de l'image ${i + 1}/${images.length}:`, {
+                    nom: imageData.name,
+                    tailleDonnées: imageData.data?.length
+                });
+
                 if (!imageData || !imageData.data) {
                     console.error(`Image ${i} invalide:`, imageData);
                     continue;
                 }
 
-                // Extraire le type MIME et les données base64
-                const [mimeType, base64Data] = imageData.data.split(',');
-                if (!base64Data) {
-                    console.error(`Format d'image ${i} invalide:`, mimeType);
-                    continue;
-                }
+                // Les données sont déjà en base64 propre
+                const base64Data = imageData.data;
+                console.log(`Préparation du blob pour ${imageData.name}:`, {
+                    tailleDonnéesBase64: base64Data?.length,
+                    premièresCaractères: base64Data?.substring(0, 50) + '...'
+                });
 
                 const blobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
                     method: "POST",
@@ -121,12 +132,21 @@ exports.handler = async (event, context) => {
 
                 if (!blobResponse.ok) {
                     const errorData = await blobResponse.json();
-                    console.error(`Erreur lors de la création du blob pour l'image ${i}:`, errorData);
+                    console.error(`Erreur lors de la création du blob pour l'image ${imageData.name}:`, {
+                        status: blobResponse.status,
+                        statusText: blobResponse.statusText,
+                        error: errorData
+                    });
                     throw new Error(`GitHub API Error: ${errorData.message}`);
                 }
 
                 const blobData = await blobResponse.json();
                 const imagePath = `images/${imageData.name}`;
+                console.log(`Blob créé avec succès pour ${imageData.name}:`, {
+                    sha: blobData.sha,
+                    path: imagePath
+                });
+
                 imageBlobs.push({
                     path: imagePath,
                     sha: blobData.sha,
@@ -134,15 +154,18 @@ exports.handler = async (event, context) => {
                     type: "blob"
                 });
 
-                // Stocker le placeholder pour le remplacement
                 imagePlaceholders[imageData.name] = `/${imagePath}`;
             }
         }
 
         // 3. Mettre à jour les chemins d'images dans le contenu markdown
-        console.log("Mise à jour des chemins d'images dans le markdown...");
+        console.log("\n=== MISE À JOUR DES CHEMINS D'IMAGES ===");
+        console.log("Placeholders d'images:", imagePlaceholders);
         for (const [placeholder, path] of Object.entries(imagePlaceholders)) {
-            updatedContent = updatedContent.replace(new RegExp(placeholder, 'g'), path);
+            const regex = new RegExp(placeholder, 'g');
+            const occurrences = (updatedContent.match(regex) || []).length;
+            console.log(`Remplacement de ${placeholder} par ${path} (${occurrences} occurrences)`);
+            updatedContent = updatedContent.replace(regex, path);
         }
 
         // 4. Créer le blob pour le contenu markdown
@@ -165,6 +188,7 @@ exports.handler = async (event, context) => {
         const markdownBlob = await markdownBlobResponse.json();
 
         // 5. Créer le nouveau tree
+        console.log("\n=== CRÉATION DU NOUVEAU TREE ===");
         const tree = [
             ...imageBlobs,
             {
@@ -174,6 +198,11 @@ exports.handler = async (event, context) => {
                 sha: markdownBlob.sha
             }
         ];
+        console.log("Structure du tree:", {
+            nombreImages: imageBlobs.length,
+            cheminsImages: imageBlobs.map(blob => blob.path),
+            fichierMarkdown: filename
+        });
 
         console.log("Création du nouveau tree...");
         const treeResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/trees`, {
@@ -233,17 +262,36 @@ exports.handler = async (event, context) => {
             throw new Error(`GitHub API Error: ${errorData.message}`);
         }
 
-        console.log("Restaurant créé avec succès!");
+        console.log("\n=== RESTAURANT CRÉÉ AVEC SUCCÈS ===");
+        console.log("Résumé:", {
+            nombreImagesTraitées: imageBlobs.length,
+            fichierMarkdown: filename,
+            commitSHA: commitData.sha
+        });
+
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Restaurant créé avec succès" })
+            body: JSON.stringify({ 
+                message: "Restaurant créé avec succès",
+                details: {
+                    imagesCount: imageBlobs.length,
+                    markdownFile: filename,
+                    commitSHA: commitData.sha
+                }
+            })
         };
 
     } catch (error) {
-        console.error("Erreur:", error);
+        console.error("\n=== ERREUR LORS DU TRAITEMENT ===", {
+            message: error.message,
+            stack: error.stack
+        });
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: error.message })
+            body: JSON.stringify({ 
+                error: error.message,
+                details: error.stack
+            })
         };
     }
 }; 
