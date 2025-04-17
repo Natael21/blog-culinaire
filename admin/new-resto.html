@@ -137,7 +137,17 @@
             margin-top: 0;
         }
 
-        /* Masquer les messages d'erreur par défaut */
+        /* Styles pour les champs en erreur */
+        .form-control.is-invalid,
+        .form-control.show-error.is-invalid,
+        select.is-invalid,
+        textarea.is-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        /* Style pour les messages d'erreur */
         .invalid-feedback {
             display: none;
             color: var(--secondary-color);
@@ -145,19 +155,27 @@
             margin-top: 0.25rem;
         }
 
-        /* Montrer les erreurs quand la classe show-error est présente */
-        .form-control.show-error.is-invalid ~ .invalid-feedback {
+        /* Afficher les messages d'erreur */
+        .form-control.is-invalid + .invalid-feedback,
+        .form-control.show-error.is-invalid + .invalid-feedback,
+        select.is-invalid + .invalid-feedback,
+        textarea.is-invalid + .invalid-feedback {
             display: block !important;
         }
 
-        .error-icon {
-            display: none !important;
+        /* Style pour la zone d'upload en erreur */
+        .upload-zone.show-error {
+            border: 2px dashed var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
         }
 
-        /* Ne montrer les erreurs que lorsque la classe show-error est présente */
-        .form-control.show-error.is-invalid + .error-icon,
-        .form-control.show-error.is-invalid + .error-icon + .invalid-feedback {
-            display: block !important;
+        /* Style pour les sliders en erreur */
+        .form-range.is-invalid::-webkit-slider-thumb {
+            background-color: var(--secondary-color) !important;
+        }
+
+        .form-range.is-invalid::-webkit-slider-runnable-track {
+            background-color: rgba(231, 76, 60, 0.25) !important;
         }
 
         .form-section {
@@ -362,12 +380,6 @@
             padding: 12px !important;
         }
 
-        .is-invalid {
-            border-color: var(--secondary-color) !important;
-            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1) !important;
-            background-color: #fff5f5 !important;
-        }
-
         .image-preview-container {
             position: relative;
             display: inline-block;
@@ -553,12 +565,6 @@
 
         .address-suggestion.selected {
             background-color: rgba(52, 152, 219, 0.1);
-        }
-
-        .form-control.is-invalid {
-            border-color: var(--secondary-color) !important;
-            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
-            background-color: #fff5f5 !important;
         }
 
         .form-control.is-invalid:focus {
@@ -1193,79 +1199,53 @@
                 { id: 'overallExperienceComment', message: 'Veuillez commenter l\'expérience globale' }
             ];
 
+            // Réinitialiser tous les états d'erreur
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.remove();
+            });
+
+            // Valider chaque champ requis
             requiredFields.forEach(field => {
                 const element = document.getElementById(field.id);
                 if (!element.value.trim()) {
-                    element.classList.add('show-error', 'is-invalid');
+                    element.classList.add('is-invalid');
                     
-                    // Ajouter ou mettre à jour le message d'erreur
-                    let errorMessage = element.nextElementSibling;
-                    if (!errorMessage || !errorMessage.classList.contains('invalid-feedback')) {
-                        errorMessage = document.createElement('div');
-                        errorMessage.className = 'invalid-feedback';
-                        element.parentNode.insertBefore(errorMessage, element.nextSibling);
-                    }
-                    errorMessage.textContent = field.message;
-                    errorMessage.style.display = 'block';
+                    // Créer et ajouter le message d'erreur
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = field.message;
+                    element.parentNode.insertBefore(errorDiv, element.nextSibling);
                     
                     isValid = false;
-                } else {
-                    element.classList.remove('show-error', 'is-invalid');
-                    const errorMessage = element.nextElementSibling;
-                    if (errorMessage && errorMessage.classList.contains('invalid-feedback')) {
-                        errorMessage.style.display = 'none';
-                    }
                 }
             });
 
-            // Valider le contenu de l'éditeur
+            // Valider l'éditeur
             const editorContent = editor.getHTML().replace(/<[^>]*>/g, '').trim();
             const editorElement = document.querySelector('.ProseMirror');
             if (!editorContent) {
-                editorElement.classList.add('show-error', 'editor-invalid');
+                editorElement.classList.add('editor-invalid');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                errorDiv.textContent = 'Veuillez ajouter une description détaillée';
+                editorElement.parentNode.appendChild(errorDiv);
                 isValid = false;
-                let errorMessage = document.querySelector('#editor-error');
-                if (!errorMessage) {
-                    errorMessage = document.createElement('div');
-                    errorMessage.id = 'editor-error';
-                    errorMessage.className = 'invalid-feedback';
-                    errorMessage.style.display = 'block';
-                    errorMessage.textContent = 'Veuillez ajouter une description détaillée';
-                    editorElement.parentNode.appendChild(errorMessage);
-                }
-            } else {
-                editorElement.classList.remove('show-error', 'editor-invalid');
-                const errorMessage = document.querySelector('#editor-error');
-                if (errorMessage) {
-                    errorMessage.remove();
-                }
             }
 
             // Valider l'image principale
             const mainImageZone = document.getElementById('mainImageZone');
             if (!mainImageFile) {
                 mainImageZone.classList.add('show-error');
-                let errorMessage = document.querySelector('#mainImage-error');
-                if (!errorMessage) {
-                    errorMessage = document.createElement('div');
-                    errorMessage.id = 'mainImage-error';
-                    errorMessage.className = 'invalid-feedback';
-                    errorMessage.style.display = 'block';
-                    errorMessage.textContent = 'Veuillez ajouter une image principale';
-                    mainImageZone.parentNode.appendChild(errorMessage);
-                }
-                mainImageZone.style.borderColor = 'var(--secondary-color)';
-                mainImageZone.style.backgroundColor = '#fff5f5';
-                isValid = false;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Veuillez ajouter une image principale';
+                mainImageZone.parentNode.appendChild(errorDiv);
                 mainImageZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-                mainImageZone.classList.remove('show-error');
-                mainImageZone.style.borderColor = '';
-                mainImageZone.style.backgroundColor = '';
-                const errorMessage = document.querySelector('#mainImage-error');
-                if (errorMessage) {
-                    errorMessage.remove();
-                }
+                isValid = false;
             }
 
             return isValid;
@@ -1471,7 +1451,7 @@ ${editorContent}`;
                 <div class="form-section">
                     <h2 class="form-section-title">Informations de base</h2>
                     <div class="form-group">
-                        <label for="title">Nom du restaurant</label>
+                        <label for="title" class="form-label">Nom du restaurant</label>
                         <div class="input-wrapper">
                             <input type="text" id="title" name="title" class="form-control" required>
                             <div class="invalid-feedback">Veuillez entrer le nom du restaurant</div>
@@ -1479,7 +1459,7 @@ ${editorContent}`;
                     </div>
 
                     <div class="form-group">
-                        <label for="date">Date de visite</label>
+                        <label for="date" class="form-label">Date de visite</label>
                         <div class="input-wrapper">
                             <input type="date" id="date" name="date" class="form-control" required>
                             <div class="invalid-feedback">Veuillez sélectionner la date de visite</div>
@@ -1487,7 +1467,7 @@ ${editorContent}`;
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Résumé</label>
+                        <label for="description" class="form-label">Résumé</label>
                         <div class="input-wrapper">
                             <textarea id="description" name="description" class="form-control" maxlength="150" required></textarea>
                             <div class="invalid-feedback">Veuillez entrer un résumé</div>
@@ -1496,7 +1476,7 @@ ${editorContent}`;
                     </div>
 
                     <div class="form-group">
-                        <label for="address">Adresse</label>
+                        <label for="address" class="form-label">Adresse</label>
                         <div class="input-wrapper">
                             <input type="text" id="address" name="address" class="form-control" required placeholder="Commencez à taper une adresse...">
                             <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
@@ -1504,7 +1484,7 @@ ${editorContent}`;
                     </div>
 
                     <div class="form-group">
-                        <label for="style">Style de cuisine</label>
+                        <label for="style" class="form-label">Style de cuisine</label>
                         <div class="input-wrapper">
                             <select class="form-control" id="style" name="style" required>
                                 <option value="">Sélectionner un style</option>
@@ -1522,7 +1502,7 @@ ${editorContent}`;
                     </div>
 
                     <div class="form-group">
-                        <label for="price">Gamme de prix</label>
+                        <label for="price" class="form-label">Gamme de prix</label>
                         <div class="input-wrapper">
                             <select class="form-control" id="price" name="price" required>
                                 <option value="">Sélectionner une gamme de prix</option>
@@ -1535,25 +1515,21 @@ ${editorContent}`;
                     </div>
 
                     <div class="form-group">
-                        <label>Options alimentaires disponibles</label>
+                        <label class="form-label d-block">Options alimentaires disponibles</label>
                         <div class="form-check-container">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
-                                <label class="form-check-label" for="vegetarian">
-                                    Options végétariennes
-                                </label>
+                                <label class="form-check-label" for="vegetarian">Options végétariennes</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
-                                <label class="form-check-label" for="vegan">
-                                    Options végétaliennes
-                                </label>
+                                <label class="form-check-label" for="vegan">Options végétaliennes</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="mainImage">Image principale</label>
+                        <label for="mainImage" class="form-label">Image principale</label>
                         <div class="upload-zone" id="mainImageZone">
                             <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
                             <div class="upload-icon">
@@ -1566,7 +1542,7 @@ ${editorContent}`;
                     </div>
 
                     <div class="form-group">
-                        <label>Images de la galerie</label>
+                        <label for="galleryImages" class="form-label">Images de la galerie</label>
                         <div class="upload-zone" id="galleryZone">
                             <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
                             <div class="upload-icon">
@@ -1597,17 +1573,15 @@ ${editorContent}`;
                             <h4 class="h6">Nourriture</h4>
                             <div class="row">
                                 <div class="col-md-2">
+                                    <label for="foodScore" class="form-label">Note</label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range" id="foodScore" min="1" max="10" step="1" value="5" required>
+                                        <input type="range" class="form-range" id="foodScore" name="foodScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
-                                    <div class="invalid-feedback">Veuillez noter la nourriture</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <div class="input-wrapper">
-                                        <textarea class="form-control" id="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
-                                        <div class="invalid-feedback">Veuillez commenter la nourriture</div>
-                                    </div>
+                                    <label for="foodComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="foodComment" name="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1617,17 +1591,15 @@ ${editorContent}`;
                             <h4 class="h6">Service</h4>
                             <div class="row">
                                 <div class="col-md-2">
+                                    <label for="serviceScore" class="form-label">Note</label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range" id="serviceScore" min="1" max="10" step="1" value="5" required>
+                                        <input type="range" class="form-range" id="serviceScore" name="serviceScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
-                                    <div class="invalid-feedback">Veuillez noter le service</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <div class="input-wrapper">
-                                        <textarea class="form-control" id="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
-                                        <div class="invalid-feedback">Veuillez commenter le service</div>
-                                    </div>
+                                    <label for="serviceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="serviceComment" name="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1637,17 +1609,15 @@ ${editorContent}`;
                             <h4 class="h6">Ambiance</h4>
                             <div class="row">
                                 <div class="col-md-2">
+                                    <label for="ambianceScore" class="form-label">Note</label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range" id="ambianceScore" min="1" max="10" step="1" value="5" required>
+                                        <input type="range" class="form-range" id="ambianceScore" name="ambianceScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
-                                    <div class="invalid-feedback">Veuillez noter l'ambiance</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <div class="input-wrapper">
-                                        <textarea class="form-control" id="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
-                                        <div class="invalid-feedback">Veuillez commenter l'ambiance</div>
-                                    </div>
+                                    <label for="ambianceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="ambianceComment" name="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1657,17 +1627,15 @@ ${editorContent}`;
                             <h4 class="h6">Rapport qualité/prix</h4>
                             <div class="row">
                                 <div class="col-md-2">
+                                    <label for="valueScore" class="form-label">Note</label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range" id="valueScore" min="1" max="10" step="1" value="5" required>
+                                        <input type="range" class="form-range" id="valueScore" name="valueScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
-                                    <div class="invalid-feedback">Veuillez noter le rapport qualité/prix</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <div class="input-wrapper">
-                                        <textarea class="form-control" id="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
-                                        <div class="invalid-feedback">Veuillez commenter le rapport qualité/prix</div>
-                                    </div>
+                                    <label for="valueComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="valueComment" name="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1677,17 +1645,15 @@ ${editorContent}`;
                             <h4 class="h6">Originalité</h4>
                             <div class="row">
                                 <div class="col-md-2">
+                                    <label for="originalityScore" class="form-label">Note</label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range" id="originalityScore" min="1" max="10" step="1" value="5" required>
+                                        <input type="range" class="form-range" id="originalityScore" name="originalityScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
-                                    <div class="invalid-feedback">Veuillez noter l'originalité</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <div class="input-wrapper">
-                                        <textarea class="form-control" id="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
-                                        <div class="invalid-feedback">Veuillez commenter l'originalité</div>
-                                    </div>
+                                    <label for="originalityComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="originalityComment" name="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1697,17 +1663,15 @@ ${editorContent}`;
                             <h4 class="h6">Expérience globale</h4>
                             <div class="row">
                                 <div class="col-md-2">
+                                    <label for="overallExperienceScore" class="form-label">Note</label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range" id="overallExperienceScore" min="1" max="10" step="1" value="5" required>
+                                        <input type="range" class="form-range" id="overallExperienceScore" name="overallExperienceScore" min="1" max="10" step="1" value="5" required>
                                         <span class="rating-value">5</span>
                                     </div>
-                                    <div class="invalid-feedback">Veuillez noter l'expérience globale</div>
                                 </div>
                                 <div class="col-md-10">
-                                    <div class="input-wrapper">
-                                        <textarea class="form-control" id="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
-                                        <div class="invalid-feedback">Veuillez commenter l'expérience globale</div>
-                                    </div>
+                                    <label for="overallExperienceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="overallExperienceComment" name="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
                                 </div>
                             </div>
                         </div>
