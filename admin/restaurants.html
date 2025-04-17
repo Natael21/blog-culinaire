@@ -357,23 +357,56 @@
 
         // Fonction pour charger et afficher les restaurants
         async function loadRestaurants() {
+            console.log('Début de la fonction loadRestaurants');
             try {
+                console.log('Tentative de récupération des restaurants...');
                 const response = await fetch('/.netlify/functions/get-restaurants');
-                const restaurants = await response.json();
+                console.log('Réponse reçue:', response);
+                
+                if (!response.ok) {
+                    console.error('Erreur HTTP:', response.status, response.statusText);
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Données reçues:', data);
+                
+                if (!Array.isArray(data)) {
+                    console.error('Les données reçues ne sont pas un tableau:', typeof data);
+                    throw new Error('Réponse invalide du serveur');
+                }
+                
+                console.log('Nombre de restaurants reçus:', data.length);
                 
                 // Trier les restaurants : drafts d'abord, puis par date
-                restaurants.sort((a, b) => {
+                const restaurants = data.sort((a, b) => {
                     if (a.state === 'draft' && b.state !== 'draft') return -1;
                     if (a.state !== 'draft' && b.state === 'draft') return 1;
                     return new Date(b.date) - new Date(a.date);
                 });
+                
+                console.log('Restaurants triés:', restaurants);
 
                 const container = document.getElementById('restaurantsList');
                 container.innerHTML = '';
 
+                if (restaurants.length === 0) {
+                    console.log('Aucun restaurant trouvé');
+                    container.innerHTML = `
+                        <div class="no-restaurants-message">
+                            <i class="fas fa-utensils"></i>
+                            <p>Aucun restaurant trouvé</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                console.log('Création des cartes de restaurants...');
                 restaurants.forEach(restaurant => {
+                    console.log('Création de la carte pour:', restaurant.title);
                     const card = document.createElement('div');
                     card.className = 'restaurant-card';
+                    card.setAttribute('data-filename', restaurant.filename);
                     card.innerHTML = `
                         <img src="${restaurant.image}" alt="${restaurant.title}" class="restaurant-image">
                         <div class="restaurant-info">
@@ -407,8 +440,17 @@
                     `;
                     container.appendChild(card);
                 });
+                console.log('Affichage des restaurants terminé');
             } catch (error) {
-                console.error('Erreur lors du chargement des restaurants:', error);
+                console.error('Erreur détaillée lors du chargement des restaurants:', error);
+                const container = document.getElementById('restaurantsList');
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Erreur lors du chargement des restaurants. Veuillez réessayer plus tard.</p>
+                        <p class="error-details">${error.message}</p>
+                    </div>
+                `;
             }
         }
 
