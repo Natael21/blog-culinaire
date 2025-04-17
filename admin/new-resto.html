@@ -1154,6 +1154,30 @@
                 }
             });
 
+            // Valider le contenu de l'éditeur
+            const editorContent = editor.getHTML().replace(/<[^>]*>/g, '').trim();
+            const editorElement = document.querySelector('.ProseMirror');
+            if (!editorContent) {
+                editorElement.classList.add('show-error', 'editor-invalid');
+                isValid = false;
+                // Afficher un message d'erreur sous l'éditeur
+                let errorMessage = document.querySelector('#editor-error');
+                if (!errorMessage) {
+                    errorMessage = document.createElement('div');
+                    errorMessage.id = 'editor-error';
+                    errorMessage.className = 'invalid-feedback';
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Veuillez ajouter une description détaillée';
+                    editorElement.parentNode.appendChild(errorMessage);
+                }
+            } else {
+                editorElement.classList.remove('show-error', 'editor-invalid');
+                const errorMessage = document.querySelector('#editor-error');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+            }
+
             const mainImage = document.getElementById('mainImage');
             if (!mainImageFile) {
                 mainImage.classList.add('show-error', 'is-invalid');
