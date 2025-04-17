@@ -139,7 +139,15 @@
 
         /* Masquer les messages d'erreur par défaut */
         .invalid-feedback {
-            display: none !important;
+            display: none;
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Montrer les erreurs quand la classe show-error est présente */
+        .form-control.show-error.is-invalid ~ .invalid-feedback {
+            display: block !important;
         }
 
         .error-icon {
@@ -605,14 +613,13 @@
 
         .form-control.show-error.is-invalid {
             border-color: var(--secondary-color) !important;
-            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
             background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
         }
 
         .form-control.show-error.is-invalid:focus {
             border-color: var(--secondary-color) !important;
             box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.4) !important;
-            background-color: #fff5f5 !important;
         }
 
         .ProseMirror.show-error.editor-invalid {
@@ -1137,20 +1144,48 @@
         function validateForm() {
             let isValid = true;
             const requiredFields = [
-                'title', 'date', 'description', 'address', 'style', 'price',
-                'foodScore', 'foodComment', 'serviceScore', 'serviceComment',
-                'ambianceScore', 'ambianceComment', 'valueScore', 'valueComment',
-                'originalityScore', 'originalityComment', 'overallExperienceScore',
-                'overallExperienceComment'
+                { id: 'title', message: 'Veuillez entrer le nom du restaurant' },
+                { id: 'date', message: 'Veuillez sélectionner la date de visite' },
+                { id: 'description', message: 'Veuillez entrer un résumé' },
+                { id: 'address', message: 'Veuillez entrer une adresse' },
+                { id: 'style', message: 'Veuillez sélectionner un style de cuisine' },
+                { id: 'price', message: 'Veuillez sélectionner une gamme de prix' },
+                { id: 'foodScore', message: 'Veuillez noter la nourriture' },
+                { id: 'foodComment', message: 'Veuillez commenter la nourriture' },
+                { id: 'serviceScore', message: 'Veuillez noter le service' },
+                { id: 'serviceComment', message: 'Veuillez commenter le service' },
+                { id: 'ambianceScore', message: 'Veuillez noter l\'ambiance' },
+                { id: 'ambianceComment', message: 'Veuillez commenter l\'ambiance' },
+                { id: 'valueScore', message: 'Veuillez noter le rapport qualité/prix' },
+                { id: 'valueComment', message: 'Veuillez commenter le rapport qualité/prix' },
+                { id: 'originalityScore', message: 'Veuillez noter l\'originalité' },
+                { id: 'originalityComment', message: 'Veuillez commenter l\'originalité' },
+                { id: 'overallExperienceScore', message: 'Veuillez noter l\'expérience globale' },
+                { id: 'overallExperienceComment', message: 'Veuillez commenter l\'expérience globale' }
             ];
 
-            requiredFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (!field.value.trim()) {
-                    field.classList.add('show-error', 'is-invalid');
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    element.classList.add('show-error', 'is-invalid');
+                    
+                    // Ajouter ou mettre à jour le message d'erreur
+                    let errorMessage = element.nextElementSibling;
+                    if (!errorMessage || !errorMessage.classList.contains('invalid-feedback')) {
+                        errorMessage = document.createElement('div');
+                        errorMessage.className = 'invalid-feedback';
+                        element.parentNode.insertBefore(errorMessage, element.nextSibling);
+                    }
+                    errorMessage.textContent = field.message;
+                    errorMessage.style.display = 'block';
+                    
                     isValid = false;
                 } else {
-                    field.classList.remove('show-error', 'is-invalid');
+                    element.classList.remove('show-error', 'is-invalid');
+                    const errorMessage = element.nextElementSibling;
+                    if (errorMessage && errorMessage.classList.contains('invalid-feedback')) {
+                        errorMessage.style.display = 'none';
+                    }
                 }
             });
 
@@ -1190,11 +1225,14 @@
                     errorMessage.textContent = 'Veuillez ajouter une image principale';
                     mainImageZone.parentNode.appendChild(errorMessage);
                 }
+                mainImageZone.style.borderColor = 'var(--secondary-color)';
+                mainImageZone.style.backgroundColor = '#fff5f5';
                 isValid = false;
-                // Faire défiler jusqu'à la zone d'image si ce n'est pas valide
                 mainImageZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
                 mainImageZone.classList.remove('show-error');
+                mainImageZone.style.borderColor = '';
+                mainImageZone.style.backgroundColor = '';
                 const errorMessage = document.querySelector('#mainImage-error');
                 if (errorMessage) {
                     errorMessage.remove();
