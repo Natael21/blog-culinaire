@@ -1204,6 +1204,15 @@
                 const container = document.getElementById('mainImagePreview');
                 container.innerHTML = '';
                 createImagePreview(file, container, true);
+                
+                // Supprimer l'état d'erreur et le message
+                const mainImageZone = document.getElementById('mainImageZone');
+                mainImageZone.classList.remove('show-error');
+                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                
                 updateMarkdownPreview();
             }
         }
@@ -1221,6 +1230,7 @@
         function validateForm() {
             console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
             let isValid = true;
+            let firstErrorField = null;
 
             // Fonction pour valider un champ individuel
             function validateField(fieldId, fieldName, isRequired = true) {
@@ -1238,6 +1248,9 @@
                     if (field) {
                         field.classList.add('is-invalid');
                         field.classList.add('show-error');
+                        if (!firstErrorField) {
+                            firstErrorField = field;
+                        }
                     }
                     if (errorDiv) {
                         errorDiv.style.display = 'block';
@@ -1291,6 +1304,9 @@
                 errorDiv.className = 'invalid-feedback';
                 errorDiv.textContent = 'Veuillez ajouter une description détaillée';
                 editorElement.parentNode.appendChild(errorDiv);
+                if (!firstErrorField) {
+                    firstErrorField = editorElement;
+                }
                 isValid = false;
             } else {
                 console.log('✓ L\'éditeur contient du contenu');
@@ -1309,12 +1325,17 @@
             if (!mainImageFile) {
                 console.log('⚠️ Pas d\'image principale - ajout de l\'état d\'erreur');
                 mainImageZone.classList.add('show-error');
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'invalid-feedback';
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = 'Veuillez ajouter une image principale';
-                mainImageZone.parentNode.appendChild(errorDiv);
-                mainImageZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                let errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = 'Veuillez ajouter une image principale';
+                    mainImageZone.parentNode.appendChild(errorDiv);
+                }
+                if (!firstErrorField) {
+                    firstErrorField = mainImageZone;
+                }
                 isValid = false;
             } else {
                 console.log('✓ Image principale présente');
@@ -1323,6 +1344,11 @@
                 if (existingError) {
                     existingError.remove();
                 }
+            }
+
+            // Faire défiler jusqu'au premier champ en erreur si présent
+            if (firstErrorField) {
+                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
             console.log(`\n=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
