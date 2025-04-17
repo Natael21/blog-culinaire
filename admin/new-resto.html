@@ -1215,7 +1215,7 @@
 
             const overallRating = calculateOverallRating();
             
-            const detailedDescription = editor ? editor.getHTML() : '';
+            const editorContent = editor.getHTML().replace(/<p>/g, '\n\n').replace(/<\/p>/g, '').replace(/<br>/g, '\n');
 
             const ratings = {
                 food: {
@@ -1286,7 +1286,9 @@ ratings:
     score: ${overallRating}
     criteria: 'Expérience globale, facteur "wow"'
     comment: '${ratings.overallExperience.comment}'
----`;
+---
+
+${editorContent}`;
         }
 
         function calculateOverallRating() {
