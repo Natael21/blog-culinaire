@@ -376,11 +376,11 @@ title: Administration - Blog Culinaire
                 </a>
             </div>
 
-            <div class="publish-btn-container">
-                <button id="publishDraft" class="action-button" style="display: none;">
-                    <i class="fas fa-upload"></i> Publier les modifications
+            <div class="admin-actions" id="pendingChangesButtons" style="display: none;">
+                <button onclick="publishChanges()" class="action-button publish">
+                    <i class="fas fa-cloud-upload-alt"></i> Publier les modifications
                 </button>
-                <button id="cancelDraft" class="action-button cancel" style="display: none; margin-left: 1rem;">
+                <button onclick="cancelChanges()" class="action-button cancel">
                     <i class="fas fa-times"></i> Annuler les modifications
                 </button>
             </div>
@@ -808,6 +808,23 @@ title: Administration - Blog Culinaire
                 };
             });
         }
+
+        // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
+        function updatePendingChangesButtons() {
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const buttons = document.getElementById('pendingChangesButtons');
+            if (pendingChanges.length > 0) {
+                buttons.style.display = 'flex';
+            } else {
+                buttons.style.display = 'none';
+            }
+        }
+
+        // Appeler la fonction au chargement de la page
+        document.addEventListener('DOMContentLoaded', updatePendingChangesButtons);
+
+        // Vérifier périodiquement les changements dans le localStorage
+        setInterval(updatePendingChangesButtons, 1000);
     </script>
 </body>
 </html> 

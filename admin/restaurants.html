@@ -423,10 +423,19 @@
                     throw new Error('Réponse invalide du serveur');
                 }
                 
-                console.log('Nombre de restaurants reçus:', data.length);
+                // Récupérer les modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                const deletedFiles = pendingChanges
+                    .filter(change => change.type === 'delete')
+                    .map(change => change.filename);
+                
+                // Filtrer les restaurants supprimés
+                const filteredData = data.filter(restaurant => !deletedFiles.includes(restaurant.filename));
+                
+                console.log('Nombre de restaurants reçus:', filteredData.length);
                 
                 // Trier les restaurants : drafts d'abord, puis par date
-                const restaurants = data.sort((a, b) => {
+                const restaurants = filteredData.sort((a, b) => {
                     if (a.state === 'draft' && b.state !== 'draft') return -1;
                     if (a.state !== 'draft' && b.state === 'draft') return 1;
                     return new Date(b.date) - new Date(a.date);
@@ -526,6 +535,18 @@
         // Fonction pour supprimer un restaurant
         async function deleteRestaurant(filename) {
             try {
+                // Trouver le titre du restaurant
+                const restaurantElement = document.querySelector(`[data-filename="${filename}"]`);
+                const restaurantTitle = restaurantElement.querySelector('.restaurant-name').textContent.trim();
+                
+                // Afficher le modal de confirmation et attendre la réponse
+                const confirmed = await showConfirmationModal(restaurantTitle);
+                
+                if (!confirmed) {
+                    console.log('Suppression annulée');
+                    return;
+                }
+
                 // Récupérer les modifications en attente
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 
@@ -539,8 +560,10 @@
                 // Sauvegarder les modifications en attente
                 localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
                 
+                // Déclencher l'événement de mise à jour des boutons
+                window.dispatchEvent(new Event('storageUpdated'));
+                
                 // Supprimer le restaurant de la liste affichée
-                const restaurantElement = document.querySelector(`[data-filename="${filename}"]`);
                 if (restaurantElement) {
                     restaurantElement.remove();
                 }
@@ -556,7 +579,9 @@
 
         // Fonction pour éditer un restaurant
         function editRestaurant(filename) {
-            window.location.href = `edit-resto.html?filename=${encodeURIComponent(filename)}`;
+            // Temporairement désactivé
+            console.log('Édition désactivée pour:', filename);
+            return false;
         }
 
         // Fonction de recherche

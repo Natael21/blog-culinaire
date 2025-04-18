@@ -80,9 +80,17 @@ exports.handler = async function(event, context) {
                 const state = metadata.state || 'ready';
                 console.log(`État du fichier ${file.name}:`, state);
 
+                // Nettoyer les guillemets d'une chaîne de caractères
+                const cleanString = (str) => {
+                    if (!str) return '';
+                    return str.replace(/^['"]|['"]$/g, '').trim();
+                };
+
                 // Nettoyer les chemins d'images
                 const cleanImagePath = (path) => {
                     if (!path) return '';
+                    // Supprimer les guillemets et nettoyer le chemin
+                    path = path.replace(/['"]/g, '').trim();
                     // Supprimer les doubles slashes et s'assurer que le chemin commence par /images
                     return path.replace(/\/+/g, '/').replace(/^\/?images\//, '/images/');
                 };
@@ -90,13 +98,13 @@ exports.handler = async function(event, context) {
                 const restaurant = {
                     filename: file.name,
                     state,
-                    title: metadata.title || '',
-                    date: metadata.date || '',
+                    title: cleanString(metadata.title) || '',
+                    date: cleanString(metadata.date) || '',
                     image: cleanImagePath(metadata.image || ''),
-                    address: metadata.address || '',
-                    style: metadata.style || '',
-                    price: metadata.price || '',
-                    rating: metadata.note || '',
+                    address: cleanString(metadata.address) || '',
+                    style: cleanString(metadata.style) || '',
+                    price: cleanString(metadata.price) || '',
+                    rating: cleanString(metadata.note) || '',
                     content: content.split('---')[2].trim()
                 };
 
