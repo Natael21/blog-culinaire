@@ -75,8 +75,8 @@
 
         .search-input {
             width: 100%;
-            padding: 12px 20px;
-            border: 2px solid var(--input-border);
+            padding: 1rem 1.5rem;
+            border: 2px solid #eee;
             border-radius: var(--border-radius);
             font-size: 1rem;
             transition: all 0.3s ease;
@@ -89,81 +89,101 @@
         }
 
         .restaurants-list {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 1rem;
         }
 
         .restaurant-card {
-            display: flex;
-            align-items: center;
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            display: flex;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .restaurant-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
         }
 
         .restaurant-image {
-            width: 80px;
-            height: 80px;
-            border-radius: var(--border-radius);
+            width: 200px;
+            height: 200px;
             object-fit: cover;
-            margin-right: 1.5rem;
+            flex-shrink: 0;
         }
 
         .restaurant-info {
-            flex: 1;
+            padding: 1.5rem;
+            flex-grow: 1;
+            min-width: 0; /* Important pour que text-overflow fonctionne */
         }
 
         .restaurant-name {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            margin: 0 0 1rem;
             color: var(--primary-color);
-            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .draft-badge {
+            background: #ffd700;
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
         .restaurant-meta {
             display: flex;
-            gap: 1rem;
-            color: #7f8c8d;
-            font-size: 0.9rem;
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
         .restaurant-meta-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            color: #666;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .restaurant-meta-item i {
             color: var(--accent-color);
+            width: 16px;
+            flex-shrink: 0;
         }
 
         .restaurant-actions {
             display: flex;
-            gap: 1rem;
-            margin-left: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            border-left: 1px solid #eee;
+            justify-content: center;
         }
 
         .action-button {
-            padding: 8px 16px;
+            padding: 0.75rem 1.5rem;
             border: none;
             border-radius: var(--border-radius);
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.5rem;
             transition: all 0.3s ease;
+            text-decoration: none;
             color: white;
-            font-size: 0.95rem;
         }
 
         .edit-button {
@@ -172,7 +192,6 @@
 
         .edit-button:hover {
             background: #2980b9;
-            transform: translateY(-2px);
         }
 
         .delete-button {
@@ -181,17 +200,6 @@
 
         .delete-button:hover {
             background: #c0392b;
-            transform: translateY(-2px);
-        }
-
-        .draft-badge {
-            background: #f1c40f;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-left: 1rem;
         }
 
         /* Styles pour le modal de confirmation */
@@ -301,6 +309,29 @@
             to {
                 transform: translateX(0);
                 opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .restaurant-card {
+                flex-direction: column;
+            }
+
+            .restaurant-image {
+                width: 100%;
+                height: 200px;
+            }
+
+            .restaurant-actions {
+                flex-direction: row;
+                border-left: none;
+                border-top: 1px solid #eee;
+                padding: 1rem;
+            }
+
+            .action-button {
+                flex: 1;
+                justify-content: center;
             }
         }
     </style>
