@@ -80,12 +80,19 @@ exports.handler = async function(event, context) {
                 const state = metadata.state || 'ready';
                 console.log(`État du fichier ${file.name}:`, state);
 
+                // Nettoyer les chemins d'images
+                const cleanImagePath = (path) => {
+                    if (!path) return '';
+                    // Supprimer les doubles slashes et s'assurer que le chemin commence par /images
+                    return path.replace(/\/+/g, '/').replace(/^\/?images\//, '/images/');
+                };
+                
                 const restaurant = {
                     filename: file.name,
                     state,
                     title: metadata.title || '',
                     date: metadata.date || '',
-                    image: metadata.image || '',
+                    image: cleanImagePath(metadata.image || ''),
                     address: metadata.address || '',
                     style: metadata.style || '',
                     price: metadata.price || '',

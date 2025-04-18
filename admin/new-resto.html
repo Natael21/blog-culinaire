@@ -1826,8 +1826,8 @@ price: '${price}'
 address: '${address}'
 image: '${mainImagePath}'
 images:
-  - image: '${mainImagePath}'
 ${galleryPaths.join('\n')}
+
 ratings:
   food:
     score: ${ratings.food.score}
@@ -1850,7 +1850,7 @@ ratings:
     criteria: 'Innovation, créativité, authenticité'
     comment: '${ratings.originality.comment}'
   overall:
-    score: ${overallRating}
+    score: ${ratings.overallExperience.score}
     criteria: 'Expérience globale, facteur "wow"'
     comment: '${ratings.overallExperience.comment}'
 ---
