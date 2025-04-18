@@ -454,7 +454,7 @@
                     console.log('Image du restaurant:', restaurant.image);
                     
                     // Vérifier si l'image existe et commence par /images/
-                    const imageUrl = restaurant.image && restaurant.image.startsWith('/images/') 
+                    const imageUrl = restaurant.image && (restaurant.image.startsWith('/images/') || restaurant.image.startsWith('/images/images/')) 
                         ? restaurant.image 
                         : null;
                     console.log('URL de l\'image après vérification:', imageUrl);
