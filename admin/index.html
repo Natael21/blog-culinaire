@@ -69,11 +69,11 @@ title: Administration - Blog Culinaire
             margin-top: 0.5rem;
         }
         .admin-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            display: flex;
+            justify-content: center;
             gap: 1.5rem;
-            margin: 0 auto;
-            max-width: 1400px;
+            margin: 2rem auto;
+            max-width: 800px;
         }
         .action-button {
             background: linear-gradient(135deg, #3498db, #2980b9);
@@ -823,8 +823,15 @@ title: Administration - Blog Culinaire
         // Appeler la fonction au chargement de la page
         document.addEventListener('DOMContentLoaded', updatePendingChangesButtons);
 
-        // Vérifier périodiquement les changements dans le localStorage
-        setInterval(updatePendingChangesButtons, 1000);
+        // Écouter l'événement storageUpdated
+        window.addEventListener('storageUpdated', updatePendingChangesButtons);
+        
+        // Écouter aussi les changements de localStorage directement
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'pendingChanges') {
+                updatePendingChangesButtons();
+            }
+        });
     </script>
 </body>
 </html> 

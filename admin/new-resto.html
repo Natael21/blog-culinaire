@@ -2157,13 +2157,12 @@ ${editorContent}`;
 
         // Modifier la fonction d'annulation existante
         async function cancelForm() {
-            const shouldCancel = await showFormConfirmationModal();
-            if (shouldCancel) {
-                // Supprimer le brouillon du localStorage
-                localStorage.removeItem('currentDraft');
-                // Rediriger vers la page d'administration
-                window.location.href = 'index.html';
-            }
+            // Vider le localStorage
+            localStorage.removeItem('currentDraft');
+            localStorage.removeItem('pendingChanges');
+            
+            // Rediriger vers la page d'administration
+            window.location.href = 'index.html';
         }
     </script>
 </head>
