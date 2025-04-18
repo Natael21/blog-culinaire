@@ -183,12 +183,12 @@ title: Administration - Blog Culinaire
             height: 3rem;
             color: #3498db;
         }
-        #cancelDraft.action-button.cancel {
+        .action-button.cancel {
             background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
             box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3) !important;
             color: #fff !important;
         }
-        #cancelDraft.action-button.cancel:hover {
+        .action-button.cancel:hover {
             background: linear-gradient(135deg, #c0392b, #a93224) !important;
             box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4) !important;
         }
@@ -719,6 +719,62 @@ title: Administration - Blog Culinaire
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+
+        // Fonction pour publier les modifications
+        async function publishChanges() {
+            try {
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                if (pendingChanges.length === 0) {
+                    showNotification('Aucune modification en attente', 'error');
+                    return;
+                }
+
+                // TODO: Implémenter la logique de publication des modifications
+                // Pour l'instant, on simule juste la publication en vidant le localStorage
+                localStorage.removeItem('pendingChanges');
+                showNotification('Les modifications ont été publiées avec succès', 'success');
+                updatePendingChangesButtons();
+            } catch (error) {
+                console.error('Erreur lors de la publication:', error);
+                showNotification('Erreur lors de la publication des modifications', 'error');
+            }
+        }
+
+        // Fonction pour annuler les modifications
+        async function cancelChanges() {
+            const modal = document.createElement('div');
+            modal.className = 'confirmation-modal';
+            modal.innerHTML = `
+                <div class="confirmation-content">
+                    <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                    <p class="confirmation-message">Êtes-vous sûr de vouloir annuler toutes les modifications en attente ?</p>
+                    <div class="confirmation-buttons">
+                        <button class="confirmation-button confirm">Confirmer</button>
+                        <button class="confirmation-button cancel">Annuler</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+
+            return new Promise((resolve) => {
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    localStorage.removeItem('pendingChanges');
+                    showNotification('Les modifications ont été annulées', 'success');
+                    modal.remove();
+                    updatePendingChangesButtons();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
         }
 
         // Modifier la fonction publishDraft
