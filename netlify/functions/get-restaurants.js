@@ -28,9 +28,9 @@ exports.handler = async function(event, context) {
         const files = await response.json();
         console.log('Réponse GitHub:', files);
 
-        // Filtrer pour ne garder que les fichiers .md
-        const mdFiles = files.filter(file => file.name.endsWith('.md'));
-        console.log('Fichiers .md trouvés:', mdFiles);
+        // Filtrer pour ne garder que les fichiers .md et .markdown
+        const mdFiles = files.filter(file => file.name.endsWith('.md') || file.name.endsWith('.markdown'));
+        console.log('Fichiers .md et .markdown trouvés:', mdFiles);
 
         // Lire chaque fichier et extraire les métadonnées
         const restaurants = await Promise.all(mdFiles.map(async file => {
