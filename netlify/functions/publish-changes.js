@@ -21,14 +21,24 @@ exports.handler = async function(event, context) {
             };
         }
 
-        const restaurantsDir = path.join(process.cwd(), 'content', 'restaurants');
-        const imagesDir = path.join(process.cwd(), 'images');
+        // Utiliser le chemin correct pour Netlify Functions
+        const baseDir = path.join(process.cwd(), '..');
+        const postsDir = path.join(baseDir, '_posts');
+        const imagesDir = path.join(baseDir, 'images');
+        
+        console.log('Chemins des répertoires:', {
+            baseDir,
+            postsDir,
+            imagesDir
+        });
         
         // S'assurer que les répertoires existent
-        if (!fs.existsSync(restaurantsDir)) {
-            fs.mkdirSync(restaurantsDir, { recursive: true });
+        if (!fs.existsSync(postsDir)) {
+            console.log('Création du répertoire _posts:', postsDir);
+            fs.mkdirSync(postsDir, { recursive: true });
         }
         if (!fs.existsSync(imagesDir)) {
+            console.log('Création du répertoire images:', imagesDir);
             fs.mkdirSync(imagesDir, { recursive: true });
         }
         
@@ -40,7 +50,7 @@ exports.handler = async function(event, context) {
             try {
                 if (change.type === 'delete') {
                     // Supprimer le fichier
-                    const filePath = path.join(restaurantsDir, change.filename);
+                    const filePath = path.join(postsDir, change.filename);
                     if (fs.existsSync(filePath)) {
                         fs.unlinkSync(filePath);
                         processedChanges.push(change);
@@ -50,7 +60,7 @@ exports.handler = async function(event, context) {
                     }
                 } else if (change.type === 'create') {
                     // Créer le fichier
-                    const filePath = path.join(restaurantsDir, change.filename);
+                    const filePath = path.join(postsDir, change.filename);
                     
                     // Convertir le contenu en YAML si c'est un objet
                     let content = change.content;
