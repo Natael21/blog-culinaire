@@ -444,11 +444,39 @@
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des restaurants');
                 }
-                const restaurants = await response.json();
+                const data = await response.json();
+                
+                if (!Array.isArray(data)) {
+                    throw new Error('Réponse invalide du serveur');
+                }
+                
+                // Récupérer les modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                const deletedFiles = pendingChanges
+                    .filter(change => change.type === 'delete')
+                    .map(change => change.filename);
+                
+                // Filtrer les restaurants supprimés
+                const filteredData = data.filter(restaurant => !deletedFiles.includes(restaurant.filename));
+                
+                // Trier les restaurants : drafts d'abord, puis par date
+                const restaurants = filteredData.sort((a, b) => {
+                    if (a.state === 'draft' && b.state !== 'draft') return -1;
+                    if (a.state !== 'draft' && b.state === 'draft') return 1;
+                    return new Date(b.date) - new Date(a.date);
+                });
+                
                 displayRestaurants(restaurants);
             } catch (error) {
                 console.error('Erreur:', error);
                 showNotification('Erreur lors du chargement des restaurants', 'error');
+                // Rafraîchir la page une seule fois en cas d'erreur
+                if (!sessionStorage.getItem('hasRefreshed')) {
+                    sessionStorage.setItem('hasRefreshed', 'true');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                }
             } finally {
                 hideSpinner();
             }
