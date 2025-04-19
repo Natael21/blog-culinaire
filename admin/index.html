@@ -760,9 +760,9 @@ title: Administration - Blog Culinaire
 
         // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
         function updatePendingChangesButtons() {
+            const buttons = document.getElementById('pendingChangesButtons');
             const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
             const currentDraft = localStorage.getItem('currentDraft');
-            const buttons = document.getElementById('pendingChangesButtons');
             
             if ((pendingChanges && pendingChanges.length > 0) || currentDraft) {
                 buttons.style.display = 'flex';
@@ -779,7 +779,9 @@ title: Administration - Blog Culinaire
         });
 
         // Écouter l'événement personnalisé storageUpdated
-        window.addEventListener('storageUpdated', updatePendingChangesButtons);
+        window.addEventListener('storageUpdated', function() {
+            updatePendingChangesButtons();
+        });
 
         // Vérifier l'état initial des boutons
         document.addEventListener('DOMContentLoaded', function() {
