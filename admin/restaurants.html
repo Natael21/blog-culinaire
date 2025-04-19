@@ -396,12 +396,11 @@
     <script>
         // Fonction pour récupérer le token d'authentification
         function getAuthToken() {
-            const userData = JSON.parse(localStorage.getItem('gotrue.user') || '{}');
-            const token = userData.token?.access_token;
-            if (!token) {
+            const user = netlifyIdentity.currentUser();
+            if (!user) {
                 throw new Error('No authorization header');
             }
-            return token;
+            return user.token.access_token;
         }
 
         // Fonction pour afficher le modal de confirmation

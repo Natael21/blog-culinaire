@@ -2273,13 +2273,23 @@ ${editorContent}`;
         }
 
         // Gestionnaire de soumission du formulaire
-        document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            if (!validateForm()) {
-                return;
+        function initializeForm() {
+            const form = document.getElementById('restaurantForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    if (!validateForm()) {
+                        return;
+                    }
+                    await saveDraft();
+                });
+            } else {
+                console.error('Formulaire non trouvé');
             }
-            await saveDraft();
-        });
+        }
+
+        // Initialiser le formulaire une fois le DOM chargé
+        document.addEventListener('DOMContentLoaded', initializeForm);
 
         // Fonction pour charger un brouillon
         function loadDraft(filename) {
