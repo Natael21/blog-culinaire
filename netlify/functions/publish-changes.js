@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+const yaml = require('js-yaml');
 
 exports.handler = async function(event, context) {
     try {
@@ -20,6 +22,15 @@ exports.handler = async function(event, context) {
         }
 
         const restaurantsDir = path.join(process.cwd(), 'content', 'restaurants');
+        const imagesDir = path.join(process.cwd(), 'images');
+        
+        // S'assurer que les répertoires existent
+        if (!fs.existsSync(restaurantsDir)) {
+            fs.mkdirSync(restaurantsDir, { recursive: true });
+        }
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
         
         // Traiter chaque changement
         for (const change of changes) {
@@ -32,8 +43,48 @@ exports.handler = async function(event, context) {
             } else if (change.type === 'create') {
                 // Créer le fichier
                 const filePath = path.join(restaurantsDir, change.filename);
-                fs.writeFileSync(filePath, change.content);
+                
+                // Convertir le contenu en YAML si c'est un objet
+                let content = change.content;
+                if (typeof content === 'object') {
+                    // Ajouter les métadonnées YAML
+                    const frontMatter = {
+                        layout: 'restaurant',
+                        title: content.title,
+                        date: content.date,
+                        address: content.address,
+                        style: content.style,
+                        state: content.state || 'draft' // Conserver l'état draft si présent
+                    };
+                    
+                    // Convertir en YAML
+                    const yamlContent = yaml.dump(frontMatter);
+                    content = `---\n${yamlContent}---\n\n${content.content || ''}`;
+                }
+                
+                fs.writeFileSync(filePath, content);
+                
+                // Gérer les images si présentes
+                if (change.images && Array.isArray(change.images)) {
+                    for (const image of change.images) {
+                        if (image.base64 && image.filename) {
+                            const imagePath = path.join(imagesDir, image.filename);
+                            const imageBuffer = Buffer.from(image.base64, 'base64');
+                            fs.writeFileSync(imagePath, imageBuffer);
+                        }
+                    }
+                }
             }
+        }
+
+        // Commiter et pousser les changements
+        try {
+            execSync('git add .', { cwd: process.cwd() });
+            execSync('git commit -m "Mise à jour des restaurants"', { cwd: process.cwd() });
+            execSync('git push', { cwd: process.cwd() });
+        } catch (gitError) {
+            console.error('Erreur Git:', gitError);
+            throw new Error('Erreur lors de la publication sur GitHub');
         }
 
         return {
