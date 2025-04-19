@@ -22,7 +22,7 @@ exports.handler = async function(event, context) {
         }
 
         // Utiliser le chemin correct pour Netlify Functions
-        const baseDir = path.join(process.cwd(), '..');
+        const baseDir = path.resolve(process.cwd(), '../../..');
         const postsDir = path.join(baseDir, '_posts');
         const imagesDir = path.join(baseDir, 'images');
         
@@ -32,14 +32,28 @@ exports.handler = async function(event, context) {
             imagesDir
         });
         
-        // S'assurer que les répertoires existent
-        if (!fs.existsSync(postsDir)) {
-            console.log('Création du répertoire _posts:', postsDir);
-            fs.mkdirSync(postsDir, { recursive: true });
-        }
-        if (!fs.existsSync(imagesDir)) {
-            console.log('Création du répertoire images:', imagesDir);
-            fs.mkdirSync(imagesDir, { recursive: true });
+        // S'assurer que les répertoires existent et sont accessibles
+        try {
+            // Vérifier si les répertoires sont accessibles
+            fs.accessSync(baseDir, fs.constants.R_OK | fs.constants.W_OK);
+            console.log('Répertoire de base accessible:', baseDir);
+            
+            if (!fs.existsSync(postsDir)) {
+                console.log('Création du répertoire _posts:', postsDir);
+                fs.mkdirSync(postsDir, { recursive: true });
+            } else {
+                console.log('Répertoire _posts existant:', postsDir);
+            }
+            
+            if (!fs.existsSync(imagesDir)) {
+                console.log('Création du répertoire images:', imagesDir);
+                fs.mkdirSync(imagesDir, { recursive: true });
+            } else {
+                console.log('Répertoire images existant:', imagesDir);
+            }
+        } catch (error) {
+            console.error('Erreur d\'accès aux répertoires:', error);
+            throw new Error(`Erreur d'accès aux répertoires: ${error.message}`);
         }
         
         // Traiter chaque changement
