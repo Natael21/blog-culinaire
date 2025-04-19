@@ -2167,31 +2167,48 @@ ${editorContent}`;
 
         // Fonction pour sauvegarder le brouillon
         function saveDraft() {
-            const formData = new FormData(document.getElementById('restaurantForm'));
-            const draftData = {
-                filename: formData.get('filename'),
+            const formData = new FormData(form);
+            const restaurantData = {
                 title: formData.get('title'),
-                content: formData.get('content'),
+                content: editor.getContent(),
+                address: formData.get('address'),
+                style: formData.get('style'),
                 images: Array.from(formData.getAll('images')).map(file => ({
-                    name: file.name,
-                    data: file.data
+                    filename: file.name,
+                    base64: URL.createObjectURL(file)
                 }))
             };
 
-            // Sauvegarder dans le tableau drafts
+            // Récupérer les brouillons existants ou initialiser un nouveau tableau
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            const existingIndex = drafts.findIndex(draft => draft.filename === draftData.filename);
             
-            if (existingIndex !== -1) {
+            // Vérifier si un brouillon avec le même nom existe déjà
+            const existingDraftIndex = drafts.findIndex(d => d.filename === filename);
+            
+            if (existingDraftIndex !== -1) {
                 // Mettre à jour le brouillon existant
-                drafts[existingIndex] = draftData;
+                drafts[existingDraftIndex] = {
+                    ...drafts[existingDraftIndex],
+                    ...restaurantData,
+                    lastModified: new Date().toISOString()
+                };
             } else {
                 // Ajouter un nouveau brouillon
-                drafts.push(draftData);
+                drafts.push({
+                    filename,
+                    ...restaurantData,
+                    lastModified: new Date().toISOString()
+                });
             }
             
+            // Sauvegarder les brouillons
             localStorage.setItem('drafts', JSON.stringify(drafts));
-            showNotification('Brouillon sauvegardé avec succès', 'success');
+            
+            // Mettre à jour l'interface
+            updatePendingChangesButtons();
+            
+            // Afficher une notification
+            showNotification('Brouillon enregistré avec succès', 'success');
         }
 
         // Fonction pour charger un brouillon
@@ -2200,115 +2217,96 @@ ${editorContent}`;
             const draft = drafts.find(d => d.filename === filename);
             
             if (draft) {
-                document.getElementById('title').value = draft.title;
-                document.getElementById('content').value = draft.content;
-                // Charger les images si nécessaire
+                form.querySelector('[name="title"]').value = draft.title;
+                editor.setContent(draft.content);
+                form.querySelector('[name="address"]').value = draft.address;
+                form.querySelector('[name="style"]').value = draft.style;
+                
+                // Gérer les images
+                const imageContainer = document.getElementById('image-preview');
+                imageContainer.innerHTML = '';
+                
                 if (draft.images && draft.images.length > 0) {
-                    // Code pour charger les images
+                    draft.images.forEach(image => {
+                        const img = document.createElement('img');
+                        img.src = image.base64;
+                        img.alt = 'Image du restaurant';
+                        imageContainer.appendChild(img);
+                    });
                 }
+                
                 showNotification('Brouillon chargé avec succès', 'success');
-            } else {
-                showNotification('Aucun brouillon trouvé', 'error');
             }
         }
 
         // Fonction pour supprimer un brouillon
         function deleteDraft(filename) {
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            const updatedDrafts = drafts.filter(draft => draft.filename !== filename);
+            const updatedDrafts = drafts.filter(d => d.filename !== filename);
             localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
-            showNotification('Brouillon supprimé avec succès', 'success');
+            updatePendingChangesButtons();
         }
 
-        // Fonction pour publier un restaurant
+        // Fonction pour publier le restaurant
         async function publishRestaurant() {
-            const formData = new FormData(document.getElementById('restaurantForm'));
-            const data = {
-                filename: formData.get('filename'),
-                title: formData.get('title'),
-                content: formData.get('content'),
-                images: Array.from(formData.getAll('images')).map(file => ({
-                    name: file.name,
-                    data: file.data
-                }))
-            };
-
             try {
-                const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
+                const formData = new FormData(form);
+                const restaurantData = {
+                    type: 'create',
+                    filename: filename,
+                    content: {
+                        title: formData.get('title'),
+                        content: editor.getContent(),
+                        date: new Date().toISOString(),
+                        address: formData.get('address'),
+                        style: formData.get('style'),
+                        state: 'published'
+                    }
+                };
+
+                const response = await fetch('/.netlify/functions/publish-changes', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ changes: [restaurantData] })
                 });
 
                 if (response.ok) {
                     // Supprimer le brouillon après publication réussie
-                    deleteDraft(data.filename);
+                    deleteDraft(filename);
                     showNotification('Restaurant publié avec succès', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'restaurants.html';
-                    }, 1500);
+                    setTimeout(() => window.location.href = 'restaurants.html', 2000);
                 } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Erreur lors de la publication');
+                    const error = await response.json();
+                    showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
                 }
             } catch (error) {
-                showNotification(error.message || 'Erreur lors de la publication', 'error');
+                showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
             }
         }
 
         // Fonction pour annuler les modifications
-        async function cancelChanges() {
-            const modal = document.createElement('div');
-            modal.className = 'confirmation-modal';
-            modal.innerHTML = `
-                <div class="confirmation-content">
-                    <h3 class="confirmation-title">Confirmer l'annulation</h3>
-                    <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
-                    <div class="confirmation-buttons">
-                        <button class="confirmation-button confirm">Confirmer</button>
-                        <button class="confirmation-button cancel">Annuler</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-
-            return new Promise((resolve) => {
-                const confirmButton = modal.querySelector('.confirmation-button.confirm');
-                const cancelButton = modal.querySelector('.confirmation-button.cancel');
-
-                confirmButton.onclick = () => {
-                    const formData = new FormData(document.getElementById('restaurantForm'));
-                    const filename = formData.get('filename');
-                    
-                    // Supprimer le brouillon
-                    deleteDraft(filename);
-                    
-                    // Rediriger vers la liste des restaurants
-                    window.location.href = 'restaurants.html';
-                    
-                    modal.remove();
-                    resolve(true);
-                };
-
-                cancelButton.onclick = () => {
-                    modal.remove();
-                    resolve(false);
-                };
-            });
+        function cancelChanges() {
+            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
+                deleteDraft(filename);
+                window.location.href = 'restaurants.html';
+            }
         }
 
         // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Vérifier s'il y a un brouillon à charger
+        document.addEventListener('DOMContentLoaded', () => {
+            // Vérifier si on charge un brouillon existant
             const urlParams = new URLSearchParams(window.location.search);
             const draftFilename = urlParams.get('draft');
             
             if (draftFilename) {
+                filename = draftFilename;
                 loadDraft(draftFilename);
             }
+            
+            // Mettre à jour les boutons
+            updatePendingChangesButtons();
         });
     </script>
 </head>
