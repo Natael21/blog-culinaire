@@ -2164,6 +2164,152 @@ ${editorContent}`;
             // Rediriger vers la page d'administration
             window.location.href = 'index.html';
         }
+
+        // Fonction pour sauvegarder le brouillon
+        function saveDraft() {
+            const formData = new FormData(document.getElementById('restaurantForm'));
+            const draftData = {
+                filename: formData.get('filename'),
+                title: formData.get('title'),
+                content: formData.get('content'),
+                images: Array.from(formData.getAll('images')).map(file => ({
+                    name: file.name,
+                    data: file.data
+                }))
+            };
+
+            // Sauvegarder dans le tableau drafts
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            const existingIndex = drafts.findIndex(draft => draft.filename === draftData.filename);
+            
+            if (existingIndex !== -1) {
+                // Mettre à jour le brouillon existant
+                drafts[existingIndex] = draftData;
+            } else {
+                // Ajouter un nouveau brouillon
+                drafts.push(draftData);
+            }
+            
+            localStorage.setItem('drafts', JSON.stringify(drafts));
+            showNotification('Brouillon sauvegardé avec succès', 'success');
+        }
+
+        // Fonction pour charger un brouillon
+        function loadDraft(filename) {
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            const draft = drafts.find(d => d.filename === filename);
+            
+            if (draft) {
+                document.getElementById('title').value = draft.title;
+                document.getElementById('content').value = draft.content;
+                // Charger les images si nécessaire
+                if (draft.images && draft.images.length > 0) {
+                    // Code pour charger les images
+                }
+                showNotification('Brouillon chargé avec succès', 'success');
+            } else {
+                showNotification('Aucun brouillon trouvé', 'error');
+            }
+        }
+
+        // Fonction pour supprimer un brouillon
+        function deleteDraft(filename) {
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            const updatedDrafts = drafts.filter(draft => draft.filename !== filename);
+            localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
+            showNotification('Brouillon supprimé avec succès', 'success');
+        }
+
+        // Fonction pour publier un restaurant
+        async function publishRestaurant() {
+            const formData = new FormData(document.getElementById('restaurantForm'));
+            const data = {
+                filename: formData.get('filename'),
+                title: formData.get('title'),
+                content: formData.get('content'),
+                images: Array.from(formData.getAll('images')).map(file => ({
+                    name: file.name,
+                    data: file.data
+                }))
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    // Supprimer le brouillon après publication réussie
+                    deleteDraft(data.filename);
+                    showNotification('Restaurant publié avec succès', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'restaurants.html';
+                    }, 1500);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erreur lors de la publication');
+                }
+            } catch (error) {
+                showNotification(error.message || 'Erreur lors de la publication', 'error');
+            }
+        }
+
+        // Fonction pour annuler les modifications
+        async function cancelChanges() {
+            const modal = document.createElement('div');
+            modal.className = 'confirmation-modal';
+            modal.innerHTML = `
+                <div class="confirmation-content">
+                    <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                    <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
+                    <div class="confirmation-buttons">
+                        <button class="confirmation-button confirm">Confirmer</button>
+                        <button class="confirmation-button cancel">Annuler</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+
+            return new Promise((resolve) => {
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    const formData = new FormData(document.getElementById('restaurantForm'));
+                    const filename = formData.get('filename');
+                    
+                    // Supprimer le brouillon
+                    deleteDraft(filename);
+                    
+                    // Rediriger vers la liste des restaurants
+                    window.location.href = 'restaurants.html';
+                    
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier s'il y a un brouillon à charger
+            const urlParams = new URLSearchParams(window.location.search);
+            const draftFilename = urlParams.get('draft');
+            
+            if (draftFilename) {
+                loadDraft(draftFilename);
+            }
+        });
     </script>
 </head>
 <body>

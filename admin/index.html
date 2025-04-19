@@ -723,9 +723,14 @@ title: Administration - Blog Culinaire
 
         // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
         function updatePendingChangesButtons() {
+            console.log('=== MISE À JOUR DES BOUTONS DE MODIFICATIONS ===');
             const buttons = document.getElementById('pendingChangesButtons');
             const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            
+            console.log('État actuel:');
+            console.log('- Nombre de modifications en attente:', pendingChanges.length);
+            console.log('- Nombre de brouillons:', drafts.length);
             
             // Vérifier si l'un ou l'autre existe
             const hasChanges = (pendingChanges && pendingChanges.length > 0) || 
@@ -733,6 +738,13 @@ title: Administration - Blog Culinaire
             
             if (buttons) {
                 buttons.style.display = hasChanges ? 'flex' : 'none';
+                console.log('État des boutons:', {
+                    pendingChanges: pendingChanges.length,
+                    drafts: drafts.length,
+                    display: buttons.style.display
+                });
+            } else {
+                console.error('Élément des boutons non trouvé !');
             }
         }
 
@@ -759,6 +771,8 @@ title: Administration - Blog Culinaire
                         images: draft.images
                     });
                 });
+
+                console.log('Données à publier:', changes);
 
                 // Envoyer les modifications à GitHub via la fonction Netlify
                 const response = await fetch('/.netlify/functions/publish-changes', {
@@ -793,12 +807,17 @@ title: Administration - Blog Culinaire
 
         // Fonction pour annuler les modifications
         async function cancelChanges() {
+            console.log('=== DÉBUT DE L\'ANNULATION DES MODIFICATIONS ===');
+            console.log('État actuel du localStorage:');
+            console.log('- pendingChanges:', JSON.parse(localStorage.getItem('pendingChanges') || '[]'));
+            console.log('- drafts:', JSON.parse(localStorage.getItem('drafts') || '[]'));
+
             const modal = document.createElement('div');
             modal.className = 'confirmation-modal';
             modal.innerHTML = `
                 <div class="confirmation-content">
                     <h3 class="confirmation-title">Confirmer l'annulation</h3>
-                    <p class="confirmation-message">Êtes-vous sûr de vouloir annuler toutes les modifications en attente ?</p>
+                    <p class="confirmation-message">Cette action supprimera tous les brouillons et modifications en attente. Êtes-vous sûr de vouloir continuer ?</p>
                     <div class="confirmation-buttons">
                         <button class="confirmation-button confirm">Confirmer</button>
                         <button class="confirmation-button cancel">Annuler</button>
@@ -813,13 +832,19 @@ title: Administration - Blog Culinaire
                 const cancelButton = modal.querySelector('.confirmation-button.cancel');
 
                 confirmButton.onclick = () => {
+                    console.log('Utilisateur a confirmé l\'annulation');
+                    
                     // Supprimer toutes les modifications en attente
                     localStorage.removeItem('pendingChanges');
                     localStorage.removeItem('drafts');
                     
+                    console.log('État du localStorage après suppression:');
+                    console.log('- pendingChanges:', localStorage.getItem('pendingChanges'));
+                    console.log('- drafts:', localStorage.getItem('drafts'));
+                    
                     // Mettre à jour l'interface
                     updatePendingChangesButtons();
-                    showNotification('Les modifications ont été annulées', 'success');
+                    showNotification('Toutes les modifications ont été annulées', 'success');
                     
                     // Rafraîchir la page après un court délai
                     setTimeout(() => {
@@ -831,6 +856,7 @@ title: Administration - Blog Culinaire
                 };
 
                 cancelButton.onclick = () => {
+                    console.log('Utilisateur a annulé l\'opération');
                     modal.remove();
                     resolve(false);
                 };
@@ -871,6 +897,18 @@ title: Administration - Blog Culinaire
         function getAllDrafts() {
             return JSON.parse(localStorage.getItem('drafts') || '[]');
         }
+
+        // Ajouter un écouteur d'événements pour les changements de localStorage
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'pendingChanges' || e.key === 'drafts') {
+                updatePendingChangesButtons();
+            }
+        });
+
+        // Vérifier l'état initial des boutons
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePendingChangesButtons();
+        });
     </script>
 </body>
 </html> 
