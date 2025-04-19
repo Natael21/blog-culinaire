@@ -350,6 +350,25 @@
                 justify-content: center;
             }
         }
+
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner-overlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #3498db;
+        }
     </style>
 </head>
 <body>
@@ -366,6 +385,12 @@
 
     <div class="restaurants-list" id="restaurantsList">
         <!-- Les restaurants seront ajoutés ici dynamiquement -->
+    </div>
+
+    <div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
     </div>
 
     <script>
@@ -402,134 +427,111 @@
             });
         }
 
+        // Fonction pour afficher/masquer le spinner
+        function showSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'flex';
+        }
+
+        function hideSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
         // Fonction pour charger et afficher les restaurants
         async function loadRestaurants() {
-            console.log('Début de la fonction loadRestaurants');
             try {
-                console.log('Tentative de récupération des restaurants...');
+                showSpinner();
                 const response = await fetch('/.netlify/functions/get-restaurants');
-                console.log('Réponse reçue:', response);
-                
                 if (!response.ok) {
-                    console.error('Erreur HTTP:', response.status, response.statusText);
-                    throw new Error(`Erreur HTTP: ${response.status}`);
+                    throw new Error('Erreur lors du chargement des restaurants');
                 }
-                
-                const data = await response.json();
-                console.log('Données reçues:', data);
-                
-                if (!Array.isArray(data)) {
-                    console.error('Les données reçues ne sont pas un tableau:', typeof data);
-                    throw new Error('Réponse invalide du serveur');
-                }
-                
-                // Récupérer les modifications en attente
-                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-                const deletedFiles = pendingChanges
-                    .filter(change => change.type === 'delete')
-                    .map(change => change.filename);
-                
-                // Filtrer les restaurants supprimés
-                const filteredData = data.filter(restaurant => !deletedFiles.includes(restaurant.filename));
-                
-                console.log('Nombre de restaurants reçus:', filteredData.length);
-                
-                // Trier les restaurants : drafts d'abord, puis par date
-                const restaurants = filteredData.sort((a, b) => {
-                    if (a.state === 'draft' && b.state !== 'draft') return -1;
-                    if (a.state !== 'draft' && b.state === 'draft') return 1;
-                    return new Date(b.date) - new Date(a.date);
-                });
-                
-                console.log('Restaurants triés:', restaurants);
-
-                const container = document.getElementById('restaurantsList');
-                container.innerHTML = '';
-
-                if (restaurants.length === 0) {
-                    console.log('Aucun restaurant trouvé');
-                    container.innerHTML = `
-                        <div class="no-restaurants-message">
-                            <i class="fas fa-utensils"></i>
-                            <p>Aucun restaurant trouvé</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                console.log('Création des cartes de restaurants...');
-                restaurants.forEach(restaurant => {
-                    console.log('Création de la carte pour:', restaurant.title);
-                    console.log('Image du restaurant:', restaurant.image);
-                    
-                    // Vérifier si l'image existe et commence par /images/
-                    const imageUrl = restaurant.image && (restaurant.image.startsWith('/images/') || restaurant.image.startsWith('/images/images/')) 
-                        ? restaurant.image 
-                        : null;
-                    console.log('URL de l\'image après vérification:', imageUrl);
-
-                    const card = document.createElement('div');
-                    card.className = 'restaurant-card';
-                    card.setAttribute('data-filename', restaurant.filename);
-                    
-                    // Créer l'élément image avec gestion d'erreur
-                    const imageHtml = imageUrl 
-                        ? `<div class="restaurant-image">
-                             <img src="${imageUrl}" 
-                                  alt="${restaurant.title}" 
-                                  onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-image\'></i>'; console.log('Erreur de chargement de l\'image pour ${restaurant.title}');"
-                                  onload="console.log('Image chargée avec succès pour ${restaurant.title}')">
-                           </div>`
-                        : `<div class="restaurant-image">
-                             <i class="fas fa-image"></i>
-                           </div>`;
-
-                    card.innerHTML = `
-                        ${imageHtml}
-                        <div class="restaurant-info">
-                            <h3 class="restaurant-name">
-                                ${restaurant.title}
-                                ${restaurant.state === 'draft' ? '<span class="draft-badge">Brouillon</span>' : ''}
-                            </h3>
-                            <div class="restaurant-meta">
-                                <span class="restaurant-meta-item">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    ${restaurant.address}
-                                </span>
-                                <span class="restaurant-meta-item">
-                                    <i class="fas fa-utensils"></i>
-                                    ${restaurant.style}
-                                </span>
-                                <span class="restaurant-meta-item">
-                                    <i class="fas fa-calendar"></i>
-                                    ${restaurant.date}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="restaurant-actions">
-                            <button class="action-button edit-button" onclick="editRestaurant('${restaurant.filename}')">
-                                <i class="fas fa-pencil-alt"></i> Éditer
-                            </button>
-                            <button class="action-button delete-button" onclick="deleteRestaurant('${restaurant.filename}')">
-                                <i class="fas fa-trash"></i> Supprimer
-                            </button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                    console.log('Carte créée pour:', restaurant.title);
-                });
-                console.log('Affichage des restaurants terminé');
+                const restaurants = await response.json();
+                displayRestaurants(restaurants);
             } catch (error) {
-                console.error('Erreur détaillée lors du chargement des restaurants:', error);
-                const container = document.getElementById('restaurantsList');
+                console.error('Erreur:', error);
+                showNotification('Erreur lors du chargement des restaurants', 'error');
+            } finally {
+                hideSpinner();
+            }
+        }
+
+        // Fonction pour afficher les restaurants
+        function displayRestaurants(restaurants) {
+            const container = document.getElementById('restaurantsList');
+            container.innerHTML = '';
+
+            if (restaurants.length === 0) {
+                console.log('Aucun restaurant trouvé');
                 container.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Erreur lors du chargement des restaurants. Veuillez réessayer plus tard.</p>
-                        <p class="error-details">${error.message}</p>
+                    <div class="no-restaurants-message">
+                        <i class="fas fa-utensils"></i>
+                        <p>Aucun restaurant trouvé</p>
                     </div>
                 `;
+                return;
             }
+
+            console.log('Création des cartes de restaurants...');
+            restaurants.forEach(restaurant => {
+                console.log('Création de la carte pour:', restaurant.title);
+                console.log('Image du restaurant:', restaurant.image);
+                
+                // Vérifier si l'image existe et commence par /images/
+                const imageUrl = restaurant.image && (restaurant.image.startsWith('/images/') || restaurant.image.startsWith('/images/images/')) 
+                    ? restaurant.image 
+                    : null;
+                console.log('URL de l\'image après vérification:', imageUrl);
+
+                const card = document.createElement('div');
+                card.className = 'restaurant-card';
+                card.setAttribute('data-filename', restaurant.filename);
+                
+                // Créer l'élément image avec gestion d'erreur
+                const imageHtml = imageUrl 
+                    ? `<div class="restaurant-image">
+                         <img src="${imageUrl}" 
+                              alt="${restaurant.title}" 
+                              onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-image\'></i>'; console.log('Erreur de chargement de l\'image pour ${restaurant.title}');"
+                              onload="console.log('Image chargée avec succès pour ${restaurant.title}')">
+                         </div>`
+                    : `<div class="restaurant-image">
+                         <i class="fas fa-image"></i>
+                       </div>`;
+
+                card.innerHTML = `
+                    ${imageHtml}
+                    <div class="restaurant-info">
+                        <h3 class="restaurant-name">
+                            ${restaurant.title}
+                            ${restaurant.state === 'draft' ? '<span class="draft-badge">Brouillon</span>' : ''}
+                        </h3>
+                        <div class="restaurant-meta">
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                ${restaurant.address}
+                            </span>
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-utensils"></i>
+                                ${restaurant.style}
+                            </span>
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-calendar"></i>
+                                ${restaurant.date}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="restaurant-actions">
+                        <button class="action-button edit-button" onclick="editRestaurant('${restaurant.filename}')">
+                            <i class="fas fa-pencil-alt"></i> Éditer
+                        </button>
+                        <button class="action-button delete-button" onclick="deleteRestaurant('${restaurant.filename}')">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+                console.log('Carte créée pour:', restaurant.title);
+            });
+            console.log('Affichage des restaurants terminé');
         }
 
         // Fonction pour supprimer un restaurant
@@ -608,7 +610,7 @@
         });
 
         // Charger les restaurants au chargement de la page
-        window.addEventListener('load', loadRestaurants);
+        document.addEventListener('DOMContentLoaded', loadRestaurants);
 
         async function publishChanges() {
             try {
