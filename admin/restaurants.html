@@ -616,14 +616,30 @@
             try {
                 // Récupérer les modifications en attente
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                const currentDraft = localStorage.getItem('currentDraft');
                 
                 // Vérifier si les modifications sont valides
-                if (pendingChanges.length > 0) {
+                if (pendingChanges.length > 0 || currentDraft) {
+                    // Si on a un brouillon, l'ajouter aux modifications
+                    if (currentDraft) {
+                        const draftData = JSON.parse(currentDraft);
+                        pendingChanges.push({
+                            type: 'create',
+                            filename: draftData.filename,
+                            content: draftData.content,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                    
                     // Appliquer les modifications
                     await applyChanges(pendingChanges);
                     
                     // Vider le localStorage
                     localStorage.removeItem('pendingChanges');
+                    localStorage.removeItem('currentDraft');
+                    
+                    // Déclencher l'événement de mise à jour des boutons
+                    window.dispatchEvent(new Event('storageUpdated'));
                     
                     // Recharger la liste des restaurants
                     loadRestaurants();
@@ -643,6 +659,8 @@
         function cancelChanges() {
             // Vider le localStorage
             localStorage.removeItem('pendingChanges');
+            // Déclencher l'événement de mise à jour des boutons
+            window.dispatchEvent(new Event('storageUpdated'));
             // Recharger la liste des restaurants
             loadRestaurants();
             // Afficher une notification
@@ -660,6 +678,28 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+
+        // Fonction pour appliquer les modifications
+        async function applyChanges(changes) {
+            try {
+                const response = await fetch('/.netlify/functions/publish-changes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ changes })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'application des modifications');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur lors de l\'application des modifications:', error);
+                throw error;
+            }
         }
     </script>
 </body>
