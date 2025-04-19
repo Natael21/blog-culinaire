@@ -2178,12 +2178,17 @@ ${editorContent}`;
 
         // Modifier la fonction d'annulation existante
         async function cancelForm() {
-            // Vider le localStorage
-            localStorage.removeItem('currentDraft');
-            localStorage.removeItem('pendingChanges');
+            // Afficher le modal de confirmation
+            const confirmed = await showFormConfirmationModal();
             
-            // Rediriger vers la page d'administration
-            window.location.href = 'index.html';
+            if (confirmed) {
+                // Vider le localStorage
+                localStorage.removeItem('currentDraft');
+                localStorage.removeItem('pendingChanges');
+                
+                // Rediriger vers la page d'administration
+                window.location.href = 'index.html';
+            }
         }
 
         // Fonction pour sauvegarder le brouillon

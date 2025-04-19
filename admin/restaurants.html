@@ -394,6 +394,16 @@
     </div>
 
     <script>
+        // Fonction pour récupérer le token d'authentification
+        function getAuthToken() {
+            const userData = JSON.parse(localStorage.getItem('gotrue.user') || '{}');
+            const token = userData.token?.access_token;
+            if (!token) {
+                throw new Error('No authorization header');
+            }
+            return token;
+        }
+
         // Fonction pour afficher le modal de confirmation
         function showConfirmationModal(restaurantName) {
             return new Promise((resolve) => {
@@ -440,7 +450,12 @@
         async function loadRestaurants() {
             try {
                 showSpinner();
-                const response = await fetch('/.netlify/functions/get-restaurants');
+                const token = getAuthToken();
+                const response = await fetch('/.netlify/functions/get-restaurants', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des restaurants');
                 }
@@ -711,14 +726,7 @@
         // Fonction pour appliquer les modifications
         async function applyChanges(changes) {
             try {
-                // Récupérer le token d'authentification
-                const userData = JSON.parse(localStorage.getItem('gotrue.user') || '{}');
-                const token = userData.token?.access_token;
-                
-                if (!token) {
-                    throw new Error('No authorization header');
-                }
-
+                const token = getAuthToken();
                 const response = await fetch('/.netlify/functions/publish-changes', {
                     method: 'POST',
                     headers: {
