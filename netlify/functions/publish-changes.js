@@ -1,4 +1,3 @@
-const { Octokit } = require("@octokit/rest");
 const { Base64 } = require('js-base64');
 
 exports.handler = async function(event, context) {
@@ -32,21 +31,20 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Initialize Octokit with the Git Gateway token
-    console.log('Initializing Octokit with token:', process.env.GITHUB_TOKEN ? 'Token present' : 'Token missing');
-    const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN
-    });
-
-    const owner = process.env.GITHUB_OWNER;
-    const repo = process.env.GITHUB_REPO;
-    const branch = process.env.GITHUB_BRANCH || 'main';
+    // Get Git Gateway token from Authorization header
+    const authHeader = event.headers.authorization;
+    if (!authHeader) {
+      console.log('No authorization header found');
+      return { 
+        statusCode: 401, 
+        body: JSON.stringify({ error: 'No authorization header' })
+      };
+    }
 
     console.log('Git configuration:', {
-      owner,
-      repo,
-      branch,
-      hasToken: !!process.env.GITHUB_TOKEN
+      owner: process.env.GITHUB_OWNER,
+      repo: process.env.GITHUB_REPO,
+      branch: process.env.GITHUB_BRANCH || 'main'
     });
 
     // Process each change
@@ -55,45 +53,38 @@ exports.handler = async function(event, context) {
       
       if (change.type === 'delete') {
         try {
-          console.log(`Attempting to get SHA for file: _posts/${change.filename}`);
-          // Get the file's SHA
-          const { data: fileData } = await octokit.repos.getContent({
-            owner,
-            repo,
-            path: `_posts/${change.filename}`,
-            ref: branch
-          });
-          console.log('File data retrieved:', {
-            sha: fileData.sha,
-            path: fileData.path,
-            type: fileData.type
+          console.log(`Attempting to delete file: _posts/${change.filename}`);
+          
+          // Make DELETE request to Git Gateway
+          const response = await fetch(`${process.env.GIT_GATEWAY}/git/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/_posts/${change.filename}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': authHeader,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Delete restaurant: ${change.filename}`,
+              branch: process.env.GITHUB_BRANCH || 'main'
+            })
           });
 
-          console.log(`Attempting to delete file: _posts/${change.filename}`);
-          // Delete the file
-          await octokit.repos.deleteFile({
-            owner,
-            repo,
-            path: `_posts/${change.filename}`,
-            message: `Delete restaurant: ${change.filename}`,
-            sha: fileData.sha,
-            branch
-          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.log('Error response from Git Gateway:', errorData);
+            if (response.status === 404) {
+              console.log(`File ${change.filename} already deleted or doesn't exist`);
+              continue;
+            }
+            throw new Error(`Git Gateway error: ${response.status} ${response.statusText}`);
+          }
 
           console.log(`Successfully deleted ${change.filename}`);
         } catch (error) {
           console.log('Error details:', {
-            status: error.status,
             message: error.message,
             response: error.response?.data
           });
-          
-          if (error.status === 404) {
-            console.log(`File ${change.filename} already deleted or doesn't exist`);
-          } else {
-            console.error('Unexpected error during deletion:', error);
-            throw error;
-          }
+          throw error;
         }
       }
     }
