@@ -721,6 +721,21 @@ title: Administration - Blog Culinaire
             }, 3000);
         }
 
+        // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
+        function updatePendingChangesButtons() {
+            const buttons = document.getElementById('pendingChangesButtons');
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            
+            // Vérifier si l'un ou l'autre existe
+            const hasChanges = (pendingChanges && pendingChanges.length > 0) || 
+                             (drafts && drafts.length > 0);
+            
+            if (buttons) {
+                buttons.style.display = hasChanges ? 'flex' : 'none';
+            }
+        }
+
         // Fonction pour publier les modifications
         async function publishChanges() {
             try {
@@ -776,37 +791,6 @@ title: Administration - Blog Culinaire
             }
         }
 
-        // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
-        function updatePendingChangesButtons() {
-            const buttons = document.getElementById('pendingChangesButtons');
-            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            
-            // Vérifier si l'un ou l'autre existe
-            const hasChanges = (pendingChanges && pendingChanges.length > 0) || (drafts && drafts.length > 0);
-            
-            if (buttons) {
-                buttons.style.display = hasChanges ? 'flex' : 'none';
-            }
-        }
-
-        // Écouter les changements de localStorage
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'pendingChanges' || e.key === 'drafts') {
-                updatePendingChangesButtons();
-            }
-        });
-
-        // Écouter l'événement personnalisé storageUpdated
-        window.addEventListener('storageUpdated', function() {
-            updatePendingChangesButtons();
-        });
-
-        // Vérifier l'état initial des boutons
-        document.addEventListener('DOMContentLoaded', function() {
-            updatePendingChangesButtons();
-        });
-
         // Fonction pour annuler les modifications
         async function cancelChanges() {
             const modal = document.createElement('div');
@@ -853,98 +837,18 @@ title: Administration - Blog Culinaire
             });
         }
 
-        // Modifier la fonction publishDraft
-        async function publishDraft() {
-            const container = document.querySelector('.publish-btn-container');
-            showSpinner(container);
-            try {
-                const draftData = JSON.parse(localStorage.getItem('currentDraft'));
-                if (!draftData) {
-                    throw new Error('Aucun brouillon trouvé');
-                }
-
-                const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(draftData)
-                });
-                
-                if (response.ok) {
-                    // Supprimer le brouillon du localStorage après publication réussie
-                    localStorage.removeItem('currentDraft');
-                    showNotification('Publication réussie !', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Erreur lors de la publication');
-                }
-            } catch (error) {
-                showNotification(error.message || 'Erreur lors de la publication', 'error');
-            } finally {
-                hideSpinner(container);
-            }
-        }
-
-        // Modifier la fonction cancelDraft
-        async function cancelDraft() {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'confirmation-modal';
-                modal.innerHTML = `
-                    <div class="confirmation-content">
-                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
-                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
-                        <div class="confirmation-buttons">
-                            <button class="confirmation-button confirm">Confirmer</button>
-                            <button class="confirmation-button cancel">Annuler</button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(modal);
-
-                const confirmButton = modal.querySelector('.confirmation-button.confirm');
-                const cancelButton = modal.querySelector('.confirmation-button.cancel');
-
-                confirmButton.onclick = async () => {
-                    try {
-                        // Supprimer le brouillon du localStorage
-                        localStorage.removeItem('currentDraft');
-                        
-                        // Supprimer le modal
-                        modal.remove();
-                        
-                        // Afficher une notification de succès
-                        showNotification('Les modifications ont été annulées avec succès', 'success');
-                        
-                        // Rafraîchir la page après un court délai
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                        
-                        resolve(true);
-                    } catch (error) {
-                        console.error('Erreur lors de l\'annulation:', error);
-                        showNotification('Erreur lors de l\'annulation des modifications', 'error');
-                        resolve(false);
-                    }
-                };
-
-                cancelButton.onclick = () => {
-                    modal.remove();
-                    resolve(false);
-                };
-            });
-        }
-
         // Fonction pour sauvegarder un brouillon
         function saveDraft(draftData) {
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            drafts.push(draftData);
+            // Vérifier si un brouillon avec le même nom de fichier existe déjà
+            const existingIndex = drafts.findIndex(draft => draft.filename === draftData.filename);
+            if (existingIndex !== -1) {
+                // Mettre à jour le brouillon existant
+                drafts[existingIndex] = draftData;
+            } else {
+                // Ajouter un nouveau brouillon
+                drafts.push(draftData);
+            }
             localStorage.setItem('drafts', JSON.stringify(drafts));
             updatePendingChangesButtons();
         }
@@ -955,6 +859,17 @@ title: Administration - Blog Culinaire
             const updatedDrafts = drafts.filter(draft => draft.filename !== filename);
             localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
             updatePendingChangesButtons();
+        }
+
+        // Fonction pour obtenir un brouillon
+        function getDraft(filename) {
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            return drafts.find(draft => draft.filename === filename);
+        }
+
+        // Fonction pour obtenir tous les brouillons
+        function getAllDrafts() {
+            return JSON.parse(localStorage.getItem('drafts') || '[]');
         }
     </script>
 </body>
