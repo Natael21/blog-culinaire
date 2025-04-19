@@ -764,10 +764,11 @@ title: Administration - Blog Culinaire
             const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
             const currentDraft = localStorage.getItem('currentDraft');
             
-            if ((pendingChanges && pendingChanges.length > 0) || currentDraft) {
-                buttons.style.display = 'flex';
-            } else {
-                buttons.style.display = 'none';
+            // Vérifier si l'un ou l'autre existe
+            const hasChanges = (pendingChanges && pendingChanges.length > 0) || currentDraft;
+            
+            if (buttons) {
+                buttons.style.display = hasChanges ? 'flex' : 'none';
             }
         }
 
@@ -810,10 +811,20 @@ title: Administration - Blog Culinaire
                 const cancelButton = modal.querySelector('.confirmation-button.cancel');
 
                 confirmButton.onclick = () => {
+                    // Supprimer toutes les modifications en attente
                     localStorage.removeItem('pendingChanges');
-                    showNotification('Les modifications ont été annulées', 'success');
-                    modal.remove();
+                    localStorage.removeItem('currentDraft');
+                    
+                    // Mettre à jour l'interface
                     updatePendingChangesButtons();
+                    showNotification('Les modifications ont été annulées', 'success');
+                    
+                    // Rafraîchir la page après un court délai
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                    
+                    modal.remove();
                     resolve(true);
                 };
 
