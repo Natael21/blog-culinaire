@@ -33,6 +33,9 @@ exports.handler = async function(event, context) {
         }
         
         // Traiter chaque changement
+        const processedChanges = [];
+        const errors = [];
+
         for (const change of changes) {
             try {
                 if (change.type === 'delete') {
@@ -40,6 +43,10 @@ exports.handler = async function(event, context) {
                     const filePath = path.join(restaurantsDir, change.filename);
                     if (fs.existsSync(filePath)) {
                         fs.unlinkSync(filePath);
+                        processedChanges.push(change);
+                    } else {
+                        // Le fichier n'existe pas, on le considère comme déjà supprimé
+                        processedChanges.push(change);
                     }
                 } else if (change.type === 'create') {
                     // Créer le fichier
@@ -48,22 +55,21 @@ exports.handler = async function(event, context) {
                     // Convertir le contenu en YAML si c'est un objet
                     let content = change.content;
                     if (typeof content === 'object') {
-                        // Ajouter les métadonnées YAML
                         const frontMatter = {
                             layout: 'restaurant',
                             title: content.title,
                             date: content.date,
                             address: content.address,
                             style: content.style,
-                            state: content.state || 'draft' // Conserver l'état draft si présent
+                            state: content.state || 'draft'
                         };
                         
-                        // Convertir en YAML
                         const yamlContent = yaml.dump(frontMatter);
                         content = `---\n${yamlContent}---\n\n${content.content || ''}`;
                     }
                     
                     fs.writeFileSync(filePath, content);
+                    processedChanges.push(change);
                     
                     // Gérer les images si présentes
                     if (change.images && Array.isArray(change.images)) {
@@ -78,8 +84,23 @@ exports.handler = async function(event, context) {
                 }
             } catch (changeError) {
                 console.error(`Erreur lors du traitement du changement ${change.type}:`, changeError);
-                throw new Error(`Erreur lors du traitement du changement ${change.type}: ${changeError.message}`);
+                errors.push({
+                    type: change.type,
+                    filename: change.filename,
+                    error: changeError.message
+                });
             }
+        }
+
+        // Si aucune modification n'a été traitée avec succès, retourner une erreur
+        if (processedChanges.length === 0 && errors.length > 0) {
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ 
+                    error: 'Aucune modification n\'a pu être appliquée',
+                    details: errors
+                })
+            };
         }
 
         // Commiter et pousser les changements
@@ -93,18 +114,37 @@ exports.handler = async function(event, context) {
             }
         } catch (gitError) {
             console.error('Erreur Git:', gitError);
+            // Si des changements ont été traités mais que le push échoue, on retourne un succès partiel
+            if (processedChanges.length > 0) {
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ 
+                        message: 'Modifications appliquées localement mais erreur lors du push',
+                        processed: processedChanges,
+                        errors: errors,
+                        gitError: gitError.message
+                    })
+                };
+            }
             throw new Error(`Erreur lors de la publication sur GitHub: ${gitError.message}`);
         }
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Modifications appliquées avec succès' })
+            body: JSON.stringify({ 
+                message: 'Modifications appliquées avec succès',
+                processed: processedChanges,
+                errors: errors
+            })
         };
     } catch (error) {
         console.error('Erreur:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: `Erreur lors de l'application des modifications: ${error.message}` })
+            body: JSON.stringify({ 
+                error: `Erreur lors de l'application des modifications: ${error.message}`,
+                details: error.stack
+            })
         };
     }
 }; 

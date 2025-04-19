@@ -725,10 +725,25 @@ title: Administration - Blog Culinaire
         async function publishChanges() {
             try {
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-                if (pendingChanges.length === 0) {
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                
+                if (pendingChanges.length === 0 && drafts.length === 0) {
                     showNotification('Aucune modification en attente', 'error');
                     return;
                 }
+
+                // Préparer les données à envoyer
+                const changes = [...pendingChanges];
+                
+                // Ajouter tous les brouillons aux modifications
+                drafts.forEach(draft => {
+                    changes.push({
+                        type: 'create',
+                        filename: draft.filename,
+                        content: draft.content,
+                        images: draft.images
+                    });
+                });
 
                 // Envoyer les modifications à GitHub via la fonction Netlify
                 const response = await fetch('/.netlify/functions/publish-changes', {
@@ -736,15 +751,18 @@ title: Administration - Blog Culinaire
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ changes: pendingChanges })
+                    body: JSON.stringify({ changes })
                 });
 
                 if (!response.ok) {
-                    throw new Error('Erreur lors de la publication des modifications');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erreur lors de la publication des modifications');
                 }
 
                 // Vider le localStorage après publication réussie
                 localStorage.removeItem('pendingChanges');
+                localStorage.removeItem('drafts');
+                
                 showNotification('Les modifications ont été publiées avec succès', 'success');
                 updatePendingChangesButtons();
                 
@@ -754,7 +772,7 @@ title: Administration - Blog Culinaire
                 }, 1500);
             } catch (error) {
                 console.error('Erreur lors de la publication:', error);
-                showNotification('Erreur lors de la publication des modifications', 'error');
+                showNotification(error.message || 'Erreur lors de la publication des modifications', 'error');
             }
         }
 
@@ -762,10 +780,10 @@ title: Administration - Blog Culinaire
         function updatePendingChangesButtons() {
             const buttons = document.getElementById('pendingChangesButtons');
             const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-            const currentDraft = localStorage.getItem('currentDraft');
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
             
             // Vérifier si l'un ou l'autre existe
-            const hasChanges = (pendingChanges && pendingChanges.length > 0) || currentDraft;
+            const hasChanges = (pendingChanges && pendingChanges.length > 0) || (drafts && drafts.length > 0);
             
             if (buttons) {
                 buttons.style.display = hasChanges ? 'flex' : 'none';
@@ -774,7 +792,7 @@ title: Administration - Blog Culinaire
 
         // Écouter les changements de localStorage
         window.addEventListener('storage', function(e) {
-            if (e.key === 'pendingChanges' || e.key === 'currentDraft') {
+            if (e.key === 'pendingChanges' || e.key === 'drafts') {
                 updatePendingChangesButtons();
             }
         });
@@ -813,7 +831,7 @@ title: Administration - Blog Culinaire
                 confirmButton.onclick = () => {
                     // Supprimer toutes les modifications en attente
                     localStorage.removeItem('pendingChanges');
-                    localStorage.removeItem('currentDraft');
+                    localStorage.removeItem('drafts');
                     
                     // Mettre à jour l'interface
                     updatePendingChangesButtons();
@@ -921,6 +939,22 @@ title: Administration - Blog Culinaire
                     resolve(false);
                 };
             });
+        }
+
+        // Fonction pour sauvegarder un brouillon
+        function saveDraft(draftData) {
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            drafts.push(draftData);
+            localStorage.setItem('drafts', JSON.stringify(drafts));
+            updatePendingChangesButtons();
+        }
+
+        // Fonction pour supprimer un brouillon
+        function deleteDraft(filename) {
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            const updatedDrafts = drafts.filter(draft => draft.filename !== filename);
+            localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
+            updatePendingChangesButtons();
         }
     </script>
 </body>
