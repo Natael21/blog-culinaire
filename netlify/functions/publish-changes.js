@@ -1,174 +1,83 @@
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const yaml = require('js-yaml');
+const { Octokit } = require("@octokit/rest");
+const { Base64 } = require('js-base64');
 
 exports.handler = async function(event, context) {
-    try {
-        if (event.httpMethod !== 'POST') {
-            return {
-                statusCode: 405,
-                body: JSON.stringify({ error: 'Méthode non autorisée' })
-            };
-        }
+  // Ensure method is POST
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method not allowed" })
+    };
+  }
 
-        const { changes } = JSON.parse(event.body);
-        
-        if (!changes || !Array.isArray(changes)) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Données invalides' })
-            };
-        }
+  try {
+    // Parse the incoming data
+    const data = JSON.parse(event.body);
+    const { changes } = data;
 
-        // Utiliser le chemin correct pour Netlify Functions
-        const baseDir = path.resolve(process.cwd(), '../../..');
-        const postsDir = path.join(baseDir, '_posts');
-        const imagesDir = path.join(baseDir, 'images');
-        
-        console.log('Chemins des répertoires:', {
-            baseDir,
-            postsDir,
-            imagesDir
-        });
-        
-        // S'assurer que les répertoires existent et sont accessibles
-        try {
-            // Vérifier si les répertoires sont accessibles
-            fs.accessSync(baseDir, fs.constants.R_OK | fs.constants.W_OK);
-            console.log('Répertoire de base accessible:', baseDir);
-            
-            if (!fs.existsSync(postsDir)) {
-                console.log('Création du répertoire _posts:', postsDir);
-                fs.mkdirSync(postsDir, { recursive: true });
-            } else {
-                console.log('Répertoire _posts existant:', postsDir);
-            }
-            
-            if (!fs.existsSync(imagesDir)) {
-                console.log('Création du répertoire images:', imagesDir);
-                fs.mkdirSync(imagesDir, { recursive: true });
-            } else {
-                console.log('Répertoire images existant:', imagesDir);
-            }
-        } catch (error) {
-            console.error('Erreur d\'accès aux répertoires:', error);
-            throw new Error(`Erreur d'accès aux répertoires: ${error.message}`);
-        }
-        
-        // Traiter chaque changement
-        const processedChanges = [];
-        const errors = [];
-
-        for (const change of changes) {
-            try {
-                if (change.type === 'delete') {
-                    // Supprimer le fichier
-                    const filePath = path.join(postsDir, change.filename);
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                        processedChanges.push(change);
-                    } else {
-                        // Le fichier n'existe pas, on le considère comme déjà supprimé
-                        processedChanges.push(change);
-                    }
-                } else if (change.type === 'create') {
-                    // Créer le fichier
-                    const filePath = path.join(postsDir, change.filename);
-                    
-                    // Convertir le contenu en YAML si c'est un objet
-                    let content = change.content;
-                    if (typeof content === 'object') {
-                        const frontMatter = {
-                            layout: 'restaurant',
-                            title: content.title,
-                            date: content.date,
-                            address: content.address,
-                            style: content.style,
-                            state: content.state || 'draft'
-                        };
-                        
-                        const yamlContent = yaml.dump(frontMatter);
-                        content = `---\n${yamlContent}---\n\n${content.content || ''}`;
-                    }
-                    
-                    fs.writeFileSync(filePath, content);
-                    processedChanges.push(change);
-                    
-                    // Gérer les images si présentes
-                    if (change.images && Array.isArray(change.images)) {
-                        for (const image of change.images) {
-                            if (image.base64 && image.filename) {
-                                const imagePath = path.join(imagesDir, image.filename);
-                                const imageBuffer = Buffer.from(image.base64, 'base64');
-                                fs.writeFileSync(imagePath, imageBuffer);
-                            }
-                        }
-                    }
-                }
-            } catch (changeError) {
-                console.error(`Erreur lors du traitement du changement ${change.type}:`, changeError);
-                errors.push({
-                    type: change.type,
-                    filename: change.filename,
-                    error: changeError.message
-                });
-            }
-        }
-
-        // Si aucune modification n'a été traitée avec succès, retourner une erreur
-        if (processedChanges.length === 0 && errors.length > 0) {
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ 
-                    error: 'Aucune modification n\'a pu être appliquée',
-                    details: errors
-                })
-            };
-        }
-
-        // Commiter et pousser les changements
-        try {
-            // Vérifier s'il y a des changements à commiter
-            const status = execSync('git status --porcelain', { cwd: process.cwd() }).toString();
-            if (status.trim()) {
-                execSync('git add .', { cwd: process.cwd() });
-                execSync('git commit -m "Mise à jour des restaurants"', { cwd: process.cwd() });
-                execSync('git push', { cwd: process.cwd() });
-            }
-        } catch (gitError) {
-            console.error('Erreur Git:', gitError);
-            // Si des changements ont été traités mais que le push échoue, on retourne un succès partiel
-            if (processedChanges.length > 0) {
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify({ 
-                        message: 'Modifications appliquées localement mais erreur lors du push',
-                        processed: processedChanges,
-                        errors: errors,
-                        gitError: gitError.message
-                    })
-                };
-            }
-            throw new Error(`Erreur lors de la publication sur GitHub: ${gitError.message}`);
-        }
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ 
-                message: 'Modifications appliquées avec succès',
-                processed: processedChanges,
-                errors: errors
-            })
-        };
-    } catch (error) {
-        console.error('Erreur:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ 
-                error: `Erreur lors de l'application des modifications: ${error.message}`,
-                details: error.stack
-            })
-        };
+    if (!changes || !Array.isArray(changes)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid request format" })
+      };
     }
+
+    // Initialize Octokit with the Git Gateway token
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN
+    });
+
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const branch = process.env.GITHUB_BRANCH || 'main';
+
+    console.log('Processing changes:', changes);
+
+    // Process each change
+    for (const change of changes) {
+      if (change.type === 'delete') {
+        try {
+          // Get the file's SHA
+          const { data: fileData } = await octokit.repos.getContent({
+            owner,
+            repo,
+            path: `_posts/${change.filename}`,
+            ref: branch
+          });
+
+          // Delete the file
+          await octokit.repos.deleteFile({
+            owner,
+            repo,
+            path: `_posts/${change.filename}`,
+            message: `Delete restaurant: ${change.filename}`,
+            sha: fileData.sha,
+            branch
+          });
+
+          console.log(`Successfully deleted ${change.filename}`);
+        } catch (error) {
+          if (error.status === 404) {
+            console.log(`File ${change.filename} already deleted or doesn't exist`);
+          } else {
+            throw error;
+          }
+        }
+      }
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Changes published successfully" })
+    };
+  } catch (error) {
+    console.error('Error publishing changes:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 
+        error: "Error publishing changes",
+        details: error.message
+      })
+    };
+  }
 }; 

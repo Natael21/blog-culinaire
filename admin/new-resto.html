@@ -1268,8 +1268,29 @@
                             });
                         }
 
-                        // Sauvegarder le brouillon dans le localStorage
-                        localStorage.setItem('currentDraft', JSON.stringify(draftData));
+                        // Récupérer les brouillons existants
+                        const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                        
+                        // Vérifier si un brouillon avec le même nom existe déjà
+                        const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                        
+                        if (existingIndex !== -1) {
+                            // Mettre à jour le brouillon existant
+                            drafts[existingIndex] = {
+                                ...drafts[existingIndex],
+                                ...draftData,
+                                lastModified: new Date().toISOString()
+                            };
+                        } else {
+                            // Ajouter un nouveau brouillon
+                            drafts.push({
+                                ...draftData,
+                                lastModified: new Date().toISOString()
+                            });
+                        }
+
+                        // Sauvegarder dans localStorage
+                        localStorage.setItem('drafts', JSON.stringify(drafts));
 
                         showNotification('Brouillon enregistré avec succès !', 'success');
                         
@@ -2166,124 +2187,98 @@ ${editorContent}`;
         }
 
         // Fonction pour sauvegarder le brouillon
-        function saveDraft() {
-            const formData = new FormData(form);
-            const restaurantData = {
-                title: formData.get('title'),
-                content: editor.getContent(),
-                address: formData.get('address'),
-                style: formData.get('style'),
-                images: Array.from(formData.getAll('images')).map(file => ({
-                    filename: file.name,
-                    base64: URL.createObjectURL(file)
-                }))
-            };
+        async function saveDraft() {
+            try {
+                const formData = new FormData(document.getElementById('restaurantForm'));
+                const title = formData.get('title');
+                
+                // Générer le nom du fichier à partir du titre
+                const filename = title.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                
+                const date = new Date().toISOString().split('T')[0];
+                const filePath = `${date}-${filename}.md`;
 
-            // Récupérer les brouillons existants ou initialiser un nouveau tableau
-            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            
-            // Vérifier si un brouillon avec le même nom existe déjà
-            const existingDraftIndex = drafts.findIndex(d => d.filename === filename);
-            
-            if (existingDraftIndex !== -1) {
-                // Mettre à jour le brouillon existant
-                drafts[existingDraftIndex] = {
-                    ...drafts[existingDraftIndex],
-                    ...restaurantData,
-                    lastModified: new Date().toISOString()
+                // Créer l'objet du brouillon
+                const draftData = {
+                    filename: filePath,
+                    title: title,
+                    content: generateMarkdown(),
+                    images: []
                 };
-            } else {
-                // Ajouter un nouveau brouillon
-                drafts.push({
-                    filename,
-                    ...restaurantData,
-                    lastModified: new Date().toISOString()
-                });
+
+                // Sauvegarder les images en base64
+                if (mainImageFile) {
+                    const mainImageBase64 = await fileToBase64(mainImageFile);
+                    draftData.images.push({
+                        name: mainImageFile.name,
+                        data: mainImageBase64
+                    });
+                }
+
+                for (const file of galleryImageFiles) {
+                    const galleryBase64 = await fileToBase64(file);
+                    draftData.images.push({
+                        name: file.name,
+                        data: galleryBase64
+                    });
+                }
+
+                // Récupérer les brouillons existants
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                
+                // Vérifier si un brouillon avec le même nom existe déjà
+                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                
+                if (existingIndex !== -1) {
+                    // Mettre à jour le brouillon existant
+                    drafts[existingIndex] = {
+                        ...drafts[existingIndex],
+                        ...draftData,
+                        lastModified: new Date().toISOString()
+                    };
+                } else {
+                    // Ajouter un nouveau brouillon
+                    drafts.push({
+                        ...draftData,
+                        lastModified: new Date().toISOString()
+                    });
+                }
+
+                // Sauvegarder dans localStorage
+                localStorage.setItem('drafts', JSON.stringify(drafts));
+
+                showNotification('Brouillon enregistré avec succès', 'success');
+                
+                // Mettre à jour l'interface
+                updatePendingChangesButtons();
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
             }
-            
-            // Sauvegarder les brouillons
-            localStorage.setItem('drafts', JSON.stringify(drafts));
-            
-            // Mettre à jour l'interface
-            updatePendingChangesButtons();
-            
-            // Afficher une notification
-            showNotification('Brouillon enregistré avec succès', 'success');
         }
+
+        // Gestionnaire de soumission du formulaire
+        document.getElementById('restaurantForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!validateForm()) {
+                return;
+            }
+            await saveDraft();
+        });
 
         // Fonction pour charger un brouillon
         function loadDraft(filename) {
-            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            const draft = drafts.find(d => d.filename === filename);
-            
-            if (draft) {
-                form.querySelector('[name="title"]').value = draft.title;
-                editor.setContent(draft.content);
-                form.querySelector('[name="address"]').value = draft.address;
-                form.querySelector('[name="style"]').value = draft.style;
-                
-                // Gérer les images
-                const imageContainer = document.getElementById('image-preview');
-                imageContainer.innerHTML = '';
-                
-                if (draft.images && draft.images.length > 0) {
-                    draft.images.forEach(image => {
-                        const img = document.createElement('img');
-                        img.src = image.base64;
-                        img.alt = 'Image du restaurant';
-                        imageContainer.appendChild(img);
-                    });
-                }
-                
-                showNotification('Brouillon chargé avec succès', 'success');
-            }
-        }
-
-        // Fonction pour supprimer un brouillon
-        function deleteDraft(filename) {
-            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            const updatedDrafts = drafts.filter(d => d.filename !== filename);
-            localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
-            updatePendingChangesButtons();
-        }
-
-        // Fonction pour publier le restaurant
-        async function publishRestaurant() {
-            try {
-                const formData = new FormData(form);
-                const restaurantData = {
-                    type: 'create',
-                    filename: filename,
-                    content: {
-                        title: formData.get('title'),
-                        content: editor.getContent(),
-                        date: new Date().toISOString(),
-                        address: formData.get('address'),
-                        style: formData.get('style'),
-                        state: 'published'
-                    }
-                };
-
-                const response = await fetch('/.netlify/functions/publish-changes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ changes: [restaurantData] })
-                });
-
-                if (response.ok) {
-                    // Supprimer le brouillon après publication réussie
-                    deleteDraft(filename);
-                    showNotification('Restaurant publié avec succès', 'success');
-                    setTimeout(() => window.location.href = 'restaurants.html', 2000);
-                } else {
-                    const error = await response.json();
-                    showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
-                }
-            } catch (error) {
                 showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
-            }
         }
 
         // Fonction pour annuler les modifications
