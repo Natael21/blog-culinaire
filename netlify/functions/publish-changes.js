@@ -31,13 +31,13 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Get Git Gateway token from Authorization header
-    const authHeader = event.headers.authorization;
-    if (!authHeader) {
-      console.log('No authorization header found');
+    // Get GitHub token from environment variable
+    const githubToken = process.env.GITHUB_TOKEN;
+    if (!githubToken) {
+      console.log('No GitHub token found in environment variables');
       return { 
-        statusCode: 401, 
-        body: JSON.stringify({ error: 'No authorization header' })
+        statusCode: 500, 
+        body: JSON.stringify({ error: 'GitHub token not configured' })
       };
     }
 
@@ -55,11 +55,11 @@ exports.handler = async function(event, context) {
         try {
           console.log(`Attempting to delete file: _posts/${change.filename}`);
           
-          // Make DELETE request to Git Gateway
-          const response = await fetch(`${process.env.GIT_GATEWAY}/git/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/_posts/${change.filename}`, {
+          // Make DELETE request to GitHub API
+          const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/_posts/${change.filename}`, {
             method: 'DELETE',
             headers: {
-              'Authorization': authHeader,
+              'Authorization': `token ${githubToken}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -70,12 +70,12 @@ exports.handler = async function(event, context) {
 
           if (!response.ok) {
             const errorData = await response.json();
-            console.log('Error response from Git Gateway:', errorData);
+            console.log('Error response from GitHub API:', errorData);
             if (response.status === 404) {
               console.log(`File ${change.filename} already deleted or doesn't exist`);
               continue;
             }
-            throw new Error(`Git Gateway error: ${response.status} ${response.statusText}`);
+            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
           }
 
           console.log(`Successfully deleted ${change.filename}`);

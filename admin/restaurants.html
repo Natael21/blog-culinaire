@@ -656,6 +656,14 @@
 
         async function publishChanges() {
             try {
+                // Vérifier l'état de connexion
+                const user = netlifyIdentity.currentUser();
+                if (!user) {
+                    showNotification('Veuillez vous reconnecter pour publier les modifications', 'error');
+                    netlifyIdentity.open('login');
+                    return;
+                }
+
                 // Récupérer les modifications en attente
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const currentDraft = localStorage.getItem('currentDraft');
@@ -693,7 +701,12 @@
                 }
             } catch (error) {
                 console.error('Erreur lors de la publication des modifications:', error);
-                showNotification('Erreur lors de la publication des modifications', 'error');
+                if (error.message === 'No authorization header') {
+                    showNotification('Session expirée. Veuillez vous reconnecter.', 'error');
+                    netlifyIdentity.open('login');
+                } else {
+                    showNotification('Erreur lors de la publication des modifications', 'error');
+                }
             }
         }
 
