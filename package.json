@@ -1,0 +1,8 @@
+{
+  "name": "blog-culinaire",
+  "version": "1.0.0",
+  "description": "Blog culinaire avec gestion des restaurants",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+} 
