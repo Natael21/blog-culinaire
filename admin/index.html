@@ -730,16 +730,61 @@ title: Administration - Blog Culinaire
                     return;
                 }
 
-                // TODO: Implémenter la logique de publication des modifications
-                // Pour l'instant, on simule juste la publication en vidant le localStorage
+                // Envoyer les modifications à GitHub via la fonction Netlify
+                const response = await fetch('/.netlify/functions/publish-changes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ changes: pendingChanges })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la publication des modifications');
+                }
+
+                // Vider le localStorage après publication réussie
                 localStorage.removeItem('pendingChanges');
                 showNotification('Les modifications ont été publiées avec succès', 'success');
                 updatePendingChangesButtons();
+                
+                // Rafraîchir la page après 1.5 secondes
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
             } catch (error) {
                 console.error('Erreur lors de la publication:', error);
                 showNotification('Erreur lors de la publication des modifications', 'error');
             }
         }
+
+        // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
+        function updatePendingChangesButtons() {
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const currentDraft = localStorage.getItem('currentDraft');
+            const buttons = document.getElementById('pendingChangesButtons');
+            
+            if ((pendingChanges && pendingChanges.length > 0) || currentDraft) {
+                buttons.style.display = 'flex';
+            } else {
+                buttons.style.display = 'none';
+            }
+        }
+
+        // Écouter les changements de localStorage
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'pendingChanges' || e.key === 'currentDraft') {
+                updatePendingChangesButtons();
+            }
+        });
+
+        // Écouter l'événement personnalisé storageUpdated
+        window.addEventListener('storageUpdated', updatePendingChangesButtons);
+
+        // Vérifier l'état initial des boutons
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePendingChangesButtons();
+        });
 
         // Fonction pour annuler les modifications
         async function cancelChanges() {
@@ -864,30 +909,6 @@ title: Administration - Blog Culinaire
                 };
             });
         }
-
-        // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
-        function updatePendingChangesButtons() {
-            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-            const buttons = document.getElementById('pendingChangesButtons');
-            if (pendingChanges.length > 0) {
-                buttons.style.display = 'flex';
-            } else {
-                buttons.style.display = 'none';
-            }
-        }
-
-        // Appeler la fonction au chargement de la page
-        document.addEventListener('DOMContentLoaded', updatePendingChangesButtons);
-
-        // Écouter l'événement storageUpdated
-        window.addEventListener('storageUpdated', updatePendingChangesButtons);
-        
-        // Écouter aussi les changements de localStorage directement
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'pendingChanges') {
-                updatePendingChangesButtons();
-            }
-        });
     </script>
 </body>
 </html> 
