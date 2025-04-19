@@ -711,16 +711,26 @@
         // Fonction pour appliquer les modifications
         async function applyChanges(changes) {
             try {
+                // Récupérer le token d'authentification
+                const userData = JSON.parse(localStorage.getItem('gotrue.user') || '{}');
+                const token = userData.token?.access_token;
+                
+                if (!token) {
+                    throw new Error('No authorization header');
+                }
+
                 const response = await fetch('/.netlify/functions/publish-changes', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ changes })
                 });
 
                 if (!response.ok) {
-                    throw new Error('Erreur lors de l\'application des modifications');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erreur lors de l\'application des modifications');
                 }
 
                 return await response.json();
