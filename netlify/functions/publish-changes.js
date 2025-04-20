@@ -55,10 +55,34 @@ exports.handler = async function(event, context) {
       
       if (change.type === 'delete') {
         try {
-          console.log(`Attempting to delete file: _posts/${change.filename}`);
+          const filePath = `_posts/${change.filename}`;
+          console.log(`Attempting to delete file: ${filePath}`);
           
-          // Make DELETE request to GitHub API
-          const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/_posts/${change.filename}`, {
+          // First, get the file's SHA
+          const getFileResponse = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${filePath}`, {
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+
+          console.log('Get file response status:', getFileResponse.status);
+
+          if (!getFileResponse.ok) {
+            const errorData = await getFileResponse.json();
+            console.log('Error getting file:', errorData);
+            if (getFileResponse.status === 404) {
+              console.log(`File ${change.filename} already deleted or doesn't exist`);
+              continue;
+            }
+            throw new Error(`GitHub API error: ${getFileResponse.status} ${getFileResponse.statusText}`);
+          }
+
+          const fileData = await getFileResponse.json();
+          console.log('File data received:', { sha: fileData.sha, path: fileData.path });
+
+          // Now delete the file with its SHA
+          const deleteResponse = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${filePath}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `token ${githubToken}`,
@@ -67,23 +91,20 @@ exports.handler = async function(event, context) {
             },
             body: JSON.stringify({
               message: `Delete restaurant: ${change.filename}`,
+              sha: fileData.sha,
               branch: process.env.GITHUB_BRANCH || 'master'
             })
           });
 
-          console.log('GitHub API response status:', response.status);
+          console.log('Delete response status:', deleteResponse.status);
           
-          if (!response.ok) {
-            const errorData = await response.json();
+          if (!deleteResponse.ok) {
+            const errorData = await deleteResponse.json();
             console.log('Error response from GitHub API:', errorData);
-            if (response.status === 404) {
-              console.log(`File ${change.filename} already deleted or doesn't exist`);
-              continue;
-            }
-            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+            throw new Error(`GitHub API error: ${deleteResponse.status} ${deleteResponse.statusText}`);
           }
 
-          const responseData = await response.json();
+          const responseData = await deleteResponse.json();
           console.log('Success response from GitHub API:', responseData);
           console.log(`Successfully deleted ${change.filename}`);
         } catch (error) {
