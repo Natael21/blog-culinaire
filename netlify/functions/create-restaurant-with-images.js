@@ -101,6 +101,24 @@ exports.handler = async (event, context) => {
         const imageBlobs = [];
         const imagePlaceholders = {};
 
+        // Fonction pour vérifier si une image existe déjà
+        async function checkImageExists(imagePath, baseUrl, owner, repo, branch, headers) {
+            try {
+                const response = await fetch(
+                    `${baseUrl}/repos/${owner}/${repo}/contents/${imagePath}?ref=${branch}`,
+                    { headers }
+                );
+                if (response.ok) {
+                    const data = await response.json();
+                    return { exists: true, sha: data.sha };
+                }
+                return { exists: false };
+            } catch (error) {
+                console.log(`Erreur lors de la vérification de l'image ${imagePath}:`, error);
+                return { exists: false };
+            }
+        }
+
         if (images && images.length > 0) {
             for (let i = 0; i < images.length; i++) {
                 const imageData = images[i];
@@ -114,42 +132,53 @@ exports.handler = async (event, context) => {
                     continue;
                 }
 
-                // Les données sont déjà en base64 propre
-                const base64Data = imageData.data;
-                console.log(`Préparation du blob pour ${imageData.name}:`, {
-                    tailleDonnéesBase64: base64Data?.length,
-                    premièresCaractères: base64Data?.substring(0, 50) + '...'
-                });
-
-                const blobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
-                    method: "POST",
-                    headers,
-                    body: JSON.stringify({
-                        content: base64Data,
-                        encoding: "base64"
-                    })
-                });
-
-                if (!blobResponse.ok) {
-                    const errorData = await blobResponse.json();
-                    console.error(`Erreur lors de la création du blob pour l'image ${imageData.name}:`, {
-                        status: blobResponse.status,
-                        statusText: blobResponse.statusText,
-                        error: errorData
-                    });
-                    throw new Error(`GitHub API Error: ${errorData.message}`);
-                }
-
-                const blobData = await blobResponse.json();
                 const imagePath = `images/${imageData.name}`;
-                console.log(`Blob créé avec succès pour ${imageData.name}:`, {
-                    sha: blobData.sha,
-                    path: imagePath
-                });
+                
+                // Vérifier si l'image existe déjà
+                const imageCheck = await checkImageExists(imagePath, baseUrl, owner, repo, branch, headers);
+                
+                let blobSha;
+                if (imageCheck.exists) {
+                    console.log(`L'image ${imageData.name} existe déjà, réutilisation du SHA:`, imageCheck.sha);
+                    blobSha = imageCheck.sha;
+                } else {
+                    // Les données sont déjà en base64 propre
+                    const base64Data = imageData.data;
+                    console.log(`Préparation du blob pour ${imageData.name}:`, {
+                        tailleDonnéesBase64: base64Data?.length,
+                        premièresCaractères: base64Data?.substring(0, 50) + '...'
+                    });
+
+                    const blobResponse = await fetch(`${baseUrl}/repos/${owner}/${repo}/git/blobs`, {
+                        method: "POST",
+                        headers,
+                        body: JSON.stringify({
+                            content: base64Data,
+                            encoding: "base64"
+                        })
+                    });
+
+                    if (!blobResponse.ok) {
+                        const errorData = await blobResponse.json();
+                        console.error(`Erreur lors de la création du blob pour l'image ${imageData.name}:`, {
+                            status: blobResponse.status,
+                            statusText: blobResponse.statusText,
+                            error: errorData
+                        });
+                        throw new Error(`GitHub API Error: ${errorData.message}`);
+                    }
+
+                    const blobData = await blobResponse.json();
+                    blobSha = blobData.sha;
+                    console.log(`Nouveau blob créé pour ${imageData.name}:`, {
+                        sha: blobSha,
+                        path: imagePath
+                    });
+                }
 
                 imageBlobs.push({
                     path: imagePath,
-                    sha: blobData.sha,
+                    sha: blobSha,
                     mode: "100644",
                     type: "blob"
                 });
