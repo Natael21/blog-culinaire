@@ -732,9 +732,13 @@
 
         async function publishChanges() {
             try {
+                // Afficher le spinner immédiatement
+                showSpinner();
+
                 // Vérifier l'authentification de l'utilisateur
                 const user = netlifyIdentity.currentUser();
                 if (!user) {
+                    hideSpinner();
                     showNotification('Veuillez vous connecter pour publier les modifications', 'error');
                     netlifyIdentity.open('login');
                     return;
@@ -746,8 +750,6 @@
                 
                 // Vérifier si les modifications sont valides
                 if (pendingChanges.length > 0 || drafts.length > 0) {
-                    showSpinner();
-
                     // Ajouter tous les brouillons aux modifications
                     for (const draft of drafts) {
                         const change = {
