@@ -536,16 +536,26 @@
                     ? `<div class="restaurant-image">
                          <img src="${imageUrl}" 
                               alt="${restaurant.title}" 
-                              onerror="console.error('❌ Erreur de chargement de l\'image:', {
-                                  url: '${imageUrl}',
-                                  restaurant: '${restaurant.title}',
-                                  timestamp: new Date().toISOString()
-                              }); this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-image\'></i>';"
-                              onload="console.log('✅ Image chargée avec succès:', {
-                                  url: '${imageUrl}',
-                                  restaurant: '${restaurant.title}',
-                                  timestamp: new Date().toISOString()
-                              });">
+                              onerror="(function(e) {
+                                  console.error({
+                                      type: 'error',
+                                      message: 'Erreur de chargement de l\\'image',
+                                      url: '${imageUrl}',
+                                      restaurant: '${restaurant.title}',
+                                      timestamp: new Date().toISOString()
+                                  });
+                                  e.target.onerror = null;
+                                  e.target.parentNode.innerHTML = '<i class=\\'fas fa-image\\'></i>';
+                              })(event)"
+                              onload="(function(e) {
+                                  console.log({
+                                      type: 'success',
+                                      message: 'Image chargée avec succès',
+                                      url: '${imageUrl}',
+                                      restaurant: '${restaurant.title}',
+                                      timestamp: new Date().toISOString()
+                                  });
+                              })(event)">
                        </div>`
                     : `<div class="restaurant-image">
                          <i class="fas fa-image"></i>
