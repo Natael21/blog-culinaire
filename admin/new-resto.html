@@ -1618,10 +1618,17 @@
             const maxTotalSize = 20 * 1024 * 1024; // 20MB total pour la galerie
             const currentTotalSize = galleryImageFiles.reduce((sum, file) => sum + file.size, 0);
             
-            // Réinitialiser le tableau temporaire pour les nouvelles images
+            // Créer un Set pour stocker les noms de fichiers uniques
+            const existingFileNames = new Set(galleryImageFiles.map(f => f.name));
             let newGalleryFiles = [];
             
             for (const file of Array.from(files)) {
+                // Vérifier si le fichier existe déjà
+                if (existingFileNames.has(file.name)) {
+                    console.log(`Image ${file.name} déjà présente dans la galerie, ignorée.`);
+                    continue;
+                }
+
                 if (!file.type.startsWith('image/')) {
                     showNotification(
                         'Fichier non valide',
@@ -1661,6 +1668,7 @@
                     }
 
                     newGalleryFiles.push(processedFile);
+                    existingFileNames.add(file.name);
                 } catch (error) {
                     console.error('Erreur lors du traitement de l\'image:', error);
                     showNotification(
@@ -1671,10 +1679,16 @@
                 }
             }
 
-            // Ajouter les nouvelles images au tableau principal
+            // Ajouter uniquement les nouvelles images au tableau principal
             galleryImageFiles = [...galleryImageFiles, ...newGalleryFiles];
             
-            updateGalleryPreview();
+            // Vider et mettre à jour la prévisualisation
+            const container = document.getElementById('galleryPreview');
+            container.innerHTML = '';
+            for (const file of galleryImageFiles) {
+                await createImagePreview(file, container, false);
+            }
+            
             updateMarkdownPreview();
         }
 
@@ -1707,8 +1721,9 @@
 
                 mainImageFile = file;
                 const container = document.getElementById('mainImagePreview');
+                // Vider le conteneur avant d'ajouter la nouvelle image
                 container.innerHTML = '';
-                createImagePreview(file, container, true);
+                await createImagePreview(file, container, true);
                 
                 // Supprimer l'état d'erreur et le message
                 const mainImageZone = document.getElementById('mainImageZone');
@@ -2206,33 +2221,36 @@ ${editorContent}`;
         }
 
         function createImagePreview(file, container, isMainImage = false) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'image-preview-container';
-                div.innerHTML = `
-                    <img src="${e.target.result}" class="image-preview" alt="Image preview">
-                    <button type="button" class="delete-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                
-                div.querySelector('.delete-image').addEventListener('click', function() {
-                    div.remove();
-                    if (isMainImage) {
-                        mainImageFile = null;
-                    } else {
-                        const index = galleryImageFiles.indexOf(file);
-                        if (index > -1) {
-                            galleryImageFiles.splice(index, 1);
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-container';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    div.querySelector('.delete-image').addEventListener('click', function() {
+                        div.remove();
+                        if (isMainImage) {
+                            mainImageFile = null;
+                        } else {
+                            const index = galleryImageFiles.findIndex(f => f.name === file.name);
+                            if (index > -1) {
+                                galleryImageFiles.splice(index, 1);
+                            }
                         }
-                    }
-                    updateMarkdownPreview();
-                });
-                
-                container.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+                        updateMarkdownPreview();
+                    });
+                    
+                    container.appendChild(div);
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         function updateGalleryPreview() {
