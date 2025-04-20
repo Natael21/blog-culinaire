@@ -206,7 +206,7 @@ exports.handler = async function(event, context) {
 
     const commitData = await createCommitResponse.json();
 
-    // Update the reference
+    // Update the reference with force
     const updateRefResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, {
       method: 'PATCH',
       headers: {
