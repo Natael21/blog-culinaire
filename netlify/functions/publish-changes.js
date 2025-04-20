@@ -108,12 +108,9 @@ exports.handler = async function(event, context) {
     const createBlobs = [];
     for (const change of changes) {
       if (change.type === 'create') {
-        console.log('\n=== Processing create change ===');
         console.log('Creating blob for new file:', change.filename);
-        console.log('Number of images to process:', change.images?.length || 0);
-        
-        // Create a blob for the markdown file
-        const createMarkdownBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
+        // Create a blob for the new file
+        const createBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
           method: 'POST',
           headers: {
             'Authorization': `token ${githubToken}`,
@@ -126,102 +123,19 @@ exports.handler = async function(event, context) {
           })
         });
 
-        if (!createMarkdownBlobResponse.ok) {
-          console.error('Failed to create markdown blob:', {
-            status: createMarkdownBlobResponse.status,
-            statusText: createMarkdownBlobResponse.statusText,
-            response: await createMarkdownBlobResponse.text()
-          });
-          throw new Error(`Failed to create markdown blob: ${createMarkdownBlobResponse.status} ${createMarkdownBlobResponse.statusText}`);
+        if (!createBlobResponse.ok) {
+          throw new Error(`Failed to create blob: ${createBlobResponse.status} ${createBlobResponse.statusText}`);
         }
 
-        const markdownBlobData = await createMarkdownBlobResponse.json();
-        console.log('Markdown blob created successfully:', markdownBlobData.sha);
+        const blobData = await createBlobResponse.json();
         
-        // Add the markdown file to the tree
+        // Add the new file to the tree
         newTree.push({
           path: `_posts/${change.filename}`,
           mode: '100644',
           type: 'blob',
-          sha: markdownBlobData.sha
+          sha: blobData.sha
         });
-
-        // Process all images (main and gallery)
-        if (change.images && change.images.length > 0) {
-          console.log('\n=== Processing images ===');
-          for (const image of change.images) {
-            console.log('\nProcessing image:', {
-              name: image.name,
-              isMain: image.isMain,
-              contentLength: (image.content || image.data || '').length
-            });
-            
-            // Vérifier et nettoyer le contenu de l'image
-            let imageContent = image.content || image.data;
-            
-            // Si le contenu contient encore l'en-tête data:image, le retirer
-            if (imageContent && imageContent.includes('data:image')) {
-              console.log('Cleaning data:image header from content');
-              imageContent = imageContent.split(',')[1];
-            }
-
-            // S'assurer que le contenu est bien en base64
-            if (!imageContent || !imageContent.match(/^[A-Za-z0-9+/=]+$/)) {
-              console.error('Invalid base64 content detected for image:', image.name);
-              throw new Error(`Invalid base64 content for image: ${image.name}`);
-            }
-
-            try {
-              console.log('Creating blob for image:', image.name);
-              const createImageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
-                method: 'POST',
-                headers: {
-                  'Authorization': `token ${githubToken}`,
-                  'Accept': 'application/vnd.github.v3+json',
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  content: imageContent,
-                  encoding: 'base64'
-                })
-              });
-
-              if (!createImageBlobResponse.ok) {
-                const errorData = await createImageBlobResponse.json();
-                console.error('Failed to create image blob:', {
-                  status: createImageBlobResponse.status,
-                  statusText: createImageBlobResponse.statusText,
-                  error: errorData
-                });
-                throw new Error(`Failed to create image blob: ${createImageBlobResponse.status} ${createImageBlobResponse.statusText} - ${JSON.stringify(errorData)}`);
-              }
-
-              const imageBlobData = await createImageBlobResponse.json();
-              console.log('Image blob created successfully:', {
-                name: image.name,
-                sha: imageBlobData.sha
-              });
-              
-              // Add the image file to the tree
-              const imagePath = `images/${image.name}`;
-              console.log('Adding image to tree:', imagePath);
-              newTree.push({
-                path: imagePath,
-                mode: '100644',
-                type: 'blob',
-                sha: imageBlobData.sha
-              });
-            } catch (error) {
-              console.error('Error processing image:', {
-                imageName: image.name,
-                error: error.message,
-                stack: error.stack,
-                response: error.response?.data
-              });
-              throw error;
-            }
-          }
-        }
       }
     }
 
