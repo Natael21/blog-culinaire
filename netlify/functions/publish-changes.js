@@ -43,85 +43,122 @@ exports.handler = async function(event, context) {
       };
     }
 
-    console.log('Git configuration:', {
+    const config = {
       owner: process.env.GITHUB_OWNER,
       repo: process.env.GITHUB_REPO,
       branch: process.env.GITHUB_BRANCH || 'master'
+    };
+
+    console.log('Git configuration:', config);
+
+    // Get the current commit SHA
+    const refResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, {
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
     });
 
-    // Process each change
-    for (const change of changes) {
-      console.log('Processing change:', change);
-      
-      if (change.type === 'delete') {
-        try {
-          const filePath = `_posts/${change.filename}`;
-          console.log(`Attempting to delete file: ${filePath}`);
-          
-          // First, get the file's SHA
-          const getFileResponse = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${filePath}`, {
-            headers: {
-              'Authorization': `token ${githubToken}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          });
-
-          console.log('Get file response status:', getFileResponse.status);
-
-          if (!getFileResponse.ok) {
-            const errorData = await getFileResponse.json();
-            console.log('Error getting file:', errorData);
-            if (getFileResponse.status === 404) {
-              console.log(`File ${change.filename} already deleted or doesn't exist`);
-              continue;
-            }
-            throw new Error(`GitHub API error: ${getFileResponse.status} ${getFileResponse.statusText}`);
-          }
-
-          const fileData = await getFileResponse.json();
-          console.log('File data received:', { sha: fileData.sha, path: fileData.path });
-
-          // Now delete the file with its SHA
-          const deleteResponse = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${filePath}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `token ${githubToken}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-              message: `Delete restaurant: ${change.filename}`,
-              sha: fileData.sha,
-              branch: process.env.GITHUB_BRANCH || 'master'
-            })
-          });
-
-          console.log('Delete response status:', deleteResponse.status);
-          
-          if (!deleteResponse.ok) {
-            const errorData = await deleteResponse.json();
-            console.log('Error response from GitHub API:', errorData);
-            throw new Error(`GitHub API error: ${deleteResponse.status} ${deleteResponse.statusText}`);
-          }
-
-          const responseData = await deleteResponse.json();
-          console.log('Success response from GitHub API:', responseData);
-          console.log(`Successfully deleted ${change.filename}`);
-        } catch (error) {
-          console.log('Error details:', {
-            message: error.message,
-            stack: error.stack,
-            response: error.response?.data
-          });
-          throw error;
-        }
-      }
+    if (!refResponse.ok) {
+      throw new Error(`Failed to get ref: ${refResponse.status} ${refResponse.statusText}`);
     }
 
-    console.log('All changes processed successfully');
+    const refData = await refResponse.json();
+    const currentCommitSha = refData.object.sha;
+
+    // Get the current tree
+    const treeResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/trees/${currentCommitSha}?recursive=1`, {
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!treeResponse.ok) {
+      throw new Error(`Failed to get tree: ${treeResponse.status} ${treeResponse.statusText}`);
+    }
+
+    const treeData = await treeResponse.json();
+
+    // Prepare the new tree
+    const newTree = treeData.tree.filter(item => {
+      const filePath = `_posts/${item.path}`;
+      return !changes.some(change => 
+        change.type === 'delete' && 
+        filePath === `_posts/${change.filename}`
+      );
+    });
+
+    // Create a new tree
+    const createTreeResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/trees`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        base_tree: currentCommitSha,
+        tree: newTree
+      })
+    });
+
+    if (!createTreeResponse.ok) {
+      throw new Error(`Failed to create tree: ${createTreeResponse.status} ${createTreeResponse.statusText}`);
+    }
+
+    const newTreeData = await createTreeResponse.json();
+
+    // Create a commit
+    const commitMessage = changes.length === 1 
+      ? `Delete restaurant: ${changes[0].filename}`
+      : `Delete ${changes.length} restaurants:\n${changes.map(c => `- ${c.filename}`).join('\n')}`;
+
+    const createCommitResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/commits`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: commitMessage,
+        tree: newTreeData.sha,
+        parents: [currentCommitSha]
+      })
+    });
+
+    if (!createCommitResponse.ok) {
+      throw new Error(`Failed to create commit: ${createCommitResponse.status} ${createCommitResponse.statusText}`);
+    }
+
+    const commitData = await createCommitResponse.json();
+
+    // Update the reference
+    const updateRefResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sha: commitData.sha,
+        force: true
+      })
+    });
+
+    if (!updateRefResponse.ok) {
+      throw new Error(`Failed to update ref: ${updateRefResponse.status} ${updateRefResponse.statusText}`);
+    }
+
+    console.log('All changes processed successfully in a single commit');
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Changes published successfully" })
+      body: JSON.stringify({ 
+        message: "Changes published successfully",
+        commit: commitData.sha
+      })
     };
   } catch (error) {
     console.error('Error publishing changes:', {
