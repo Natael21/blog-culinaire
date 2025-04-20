@@ -192,17 +192,57 @@
         }
 
         .action-button {
-            padding: 0.75rem 1.5rem;
+            padding: 12px 24px;
             border: none;
             border-radius: var(--border-radius);
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
             transition: all 0.3s ease;
             text-decoration: none;
             color: white;
+            font-size: 0.95rem;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            position: relative;
+        }
+
+        .action-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .action-button .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        .action-button.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .action-button.loading .spinner {
+            display: inline-block;
+        }
+
+        .action-button.loading .button-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .edit-button {
@@ -736,11 +776,20 @@
             try {
                 // Afficher le spinner immédiatement
                 showSpinner();
+                const publishButton = document.querySelector('.action-button[onclick="publishChanges()"]');
+                if (publishButton) {
+                    publishButton.disabled = true;
+                    publishButton.classList.add('loading');
+                }
 
                 // Vérifier l'authentification de l'utilisateur
                 const user = netlifyIdentity.currentUser();
                 if (!user) {
                     hideSpinner();
+                    if (publishButton) {
+                        publishButton.disabled = false;
+                        publishButton.classList.remove('loading');
+                    }
                     showNotification('Veuillez vous connecter pour publier les modifications', 'error');
                     netlifyIdentity.open('login');
                     return;
@@ -825,26 +874,56 @@
                     // Afficher une notification de succès
                     showNotification('Modifications publiées avec succès', 'success');
                 } else {
+                    hideSpinner();
+                    if (publishButton) {
+                        publishButton.disabled = false;
+                        publishButton.classList.remove('loading');
+                    }
                     showNotification('Aucune modification à publier', 'info');
                 }
             } catch (error) {
-                console.error('Erreur lors de la publication des modifications:', error);
+                console.error('Erreur:', error);
                 showNotification('Erreur lors de la publication des modifications: ' + error.message, 'error');
+                const publishButton = document.querySelector('.action-button[onclick="publishChanges()"]');
+                if (publishButton) {
+                    publishButton.disabled = false;
+                    publishButton.classList.remove('loading');
+                }
             } finally {
                 hideSpinner();
+                const publishButton = document.querySelector('.action-button[onclick="publishChanges()"]');
+                if (publishButton) {
+                    publishButton.disabled = false;
+                    publishButton.classList.remove('loading');
+                }
             }
         }
 
-        // Fonction pour annuler les modifications
-        function cancelChanges() {
-            // Vider le localStorage
-            localStorage.removeItem('pendingChanges');
-            // Déclencher l'événement de mise à jour des boutons
-            window.dispatchEvent(new Event('storageUpdated'));
-            // Recharger la liste des restaurants
-            loadRestaurants();
-            // Afficher une notification
-            showNotification('Modifications annulées', 'info');
+        // Fonction pour mettre à jour les boutons de gestion des modifications
+        function updatePendingChangesButtons() {
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            
+            // Mettre à jour le compteur de modifications en attente
+            const totalChanges = pendingChanges.length + drafts.length;
+            
+            // Mettre à jour le bouton de publication
+            const publishButton = document.querySelector('.action-button[onclick="publishChanges()"]');
+            if (publishButton) {
+                // Ajouter le spinner s'il n'existe pas déjà
+                if (!publishButton.querySelector('.spinner')) {
+                    const spinnerDiv = document.createElement('div');
+                    spinnerDiv.className = 'spinner';
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'button-text';
+                    textSpan.innerHTML = publishButton.innerHTML;
+                    publishButton.innerHTML = '';
+                    publishButton.appendChild(spinnerDiv);
+                    publishButton.appendChild(textSpan);
+                }
+            }
+            
+            console.log(`${totalChanges} modification(s) en attente`);
         }
 
         // Fonction pour afficher une notification
