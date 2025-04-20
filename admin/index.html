@@ -312,41 +312,81 @@ title: Administration - Blog Culinaire
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             backdrop-filter: blur(2px);
         }
 
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .loading-content {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .loading-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+
+        .loading-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>') no-repeat center;
+            background-size: contain;
+            animation: float 2s ease-in-out infinite;
         }
 
         .loading-message {
-            position: absolute;
-            bottom: 20%;
             color: #2c3e50;
             font-weight: 500;
-            text-align: center;
-            width: 100%;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
         }
 
-        @keyframes spin {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .loading-submessage {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            width: 0;
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes progress {
+            0% { width: 0; }
+            50% { width: 100%; }
+            100% { width: 0; }
         }
     </style>
 </head>
@@ -772,8 +812,14 @@ title: Administration - Blog Culinaire
             const overlay = document.createElement('div');
             overlay.className = 'loading-overlay';
             overlay.innerHTML = `
-                <div class="loading-spinner"></div>
-                <div class="loading-message">${message}</div>
+                <div class="loading-content">
+                    <div class="loading-icon"></div>
+                    <div class="loading-message">${message}</div>
+                    <div class="loading-submessage">Veuillez patienter pendant le traitement...</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                </div>
             `;
             document.body.appendChild(overlay);
             console.log('Overlay créé et ajouté au DOM');
