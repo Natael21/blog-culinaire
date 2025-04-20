@@ -926,6 +926,18 @@
             console.log(`${totalChanges} modification(s) en attente`);
         }
 
+        // Fonction pour afficher l'état de chargement
+        function showLoadingState(button) {
+            button.classList.add('loading');
+            button.disabled = true;
+        }
+
+        // Fonction pour masquer l'état de chargement
+        function hideLoadingState(button) {
+            button.classList.remove('loading');
+            button.disabled = false;
+        }
+
         // Fonction pour afficher une notification
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');

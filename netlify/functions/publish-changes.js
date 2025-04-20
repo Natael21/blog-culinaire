@@ -84,20 +84,17 @@ exports.handler = async function(event, context) {
     let newTree = treeData.tree.filter(item => {
       // Keep files that are not being deleted
       const isMarkdownFile = item.path.startsWith('_posts/');
-      const isImageFile = item.path.startsWith('images/');
       
       console.log('Checking file in tree:', {
         path: item.path,
-        isMarkdownFile,
-        isImageFile
+        isMarkdownFile
       });
       
+      // Ne supprimer que les fichiers markdown
       return !changes.some(change => {
-        if (change.type === 'delete') {
-          // Check both markdown files and their associated images
-          if ((isMarkdownFile && `_posts/${change.filename}` === item.path) ||
-              (isImageFile && item.path.includes(change.filename.replace('.md', '')))) {
-            console.log('Marking for deletion:', item.path);
+        if (change.type === 'delete' && isMarkdownFile) {
+          if (`_posts/${change.filename}` === item.path) {
+            console.log('Marking markdown file for deletion:', item.path);
             return true;
           }
         }
