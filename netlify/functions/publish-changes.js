@@ -90,6 +90,18 @@ exports.handler = async function(event, context) {
       );
     });
 
+    // Add explicit deletion entries for files to be deleted
+    for (const change of changes) {
+      if (change.type === 'delete') {
+        newTree.push({
+          path: `_posts/${change.filename}`,
+          mode: '100644',
+          type: 'blob',
+          sha: null  // This explicitly tells Git to delete the file
+        });
+      }
+    }
+
     console.log('\n=== Résumé des changements ===');
     console.log('Nombre total de changements:', changes.length);
     console.log('Détail des changements:', changes.map(c => ({
