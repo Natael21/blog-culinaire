@@ -85,39 +85,62 @@ exports.handler = async function(event, context) {
       // Keep files that are not being deleted
       const isMarkdownFile = item.path.startsWith('_posts/');
       
-      console.log('=== Vérification du fichier ===');
-      console.log('Chemin du fichier:', item.path);
+      console.log('\n=== Vérification détaillée du fichier ===');
+      console.log('Chemin du fichier actuel:', item.path);
+      console.log('Type du fichier:', item.type);
       console.log('Est un fichier markdown:', isMarkdownFile);
+      console.log('Mode du fichier:', item.mode);
       
       // Ne supprimer que les fichiers markdown
       const shouldDelete = changes.some(change => {
+        console.log('\nAnalyse du changement:', {
+          type: change.type,
+          filename: change.filename,
+          isDelete: change.type === 'delete'
+        });
+
         if (change.type === 'delete' && isMarkdownFile) {
-          const fileToDelete = `_posts/${change.filename}`;
-          console.log('Comparaison de suppression:', {
-            fileToDelete,
-            currentPath: item.path,
-            shouldDelete: fileToDelete === item.path,
-            change: change
+          // Normaliser le nom du fichier à supprimer
+          const filename = change.filename.startsWith('_posts/') 
+            ? change.filename 
+            : `_posts/${change.filename}`;
+            
+          console.log('Analyse détaillée de la suppression:', {
+            filenameOriginal: change.filename,
+            filenameNormalisé: filename,
+            cheminFichierActuel: item.path,
+            correspondance: filename === item.path
           });
-          return fileToDelete === item.path;
+
+          const willDelete = filename === item.path;
+          if (willDelete) {
+            console.log('🚨 FICHIER MARQUÉ POUR SUPPRESSION 🚨');
+          }
+          return willDelete;
         }
         return false;
       });
 
-      console.log('Résultat final:', {
-        path: item.path,
-        shouldDelete,
-        willKeep: !shouldDelete
+      console.log('\nRésultat final pour', item.path, ':', {
+        estMarkdown: isMarkdownFile,
+        seraSupprimer: shouldDelete,
+        seraConserver: !shouldDelete
       });
+      console.log('----------------------------------------');
 
       return !shouldDelete;
     });
 
-    console.log('=== Résumé des changements ===');
+    console.log('\n=== Résumé détaillé des changements ===');
     console.log('Nombre total de changements:', changes.length);
-    console.log('Changements de suppression:', changes.filter(c => c.type === 'delete'));
+    console.log('Détail des changements:', changes.map(c => ({
+      type: c.type,
+      filename: c.filename,
+      filenameComplet: c.filename.startsWith('_posts/') ? c.filename : `_posts/${c.filename}`
+    })));
     console.log('Nombre de fichiers dans le nouvel arbre:', newTree.length);
-    console.log('Fichiers dans le nouvel arbre:', newTree.map(item => item.path));
+    console.log('Liste des fichiers conservés:', newTree.map(item => item.path));
+    console.log('=========================================\n');
 
     // Add new files to the tree
     const createBlobs = [];
