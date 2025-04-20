@@ -33,6 +33,8 @@ exports.handler = async function(event, context) {
 
     // Get GitHub token from environment variable
     const githubToken = process.env.GITHUB_TOKEN;
+    console.log('GitHub token available:', !!githubToken);
+    
     if (!githubToken) {
       console.log('No GitHub token found in environment variables');
       return { 
@@ -44,7 +46,7 @@ exports.handler = async function(event, context) {
     console.log('Git configuration:', {
       owner: process.env.GITHUB_OWNER,
       repo: process.env.GITHUB_REPO,
-      branch: process.env.GITHUB_BRANCH || 'main'
+      branch: process.env.GITHUB_BRANCH || 'master'
     });
 
     // Process each change
@@ -60,14 +62,17 @@ exports.handler = async function(event, context) {
             method: 'DELETE',
             headers: {
               'Authorization': `token ${githubToken}`,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Accept': 'application/vnd.github.v3+json'
             },
             body: JSON.stringify({
               message: `Delete restaurant: ${change.filename}`,
-              branch: process.env.GITHUB_BRANCH || 'main'
+              branch: process.env.GITHUB_BRANCH || 'master'
             })
           });
 
+          console.log('GitHub API response status:', response.status);
+          
           if (!response.ok) {
             const errorData = await response.json();
             console.log('Error response from GitHub API:', errorData);
@@ -78,10 +83,13 @@ exports.handler = async function(event, context) {
             throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
           }
 
+          const responseData = await response.json();
+          console.log('Success response from GitHub API:', responseData);
           console.log(`Successfully deleted ${change.filename}`);
         } catch (error) {
           console.log('Error details:', {
             message: error.message,
+            stack: error.stack,
             response: error.response?.data
           });
           throw error;
@@ -105,6 +113,7 @@ exports.handler = async function(event, context) {
       body: JSON.stringify({ 
         error: "Error publishing changes",
         details: error.message,
+        stack: error.stack,
         response: error.response?.data
       })
     };
