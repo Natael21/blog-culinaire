@@ -756,38 +756,59 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px 25px;
+            padding: 20px 25px;
             border-radius: var(--border-radius);
             background: white;
-            box-shadow: var(--box-shadow);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             z-index: 9999;
             animation: slideIn 0.3s ease-out;
-        }
-
-        .notification.success {
-            border-left: 4px solid #2ecc71;
+            min-width: 300px;
+            max-width: 500px;
         }
 
         .notification.error {
             border-left: 4px solid var(--secondary-color);
+            background-color: #fff5f5;
+        }
+
+        .notification.success {
+            border-left: 4px solid #2ecc71;
+            background-color: #f0fff4;
         }
 
         .notification-content {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            align-items: flex-start;
+            gap: 12px;
         }
 
-        .notification i {
+        .notification-icon {
             font-size: 1.2rem;
+            margin-top: 2px;
         }
 
-        .notification.success i {
-            color: #2ecc71;
+        .notification-text {
+            flex: 1;
         }
 
-        .notification.error i {
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--primary-color);
+        }
+
+        .notification-message {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .notification.error .notification-icon {
             color: var(--secondary-color);
+        }
+
+        .notification.success .notification-icon {
+            color: #2ecc71;
         }
 
         @keyframes slideIn {
@@ -1768,13 +1789,30 @@
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.textContent = message;
+            
+            let title = type === 'error' ? 'Erreur' : 'Succès';
+            let icon = type === 'error' ? 'exclamation-circle' : 'check-circle';
+            
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        <i class="fas fa-${icon}"></i>
+                    </div>
+                    <div class="notification-text">
+                        <div class="notification-title">${title}</div>
+                        <div class="notification-message">
+                            ${message}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
             document.body.appendChild(notification);
             
-            // Supprimer la notification après 3 secondes
+            // Supprimer la notification après 5 secondes pour les succès, 8 secondes pour les erreurs
             setTimeout(() => {
                 notification.remove();
-            }, 3000);
+            }, type === 'error' ? 8000 : 5000);
         }
 
         // Fonction pour mettre à jour les boutons de gestion des modifications
@@ -2287,6 +2325,15 @@ ${editorContent}`;
             });
         }
 
+        // Fonction pour vérifier la taille des images
+        function checkImageSize(file, maxSize = 5) {
+            const sizeInMB = file.size / (1024 * 1024);
+            return {
+                isValid: sizeInMB <= maxSize,
+                size: sizeInMB.toFixed(2)
+            };
+        }
+
         // Fonction pour sauvegarder le brouillon avec gestion améliorée du stockage
         async function saveDraft() {
             try {
@@ -2294,23 +2341,44 @@ ${editorContent}`;
                 cleanupOldDrafts();
                 
                 const formData = getFormData();
+                let processedData = { ...formData };
                 
                 // Vérifier la taille des images avant compression
-                if (mainImageFile && mainImageFile.size > 5 * 1024 * 1024) { // 5MB
-                    throw new Error('L\'image principale est trop volumineuse (max 5MB). Veuillez la réduire avant de la télécharger.');
+                if (mainImageFile) {
+                    const mainImageCheck = checkImageSize(mainImageFile);
+                    if (!mainImageCheck.isValid) {
+                        throw new Error(
+                            'Image principale trop volumineuse',
+                            `L'image fait ${mainImageCheck.size}MB alors que la limite est de 5MB. Veuillez la réduire avant de la télécharger.`
+                        );
+                    }
                 }
 
-                if (galleryImageFiles.some(file => file.size > 5 * 1024 * 1024)) {
-                    throw new Error('Une ou plusieurs images de la galerie sont trop volumineuses (max 5MB chacune). Veuillez les réduire avant de les télécharger.');
+                if (galleryImageFiles.length > 0) {
+                    const largeImages = galleryImageFiles
+                        .map(file => ({
+                            name: file.name,
+                            ...checkImageSize(file)
+                        }))
+                        .filter(img => !img.isValid);
+
+                    if (largeImages.length > 0) {
+                        const details = largeImages
+                            .map(img => `${img.name} (${img.size}MB)`)
+                            .join(', ');
+                        throw new Error(
+                            'Images de galerie trop volumineuses',
+                            `Les images suivantes dépassent la limite de 5MB : ${details}`
+                        );
+                    }
                 }
                 
                 // Compresser l'image principale si elle existe
                 if (formData.imageContent) {
                     try {
-                        formData.imageContent = await compressImage(formData.imageContent, 0.3); // Réduire à 300KB
+                        processedData.imageContent = await compressImage(formData.imageContent, 0.3);
                         console.log('Image principale compressée avec succès');
                     } catch (error) {
-                        console.error('Erreur lors de la compression de l\'image principale:', error);
                         throw new Error('Impossible de compresser l\'image principale. Veuillez essayer avec une image plus petite.');
                     }
                 }
@@ -2318,12 +2386,11 @@ ${editorContent}`;
                 // Compresser les images de la galerie
                 if (formData.galleryImages && formData.galleryImages.length > 0) {
                     try {
-                        formData.galleryImages = await Promise.all(
-                            formData.galleryImages.map(img => compressImage(img, 0.2)) // Réduire à 200KB
+                        processedData.galleryImages = await Promise.all(
+                            formData.galleryImages.map(img => compressImage(img, 0.2))
                         );
                         console.log('Images de la galerie compressées avec succès');
                     } catch (error) {
-                        console.error('Erreur lors de la compression des images de la galerie:', error);
                         throw new Error('Impossible de compresser les images de la galerie. Veuillez essayer avec des images plus petites.');
                     }
                 }
@@ -2340,56 +2407,87 @@ ${editorContent}`;
                     drafts = drafts.slice(-2); // Garder seulement les 2 plus récents
                 }
 
-                // Ajouter le nouveau brouillon
+                // Ajouter le nouveau brouillon avec les images compressées
                 const draft = {
-                    ...formData,
+                    ...processedData,
                     timestamp: new Date().toISOString()
                 };
 
+                // Essayer de sauvegarder le brouillon complet
                 try {
-                    localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
-                    showNotification('Brouillon sauvegardé avec succès', 'success');
+                    const draftString = JSON.stringify([...drafts, draft]);
+                    // Tester d'abord si on peut stocker
+                    try {
+                        localStorage.setItem('drafts_test', draftString);
+                        localStorage.removeItem('drafts_test');
+                    } catch (testError) {
+                        if (testError.name === 'QuotaExceededError') {
+                            // Si on ne peut pas stocker, demander confirmation pour nettoyer
+                            const confirmed = await showStorageCleanupModal();
+                            if (!confirmed) {
+                                throw new Error('Sauvegarde annulée par l\'utilisateur');
+                            }
+                            drafts = drafts.slice(-1);
+                        }
+                    }
+
+                    // Tentative finale de sauvegarde
+                    try {
+                        localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
+                        showNotification('Brouillon sauvegardé avec succès', 'success');
+                        return true; // Indiquer que la sauvegarde a réussi
+                    } catch (finalError) {
+                        throw new Error('Les images sont trop volumineuses pour être sauvegardées. Veuillez réduire leur taille ou en utiliser moins.');
+                    }
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
-                        // Si toujours pas assez d'espace, demander confirmation pour supprimer tous les brouillons sauf le plus récent
-                        const confirmed = await showStorageCleanupModal();
-                        if (!confirmed) {
-                            throw new Error('Sauvegarde annulée par l\'utilisateur');
-                        }
-                        
-                        drafts = drafts.slice(-1);
-                        try {
-                            localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
-                            showNotification('Brouillon sauvegardé avec succès (anciens brouillons nettoyés)', 'success');
-                        } catch (finalError) {
-                            throw new Error('Impossible de sauvegarder même après nettoyage complet. Les images sont peut-être trop volumineuses. Veuillez essayer avec des images plus petites.');
-                        }
+                        throw new Error('Les images sont trop volumineuses pour être sauvegardées. Veuillez réduire leur taille ou en utiliser moins.');
                     } else {
-                        throw storageError;
+                        throw new Error('Erreur lors de la sauvegarde : ' + storageError.message);
                     }
                 }
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde du brouillon:', error);
-                showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
-                throw error;
+                showNotification(
+                    error.message || 'Une erreur est survenue lors de la sauvegarde',
+                    'error',
+                    error.details || ''
+                );
+                return false;
             }
         }
 
-        // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
-        function escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        // Gestionnaire de soumission du formulaire
+        // Modifier le gestionnaire de formulaire pour tenir compte du résultat de saveDraft
         function initializeForm() {
             const form = document.getElementById('restaurantForm');
             if (form) {
                 form.addEventListener('submit', async function(e) {
                     e.preventDefault();
-                    if (!validateForm()) {
-                        return;
+                    try {
+                        if (!validateForm()) {
+                            return;
+                        }
+                        
+                        // Désactiver le bouton de sauvegarde et montrer le spinner
+                        const saveButton = document.getElementById('saveButton');
+                        if (saveButton) showLoadingState(saveButton);
+                        
+                        const saveSuccess = await saveDraft();
+                        
+                        // Ne rediriger que si la sauvegarde a réussi
+                        if (saveSuccess) {
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors de la sauvegarde:', error);
+                        showNotification(error.message || 'Une erreur est survenue lors de la sauvegarde', 'error');
+                    } finally {
+                        // Réactiver le bouton de sauvegarde et cacher le spinner
+                        const saveButton = document.getElementById('saveButton');
+                        if (saveButton) hideLoadingState(saveButton);
                     }
-                    await saveDraft();
                 });
             } else {
                 console.error('Formulaire non trouvé');
