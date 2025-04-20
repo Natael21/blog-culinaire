@@ -130,36 +130,38 @@ exports.handler = async function(event, context) {
           sha: markdownBlobData.sha
         });
 
-        // If there's an image, create a blob for it too
-        if (change.image && change.imageContent) {
-          console.log('Creating blob for image:', change.image);
-          
-          const createImageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `token ${githubToken}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              content: change.imageContent,
-              encoding: 'base64'
-            })
-          });
+        // Process all images (main and gallery)
+        if (change.images && change.images.length > 0) {
+          for (const image of change.images) {
+            console.log('Creating blob for image:', image.name);
+            
+            const createImageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `token ${githubToken}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                content: image.content,
+                encoding: 'base64'
+              })
+            });
 
-          if (!createImageBlobResponse.ok) {
-            throw new Error(`Failed to create image blob: ${createImageBlobResponse.status} ${createImageBlobResponse.statusText}`);
+            if (!createImageBlobResponse.ok) {
+              throw new Error(`Failed to create image blob: ${createImageBlobResponse.status} ${createImageBlobResponse.statusText}`);
+            }
+
+            const imageBlobData = await createImageBlobResponse.json();
+            
+            // Add the image file to the tree
+            newTree.push({
+              path: `images/${image.name}`,
+              mode: '100644',
+              type: 'blob',
+              sha: imageBlobData.sha
+            });
           }
-
-          const imageBlobData = await createImageBlobResponse.json();
-          
-          // Add the image file to the tree
-          newTree.push({
-            path: `images/${change.image}`,
-            mode: '100644',
-            type: 'blob',
-            sha: imageBlobData.sha
-          });
         }
       }
     }

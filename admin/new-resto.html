@@ -2208,30 +2208,59 @@ ${editorContent}`;
                 const date = new Date().toISOString().split('T')[0];
                 const filePath = `${date}-${filename}.md`;
 
-                // Créer l'objet du brouillon
+                // Créer l'objet du brouillon avec le contenu initial
+                let markdownContent = generateMarkdown();
                 const draftData = {
                     filename: filePath,
                     title: title,
-                    content: generateMarkdown(),
                     images: []
                 };
 
-                // Sauvegarder les images en base64
+                // Traiter l'image principale
                 if (mainImageFile) {
                     const mainImageBase64 = await fileToBase64(mainImageFile);
+                    const mainImageExtension = mainImageFile.name.split('.').pop();
+                    const mainImageName = `${filename}-main-${Date.now()}.${mainImageExtension}`;
+                    
                     draftData.images.push({
-                        name: mainImageFile.name,
-                        data: mainImageBase64
+                        name: mainImageName,
+                        content: mainImageBase64.split(',')[1],
+                        isMain: true
                     });
+
+                    // Mettre à jour le contenu avec le chemin de l'image principale
+                    markdownContent = markdownContent.replace(
+                        /image:\s*"[^"]*"/,
+                        `image: "/images/${mainImageName}"`
+                    );
                 }
 
-                for (const file of galleryImageFiles) {
-                    const galleryBase64 = await fileToBase64(file);
-                    draftData.images.push({
-                        name: file.name,
-                        data: galleryBase64
-                    });
+                // Traiter les images de la galerie
+                if (galleryImageFiles && galleryImageFiles.length > 0) {
+                    const timestamp = Date.now(); // Utiliser le même timestamp pour toutes les images de la galerie
+                    for (let i = 0; i < galleryImageFiles.length; i++) {
+                        const file = galleryImageFiles[i];
+                        const galleryImageBase64 = await fileToBase64(file);
+                        const galleryImageExtension = file.name.split('.').pop();
+                        const galleryImageName = `${filename}-gallery-${i + 1}-${timestamp}.${galleryImageExtension}`;
+                        
+                        draftData.images.push({
+                            name: galleryImageName,
+                            content: galleryImageBase64.split(',')[1],
+                            isMain: false,
+                            originalName: file.name // Stocker le nom original pour le remplacement
+                        });
+
+                        // Mettre à jour le contenu avec le chemin de l'image de la galerie
+                        markdownContent = markdownContent.replace(
+                            new RegExp(`!\\[.*?\\]\\(${escapeRegExp(file.name)}\\)`, 'g'),
+                            `![](/images/${galleryImageName})`
+                        );
+                    }
                 }
+
+                // Ajouter le contenu Markdown mis à jour
+                draftData.content = markdownContent;
 
                 // Récupérer les brouillons existants
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
@@ -2270,6 +2299,11 @@ ${editorContent}`;
                 console.error('Erreur:', error);
                 showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
             }
+        }
+
+        // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
         // Gestionnaire de soumission du formulaire

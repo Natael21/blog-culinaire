@@ -675,33 +675,25 @@
 
                     // Ajouter tous les brouillons aux modifications
                     for (const draft of drafts) {
-                        // Si le brouillon contient une image
-                        if (draft.image && draft.image.startsWith('data:image')) {
-                            // Extraire le contenu base64 de l'image
-                            const imageContent = draft.image.split(',')[1];
-                            const imageExtension = draft.image.split(';')[0].split('/')[1];
-                            const imageName = `${draft.filename.replace('.md', '')}-${Date.now()}.${imageExtension}`;
-                            
-                            // Mettre à jour le chemin de l'image dans le contenu Markdown
-                            draft.content = draft.content.replace(
-                                draft.image,
-                                `/images/${imageName}`
-                            );
+                        const change = {
+                            type: 'create',
+                            filename: draft.filename,
+                            content: draft.content,
+                            images: []
+                        };
 
-                            pendingChanges.push({
-                                type: 'create',
-                                filename: draft.filename,
-                                content: draft.content,
-                                image: imageName,
-                                imageContent: imageContent
-                            });
-                        } else {
-                            pendingChanges.push({
-                                type: 'create',
-                                filename: draft.filename,
-                                content: draft.content
-                            });
+                        // Traiter toutes les images (principale et galerie)
+                        if (draft.images && draft.images.length > 0) {
+                            for (const image of draft.images) {
+                                change.images.push({
+                                    name: image.name,
+                                    content: image.content,
+                                    isMain: image.isMain
+                                });
+                            }
                         }
+
+                        pendingChanges.push(change);
                     }
                     
                     // Appliquer les modifications
