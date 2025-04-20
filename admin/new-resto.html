@@ -2209,7 +2209,85 @@ ${editorContent}`;
             }
         }
 
-        // Fonction pour sauvegarder le brouillon
+        // Fonction pour récupérer les données du formulaire
+        function getFormData() {
+            return {
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                description: document.getElementById('description').value,
+                address: document.getElementById('address').value,
+                style: document.getElementById('style').value,
+                price: document.getElementById('price').value,
+                diet: {
+                    vegetarian: document.getElementById('vegetarian').checked,
+                    vegan: document.getElementById('vegan').checked
+                },
+                imageContent: mainImageFile ? URL.createObjectURL(mainImageFile) : null,
+                galleryImages: galleryImageFiles.map(file => URL.createObjectURL(file)),
+                ratings: {
+                    food: {
+                        score: document.getElementById('foodScore').value,
+                        comment: document.getElementById('foodComment').value
+                    },
+                    service: {
+                        score: document.getElementById('serviceScore').value,
+                        comment: document.getElementById('serviceComment').value
+                    },
+                    ambiance: {
+                        score: document.getElementById('ambianceScore').value,
+                        comment: document.getElementById('ambianceComment').value
+                    },
+                    value: {
+                        score: document.getElementById('valueScore').value,
+                        comment: document.getElementById('valueComment').value
+                    },
+                    originality: {
+                        score: document.getElementById('originalityScore').value,
+                        comment: document.getElementById('originalityComment').value
+                    },
+                    overallExperience: {
+                        score: document.getElementById('overallExperienceScore').value,
+                        comment: document.getElementById('overallExperienceComment').value
+                    }
+                },
+                content: editor.getHTML()
+            };
+        }
+
+        // Fonction pour afficher un modal de confirmation
+        function showStorageCleanupModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Espace de stockage insuffisant</h3>
+                        <p class="confirmation-message">Pour sauvegarder ce brouillon, nous devons supprimer les anciens brouillons. Voulez-vous continuer ?</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Oui, supprimer les anciens brouillons</button>
+                            <button class="confirmation-button cancel">Non, annuler</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Fonction pour sauvegarder le brouillon avec gestion améliorée du stockage
         async function saveDraft() {
             try {
                 // Nettoyer les anciens brouillons d'abord
@@ -2217,20 +2295,51 @@ ${editorContent}`;
                 
                 const formData = getFormData();
                 
-                // Compresser l'image si elle existe
+                // Vérifier la taille des images avant compression
+                if (mainImageFile && mainImageFile.size > 5 * 1024 * 1024) { // 5MB
+                    throw new Error('L\'image principale est trop volumineuse (max 5MB). Veuillez la réduire avant de la télécharger.');
+                }
+
+                if (galleryImageFiles.some(file => file.size > 5 * 1024 * 1024)) {
+                    throw new Error('Une ou plusieurs images de la galerie sont trop volumineuses (max 5MB chacune). Veuillez les réduire avant de les télécharger.');
+                }
+                
+                // Compresser l'image principale si elle existe
                 if (formData.imageContent) {
                     try {
-                        formData.imageContent = await compressImage(formData.imageContent);
-                        console.log('Image compressée avec succès');
+                        formData.imageContent = await compressImage(formData.imageContent, 0.3); // Réduire à 300KB
+                        console.log('Image principale compressée avec succès');
                     } catch (error) {
-                        console.error('Erreur lors de la compression de l\'image:', error);
-                        // Continuer avec l'image non compressée si la compression échoue
+                        console.error('Erreur lors de la compression de l\'image principale:', error);
+                        throw new Error('Impossible de compresser l\'image principale. Veuillez essayer avec une image plus petite.');
+                    }
+                }
+
+                // Compresser les images de la galerie
+                if (formData.galleryImages && formData.galleryImages.length > 0) {
+                    try {
+                        formData.galleryImages = await Promise.all(
+                            formData.galleryImages.map(img => compressImage(img, 0.2)) // Réduire à 200KB
+                        );
+                        console.log('Images de la galerie compressées avec succès');
+                    } catch (error) {
+                        console.error('Erreur lors de la compression des images de la galerie:', error);
+                        throw new Error('Impossible de compresser les images de la galerie. Veuillez essayer avec des images plus petites.');
                     }
                 }
 
                 // Récupérer les brouillons existants
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 
+                // Limiter le nombre de brouillons à 3 maximum
+                if (drafts.length >= 3) {
+                    const confirmed = await showStorageCleanupModal();
+                    if (!confirmed) {
+                        throw new Error('Sauvegarde annulée par l\'utilisateur');
+                    }
+                    drafts = drafts.slice(-2); // Garder seulement les 2 plus récents
+                }
+
                 // Ajouter le nouveau brouillon
                 const draft = {
                     ...formData,
@@ -2238,31 +2347,31 @@ ${editorContent}`;
                 };
 
                 try {
-                    // Essayer de sauvegarder avec le nouveau brouillon
                     localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
+                    showNotification('Brouillon sauvegardé avec succès', 'success');
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
-                        // Si l'erreur est due au quota, supprimer le brouillon le plus ancien et réessayer
-                        if (drafts.length > 0) {
-                            drafts.shift(); // Supprimer le premier élément
-                            try {
-                                localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
-                            } catch (retryError) {
-                                throw new Error('Impossible de sauvegarder le brouillon même après nettoyage. L\'image est peut-être trop volumineuse.');
-                            }
-                        } else {
-                            throw new Error('L\'image est trop volumineuse pour être sauvegardée. Essayez de réduire sa taille.');
+                        // Si toujours pas assez d'espace, demander confirmation pour supprimer tous les brouillons sauf le plus récent
+                        const confirmed = await showStorageCleanupModal();
+                        if (!confirmed) {
+                            throw new Error('Sauvegarde annulée par l\'utilisateur');
+                        }
+                        
+                        drafts = drafts.slice(-1);
+                        try {
+                            localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
+                            showNotification('Brouillon sauvegardé avec succès (anciens brouillons nettoyés)', 'success');
+                        } catch (finalError) {
+                            throw new Error('Impossible de sauvegarder même après nettoyage complet. Les images sont peut-être trop volumineuses. Veuillez essayer avec des images plus petites.');
                         }
                     } else {
                         throw storageError;
                     }
                 }
-
-                showNotification('Brouillon sauvegardé avec succès', 'success');
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde du brouillon:', error);
                 showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
-                throw error; // Propager l'erreur pour la gestion en amont
+                throw error;
             }
         }
 
