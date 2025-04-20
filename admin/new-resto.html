@@ -1592,28 +1592,90 @@
                     });
                 });
 
-                zone.addEventListener('drop', (e) => {
-                    const dt = e.dataTransfer;
-                    const files = dt.files;
-
+                // Gestionnaire unifié pour le drop et le change
+                async function handleFiles(files) {
                     if (zoneId === 'mainImageZone' && files.length > 0) {
-                        input.files = files;
-                        handleMainImageUpload(files[0]);
-                    } else if (zoneId === 'galleryZone') {
-                        input.files = files;
-                        handleGalleryUpload(files);
+                        await handleMainImageUpload(files[0]);
+                    } else if (zoneId === 'galleryZone' && files.length > 0) {
+                        await handleGalleryUpload(files);
                     }
+                }
+
+                // Gestionnaire pour le drop
+                zone.addEventListener('drop', async (e) => {
+                    const dt = e.dataTransfer;
+                    await handleFiles(dt.files);
                 });
 
-                // Ajouter les écouteurs d'événements pour les inputs file
-                input.addEventListener('change', function(e) {
-                    if (zoneId === 'mainImageZone' && this.files.length > 0) {
-                        handleMainImageUpload(this.files[0]);
-                    } else if (zoneId === 'galleryZone' && this.files.length > 0) {
-                        handleGalleryUpload(this.files);
-                    }
+                // Gestionnaire pour le changement de l'input file
+                input.addEventListener('change', async function(e) {
+                    await handleFiles(this.files);
                 });
             });
+        }
+
+        async function handleGalleryUpload(files) {
+            const maxTotalSize = 20 * 1024 * 1024; // 20MB total pour la galerie
+            const currentTotalSize = galleryImageFiles.reduce((sum, file) => sum + file.size, 0);
+            
+            // Réinitialiser le tableau temporaire pour les nouvelles images
+            let newGalleryFiles = [];
+            
+            for (const file of Array.from(files)) {
+                if (!file.type.startsWith('image/')) {
+                    showNotification(
+                        'Fichier non valide',
+                        'error',
+                        `Le fichier "${file.name}" n'est pas une image valide.`
+                    );
+                    continue;
+                }
+
+                const imageCheck = checkImageSize(file);
+                if (!imageCheck.isValid) {
+                    showNotification(
+                        'Image trop volumineuse',
+                        'error',
+                        `L'image "${file.name}" fait ${imageCheck.size}MB alors que la limite est de 5MB.`
+                    );
+                    continue;
+                }
+
+                // Vérifier la taille totale
+                if (currentTotalSize + file.size > maxTotalSize) {
+                    showNotification(
+                        'Galerie trop volumineuse',
+                        'error',
+                        'La taille totale des images de la galerie ne doit pas dépasser 20MB.'
+                    );
+                    break;
+                }
+
+                try {
+                    let processedFile = file;
+                    if (file.size > 1 * 1024 * 1024) { // Si plus de 1MB
+                        const compressed = await compressImage(URL.createObjectURL(file), 0.2);
+                        const response = await fetch(compressed);
+                        const blob = await response.blob();
+                        processedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                    }
+
+                    newGalleryFiles.push(processedFile);
+                } catch (error) {
+                    console.error('Erreur lors du traitement de l\'image:', error);
+                    showNotification(
+                        'Erreur de traitement',
+                        'error',
+                        `Impossible de traiter l'image "${file.name}". Veuillez essayer avec une image plus petite.`
+                    );
+                }
+            }
+
+            // Ajouter les nouvelles images au tableau principal
+            galleryImageFiles = [...galleryImageFiles, ...newGalleryFiles];
+            
+            updateGalleryPreview();
+            updateMarkdownPreview();
         }
 
         async function handleMainImageUpload(file) {
@@ -1665,64 +1727,6 @@
                     'Impossible de traiter l\'image. Veuillez essayer avec une image plus petite.'
                 );
             }
-        }
-
-        async function handleGalleryUpload(files) {
-            const maxTotalSize = 20 * 1024 * 1024; // 20MB total pour la galerie
-            const currentTotalSize = galleryImageFiles.reduce((sum, file) => sum + file.size, 0);
-            
-            for (const file of Array.from(files)) {
-                if (!file.type.startsWith('image/')) {
-                    showNotification(
-                        'Fichier non valide',
-                        'error',
-                        `Le fichier "${file.name}" n'est pas une image valide.`
-                    );
-                    continue;
-                }
-
-                const imageCheck = checkImageSize(file);
-                if (!imageCheck.isValid) {
-                    showNotification(
-                        'Image trop volumineuse',
-                        'error',
-                        `L'image "${file.name}" fait ${imageCheck.size}MB alors que la limite est de 5MB.`
-                    );
-                    continue;
-                }
-
-                // Vérifier la taille totale
-                if (currentTotalSize + file.size > maxTotalSize) {
-                    showNotification(
-                        'Galerie trop volumineuse',
-                        'error',
-                        'La taille totale des images de la galerie ne doit pas dépasser 20MB.'
-                    );
-                    break;
-                }
-
-                try {
-                    let processedFile = file;
-                    if (file.size > 1 * 1024 * 1024) { // Si plus de 1MB
-                        const compressed = await compressImage(URL.createObjectURL(file), 0.2);
-                        const response = await fetch(compressed);
-                        const blob = await response.blob();
-                        processedFile = new File([blob], file.name, { type: 'image/jpeg' });
-                    }
-
-                    galleryImageFiles.push(processedFile);
-                } catch (error) {
-                    console.error('Erreur lors du traitement de l\'image:', error);
-                    showNotification(
-                        'Erreur de traitement',
-                        'error',
-                        `Impossible de traiter l'image "${file.name}". Veuillez essayer avec une image plus petite.`
-                    );
-                }
-            }
-
-            updateGalleryPreview();
-            updateMarkdownPreview();
         }
 
         function validateForm() {
