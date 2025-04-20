@@ -2212,10 +2212,8 @@ ${editorContent}`;
         // Fonction pour sauvegarder le brouillon
         async function saveDraft() {
             try {
-                const formData = new FormData(document.getElementById('restaurantForm'));
-                const title = formData.get('title');
-                
                 // Générer le nom du fichier à partir du titre
+                const title = document.getElementById('title').value;
                 const filename = title.toLowerCase()
                     .normalize('NFD')
                     .replace(/[\u0300-\u036f]/g, '')
@@ -2226,95 +2224,70 @@ ${editorContent}`;
                 const date = new Date().toISOString().split('T')[0];
                 const filePath = `${date}-${filename}.md`;
 
-                // Créer l'objet du brouillon avec le contenu initial
-                let markdownContent = generateMarkdown();
+                // Créer un objet pour stocker les données du brouillon
                 const draftData = {
                     filename: filePath,
                     title: title,
-                    images: []
+                    content: generateMarkdown(),
+                    imageMetadata: []  // On ne stocke que les métadonnées
                 };
 
-                // Traiter l'image principale
+                // Sauvegarder les métadonnées des images
                 if (mainImageFile) {
-                    const mainImageBase64 = await fileToBase64(mainImageFile);
-                    const mainImageExtension = mainImageFile.name.split('.').pop();
-                    const mainImageName = `${filename}-main-${Date.now()}.${mainImageExtension}`;
-                    
-                    draftData.images.push({
-                        name: mainImageName,
-                        content: mainImageBase64.split(',')[1],
+                    draftData.imageMetadata.push({
+                        name: mainImageFile.name,
+                        size: mainImageFile.size,
+                        type: mainImageFile.type,
                         isMain: true
                     });
-
-                    // Mettre à jour le contenu avec le chemin de l'image principale
-                    markdownContent = markdownContent.replace(
-                        /image:\s*"[^"]*"/,
-                        `image: "/images/${mainImageName}"`
-                    );
                 }
 
-                // Traiter les images de la galerie
-                if (galleryImageFiles && galleryImageFiles.length > 0) {
-                    const timestamp = Date.now(); // Utiliser le même timestamp pour toutes les images de la galerie
-                    for (let i = 0; i < galleryImageFiles.length; i++) {
-                        const file = galleryImageFiles[i];
-                        const galleryImageBase64 = await fileToBase64(file);
-                        const galleryImageExtension = file.name.split('.').pop();
-                        const galleryImageName = `${filename}-gallery-${i + 1}-${timestamp}.${galleryImageExtension}`;
-                        
-                        draftData.images.push({
-                            name: galleryImageName,
-                            content: galleryImageBase64.split(',')[1],
-                            isMain: false,
-                            originalName: file.name // Stocker le nom original pour le remplacement
-                        });
+                for (let i = 0; i < galleryImageFiles.length; i++) {
+                    const file = galleryImageFiles[i];
+                    draftData.imageMetadata.push({
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        isMain: false
+                    });
+                }
 
-                        // Mettre à jour le contenu avec le chemin de l'image de la galerie
-                        markdownContent = markdownContent.replace(
-                            new RegExp(`!\\[.*?\\]\\(${escapeRegExp(file.name)}\\)`, 'g'),
-                            `![](/images/${galleryImageName})`
-                        );
+                // Récupérer les brouillons existants
+                let drafts = [];
+                try {
+                    const existingDrafts = localStorage.getItem('drafts');
+                    if (existingDrafts) {
+                        drafts = JSON.parse(existingDrafts);
+                    }
+                } catch (e) {
+                    console.warn('Erreur lors de la lecture des brouillons:', e);
+                    drafts = [];
+                }
+
+                // Ajouter ou mettre à jour le brouillon
+                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                if (existingIndex !== -1) {
+                    drafts[existingIndex] = draftData;
+                } else {
+                    drafts.push(draftData);
+                }
+
+                try {
+                    // Essayer de sauvegarder avec gestion d'erreur de quota
+                    localStorage.setItem('drafts', JSON.stringify(drafts));
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                        // Si le quota est dépassé, on ne garde que le brouillon actuel
+                        localStorage.setItem('drafts', JSON.stringify([draftData]));
+                        console.warn('Quota dépassé, seul le brouillon actuel a été sauvegardé');
+                    } else {
+                        throw e;
                     }
                 }
 
-                // Ajouter le contenu Markdown mis à jour
-                draftData.content = markdownContent;
-
-                // Récupérer les brouillons existants
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                
-                // Vérifier si un brouillon avec le même nom existe déjà
-                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
-                
-                if (existingIndex !== -1) {
-                    // Mettre à jour le brouillon existant
-                    drafts[existingIndex] = {
-                        ...drafts[existingIndex],
-                        ...draftData,
-                        lastModified: new Date().toISOString()
-                    };
-                } else {
-                    // Ajouter un nouveau brouillon
-                    drafts.push({
-                        ...draftData,
-                        lastModified: new Date().toISOString()
-                    });
-                }
-
-                // Sauvegarder dans localStorage
-                localStorage.setItem('drafts', JSON.stringify(drafts));
-
-                showNotification('Brouillon enregistré avec succès', 'success');
-                
-                // Mettre à jour l'interface
-                updatePendingChangesButtons();
-                
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
-
+                showNotification('Brouillon sauvegardé avec succès', 'success');
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur lors de la sauvegarde du brouillon:', error);
                 showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
             }
         }
