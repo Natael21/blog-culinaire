@@ -750,7 +750,10 @@ title: Administration - Blog Culinaire
 
         // Fonction pour publier les modifications
         async function publishChanges() {
+            let loadingOverlay = null;
+            
             try {
+                console.log('=== Début publishChanges ===');
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 
@@ -758,6 +761,11 @@ title: Administration - Blog Culinaire
                     showNotification('Aucune modification en attente', 'error');
                     return;
                 }
+
+                // Afficher le spinner central
+                console.log('Tentative d\'affichage du spinner...');
+                loadingOverlay = showLoadingOverlay('Publication des modifications en cours...');
+                console.log('Spinner affiché:', !!loadingOverlay);
 
                 // Préparer les données à envoyer
                 const changes = [...pendingChanges];
@@ -802,6 +810,11 @@ title: Administration - Blog Culinaire
             } catch (error) {
                 console.error('Erreur lors de la publication:', error);
                 showNotification(error.message || 'Erreur lors de la publication des modifications', 'error');
+            } finally {
+                // Cacher le spinner central
+                console.log('Tentative de masquage du spinner...');
+                hideLoadingOverlay(loadingOverlay);
+                console.log('Spinner masqué');
             }
         }
 
