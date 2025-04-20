@@ -520,46 +520,99 @@
                 console.log('Données complètes:', restaurant);
                 console.log('Image path brut:', restaurant.image);
                 
+                // Nettoyer le chemin de l'image en supprimant les doublons de /images/
+                let imageUrl = restaurant.image;
+                if (imageUrl && imageUrl.includes('/images/images/')) {
+                    imageUrl = imageUrl.replace('/images/images/', '/images/');
+                    console.log('URL de l\'image nettoyée:', imageUrl);
+                }
+                
                 // Vérifier si l'image existe et commence par /images/
-                const imageUrl = restaurant.image && restaurant.image.startsWith('/images/') 
-                    ? restaurant.image 
+                const finalImageUrl = imageUrl && imageUrl.startsWith('/images/') 
+                    ? imageUrl 
                     : null;
-                console.log('URL de l\'image après vérification:', imageUrl);
-                console.log('L\'image sera-t-elle affichée ?', !!imageUrl);
+                console.log('URL de l\'image après vérification:', finalImageUrl);
+                console.log('L\'image sera-t-elle affichée ?', !!finalImageUrl);
 
                 const card = document.createElement('div');
                 card.className = 'restaurant-card';
                 card.setAttribute('data-filename', restaurant.filename);
                 
-                // Créer l'élément image avec gestion d'erreur et logging détaillé
-                const imageHtml = imageUrl 
+                // Améliorer la gestion des erreurs d'images
+                const imageHtml = finalImageUrl 
                     ? `<div class="restaurant-image">
-                         <img src="${imageUrl}" 
+                         <img src="${finalImageUrl}" 
                               alt="${restaurant.title}" 
                               onerror="(function(e) {
+                                  // Tenter de charger l'image une seconde fois
+                                  if (!e.target.dataset.retried) {
+                                      console.log('Premier échec de chargement, nouvelle tentative pour:', {
+                                          url: '${finalImageUrl}',
+                                          restaurant: '${restaurant.title}'
+                                      });
+                                      e.target.dataset.retried = 'true';
+                                      e.target.src = '${finalImageUrl}' + '?t=' + new Date().getTime();
+                                      return;
+                                  }
+
                                   console.error({
                                       type: 'error',
                                       message: 'Erreur de chargement de l\\'image',
-                                      url: '${imageUrl}',
+                                      url: '${finalImageUrl}',
                                       restaurant: '${restaurant.title}',
-                                      timestamp: new Date().toISOString()
+                                      timestamp: new Date().toISOString(),
+                                      status: 'Image non trouvée ou inaccessible après nouvelle tentative',
+                                      htmlError: e.target.error
                                   });
-                                  e.target.onerror = null;
-                                  e.target.parentNode.innerHTML = '<i class=\\'fas fa-image\\'></i>';
+
+                                  // Vérifier si l'image existe avec un fetch
+                                  fetch('${finalImageUrl}')
+                                      .then(response => {
+                                          console.log('Vérification de l\\'image:', {
+                                              url: '${finalImageUrl}',
+                                              status: response.status,
+                                              ok: response.ok,
+                                              headers: response.headers
+                                          });
+                                      })
+                                      .catch(error => {
+                                          console.error('Erreur lors de la vérification:', {
+                                              url: '${finalImageUrl}',
+                                              error: error.message
+                                          });
+                                      });
+
+                                  // Remplacer par une icône avec un message d'erreur
+                                  e.target.parentNode.innerHTML = \`
+                                    <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
+                                      <i class='fas fa-image' style='font-size: 2em; color: #ccc;'></i>
+                                      <div style='text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;'>
+                                        Image non disponible
+                                      </div>
+                                      <div style='text-align: center; font-size: 0.7em; color: #999; margin-top: 4px;'>
+                                        Erreur: Image inaccessible
+                                      </div>
+                                    </div>
+                                  \`;
                               })(event)"
                               onload="(function(e) {
                                   console.log({
                                       type: 'success',
                                       message: 'Image chargée avec succès',
-                                      url: '${imageUrl}',
+                                      url: '${finalImageUrl}',
                                       restaurant: '${restaurant.title}',
-                                      timestamp: new Date().toISOString()
+                                      timestamp: new Date().toISOString(),
+                                      dimensions: e.target.naturalWidth + 'x' + e.target.naturalHeight
                                   });
                               })(event)">
                        </div>`
                     : `<div class="restaurant-image">
-                         <i class="fas fa-image"></i>
-                         <div style="text-align: center; font-size: 0.8em; margin-top: 8px;">Pas d'image</div>
+                         <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
+                           <i class="fas fa-image" style='font-size: 2em; color: #ccc;'></i>
+                           <div style="text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;">
+                             Pas d'image
+                           </div>
+                         </div>
                        </div>`;
 
                 card.innerHTML = `
@@ -713,6 +766,12 @@
                                     imageContent = imageContent.split(',')[1];
                                 }
 
+                                // Vérifier que le contenu est bien en base64
+                                if (!imageContent || !/^[A-Za-z0-9+/=]+$/.test(imageContent)) {
+                                    console.error('Contenu de l\'image invalide pour:', image.name);
+                                    continue;
+                                }
+
                                 change.images.push({
                                     name: image.name,
                                     content: imageContent,
@@ -724,7 +783,14 @@
                         pendingChanges.push(change);
                     }
                     
-                    console.log('Envoi des modifications:', pendingChanges);
+                    console.log('Envoi des modifications:', {
+                        nombreChangements: pendingChanges.length,
+                        changements: pendingChanges.map(change => ({
+                            type: change.type,
+                            filename: change.filename,
+                            nombreImages: change.images?.length || 0
+                        }))
+                    });
                     
                     // Appliquer les modifications
                     const response = await fetch('/.netlify/functions/publish-changes', {
@@ -791,4 +857,4 @@
         }
     </script>
 </body>
-</html> 
+</html>
