@@ -869,17 +869,22 @@
                 // Afficher le spinner central
                 loadingOverlay = showLoadingOverlay('Publication des modifications en cours...');
 
-                // Récupérer les brouillons
+                // Récupérer les brouillons et les suppressions
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                console.log(`Publication de ${drafts.length} brouillons...`);
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                const deletions = pendingChanges.filter(change => change.type === 'delete');
+                
+                console.log(`Publication de ${drafts.length} brouillons et ${deletions.length} suppressions...`);
 
-                if (drafts.length === 0) {
-                    showNotification('Aucun brouillon à publier', 'info');
+                if (drafts.length === 0 && deletions.length === 0) {
+                    showNotification('Aucune modification à publier', 'info');
                     return;
                 }
 
                 // Préparer les changements
                 const changes = [];
+                
+                // Ajouter les brouillons
                 for (const draft of drafts) {
                     console.log(`Traitement du brouillon : ${draft.title}`);
                     
@@ -898,6 +903,15 @@
                         content: draft.content,
                         imageContent: draft.imageContent,
                         imagePath: draft.imagePath
+                    });
+                }
+
+                // Ajouter les suppressions
+                for (const deletion of deletions) {
+                    console.log(`Traitement de la suppression : ${deletion.filename}`);
+                    changes.push({
+                        path: deletion.filename,
+                        type: 'delete'
                     });
                 }
 
@@ -923,6 +937,7 @@
                 
                 // Vider le stockage local et recharger la liste
                 localStorage.removeItem('drafts');
+                localStorage.removeItem('pendingChanges');
                 await loadRestaurants();
                 
                 showNotification('Les modifications ont été publiées avec succès', 'success');
