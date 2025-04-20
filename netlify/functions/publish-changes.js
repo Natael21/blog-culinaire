@@ -83,7 +83,7 @@ exports.handler = async function(event, context) {
     // Prepare the new tree
     let newTree = treeData.tree.filter(item => {
       // Keep files that are not being deleted
-      const filePath = `_posts/${item.path}`;
+      const filePath = item.path;
       return !changes.some(change => 
         change.type === 'delete' && 
         filePath === `_posts/${change.filename}`
@@ -94,7 +94,8 @@ exports.handler = async function(event, context) {
     console.log('Nombre total de changements:', changes.length);
     console.log('Détail des changements:', changes.map(c => ({
       type: c.type,
-      filename: c.filename
+      filename: c.filename,
+      path: `_posts/${c.filename}`
     })));
     console.log('Nombre de fichiers dans le nouvel arbre:', newTree.length);
     console.log('Liste des fichiers conservés:', newTree.map(item => item.path));
