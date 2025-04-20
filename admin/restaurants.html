@@ -874,7 +874,10 @@
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const deletions = pendingChanges.filter(change => change.type === 'delete');
                 
-                console.log(`Publication de ${drafts.length} brouillons et ${deletions.length} suppressions...`);
+                console.log('=== Préparation des modifications ===');
+                console.log('Nombre de brouillons:', drafts.length);
+                console.log('Nombre de suppressions:', deletions.length);
+                console.log('Détails des suppressions:', deletions);
 
                 if (drafts.length === 0 && deletions.length === 0) {
                     showNotification('Aucune modification à publier', 'info');
@@ -899,6 +902,7 @@
                     }
 
                     changes.push({
+                        type: 'create',
                         path: draft.path,
                         content: draft.content,
                         imageContent: draft.imageContent,
@@ -915,8 +919,10 @@
                     });
                 }
 
-                console.log(`Envoi de ${changes.length} modifications au serveur...`);
-                
+                console.log('=== Données à envoyer ===');
+                console.log('Nombre total de changements:', changes.length);
+                console.log('Détails des changements:', changes);
+
                 // Envoyer les modifications
                 const response = await fetch('/.netlify/functions/publish-changes', {
                     method: 'POST',
@@ -929,6 +935,7 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
+                    console.error('Erreur de réponse:', errorData);
                     throw new Error(errorData.message || 'Erreur lors de la publication');
                 }
 

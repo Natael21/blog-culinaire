@@ -85,25 +85,39 @@ exports.handler = async function(event, context) {
       // Keep files that are not being deleted
       const isMarkdownFile = item.path.startsWith('_posts/');
       
-      console.log('Checking file in tree:', {
-        path: item.path,
-        isMarkdownFile
-      });
+      console.log('=== Vérification du fichier ===');
+      console.log('Chemin du fichier:', item.path);
+      console.log('Est un fichier markdown:', isMarkdownFile);
       
       // Ne supprimer que les fichiers markdown
-      return !changes.some(change => {
+      const shouldDelete = changes.some(change => {
         if (change.type === 'delete' && isMarkdownFile) {
           const fileToDelete = `_posts/${change.path}`;
-          console.log('Comparing:', {
+          console.log('Comparaison de suppression:', {
             fileToDelete,
             currentPath: item.path,
-            shouldDelete: fileToDelete === item.path
+            shouldDelete: fileToDelete === item.path,
+            change: change
           });
           return fileToDelete === item.path;
         }
         return false;
       });
+
+      console.log('Résultat final:', {
+        path: item.path,
+        shouldDelete,
+        willKeep: !shouldDelete
+      });
+
+      return !shouldDelete;
     });
+
+    console.log('=== Résumé des changements ===');
+    console.log('Nombre total de changements:', changes.length);
+    console.log('Changements de suppression:', changes.filter(c => c.type === 'delete'));
+    console.log('Nombre de fichiers dans le nouvel arbre:', newTree.length);
+    console.log('Fichiers dans le nouvel arbre:', newTree.map(item => item.path));
 
     // Add new files to the tree
     const createBlobs = [];
