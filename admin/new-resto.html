@@ -1604,11 +1604,45 @@
                         handleGalleryUpload(files);
                     }
                 });
+
+                // Ajouter les écouteurs d'événements pour les inputs file
+                input.addEventListener('change', function(e) {
+                    if (zoneId === 'mainImageZone' && this.files.length > 0) {
+                        handleMainImageUpload(this.files[0]);
+                    } else if (zoneId === 'galleryZone' && this.files.length > 0) {
+                        handleGalleryUpload(this.files);
+                    }
+                });
             });
         }
 
-        function handleMainImageUpload(file) {
-            if (file && file.type.startsWith('image/')) {
+        async function handleMainImageUpload(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showNotification('Le fichier sélectionné n\'est pas une image valide', 'error');
+                return;
+            }
+
+            const imageCheck = checkImageSize(file);
+            if (!imageCheck.isValid) {
+                showNotification(
+                    'Image trop volumineuse',
+                    'error',
+                    `L'image fait ${imageCheck.size}MB alors que la limite est de 5MB. Veuillez la réduire avant de la télécharger.`
+                );
+                return;
+            }
+
+            try {
+                // Tenter de compresser l'image si nécessaire
+                if (file.size > 1 * 1024 * 1024) { // Si plus de 1MB
+                    const compressed = await compressImage(URL.createObjectURL(file), 0.3);
+                    // Convertir le Data URL en Blob
+                    const response = await fetch(compressed);
+                    const blob = await response.blob();
+                    // Créer un nouveau File à partir du Blob
+                    file = new File([blob], file.name, { type: 'image/jpeg' });
+                }
+
                 mainImageFile = file;
                 const container = document.getElementById('mainImagePreview');
                 container.innerHTML = '';
@@ -1623,15 +1657,70 @@
                 }
                 
                 updateMarkdownPreview();
+            } catch (error) {
+                console.error('Erreur lors du traitement de l\'image:', error);
+                showNotification(
+                    'Erreur de traitement',
+                    'error',
+                    'Impossible de traiter l\'image. Veuillez essayer avec une image plus petite.'
+                );
             }
         }
 
-        function handleGalleryUpload(files) {
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    galleryImageFiles.push(file);
+        async function handleGalleryUpload(files) {
+            const maxTotalSize = 20 * 1024 * 1024; // 20MB total pour la galerie
+            const currentTotalSize = galleryImageFiles.reduce((sum, file) => sum + file.size, 0);
+            
+            for (const file of Array.from(files)) {
+                if (!file.type.startsWith('image/')) {
+                    showNotification(
+                        'Fichier non valide',
+                        'error',
+                        `Le fichier "${file.name}" n'est pas une image valide.`
+                    );
+                    continue;
                 }
-            });
+
+                const imageCheck = checkImageSize(file);
+                if (!imageCheck.isValid) {
+                    showNotification(
+                        'Image trop volumineuse',
+                        'error',
+                        `L'image "${file.name}" fait ${imageCheck.size}MB alors que la limite est de 5MB.`
+                    );
+                    continue;
+                }
+
+                // Vérifier la taille totale
+                if (currentTotalSize + file.size > maxTotalSize) {
+                    showNotification(
+                        'Galerie trop volumineuse',
+                        'error',
+                        'La taille totale des images de la galerie ne doit pas dépasser 20MB.'
+                    );
+                    break;
+                }
+
+                try {
+                    let processedFile = file;
+                    if (file.size > 1 * 1024 * 1024) { // Si plus de 1MB
+                        const compressed = await compressImage(URL.createObjectURL(file), 0.2);
+                        const response = await fetch(compressed);
+                        const blob = await response.blob();
+                        processedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                    }
+
+                    galleryImageFiles.push(processedFile);
+                } catch (error) {
+                    console.error('Erreur lors du traitement de l\'image:', error);
+                    showNotification(
+                        'Erreur de traitement',
+                        'error',
+                        `Impossible de traiter l'image "${file.name}". Veuillez essayer avec une image plus petite.`
+                    );
+                }
+            }
+
             updateGalleryPreview();
             updateMarkdownPreview();
         }
@@ -2334,7 +2423,14 @@ ${editorContent}`;
             };
         }
 
-        // Fonction pour sauvegarder le brouillon avec gestion améliorée du stockage
+        class StorageError extends Error {
+            constructor(message, details = '') {
+                super(message);
+                this.name = 'StorageError';
+                this.details = details;
+            }
+        }
+
         async function saveDraft() {
             try {
                 // Nettoyer les anciens brouillons d'abord
@@ -2347,7 +2443,7 @@ ${editorContent}`;
                 if (mainImageFile) {
                     const mainImageCheck = checkImageSize(mainImageFile);
                     if (!mainImageCheck.isValid) {
-                        throw new Error(
+                        throw new StorageError(
                             'Image principale trop volumineuse',
                             `L'image fait ${mainImageCheck.size}MB alors que la limite est de 5MB. Veuillez la réduire avant de la télécharger.`
                         );
@@ -2366,20 +2462,23 @@ ${editorContent}`;
                         const details = largeImages
                             .map(img => `${img.name} (${img.size}MB)`)
                             .join(', ');
-                        throw new Error(
+                        throw new StorageError(
                             'Images de galerie trop volumineuses',
                             `Les images suivantes dépassent la limite de 5MB : ${details}`
                         );
                     }
                 }
-                
+
                 // Compresser l'image principale si elle existe
                 if (formData.imageContent) {
                     try {
                         processedData.imageContent = await compressImage(formData.imageContent, 0.3);
                         console.log('Image principale compressée avec succès');
                     } catch (error) {
-                        throw new Error('Impossible de compresser l\'image principale. Veuillez essayer avec une image plus petite.');
+                        throw new StorageError(
+                            'Erreur de compression',
+                            'Impossible de compresser l\'image principale. Veuillez essayer avec une image plus petite.'
+                        );
                     }
                 }
 
@@ -2391,7 +2490,10 @@ ${editorContent}`;
                         );
                         console.log('Images de la galerie compressées avec succès');
                     } catch (error) {
-                        throw new Error('Impossible de compresser les images de la galerie. Veuillez essayer avec des images plus petites.');
+                        throw new StorageError(
+                            'Erreur de compression',
+                            'Impossible de compresser les images de la galerie. Veuillez essayer avec des images plus petites.'
+                        );
                     }
                 }
 
@@ -2402,90 +2504,82 @@ ${editorContent}`;
                 if (drafts.length >= 3) {
                     const confirmed = await showStorageCleanupModal();
                     if (!confirmed) {
-                        throw new Error('Sauvegarde annulée par l\'utilisateur');
+                        throw new StorageError('Opération annulée', 'La sauvegarde a été annulée par l\'utilisateur.');
                     }
-                    drafts = drafts.slice(-2); // Garder seulement les 2 plus récents
+                    drafts = drafts.slice(-2);
                 }
 
-                // Ajouter le nouveau brouillon avec les images compressées
+                // Ajouter le nouveau brouillon
                 const draft = {
                     ...processedData,
                     timestamp: new Date().toISOString()
                 };
 
-                // Essayer de sauvegarder le brouillon complet
                 try {
-                    const draftString = JSON.stringify([...drafts, draft]);
-                    // Tester d'abord si on peut stocker
-                    try {
-                        localStorage.setItem('drafts_test', draftString);
-                        localStorage.removeItem('drafts_test');
-                    } catch (testError) {
-                        if (testError.name === 'QuotaExceededError') {
-                            // Si on ne peut pas stocker, demander confirmation pour nettoyer
-                            const confirmed = await showStorageCleanupModal();
-                            if (!confirmed) {
-                                throw new Error('Sauvegarde annulée par l\'utilisateur');
-                            }
-                            drafts = drafts.slice(-1);
-                        }
-                    }
-
-                    // Tentative finale de sauvegarde
-                    try {
-                        localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
-                        showNotification('Brouillon sauvegardé avec succès', 'success');
-                        return true; // Indiquer que la sauvegarde a réussi
-                    } catch (finalError) {
-                        throw new Error('Les images sont trop volumineuses pour être sauvegardées. Veuillez réduire leur taille ou en utiliser moins.');
-                    }
+                    localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
+                    showNotification('Brouillon sauvegardé avec succès', 'success');
+                    return true;
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
-                        throw new Error('Les images sont trop volumineuses pour être sauvegardées. Veuillez réduire leur taille ou en utiliser moins.');
-                    } else {
-                        throw new Error('Erreur lors de la sauvegarde : ' + storageError.message);
+                        const confirmed = await showStorageCleanupModal();
+                        if (!confirmed) {
+                            throw new StorageError('Opération annulée', 'La sauvegarde a été annulée par l\'utilisateur.');
+                        }
+                        
+                        drafts = drafts.slice(-1);
+                        try {
+                            localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
+                            showNotification('Brouillon sauvegardé avec succès (anciens brouillons nettoyés)', 'success');
+                            return true;
+                        } catch (finalError) {
+                            throw new StorageError(
+                                'Erreur de stockage',
+                                'Les images sont trop volumineuses pour être sauvegardées. Veuillez réduire leur taille ou en utiliser moins.'
+                            );
+                        }
                     }
+                    throw new StorageError('Erreur de stockage', storageError.message);
                 }
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde du brouillon:', error);
                 showNotification(
-                    error.message || 'Une erreur est survenue lors de la sauvegarde',
+                    error instanceof StorageError ? error.message : 'Erreur lors de la sauvegarde',
                     'error',
-                    error.details || ''
+                    error instanceof StorageError ? error.details : error.message
                 );
                 return false;
             }
         }
 
-        // Modifier le gestionnaire de formulaire pour tenir compte du résultat de saveDraft
+        // Modifier le gestionnaire de formulaire
         function initializeForm() {
             const form = document.getElementById('restaurantForm');
             if (form) {
                 form.addEventListener('submit', async function(e) {
                     e.preventDefault();
+                    
+                    // Désactiver le bouton de sauvegarde et montrer le spinner
+                    const saveButton = document.getElementById('saveButton');
+                    if (saveButton) showLoadingState(saveButton);
+                    
                     try {
                         if (!validateForm()) {
                             return;
                         }
                         
-                        // Désactiver le bouton de sauvegarde et montrer le spinner
-                        const saveButton = document.getElementById('saveButton');
-                        if (saveButton) showLoadingState(saveButton);
-                        
                         const saveSuccess = await saveDraft();
+                        console.log('Résultat de la sauvegarde:', saveSuccess);
                         
                         // Ne rediriger que si la sauvegarde a réussi
-                        if (saveSuccess) {
+                        if (saveSuccess === true) {
                             setTimeout(() => {
                                 window.location.href = 'index.html';
                             }, 1500);
                         }
                     } catch (error) {
                         console.error('Erreur lors de la sauvegarde:', error);
-                        showNotification(error.message || 'Une erreur est survenue lors de la sauvegarde', 'error');
                     } finally {
                         // Réactiver le bouton de sauvegarde et cacher le spinner
-                        const saveButton = document.getElementById('saveButton');
                         if (saveButton) hideLoadingState(saveButton);
                     }
                 });
