@@ -92,7 +92,7 @@ exports.handler = async function(event, context) {
       // Ne supprimer que les fichiers markdown
       const shouldDelete = changes.some(change => {
         if (change.type === 'delete' && isMarkdownFile) {
-          const fileToDelete = `_posts/${change.path}`;
+          const fileToDelete = `_posts/${change.filename}`;
           console.log('Comparaison de suppression:', {
             fileToDelete,
             currentPath: item.path,
