@@ -658,27 +658,26 @@
             try {
                 // Récupérer les modifications en attente
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-                const currentDraft = localStorage.getItem('currentDraft');
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 
                 // Vérifier si les modifications sont valides
-                if (pendingChanges.length > 0 || currentDraft) {
-                    // Si on a un brouillon, l'ajouter aux modifications
-                    if (currentDraft) {
-                        const draftData = JSON.parse(currentDraft);
+                if (pendingChanges.length > 0 || drafts.length > 0) {
+                    // Ajouter tous les brouillons aux modifications
+                    drafts.forEach(draft => {
                         pendingChanges.push({
                             type: 'create',
-                            filename: draftData.filename,
-                            content: draftData.content,
+                            filename: draft.filename,
+                            content: draft.content,
                             timestamp: new Date().toISOString()
                         });
-                    }
+                    });
                     
                     // Appliquer les modifications
                     await applyChanges(pendingChanges);
                     
                     // Vider le localStorage
                     localStorage.removeItem('pendingChanges');
-                    localStorage.removeItem('currentDraft');
+                    localStorage.removeItem('drafts');
                     
                     // Déclencher l'événement de mise à jour des boutons
                     window.dispatchEvent(new Event('storageUpdated'));

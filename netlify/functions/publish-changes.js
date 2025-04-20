@@ -81,13 +81,49 @@ exports.handler = async function(event, context) {
     const treeData = await treeResponse.json();
 
     // Prepare the new tree
-    const newTree = treeData.tree.filter(item => {
+    let newTree = treeData.tree.filter(item => {
+      // Keep files that are not being deleted
       const filePath = `_posts/${item.path}`;
       return !changes.some(change => 
         change.type === 'delete' && 
         filePath === `_posts/${change.filename}`
       );
     });
+
+    // Add new files to the tree
+    const createBlobs = [];
+    for (const change of changes) {
+      if (change.type === 'create') {
+        console.log('Creating blob for new file:', change.filename);
+        // Create a blob for the new file
+        const createBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `token ${githubToken}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: change.content,
+            encoding: 'utf-8'
+          })
+        });
+
+        if (!createBlobResponse.ok) {
+          throw new Error(`Failed to create blob: ${createBlobResponse.status} ${createBlobResponse.statusText}`);
+        }
+
+        const blobData = await createBlobResponse.json();
+        
+        // Add the new file to the tree
+        newTree.push({
+          path: `_posts/${change.filename}`,
+          mode: '100644',
+          type: 'blob',
+          sha: blobData.sha
+        });
+      }
+    }
 
     // Create a new tree
     const createTreeResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/trees`, {
@@ -109,10 +145,28 @@ exports.handler = async function(event, context) {
 
     const newTreeData = await createTreeResponse.json();
 
-    // Create a commit
-    const commitMessage = changes.length === 1 
-      ? `Delete restaurant: ${changes[0].filename}`
-      : `Delete ${changes.length} restaurants:\n${changes.map(c => `- ${c.filename}`).join('\n')}`;
+    // Create a commit message that includes both additions and deletions
+    const deletions = changes.filter(c => c.type === 'delete');
+    const additions = changes.filter(c => c.type === 'create');
+    let commitMessage = '';
+
+    if (deletions.length > 0 && additions.length > 0) {
+      commitMessage = `Modifications des restaurants:\n\n`;
+      if (additions.length > 0) {
+        commitMessage += `Ajouts:\n${additions.map(c => `+ ${c.filename}`).join('\n')}\n\n`;
+      }
+      if (deletions.length > 0) {
+        commitMessage += `Suppressions:\n${deletions.map(c => `- ${c.filename}`).join('\n')}`;
+      }
+    } else if (deletions.length > 0) {
+      commitMessage = deletions.length === 1
+        ? `Delete restaurant: ${deletions[0].filename}`
+        : `Delete ${deletions.length} restaurants:\n${deletions.map(c => `- ${c.filename}`).join('\n')}`;
+    } else if (additions.length > 0) {
+      commitMessage = additions.length === 1
+        ? `Add restaurant: ${additions[0].filename}`
+        : `Add ${additions.length} restaurants:\n${additions.map(c => `+ ${c.filename}`).join('\n')}`;
+    }
 
     const createCommitResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/commits`, {
       method: 'POST',
