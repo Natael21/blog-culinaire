@@ -115,6 +115,11 @@ exports.handler = async function(event, context) {
           const willDelete = filename === item.path;
           if (willDelete) {
             console.log('🚨 FICHIER MARQUÉ POUR SUPPRESSION 🚨');
+            console.log('Détails de la suppression:', {
+              filename: filename,
+              path: item.path,
+              sha: item.sha
+            });
           }
           return willDelete;
         }
@@ -140,6 +145,9 @@ exports.handler = async function(event, context) {
     })));
     console.log('Nombre de fichiers dans le nouvel arbre:', newTree.length);
     console.log('Liste des fichiers conservés:', newTree.map(item => item.path));
+    console.log('Liste des fichiers supprimés:', treeData.tree
+      .filter(item => !newTree.some(newItem => newItem.path === item.path))
+      .map(item => item.path));
     console.log('=========================================\n');
 
     // Add new files to the tree
