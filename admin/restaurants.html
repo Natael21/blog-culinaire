@@ -978,17 +978,9 @@
             // Mettre à jour le bouton de publication
             const publishButton = document.querySelector('.action-button[onclick="publishChanges()"]');
             if (publishButton) {
-                // Ajouter le spinner s'il n'existe pas déjà
-                if (!publishButton.querySelector('.spinner')) {
-                    const spinnerDiv = document.createElement('div');
-                    spinnerDiv.className = 'spinner';
-                    const textSpan = document.createElement('span');
-                    textSpan.className = 'button-text';
-                    textSpan.innerHTML = publishButton.innerHTML;
-                    publishButton.innerHTML = '';
-                    publishButton.appendChild(spinnerDiv);
-                    publishButton.appendChild(textSpan);
-                }
+                // Ne pas ajouter de spinner individuel pour le bouton de publication
+                // car nous utilisons le spinner central
+                publishButton.innerHTML = '<i class="fas fa-check"></i> Publier les modifications';
             }
             
             // Mettre à jour le bouton d'annulation
