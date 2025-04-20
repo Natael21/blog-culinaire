@@ -83,11 +83,17 @@ exports.handler = async function(event, context) {
     // Prepare the new tree
     let newTree = treeData.tree.filter(item => {
       // Keep files that are not being deleted
-      const filePath = `_posts/${item.path}`;
-      return !changes.some(change => 
-        change.type === 'delete' && 
-        filePath === `_posts/${change.filename}`
-      );
+      const isMarkdownFile = item.path.startsWith('_posts/');
+      
+      return !changes.some(change => {
+        if (change.type === 'delete') {
+          // Only check markdown files for deletion
+          if (isMarkdownFile && `_posts/${change.filename}` === item.path) {
+            return true;
+          }
+        }
+        return false;
+      });
     });
 
     // Add new files to the tree
@@ -95,8 +101,9 @@ exports.handler = async function(event, context) {
     for (const change of changes) {
       if (change.type === 'create') {
         console.log('Creating blob for new file:', change.filename);
-        // Create a blob for the new file
-        const createBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
+        
+        // Create a blob for the markdown file
+        const createMarkdownBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
           method: 'POST',
           headers: {
             'Authorization': `token ${githubToken}`,
@@ -109,19 +116,51 @@ exports.handler = async function(event, context) {
           })
         });
 
-        if (!createBlobResponse.ok) {
-          throw new Error(`Failed to create blob: ${createBlobResponse.status} ${createBlobResponse.statusText}`);
+        if (!createMarkdownBlobResponse.ok) {
+          throw new Error(`Failed to create markdown blob: ${createMarkdownBlobResponse.status} ${createMarkdownBlobResponse.statusText}`);
         }
 
-        const blobData = await createBlobResponse.json();
+        const markdownBlobData = await createMarkdownBlobResponse.json();
         
-        // Add the new file to the tree
+        // Add the markdown file to the tree
         newTree.push({
           path: `_posts/${change.filename}`,
           mode: '100644',
           type: 'blob',
-          sha: blobData.sha
+          sha: markdownBlobData.sha
         });
+
+        // If there's an image, create a blob for it too
+        if (change.image && change.imageContent) {
+          console.log('Creating blob for image:', change.image);
+          
+          const createImageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              content: change.imageContent,
+              encoding: 'base64'
+            })
+          });
+
+          if (!createImageBlobResponse.ok) {
+            throw new Error(`Failed to create image blob: ${createImageBlobResponse.status} ${createImageBlobResponse.statusText}`);
+          }
+
+          const imageBlobData = await createImageBlobResponse.json();
+          
+          // Add the image file to the tree
+          newTree.push({
+            path: `images/${change.image}`,
+            mode: '100644',
+            type: 'blob',
+            sha: imageBlobData.sha
+          });
+        }
       }
     }
 

@@ -656,24 +656,67 @@
 
         async function publishChanges() {
             try {
+                // Vérifier l'authentification de l'utilisateur
+                const user = netlifyIdentity.currentUser();
+                if (!user) {
+                    showNotification('Veuillez vous connecter pour publier les modifications', 'error');
+                    netlifyIdentity.open('login');
+                    return;
+                }
+
                 // Récupérer les modifications en attente
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 
                 // Vérifier si les modifications sont valides
                 if (pendingChanges.length > 0 || drafts.length > 0) {
+                    showSpinner();
+
                     // Ajouter tous les brouillons aux modifications
-                    drafts.forEach(draft => {
-                        pendingChanges.push({
-                            type: 'create',
-                            filename: draft.filename,
-                            content: draft.content,
-                            timestamp: new Date().toISOString()
-                        });
-                    });
+                    for (const draft of drafts) {
+                        // Si le brouillon contient une image
+                        if (draft.image && draft.image.startsWith('data:image')) {
+                            // Extraire le contenu base64 de l'image
+                            const imageContent = draft.image.split(',')[1];
+                            const imageExtension = draft.image.split(';')[0].split('/')[1];
+                            const imageName = `${draft.filename.replace('.md', '')}-${Date.now()}.${imageExtension}`;
+                            
+                            // Mettre à jour le chemin de l'image dans le contenu Markdown
+                            draft.content = draft.content.replace(
+                                draft.image,
+                                `/images/${imageName}`
+                            );
+
+                            pendingChanges.push({
+                                type: 'create',
+                                filename: draft.filename,
+                                content: draft.content,
+                                image: imageName,
+                                imageContent: imageContent
+                            });
+                        } else {
+                            pendingChanges.push({
+                                type: 'create',
+                                filename: draft.filename,
+                                content: draft.content
+                            });
+                        }
+                    }
                     
                     // Appliquer les modifications
-                    await applyChanges(pendingChanges);
+                    const response = await fetch('/.netlify/functions/publish-changes', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user.token.access_token}`
+                        },
+                        body: JSON.stringify({ changes: pendingChanges })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Erreur lors de la publication des modifications');
+                    }
                     
                     // Vider le localStorage
                     localStorage.removeItem('pendingChanges');
@@ -683,16 +726,18 @@
                     window.dispatchEvent(new Event('storageUpdated'));
                     
                     // Recharger la liste des restaurants
-                    loadRestaurants();
+                    await loadRestaurants();
                     
                     // Afficher une notification de succès
-                    showNotification('Modifications appliquées avec succès', 'success');
+                    showNotification('Modifications publiées avec succès', 'success');
                 } else {
-                    showNotification('Aucune modification à appliquer', 'info');
+                    showNotification('Aucune modification à publier', 'info');
                 }
             } catch (error) {
                 console.error('Erreur lors de la publication des modifications:', error);
-                showNotification('Erreur lors de la publication des modifications', 'error');
+                showNotification('Erreur lors de la publication des modifications: ' + error.message, 'error');
+            } finally {
+                hideSpinner();
             }
         }
 
@@ -719,29 +764,6 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
-        }
-
-        // Fonction pour appliquer les modifications
-        async function applyChanges(changes) {
-            try {
-                const response = await fetch('/.netlify/functions/publish-changes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ changes })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Erreur lors de l\'application des modifications');
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur lors de l\'application des modifications:', error);
-                throw error;
-            }
         }
     </script>
 </body>
