@@ -515,14 +515,17 @@
 
             console.log('Création des cartes de restaurants...');
             restaurants.forEach(restaurant => {
-                console.log('Création de la carte pour:', restaurant.title);
-                console.log('Image du restaurant:', restaurant.image);
+                console.log('=== Détails du restaurant ===');
+                console.log('Titre:', restaurant.title);
+                console.log('Données complètes:', restaurant);
+                console.log('Image path brut:', restaurant.image);
                 
                 // Vérifier si l'image existe et commence par /images/
                 const imageUrl = restaurant.image && restaurant.image.startsWith('/images/') 
                     ? restaurant.image 
                     : null;
                 console.log('URL de l\'image après vérification:', imageUrl);
+                console.log('L\'image sera-t-elle affichée ?', !!imageUrl);
 
                 const card = document.createElement('div');
                 card.className = 'restaurant-card';
@@ -533,11 +536,12 @@
                     ? `<div class="restaurant-image">
                          <img src="${imageUrl}" 
                               alt="${restaurant.title}" 
-                              onerror="console.error('Erreur de chargement de l\'image:', '${imageUrl}'); this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-image\'></i>';"
-                              onload="console.log('Image chargée avec succès:', '${imageUrl}')">
+                              onerror="console.error('❌ Erreur de chargement de l\'image:', '${imageUrl}', 'pour le restaurant:', '${restaurant.title}'); this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-image\'></i>';"
+                              onload="console.log('✅ Image chargée avec succès:', '${imageUrl}', 'pour le restaurant:', '${restaurant.title}')">
                        </div>`
                     : `<div class="restaurant-image">
                          <i class="fas fa-image"></i>
+                         <div style="text-align: center; font-size: 0.8em; margin-top: 8px;">Pas d'image</div>
                        </div>`;
 
                 card.innerHTML = `

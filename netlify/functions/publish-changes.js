@@ -84,11 +84,20 @@ exports.handler = async function(event, context) {
     let newTree = treeData.tree.filter(item => {
       // Keep files that are not being deleted
       const isMarkdownFile = item.path.startsWith('_posts/');
+      const isImageFile = item.path.startsWith('images/');
+      
+      console.log('Checking file in tree:', {
+        path: item.path,
+        isMarkdownFile,
+        isImageFile
+      });
       
       return !changes.some(change => {
         if (change.type === 'delete') {
-          // Only check markdown files for deletion
-          if (isMarkdownFile && `_posts/${change.filename}` === item.path) {
+          // Check both markdown files and their associated images
+          if ((isMarkdownFile && `_posts/${change.filename}` === item.path) ||
+              (isImageFile && item.path.includes(change.filename.replace('.md', '')))) {
+            console.log('Marking for deletion:', item.path);
             return true;
           }
         }
@@ -100,7 +109,9 @@ exports.handler = async function(event, context) {
     const createBlobs = [];
     for (const change of changes) {
       if (change.type === 'create') {
+        console.log('\n=== Processing create change ===');
         console.log('Creating blob for new file:', change.filename);
+        console.log('Number of images to process:', change.images?.length || 0);
         
         // Create a blob for the markdown file
         const createMarkdownBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
@@ -117,10 +128,16 @@ exports.handler = async function(event, context) {
         });
 
         if (!createMarkdownBlobResponse.ok) {
+          console.error('Failed to create markdown blob:', {
+            status: createMarkdownBlobResponse.status,
+            statusText: createMarkdownBlobResponse.statusText,
+            response: await createMarkdownBlobResponse.text()
+          });
           throw new Error(`Failed to create markdown blob: ${createMarkdownBlobResponse.status} ${createMarkdownBlobResponse.statusText}`);
         }
 
         const markdownBlobData = await createMarkdownBlobResponse.json();
+        console.log('Markdown blob created successfully:', markdownBlobData.sha);
         
         // Add the markdown file to the tree
         newTree.push({
@@ -132,24 +149,31 @@ exports.handler = async function(event, context) {
 
         // Process all images (main and gallery)
         if (change.images && change.images.length > 0) {
+          console.log('\n=== Processing images ===');
           for (const image of change.images) {
-            console.log('Creating blob for image:', image.name);
+            console.log('\nProcessing image:', {
+              name: image.name,
+              isMain: image.isMain,
+              contentLength: (image.content || image.data || '').length
+            });
             
             // Vérifier et nettoyer le contenu de l'image
             let imageContent = image.content || image.data;
             
             // Si le contenu contient encore l'en-tête data:image, le retirer
             if (imageContent && imageContent.includes('data:image')) {
+              console.log('Cleaning data:image header from content');
               imageContent = imageContent.split(',')[1];
             }
 
             // S'assurer que le contenu est bien en base64
             if (!imageContent || !imageContent.match(/^[A-Za-z0-9+/=]+$/)) {
-              console.error('Invalid base64 content for image:', image.name);
+              console.error('Invalid base64 content detected for image:', image.name);
               throw new Error(`Invalid base64 content for image: ${image.name}`);
             }
 
             try {
+              console.log('Creating blob for image:', image.name);
               const createImageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
                 method: 'POST',
                 headers: {
@@ -165,23 +189,34 @@ exports.handler = async function(event, context) {
 
               if (!createImageBlobResponse.ok) {
                 const errorData = await createImageBlobResponse.json();
-                console.error('GitHub API error:', errorData);
+                console.error('Failed to create image blob:', {
+                  status: createImageBlobResponse.status,
+                  statusText: createImageBlobResponse.statusText,
+                  error: errorData
+                });
                 throw new Error(`Failed to create image blob: ${createImageBlobResponse.status} ${createImageBlobResponse.statusText} - ${JSON.stringify(errorData)}`);
               }
 
               const imageBlobData = await createImageBlobResponse.json();
+              console.log('Image blob created successfully:', {
+                name: image.name,
+                sha: imageBlobData.sha
+              });
               
               // Add the image file to the tree
+              const imagePath = `images/${image.name}`;
+              console.log('Adding image to tree:', imagePath);
               newTree.push({
-                path: `images/${image.name}`,
+                path: imagePath,
                 mode: '100644',
                 type: 'blob',
                 sha: imageBlobData.sha
               });
             } catch (error) {
-              console.error('Error creating image blob:', {
+              console.error('Error processing image:', {
                 imageName: image.name,
                 error: error.message,
+                stack: error.stack,
                 response: error.response?.data
               });
               throw error;
@@ -192,6 +227,10 @@ exports.handler = async function(event, context) {
     }
 
     // Create a new tree
+    console.log('\n=== Creating new tree ===');
+    console.log('Number of items in new tree:', newTree.length);
+    console.log('Tree items:', newTree.map(item => item.path));
+
     const createTreeResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/trees`, {
       method: 'POST',
       headers: {
