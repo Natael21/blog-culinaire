@@ -135,32 +135,57 @@ exports.handler = async function(event, context) {
           for (const image of change.images) {
             console.log('Creating blob for image:', image.name);
             
-            const createImageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `token ${githubToken}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                content: image.content,
-                encoding: 'base64'
-              })
-            });
-
-            if (!createImageBlobResponse.ok) {
-              throw new Error(`Failed to create image blob: ${createImageBlobResponse.status} ${createImageBlobResponse.statusText}`);
+            // Vérifier et nettoyer le contenu de l'image
+            let imageContent = image.content;
+            
+            // Si le contenu contient encore l'en-tête data:image, le retirer
+            if (imageContent.includes('data:image')) {
+              imageContent = imageContent.split(',')[1];
             }
 
-            const imageBlobData = await createImageBlobResponse.json();
-            
-            // Add the image file to the tree
-            newTree.push({
-              path: `images/${image.name}`,
-              mode: '100644',
-              type: 'blob',
-              sha: imageBlobData.sha
-            });
+            // S'assurer que le contenu est bien en base64
+            if (!imageContent.match(/^[A-Za-z0-9+/=]+$/)) {
+              console.error('Invalid base64 content for image:', image.name);
+              throw new Error(`Invalid base64 content for image: ${image.name}`);
+            }
+
+            try {
+              const createImageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `token ${githubToken}`,
+                  'Accept': 'application/vnd.github.v3+json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  content: imageContent,
+                  encoding: 'base64'
+                })
+              });
+
+              if (!createImageBlobResponse.ok) {
+                const errorData = await createImageBlobResponse.json();
+                console.error('GitHub API error:', errorData);
+                throw new Error(`Failed to create image blob: ${createImageBlobResponse.status} ${createImageBlobResponse.statusText} - ${JSON.stringify(errorData)}`);
+              }
+
+              const imageBlobData = await createImageBlobResponse.json();
+              
+              // Add the image file to the tree
+              newTree.push({
+                path: `images/${image.name}`,
+                mode: '100644',
+                type: 'blob',
+                sha: imageBlobData.sha
+              });
+            } catch (error) {
+              console.error('Error creating image blob:', {
+                imageName: image.name,
+                error: error.message,
+                response: error.response?.data
+              });
+              throw error;
+            }
           }
         }
       }

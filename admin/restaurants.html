@@ -685,9 +685,15 @@
                         // Traiter toutes les images (principale et galerie)
                         if (draft.images && draft.images.length > 0) {
                             for (const image of draft.images) {
+                                // Nettoyer le contenu de l'image
+                                let imageContent = image.content;
+                                if (imageContent.includes('data:image')) {
+                                    imageContent = imageContent.split(',')[1];
+                                }
+
                                 change.images.push({
                                     name: image.name,
-                                    content: image.content,
+                                    content: imageContent,
                                     isMain: image.isMain
                                 });
                             }
@@ -695,6 +701,8 @@
 
                         pendingChanges.push(change);
                     }
+                    
+                    console.log('Envoi des modifications:', pendingChanges);
                     
                     // Appliquer les modifications
                     const response = await fetch('/.netlify/functions/publish-changes', {
@@ -708,7 +716,8 @@
 
                     if (!response.ok) {
                         const errorData = await response.json();
-                        throw new Error(errorData.error || 'Erreur lors de la publication des modifications');
+                        console.error('Erreur serveur:', errorData);
+                        throw new Error(errorData.error || errorData.details || 'Erreur lors de la publication des modifications');
                     }
                     
                     // Vider le localStorage
