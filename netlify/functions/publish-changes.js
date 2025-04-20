@@ -136,15 +136,15 @@ exports.handler = async function(event, context) {
             console.log('Creating blob for image:', image.name);
             
             // Vérifier et nettoyer le contenu de l'image
-            let imageContent = image.content;
+            let imageContent = image.content || image.data;
             
             // Si le contenu contient encore l'en-tête data:image, le retirer
-            if (imageContent.includes('data:image')) {
+            if (imageContent && imageContent.includes('data:image')) {
               imageContent = imageContent.split(',')[1];
             }
 
             // S'assurer que le contenu est bien en base64
-            if (!imageContent.match(/^[A-Za-z0-9+/=]+$/)) {
+            if (!imageContent || !imageContent.match(/^[A-Za-z0-9+/=]+$/)) {
               console.error('Invalid base64 content for image:', image.name);
               throw new Error(`Invalid base64 content for image: ${image.name}`);
             }
