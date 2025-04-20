@@ -207,6 +207,7 @@ exports.handler = async function(event, context) {
     const commitData = await createCommitResponse.json();
 
     // Update the reference with force
+    console.log('Updating Git reference with force...');
     const updateRefResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, {
       method: 'PATCH',
       headers: {
@@ -220,9 +221,24 @@ exports.handler = async function(event, context) {
       })
     });
 
+    console.log('GitHub reference update response:', {
+      status: updateRefResponse.status,
+      statusText: updateRefResponse.statusText,
+      headers: Object.fromEntries(updateRefResponse.headers.entries())
+    });
+
     if (!updateRefResponse.ok) {
-      throw new Error(`Failed to update ref: ${updateRefResponse.status} ${updateRefResponse.statusText}`);
+      const errorBody = await updateRefResponse.text();
+      console.error('GitHub reference update failed:', {
+        status: updateRefResponse.status,
+        statusText: updateRefResponse.statusText,
+        body: errorBody
+      });
+      throw new Error(`Failed to update ref: ${updateRefResponse.status} ${updateRefResponse.statusText}\n${errorBody}`);
     }
+
+    const updatedRefData = await updateRefResponse.json();
+    console.log('GitHub reference update successful:', updatedRefData);
 
     console.log('All changes processed successfully in a single commit');
     return {
