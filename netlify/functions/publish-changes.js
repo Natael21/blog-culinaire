@@ -90,19 +90,18 @@ exports.handler = async function(event, context) {
       );
     });
 
-    console.log('\n=== Résumé détaillé des changements ===');
+    console.log('\n=== Résumé des changements ===');
     console.log('Nombre total de changements:', changes.length);
     console.log('Détail des changements:', changes.map(c => ({
       type: c.type,
-      filename: c.filename,
-      filenameComplet: c.filename.startsWith('_posts/') ? c.filename : `_posts/${c.filename}`
+      filename: c.filename
     })));
     console.log('Nombre de fichiers dans le nouvel arbre:', newTree.length);
     console.log('Liste des fichiers conservés:', newTree.map(item => item.path));
     console.log('Liste des fichiers supprimés:', treeData.tree
       .filter(item => !newTree.some(newItem => newItem.path === item.path))
       .map(item => item.path));
-    console.log('=========================================\n');
+    console.log('================================\n');
 
     // Add new files to the tree
     const createBlobs = [];
