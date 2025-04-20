@@ -304,6 +304,50 @@ title: Administration - Blog Culinaire
                 opacity: 1;
             }
         }
+
+        /* Styles pour le spinner central */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-message {
+            position: absolute;
+            bottom: 20%;
+            color: #2c3e50;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+        }
+
+        @keyframes spin {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -719,6 +763,31 @@ title: Administration - Blog Culinaire
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+
+        // Fonction pour afficher l'overlay de chargement
+        function showLoadingOverlay(message = 'Chargement...') {
+            console.log('=== Début showLoadingOverlay ===');
+            console.log('Message:', message);
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-spinner"></div>
+                <div class="loading-message">${message}</div>
+            `;
+            document.body.appendChild(overlay);
+            console.log('Overlay créé et ajouté au DOM');
+            return overlay;
+        }
+
+        // Fonction pour masquer l'overlay de chargement
+        function hideLoadingOverlay(overlay) {
+            console.log('=== Début hideLoadingOverlay ===');
+            console.log('Overlay à masquer:', !!overlay);
+            if (overlay) {
+                overlay.remove();
+                console.log('Overlay supprimé du DOM');
+            }
         }
 
         // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
