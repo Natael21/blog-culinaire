@@ -835,8 +835,8 @@
         // Charger les restaurants au chargement de la page
         document.addEventListener('DOMContentLoaded', loadRestaurants);
 
-        // Fonction pour afficher le spinner central
-        function showLoadingOverlay(message = 'Chargement en cours...') {
+        // Fonction pour afficher l'overlay de chargement
+        function showLoadingOverlay(message = 'Chargement...') {
             const overlay = document.createElement('div');
             overlay.className = 'loading-overlay';
             overlay.innerHTML = `
@@ -847,7 +847,7 @@
             return overlay;
         }
 
-        // Fonction pour masquer le spinner central
+        // Fonction pour masquer l'overlay de chargement
         function hideLoadingOverlay(overlay) {
             if (overlay) {
                 overlay.remove();
@@ -910,8 +910,8 @@
                 for (const deletion of deletions) {
                     console.log(`Traitement de la suppression : ${deletion.filename}`);
                     changes.push({
-                        path: deletion.filename,
-                        type: 'delete'
+                        type: 'delete',
+                        path: deletion.filename
                     });
                 }
 
