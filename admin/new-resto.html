@@ -1629,15 +1629,18 @@
                     continue;
                 }
 
-                if (!file.type.startsWith('image/')) {
+                // Vérification du type de fichier
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
                     showNotification(
-                        'Fichier non valide',
+                        'Format d\'image non supporté',
                         'error',
-                        `Le fichier "${file.name}" n'est pas une image valide.`
+                        `Le fichier "${file.name}" n'est pas dans un format accepté (JPEG, PNG ou WebP).`
                     );
                     continue;
                 }
 
+                // Vérification de la taille
                 const imageCheck = checkImageSize(file);
                 if (!imageCheck.isValid) {
                     showNotification(
@@ -1645,6 +1648,23 @@
                         'error',
                         `L'image "${file.name}" fait ${imageCheck.size}MB alors que la limite est de 5MB.`
                     );
+                    continue;
+                }
+
+                // Vérification des dimensions
+                const dimensions = await checkImageDimensions(file);
+                if (!dimensions.isValid) {
+                    let errorMessage = `Image "${file.name}":\n`;
+                    errorMessage += `Dimensions actuelles: ${dimensions.details.currentSize}\n`;
+                    errorMessage += `Dimensions requises: ${dimensions.details.requiredSize}\n\n`;
+                    
+                    if (dimensions.details.tooSmall) {
+                        errorMessage += "L'image est trop petite. Elle doit faire au minimum 800x600 pixels.";
+                    } else if (dimensions.details.tooBig) {
+                        errorMessage += "L'image est trop grande. Elle doit faire au maximum 3000x3000 pixels.";
+                    }
+                    
+                    showNotification('Dimensions d\'image non valides', 'error', errorMessage);
                     continue;
                 }
 
@@ -1660,21 +1680,27 @@
 
                 try {
                     let processedFile = file;
-                    if (file.size > 1 * 1024 * 1024) { // Si plus de 1MB
-                        const compressed = await compressImage(URL.createObjectURL(file), 0.2);
+                    if (file.size > 1 * 1024 * 1024) {
+                        const compressed = await compressImage(URL.createObjectURL(file), 0.3);
                         const response = await fetch(compressed);
                         const blob = await response.blob();
-                        processedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                        
+                        // Générer un nom de fichier unique
+                        const hash = await generateHash(blob);
+                        const timestamp = new Date().getTime();
+                        const newFileName = `${timestamp}-${hash}-${file.name}`;
+                        
+                        processedFile = new File([blob], newFileName, { type: file.type });
                     }
 
                     newGalleryFiles.push(processedFile);
-                    existingFileNames.add(file.name);
+                    existingFileNames.add(processedFile.name);
                 } catch (error) {
                     console.error('Erreur lors du traitement de l\'image:', error);
                     showNotification(
                         'Erreur de traitement',
                         'error',
-                        `Impossible de traiter l'image "${file.name}". Veuillez essayer avec une image plus petite.`
+                        `Impossible de traiter l'image "${file.name}". Erreur: ${error.message}`
                     );
                 }
             }
@@ -1682,13 +1708,14 @@
             // Ajouter uniquement les nouvelles images au tableau principal
             galleryImageFiles = [...galleryImageFiles, ...newGalleryFiles];
             
-            // Vider et mettre à jour la prévisualisation
+            // Mettre à jour la prévisualisation
             const container = document.getElementById('galleryPreview');
-            container.innerHTML = '';
+            container.innerHTML = ''; // Vider le conteneur avant de le mettre à jour
             for (const file of galleryImageFiles) {
                 await createImagePreview(file, container, false);
             }
             
+            // Mettre à jour l'aperçu markdown une seule fois à la fin
             updateMarkdownPreview();
         }
 
@@ -2173,36 +2200,26 @@ ${editorContent}`;
 
         function updateMarkdownPreview() {
             const preview = document.querySelector('.restaurant-preview');
-            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
             
-            // Récupérer les valeurs du formulaire
-            const title = document.getElementById('title').value || 'Nom du restaurant';
-            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
-            const description = document.getElementById('description').value || 'Description du restaurant';
-            const address = document.getElementById('address').value || 'Adresse du restaurant';
-            const style = document.getElementById('style').value || 'Style de cuisine';
-            const price = document.getElementById('price').value || 'Gamme de prix';
-            
-            // Récupérer les notes
-            const foodScore = document.getElementById('foodScore').value || '5';
-            const serviceScore = document.getElementById('serviceScore').value || '5';
-            const ambianceScore = document.getElementById('ambianceScore').value || '5';
-            const valueScore = document.getElementById('valueScore').value || '5';
-            const originalityScore = document.getElementById('originalityScore').value || '5';
-            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
-            
-            // Récupérer les commentaires
-            const foodComment = document.getElementById('foodComment').value || '';
-            const serviceComment = document.getElementById('serviceComment').value || '';
-            const ambianceComment = document.getElementById('ambianceComment').value || '';
-            const valueComment = document.getElementById('valueComment').value || '';
-            const originalityComment = document.getElementById('originalityComment').value || '';
-            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
-            
-            // Récupérer le contenu de l'éditeur
-            const editorContent = editor.getHTML() || '';
-            
-            // Créer le HTML de l'aperçu
+            // ... code existant ...
+
+            // Modification de la section galerie pour éviter les doublons
+            const gallerySection = `
+                <h2 class="gallery-title">Galerie photos</h2>
+                <div class="restaurant-gallery">
+                    ${galleryImageFiles.length > 0 ? 
+                        Array.from(new Set(galleryImageFiles)).map(file => `
+                            <div class="gallery-image">
+                                <img src="${URL.createObjectURL(file)}" alt="Galerie ${file.name}">
+                            </div>
+                        `).join('') : 
+                        `<div class="gallery-image">
+                            <i class="fas fa-images"></i>
+                        </div>`
+                    }
+                </div>
+            `;
+
             preview.innerHTML = `
                 <div class="restaurant-header">
                     <h1 class="restaurant-title">${title}</h1>
@@ -2244,7 +2261,7 @@ ${editorContent}`;
                 
                 <div class="restaurant-image">
                     ${mainImageFile ? 
-                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
+                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}" data-filename="${mainImageFile.name}">` : 
                         `<i class="fas fa-image"></i>`
                     }
                 </div>
@@ -2315,19 +2332,7 @@ ${editorContent}`;
                     </div>
                 </div>
                 
-                <h2 class="gallery-title">Galerie photos</h2>
-                <div class="restaurant-gallery">
-                    ${galleryImageFiles.length > 0 ? 
-                        galleryImageFiles.map(file => `
-                            <div class="gallery-image">
-                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
-                            </div>
-                        `).join('') : 
-                        `<div class="gallery-image">
-                            <i class="fas fa-images"></i>
-                        </div>`
-                    }
-                </div>
+                ${gallerySection}
             `;
         }
 
