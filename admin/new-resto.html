@@ -1871,435 +1871,177 @@
 
         // Fonction pour mettre à jour les boutons de gestion des modifications
         function updatePendingChangesButtons() {
-            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            
-            // Mettre à jour le compteur de modifications en attente
-            const totalChanges = pendingChanges.length + drafts.length;
-            
-            // Vous pouvez ajouter ici d'autres mises à jour de l'interface si nécessaire
-            console.log(`${totalChanges} modification(s) en attente`);
-        }
-
-        // Initialiser les boutons au chargement de la page
-        document.addEventListener('DOMContentLoaded', () => {
-            updatePendingChangesButtons();
-        });
-
-        // Écouter les changements dans le localStorage
-        window.addEventListener('storageUpdated', () => {
-            updatePendingChangesButtons();
-        });
-
-        function generateMarkdown() {
-            const title = document.getElementById('title').value;
-            const date = document.getElementById('date').value;
-            const description = document.getElementById('description').value;
-            const address = document.getElementById('address').value;
-            const style = document.getElementById('style').value;
-            const price = document.getElementById('price').value;
-            
-            const dietOptions = [];
-            if (document.getElementById('vegetarian').checked) {
-                dietOptions.push('vegetarian-friendly');
-            }
-            if (document.getElementById('vegan').checked) {
-                dietOptions.push('vegan-friendly');
-            }
-            const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
-
-            const mainImagePath = mainImageFile ? `/images/${mainImageFile.name}` : '';
-            const galleryPaths = galleryImageFiles.map(file => `  - image: "/images/${file.name}"`);
-
-            const overallRating = calculateOverallRating();
-            
-            const editorContent = editor.getHTML().replace(/<p>/g, '\n\n').replace(/<\/p>/g, '').replace(/<br>/g, '\n');
-
-            const ratings = {
-                food: {
-                    score: document.getElementById('foodScore').value || '0',
-                    comment: document.getElementById('foodComment').value || ''
-                },
-                service: {
-                    score: document.getElementById('serviceScore').value || '0',
-                    comment: document.getElementById('serviceComment').value || ''
-                },
-                ambiance: {
-                    score: document.getElementById('ambianceScore').value || '0',
-                    comment: document.getElementById('ambianceComment').value || ''
-                },
-                value: {
-                    score: document.getElementById('valueScore').value || '0',
-                    comment: document.getElementById('valueComment').value || ''
-                },
-                originality: {
-                    score: document.getElementById('originalityScore').value || '0',
-                    comment: document.getElementById('originalityComment').value || ''
-                },
-                overallExperience: {
-                    score: document.getElementById('overallExperienceScore').value || '0',
-                    comment: document.getElementById('overallExperienceComment').value || ''
-                }
-            };
-
-            const today = new Date().toISOString().split('T')[0];
-
-            return `---
-layout: restaurant
-title: '${title}'
-date: ${today}
-state: draft
-note: ${overallRating}
-style: '${style}'
-diet: '${diet}'
-description: '${description}'
-price: '${price}'
-address: '${address}'
-image: '${mainImagePath}'
-images:
-${galleryPaths.join('\n')}
-
-ratings:
-  food:
-    score: ${ratings.food.score}
-    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: '${ratings.food.comment}'
-  service:
-    score: ${ratings.service.score}
-    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: '${ratings.service.comment}'
-  ambiance:
-    score: ${ratings.ambiance.score}
-    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: '${ratings.ambiance.comment}'
-  value:
-    score: ${ratings.value.score}
-    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
-    comment: '${ratings.value.comment}'
-  originality:
-    score: ${ratings.originality.score}
-    criteria: 'Innovation, créativité, authenticité'
-    comment: '${ratings.originality.comment}'
-  overall:
-    score: ${ratings.overallExperience.score}
-    criteria: 'Expérience globale, facteur "wow"'
-    comment: '${ratings.overallExperience.comment}'
----
-
-${editorContent}`;
-        }
-
-        function calculateOverallRating() {
-            const scores = [
-                parseFloat(document.getElementById('foodScore').value) || 0,
-                parseFloat(document.getElementById('serviceScore').value) || 0,
-                parseFloat(document.getElementById('ambianceScore').value) || 0,
-                parseFloat(document.getElementById('valueScore').value) || 0,
-                parseFloat(document.getElementById('originalityScore').value) || 0,
-                parseFloat(document.getElementById('overallExperienceScore').value) || 0
-            ];
-            
-            const sum = scores.reduce((a, b) => a + b, 0);
-            const average = (sum / scores.length).toFixed(1);
-            
-            document.getElementById('overallRating').value = average;
-            return average;
-        }
-
-        function updateMarkdownPreview() {
-            const preview = document.querySelector('.restaurant-preview');
-            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
-            
-            // Récupérer les valeurs du formulaire
-            const title = document.getElementById('title').value || 'Nom du restaurant';
-            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
-            const description = document.getElementById('description').value || 'Description du restaurant';
-            const address = document.getElementById('address').value || 'Adresse du restaurant';
-            const style = document.getElementById('style').value || 'Style de cuisine';
-            const price = document.getElementById('price').value || 'Gamme de prix';
-            
-            // Récupérer les notes
-            const foodScore = document.getElementById('foodScore').value || '5';
-            const serviceScore = document.getElementById('serviceScore').value || '5';
-            const ambianceScore = document.getElementById('ambianceScore').value || '5';
-            const valueScore = document.getElementById('valueScore').value || '5';
-            const originalityScore = document.getElementById('originalityScore').value || '5';
-            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
-            
-            // Récupérer les commentaires
-            const foodComment = document.getElementById('foodComment').value || '';
-            const serviceComment = document.getElementById('serviceComment').value || '';
-            const ambianceComment = document.getElementById('ambianceComment').value || '';
-            const valueComment = document.getElementById('valueComment').value || '';
-            const originalityComment = document.getElementById('originalityComment').value || '';
-            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
-            
-            // Récupérer le contenu de l'éditeur
-            const editorContent = editor.getHTML() || '';
-            
-            // Créer le HTML de l'aperçu
-            preview.innerHTML = `
-                <div class="restaurant-header">
-                    <h1 class="restaurant-title">${title}</h1>
-                    <div class="restaurant-meta">
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${address}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-star"></i>
-                            ${calculateOverallRating()}/10
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-utensils"></i>
-                            ${style}
-                        </span>
-                        ${document.getElementById('vegetarian').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-leaf"></i>
-                                Options végétariennes
-                            </span>
-                        ` : ''}
-                        ${document.getElementById('vegan').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-seedling"></i>
-                                Options végétaliennes
-                            </span>
-                        ` : ''}
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-calendar"></i>
-                            ${date}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-tag"></i>
-                            ${price}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="restaurant-image">
-                    ${mainImageFile ? 
-                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
-                        `<i class="fas fa-image"></i>`
-                    }
-                </div>
-                
-                <div class="restaurant-description">
-                    ${description}
-                </div>
-                
-                <div class="restaurant-content">
-                    ${editorContent}
-                </div>
-                
-                <div class="restaurant-ratings">
-                    <h2>Pourquoi cette note ?</h2>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Qualité de la nourriture</span>
-                            <span class="rating-score">${foodScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
-                        <div class="rating-comment">${foodComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Service</span>
-                            <span class="rating-score">${serviceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
-                        <div class="rating-comment">${serviceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Ambiance</span>
-                            <span class="rating-score">${ambianceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
-                        <div class="rating-comment">${ambianceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Rapport qualité/prix</span>
-                            <span class="rating-score">${valueScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
-                        <div class="rating-comment">${valueComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Originalité / Concept</span>
-                            <span class="rating-score">${originalityScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
-                        <div class="rating-comment">${originalityComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Expérience globale</span>
-                            <span class="rating-score">${overallExperienceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Facteur "wow"</div>
-                        <div class="rating-comment">${overallExperienceComment}</div>
-                    </div>
-                </div>
-                
-                <h2 class="gallery-title">Galerie photos</h2>
-                <div class="restaurant-gallery">
-                    ${galleryImageFiles.length > 0 ? 
-                        galleryImageFiles.map(file => `
-                            <div class="gallery-image">
-                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
-                            </div>
-                        `).join('') : 
-                        `<div class="gallery-image">
-                            <i class="fas fa-images"></i>
-                        </div>`
-                    }
-                </div>
-            `;
-        }
-
-        function createImagePreview(file, container, isMainImage = false) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'image-preview-container';
-                div.innerHTML = `
-                    <img src="${e.target.result}" class="image-preview" alt="Image preview">
-                    <button type="button" class="delete-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                
-                div.querySelector('.delete-image').addEventListener('click', function() {
-                    div.remove();
-                    if (isMainImage) {
-                        mainImageFile = null;
-                    } else {
-                        const index = galleryImageFiles.indexOf(file);
-                        if (index > -1) {
-                            galleryImageFiles.splice(index, 1);
+            try {
+                console.log('Mise à jour du compteur de modifications...');
+                // Vérifier si les données sont valides dans localStorage
+                let drafts = [];
+                try {
+                    const draftsData = localStorage.getItem('drafts');
+                    if (draftsData) {
+                        drafts = JSON.parse(draftsData);
+                        if (!Array.isArray(drafts)) {
+                            console.warn('Format de drafts invalide, réinitialisation');
+                            drafts = [];
+                            localStorage.setItem('drafts', '[]');
                         }
                     }
-                    updateMarkdownPreview();
-                });
+                } catch (e) {
+                    console.error('Erreur lors de la lecture des drafts:', e);
+                    drafts = [];
+                    localStorage.setItem('drafts', '[]');
+                }
+
+                // Vérifier que chaque brouillon a un ID valide
+                drafts = drafts.filter(draft => draft && (draft.id || draft.i));
                 
-                container.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function updateGalleryPreview() {
-            const container = document.getElementById('galleryPreview');
-            container.innerHTML = '';
-            galleryImageFiles.forEach(file => createImagePreview(file, container));
-        }
-
-        function showLoadingState(button) {
-            const buttonText = button.querySelector('.button-text');
-            const spinner = button.querySelector('.spinner');
-            
-            button.classList.add('loading');
-            button.disabled = true;
-            if (spinner) spinner.style.display = 'inline-block';
-            if (buttonText) buttonText.style.opacity = '0.7';
-        }
-
-        function hideLoadingState(button) {
-            const buttonText = button.querySelector('.button-text');
-            const spinner = button.querySelector('.spinner');
-            
-            button.classList.remove('loading');
-            button.disabled = false;
-            if (spinner) spinner.style.display = 'none';
-            if (buttonText) buttonText.style.opacity = '1';
-        }
-
-        function showConfirmationModal() {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'confirmation-modal';
-                modal.innerHTML = `
-                    <div class="confirmation-content">
-                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
-                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
-                        <div class="confirmation-buttons">
-                            <button class="confirmation-button confirm">Confirmer</button>
-                            <button class="confirmation-button cancel">Annuler</button>
-                        </div>
-                    </div>
-                `;
+                // Mettre à jour le compteur
+                const totalChanges = drafts.length;
+                console.log(`${totalChanges} modification(s) en attente`);
                 
-                document.body.appendChild(modal);
-
-                const confirmButton = modal.querySelector('.confirmation-button.confirm');
-                const cancelButton = modal.querySelector('.confirmation-button.cancel');
-
-                confirmButton.onclick = () => {
-                    modal.remove();
-                    resolve(true);
-                };
-
-                cancelButton.onclick = () => {
-                    modal.remove();
-                    resolve(false);
-                };
-            });
-        }
-
-        function showFormConfirmationModal() {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'form-confirmation-modal';
-                modal.innerHTML = `
-                    <div class="form-confirmation-content">
-                        <h3 class="form-confirmation-title">Annuler le formulaire</h3>
-                        <p class="form-confirmation-message">Êtes-vous sûr de vouloir annuler ? Toutes les modifications non sauvegardées seront perdues.</p>
-                        <div class="form-confirmation-buttons">
-                            <button class="form-confirmation-button confirm">Oui, annuler</button>
-                            <button class="form-confirmation-button cancel">Non, continuer</button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(modal);
-
-                const confirmButton = modal.querySelector('.form-confirmation-button.confirm');
-                const cancelButton = modal.querySelector('.form-confirmation-button.cancel');
-
-                confirmButton.onclick = () => {
-                    modal.remove();
-                    resolve(true);
-                };
-
-                cancelButton.onclick = () => {
-                    modal.remove();
-                    resolve(false);
-                };
-            });
-        }
-
-        // Modifier la fonction d'annulation existante
-        async function cancelForm() {
-            // Afficher le modal de confirmation
-            const confirmed = await showFormConfirmationModal();
-            
-            if (confirmed) {
-                // Vider le localStorage
-                localStorage.removeItem('currentDraft');
-                localStorage.removeItem('pendingChanges');
-                
-                // Rediriger vers la page d'administration
-                window.location.href = 'index.html';
+                // Mettre à jour l'affichage si nécessaire
+                const pendingChangesElement = document.getElementById('pendingChangesCount');
+                if (pendingChangesElement) {
+                    pendingChangesElement.textContent = `${totalChanges} modification(s) en attente`;
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour du compteur:', error);
             }
         }
+
+        // Fonction pour sauvegarder un brouillon
+        async function saveDraft() {
+            let success = false;
+            try {
+                console.log('=== DÉBUT DE LA SAUVEGARDE ===');
+                
+                // Vérifier si IndexedDB est disponible
+                if (!window.indexedDB) {
+                    throw new Error('IndexedDB n\'est pas supporté par votre navigateur');
+                }
+
+                // Initialiser IndexedDB si nécessaire
+                if (!db) {
+                    console.log('Initialisation de la base de données...');
+                    await initDB();
+                }
+
+                const formData = getFormData();
+                const draftId = Date.now().toString();
+
+                // Préparer les données de base du brouillon
+                const draftData = {
+                    id: draftId,
+                    title: formData.title,
+                    date: formData.date,
+                    timestamp: Date.now(),
+                    imageRefs: []
+                };
+
+                console.log('Traitement des images...');
+
+                // Traiter l'image principale
+                if (mainImageFile) {
+                    try {
+                        console.log('Optimisation de l\'image principale...');
+                        const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
+                        const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
+                        draftData.imageRefs.push({
+                            id: mainImageId,
+                            name: mainImageFile.name,
+                            isMain: true
+                        });
+                    } catch (error) {
+                        console.error('Erreur lors du traitement de l\'image principale:', error);
+                        throw new Error('Erreur lors du traitement de l\'image principale');
+                    }
+                }
+
+                // Traiter les images de la galerie
+                if (galleryImageFiles.length > 0) {
+                    try {
+                        for (const file of galleryImageFiles) {
+                            console.log(`Optimisation de l'image ${file.name}...`);
+                            const optimizedImage = await optimizeImageForStorage(file, false);
+                            const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
+                            draftData.imageRefs.push({
+                                id: imageId,
+                                name: file.name,
+                                isMain: false
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors du traitement des images de la galerie:', error);
+                        throw new Error('Erreur lors du traitement des images de la galerie');
+                    }
+                }
+
+                // Sauvegarder les métadonnées dans localStorage
+                try {
+                    console.log('Sauvegarde des métadonnées...');
+                    // Version très légère pour localStorage
+                    const lightDraftData = {
+                        i: draftId,
+                        t: formData.title.slice(0, 30),
+                        d: Date.now()
+                    };
+
+                    // Sauvegarder d'abord dans IndexedDB
+                    console.log('Sauvegarde dans IndexedDB...');
+                    const transaction = db.transaction([STORE_NAMES.DRAFTS], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAMES.DRAFTS);
+                    await new Promise((resolve, reject) => {
+                        const request = store.put(draftData);
+                        request.onsuccess = () => resolve();
+                        request.onerror = () => reject(request.error);
+                    });
+
+                    // Si IndexedDB réussit, sauvegarder dans localStorage
+                    localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
+                    
+                    success = true;
+                    console.log('Sauvegarde réussie');
+                    showNotification('Brouillon sauvegardé avec succès', 'success');
+                    
+                    // Attendre que la notification soit visible
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    if (success) {
+                        window.location.href = 'index.html';
+                    }
+
+                } catch (error) {
+                    console.error('Erreur lors de la sauvegarde:', error);
+                    throw new Error('Erreur lors de la sauvegarde du brouillon');
+                }
+
+            } catch (error) {
+                console.error('Erreur globale:', error);
+                // En cas d'erreur, nettoyer localStorage
+                try {
+                    localStorage.removeItem('drafts');
+                } catch (e) {
+                    console.error('Erreur lors du nettoyage du localStorage:', e);
+                }
+                showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
+                return false;
+            }
+
+            return success;
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Initialisation de la page...');
+            updatePendingChangesButtons();
+            
+            // Écouter les changements dans le localStorage
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'drafts') {
+                    console.log('Changement détecté dans localStorage');
+                    updatePendingChangesButtons();
+                }
+            });
+        });
 
         // Fonction pour récupérer les données du formulaire
         function getFormData() {
@@ -2421,118 +2163,6 @@ ${editorContent}`;
             });
         }
 
-        // Fonction pour sauvegarder un brouillon
-        async function saveDraft() {
-            try {
-                console.log('=== DÉBUT DE LA SAUVEGARDE ===');
-                
-                // Vérifier si IndexedDB est disponible
-                if (!window.indexedDB) {
-                    throw new Error('IndexedDB n\'est pas supporté par votre navigateur');
-                }
-
-                // Initialiser IndexedDB si nécessaire
-                if (!db) {
-                    console.log('Initialisation de la base de données...');
-                    await initDB();
-                }
-
-                const formData = getFormData();
-                const draftId = Date.now().toString();
-
-                // Préparer les données de base du brouillon
-                const draftData = {
-                    id: draftId,
-                    title: formData.title,
-                    date: formData.date,
-                    timestamp: Date.now(),
-                    imageRefs: []
-                };
-
-                console.log('Traitement des images...');
-
-                // Traiter l'image principale
-                if (mainImageFile) {
-                    try {
-                        console.log('Optimisation de l\'image principale...');
-                        const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
-                        const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                        draftData.imageRefs.push({
-                            id: mainImageId,
-                            name: mainImageFile.name,
-                            isMain: true
-                        });
-                    } catch (error) {
-                        console.error('Erreur lors du traitement de l\'image principale:', error);
-                        showNotification('Erreur lors du traitement de l\'image principale', 'error');
-                        return false;
-                    }
-                }
-
-                // Traiter les images de la galerie
-                if (galleryImageFiles.length > 0) {
-                    try {
-                        for (const file of galleryImageFiles) {
-                            console.log(`Optimisation de l'image ${file.name}...`);
-                            const optimizedImage = await optimizeImageForStorage(file, false);
-                            const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
-                            draftData.imageRefs.push({
-                                id: imageId,
-                                name: file.name,
-                                isMain: false
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Erreur lors du traitement des images de la galerie:', error);
-                        showNotification('Erreur lors du traitement des images de la galerie', 'error');
-                        return false;
-                    }
-                }
-
-                // Sauvegarder les métadonnées dans localStorage
-                try {
-                    console.log('Sauvegarde des métadonnées...');
-                    // Version très légère pour localStorage
-                    const lightDraftData = {
-                        i: draftId,
-                        t: formData.title.slice(0, 30),
-                        d: Date.now()
-                    };
-
-                    localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
-
-                    // Sauvegarder les données complètes dans IndexedDB
-                    console.log('Sauvegarde dans IndexedDB...');
-                    const transaction = db.transaction([STORE_NAMES.DRAFTS], 'readwrite');
-                    const store = transaction.objectStore(STORE_NAMES.DRAFTS);
-                    await new Promise((resolve, reject) => {
-                        const request = store.put(draftData);
-                        request.onsuccess = () => resolve();
-                        request.onerror = () => reject(request.error);
-                    });
-
-                    console.log('Sauvegarde réussie');
-                    showNotification('Brouillon sauvegardé avec succès', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-
-                    return true;
-
-                } catch (error) {
-                    console.error('Erreur lors de la sauvegarde:', error);
-                    showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
-                    return false;
-                }
-
-            } catch (error) {
-                console.error('Erreur globale:', error);
-                showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
-                return false;
-            }
-        }
-
         // Mise à jour de la fonction loadDraft pour charger depuis IndexedDB
         async function loadDraft(draftId) {
             try {
@@ -2641,6 +2271,79 @@ ${editorContent}`;
             
             // Mettre à jour les boutons
             updatePendingChangesButtons();
+        });
+
+        // Fonction pour nettoyer le localStorage et mettre à jour le compteur
+        async function cleanupAndUpdateCounter() {
+            try {
+                console.log('Nettoyage du localStorage...');
+                localStorage.removeItem('drafts');
+                
+                // Vérifier et nettoyer IndexedDB si nécessaire
+                if (db) {
+                    try {
+                        const transaction = db.transaction([STORE_NAMES.DRAFTS, STORE_NAMES.IMAGES], 'readwrite');
+                        const draftsStore = transaction.objectStore(STORE_NAMES.DRAFTS);
+                        const imagesStore = transaction.objectStore(STORE_NAMES.IMAGES);
+                        
+                        await Promise.all([
+                            new Promise((resolve, reject) => {
+                                const request = draftsStore.clear();
+                                request.onsuccess = () => resolve();
+                                request.onerror = () => reject(request.error);
+                            }),
+                            new Promise((resolve, reject) => {
+                                const request = imagesStore.clear();
+                                request.onsuccess = () => resolve();
+                                request.onerror = () => reject(request.error);
+                            })
+                        ]);
+                        
+                        console.log('Nettoyage d\'IndexedDB terminé');
+                    } catch (error) {
+                        console.error('Erreur lors du nettoyage d\'IndexedDB:', error);
+                    }
+                }
+                
+                // Mettre à jour l'affichage du compteur
+                const pendingChangesElement = document.getElementById('pendingChangesCount');
+                if (pendingChangesElement) {
+                    pendingChangesElement.textContent = '0 modification(s) en attente';
+                }
+                
+                // Déclencher un événement personnalisé pour informer les autres parties de l'application
+                window.dispatchEvent(new CustomEvent('draftsUpdated', {
+                    detail: { count: 0 }
+                }));
+                
+            } catch (error) {
+                console.error('Erreur lors du nettoyage:', error);
+            }
+        }
+
+        // Modifier la partie gestion d'erreur dans saveDraft
+        async function saveDraft() {
+            let success = false;
+            try {
+                // ... code existant ...
+            } catch (error) {
+                console.error('Erreur globale:', error);
+                await cleanupAndUpdateCounter();
+                showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
+                return false;
+            }
+            return success;
+        }
+
+        // Écouter les événements de mise à jour des brouillons
+        document.addEventListener('DOMContentLoaded', () => {
+            window.addEventListener('draftsUpdated', (event) => {
+                console.log(`Mise à jour du compteur: ${event.detail.count} modification(s)`);
+                const pendingChangesElement = document.getElementById('pendingChangesCount');
+                if (pendingChangesElement) {
+                    pendingChangesElement.textContent = `${event.detail.count} modification(s) en attente`;
+                }
+            });
         });
     </script>
 </head>
