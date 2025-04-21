@@ -2400,10 +2400,11 @@ ${editorContent}`;
         // Fonction pour sauvegarder un brouillon
         async function saveDraft() {
             try {
-                console.log('=== DÉBUT DE LA SAUVEGARDE ===');
+                console.group('=== DÉBUT DE LA SAUVEGARDE ===');
                 
                 // Initialiser IndexedDB
                 if (!db) {
+                    console.log('Initialisation de IndexedDB...');
                     await initDB();
                 }
 
@@ -2411,50 +2412,79 @@ ${editorContent}`;
                 const draftId = Date.now().toString();
 
                 // 1. Sauvegarder d'abord les métadonnées légères
+                console.group('1. Préparation des métadonnées');
                 const lightDraftData = {
                     i: draftId,
                     t: formData.title.slice(0, 50),
                     d: formData.date,
                     ts: Date.now()
                 };
+                console.log('Métadonnées préparées:', lightDraftData);
+                console.groupEnd();
 
                 // 2. Optimiser et sauvegarder l'image principale
-                console.log('Traitement de l\'image principale...');
+                console.group('2. Traitement de l\'image principale');
                 let mainImageRef = null;
                 if (mainImageFile) {
-                    const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
-                    const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                    mainImageRef = { i: mainImageId, n: mainImageFile.name, m: true };
+                    try {
+                        console.log('Début optimisation image principale...');
+                        const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
+                        console.log('Image principale optimisée, sauvegarde dans IndexedDB...');
+                        const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
+                        mainImageRef = { i: mainImageId, n: mainImageFile.name, m: true };
+                        console.log('Image principale sauvegardée avec succès');
+                    } catch (error) {
+                        console.error('Erreur lors du traitement de l\'image principale:', error);
+                        throw new Error('Échec du traitement de l\'image principale');
+                    }
                 }
+                console.groupEnd();
 
                 // 3. Traiter les images de la galerie par lots de 2
-                console.log('Traitement des images de la galerie...');
+                console.group('3. Traitement des images de la galerie');
                 const galleryRefs = [];
+                const totalBatches = Math.ceil(galleryImageFiles.length / 2);
+                
                 for (let i = 0; i < galleryImageFiles.length; i += 2) {
+                    console.group(`Lot ${Math.floor(i/2) + 1}/${totalBatches}`);
                     const batch = galleryImageFiles.slice(i, Math.min(i + 2, galleryImageFiles.length));
-                    console.log(`Traitement du lot ${i/2 + 1}/${Math.ceil(galleryImageFiles.length/2)}`);
                     
-                    const batchPromises = batch.map(async file => {
-                        const optimizedImage = await optimizeImageForStorage(file, false);
-                        const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
-                        return { i: imageId, n: file.name, m: false };
-                    });
+                    try {
+                        const batchPromises = batch.map(async file => {
+                            console.log(`Optimisation de ${file.name}...`);
+                            const optimizedImage = await optimizeImageForStorage(file, false);
+                            console.log(`Sauvegarde de ${file.name} dans IndexedDB...`);
+                            const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
+                            return { i: imageId, n: file.name, m: false };
+                        });
 
-                    const batchResults = await Promise.all(batchPromises);
-                    galleryRefs.push(...batchResults);
+                        const batchResults = await Promise.all(batchPromises);
+                        galleryRefs.push(...batchResults);
+                        console.log(`Lot ${Math.floor(i/2) + 1} traité avec succès`);
+                    } catch (error) {
+                        console.error(`Erreur lors du traitement du lot ${Math.floor(i/2) + 1}:`, error);
+                        // Continuer avec les autres lots même si un échoue
+                    }
+                    console.groupEnd();
                 }
+                console.groupEnd();
 
                 // 4. Sauvegarder les références dans localStorage
+                console.group('4. Sauvegarde dans localStorage');
                 try {
                     let drafts = [];
                     try {
-                        drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                        const existingDrafts = localStorage.getItem('drafts');
+                        console.log('Contenu actuel localStorage:', existingDrafts);
+                        drafts = JSON.parse(existingDrafts || '[]');
+                        console.log('Nombre de brouillons existants:', drafts.length);
                     } catch (e) {
-                        console.warn('Réinitialisation du localStorage');
+                        console.warn('Réinitialisation du localStorage:', e);
                     }
 
                     // Ne garder que le dernier brouillon
                     if (drafts.length > 0) {
+                        console.log('Conservation uniquement du dernier brouillon');
                         drafts = drafts.slice(-1);
                     }
 
@@ -2466,11 +2496,25 @@ ${editorContent}`;
                     };
 
                     drafts.push(newDraft);
+                    console.log('Nouveau brouillon à sauvegarder:', newDraft);
 
                     // Sauvegarder dans localStorage
                     const draftsString = JSON.stringify(drafts);
                     console.log('Taille des données localStorage:', draftsString.length, 'caractères');
-                    localStorage.setItem('drafts', draftsString);
+                    
+                    try {
+                        localStorage.setItem('drafts', draftsString);
+                        console.log('Sauvegarde dans localStorage réussie');
+                    } catch (e) {
+                        console.warn('Échec de la sauvegarde complète, tentative avec données minimales');
+                        // Sauvegarder uniquement les métadonnées essentielles
+                        const minimalDraft = {
+                            i: lightDraftData.i,
+                            t: lightDraftData.t
+                        };
+                        localStorage.setItem('drafts', JSON.stringify([minimalDraft]));
+                        console.log('Sauvegarde minimale réussie');
+                    }
 
                     showNotification('Brouillon sauvegardé avec succès', 'success');
                     
@@ -2478,21 +2522,33 @@ ${editorContent}`;
                         window.location.href = 'index.html';
                     }, 1500);
 
+                    console.groupEnd();
+                    console.groupEnd(); // Fin du groupe principal
                     return true;
 
                 } catch (storageError) {
-                    console.error('Erreur de stockage:', storageError);
-                    // Si échec du localStorage, essayer de sauvegarder uniquement le nouveau brouillon
+                    console.error('Erreur finale de stockage:', storageError);
+                    console.groupEnd(); // Fermer le groupe localStorage
+                    console.groupEnd(); // Fermer le groupe principal
+                    
+                    // Dernière tentative avec uniquement l'ID et le titre
                     try {
-                        localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
+                        const emergencyDraft = {
+                            i: draftId,
+                            t: formData.title.slice(0, 30)
+                        };
+                        localStorage.setItem('drafts', JSON.stringify([emergencyDraft]));
+                        showNotification('Brouillon sauvegardé partiellement', 'warning');
                         return true;
                     } catch (e) {
-                        throw new Error('Impossible de sauvegarder même les métadonnées minimales');
+                        console.error('Échec de la sauvegarde d\'urgence:', e);
+                        throw new Error('Impossible de sauvegarder même les données minimales');
                     }
                 }
 
             } catch (error) {
-                console.error('Erreur lors de la sauvegarde:', error);
+                console.error('Erreur globale:', error);
+                console.groupEnd(); // Fermer tous les groupes ouverts
                 showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
                 return false;
             }
