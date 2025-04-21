@@ -9,64 +9,25 @@
     <script type="module">
       import { Editor } from 'https://esm.sh/@tiptap/core'
       import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
+      import Document from 'https://esm.sh/@tiptap/extension-document'
+      import Paragraph from 'https://esm.sh/@tiptap/extension-paragraph'
+      import Text from 'https://esm.sh/@tiptap/extension-text'
+      import Bold from 'https://esm.sh/@tiptap/extension-bold'
+      import Italic from 'https://esm.sh/@tiptap/extension-italic'
+      import BulletList from 'https://esm.sh/@tiptap/extension-bullet-list'
+      import OrderedList from 'https://esm.sh/@tiptap/extension-ordered-list'
+      import ListItem from 'https://esm.sh/@tiptap/extension-list-item'
 
-      // Rendre les modules disponibles globalement
       window.Editor = Editor;
       window.StarterKit = StarterKit;
-      window.editor = null;
-
-      // Initialiser l'éditeur quand le DOM est chargé
-      window.addEventListener('load', () => {
-        console.log('=== INITIALISATION DE LA PAGE ===');
-        
-        // Initialiser l'éditeur avec StarterKit uniquement
-        window.editor = new Editor({
-          element: document.querySelector('#editor'),
-          extensions: [
-            StarterKit,
-          ],
-          content: '',
-          onUpdate: ({ editor }) => {
-            const content = editor.getHTML();
-            document.querySelector('#description').value = content;
-            updateMarkdownPreview();
-          },
-        });
-
-        // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
-        const saveButton = document.getElementById('saveButton');
-        console.log('Étape 2: Recherche du bouton de sauvegarde');
-        
-        if (saveButton) {
-          console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
-          
-          // Ajouter le spinner au bouton
-          const spinnerDiv = document.createElement('div');
-          spinnerDiv.className = 'spinner';
-          const textSpan = document.createElement('span');
-          textSpan.className = 'button-text';
-          textSpan.innerHTML = saveButton.innerHTML;
-          saveButton.innerHTML = '';
-          saveButton.appendChild(spinnerDiv);
-          saveButton.appendChild(textSpan);
-          
-          saveButton.addEventListener('click', async function(e) {
-            e.preventDefault();
-            showLoadingState(this);
-            
-            const form = document.getElementById('restaurantForm');
-            if (form) {
-              form.dispatchEvent(new Event('submit'));
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, 500));
-            hideLoadingState(this);
-          });
-        }
-
-        // Initialiser les zones de drop
-        initializeDropZones();
-      });
+      window.Document = Document;
+      window.Paragraph = Paragraph;
+      window.Text = Text;
+      window.Bold = Bold;
+      window.Italic = Italic;
+      window.BulletList = BulletList;
+      window.OrderedList = OrderedList;
+      window.ListItem = ListItem;
     </script>
     <style>
         :root {
@@ -795,59 +756,38 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 20px 25px;
+            padding: 15px 25px;
             border-radius: var(--border-radius);
             background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: var(--box-shadow);
             z-index: 9999;
             animation: slideIn 0.3s ease-out;
-            min-width: 300px;
-            max-width: 500px;
-        }
-
-        .notification.error {
-            border-left: 4px solid var(--secondary-color);
-            background-color: #fff5f5;
         }
 
         .notification.success {
             border-left: 4px solid #2ecc71;
-            background-color: #f0fff4;
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--secondary-color);
         }
 
         .notification-content {
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            align-items: center;
+            gap: 10px;
         }
 
-        .notification-icon {
+        .notification i {
             font-size: 1.2rem;
-            margin-top: 2px;
         }
 
-        .notification-text {
-            flex: 1;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--primary-color);
-        }
-
-        .notification-message {
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        .notification.error .notification-icon {
-            color: var(--secondary-color);
-        }
-
-        .notification.success .notification-icon {
+        .notification.success i {
             color: #2ecc71;
+        }
+
+        .notification.error i {
+            color: var(--secondary-color);
         }
 
         @keyframes slideIn {
@@ -1371,10 +1311,17 @@
                 console.error('Formulaire non trouvé !');
             }
 
-            editor = new window.tiptap.Editor({
+            editor = new Editor({
                 element: document.querySelector('#editor'),
                 extensions: [
-                    window.tiptap.StarterKit,
+                    Document,
+                    Paragraph,
+                    Text,
+                    Bold,
+                    Italic,
+                    BulletList,
+                    OrderedList,
+                    ListItem
                 ],
                 content: '',
                 editable: true,
@@ -1434,6 +1381,20 @@
             // Écouter les changements dans les checkboxes
             document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', updateMarkdownPreview);
+            });
+
+            // Écouter les changements d'image principale
+            document.getElementById('mainImage').addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    handleMainImageUpload(this.files[0]);
+                }
+            });
+
+            // Écouter les changements d'images de galerie
+            document.getElementById('galleryImages').addEventListener('change', function(e) {
+                if (this.files) {
+                    handleGalleryUpload(this.files);
+                }
             });
 
             // Initialiser l'aperçu markdown au chargement
@@ -1610,597 +1571,48 @@
                     });
                 });
 
-                // Gestionnaire unifié pour le drop et le change
-                async function handleFiles(files) {
-                    if (zoneId === 'mainImageZone' && files.length > 0) {
-                        await handleMainImageUpload(files[0]);
-                    } else if (zoneId === 'galleryZone' && files.length > 0) {
-                        await handleGalleryUpload(files);
-                    }
-                }
-
-                // Gestionnaire pour le drop
-                zone.addEventListener('drop', async (e) => {
+                zone.addEventListener('drop', (e) => {
                     const dt = e.dataTransfer;
-                    await handleFiles(dt.files);
-                });
+                    const files = dt.files;
 
-                // Gestionnaire pour le changement de l'input file
-                input.addEventListener('change', async function(e) {
-                    await handleFiles(this.files);
-                });
-            });
-        }
-
-        async function handleGalleryUpload(files) {
-            const maxTotalSize = 50 * 1024 * 1024; // 50MB total pour la galerie
-            const currentTotalSize = galleryImageFiles.reduce((sum, file) => sum + file.size, 0);
-            
-            // Créer un Set pour stocker les noms de fichiers uniques
-            const existingFileNames = new Set(galleryImageFiles.map(f => f.name));
-            let newGalleryFiles = [];
-            
-            for (const file of Array.from(files)) {
-                // Vérifier si le fichier existe déjà
-                if (existingFileNames.has(file.name)) {
-                    console.log(`Image ${file.name} déjà présente dans la galerie, ignorée.`);
-                    continue;
-                }
-
-                // Vérification de la taille totale
-                if (currentTotalSize + file.size > maxTotalSize) {
-                    showNotification(
-                        'Galerie trop volumineuse',
-                        'error',
-                        'La taille totale des images de la galerie ne doit pas dépasser 50MB.'
-                    );
-                    break;
-                }
-
-                newGalleryFiles.push(file);
-                existingFileNames.add(file.name);
-            }
-
-            // Ajouter uniquement les nouvelles images au tableau principal
-            galleryImageFiles = [...galleryImageFiles, ...newGalleryFiles];
-            
-            // Mettre à jour la prévisualisation
-            const container = document.getElementById('galleryPreview');
-            container.innerHTML = '';
-            for (const file of galleryImageFiles) {
-                await createImagePreview(file, container, false);
-            }
-            
-            updateMarkdownPreview();
-        }
-
-        // Fonction pour estimer la taille du localStorage utilisé
-        function getLocalStorageUsage() {
-            let total = 0;
-            for (let key in localStorage) {
-                if (localStorage.hasOwnProperty(key)) {
-                    total += (localStorage[key].length * 2) / 1024 / 1024; // Taille en MB
-                }
-            }
-            return total;
-        }
-
-        // Fonction pour estimer l'espace disponible (en gardant une marge de sécurité)
-        function getAvailableSpace() {
-            // La plupart des navigateurs ont une limite de 5-10MB
-            const estimatedLimit = 5; // MB
-            const currentUsage = getLocalStorageUsage();
-            return Math.max(0, estimatedLimit - currentUsage);
-        }
-
-        // Fonction améliorée pour optimiser une image avant le stockage
-        async function optimizeImageForStorage(file, isMainImage = false) {
-            // Calculer l'espace disponible
-            const availableSpace = getAvailableSpace();
-            
-            // Convertir d'abord en base64 pour avoir la taille initiale
-            const base64 = await fileToBase64(file);
-            const initialSizeMB = (base64.length * 3) / 4 / 1024 / 1024; // Taille approximative en MB
-
-            // Si l'image est déjà petite, pas besoin de compression
-            if (initialSizeMB < 0.1) { // Moins de 100KB
-                return base64;
-            }
-
-            // Définir la taille cible en fonction du type d'image
-            const targetSizeMB = isMainImage ? 0.5 : 0.3; // 500KB pour l'image principale, 300KB pour la galerie
-            
-            // Créer un canvas pour la compression
-            const img = new Image();
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Charger l'image
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = 'data:image/jpeg;base64,' + base64;
-            });
-
-            // Calculer les dimensions optimales
-            let width = img.width;
-            let height = img.height;
-            const maxDim = isMainImage ? 1600 : 1200;
-            const minDim = isMainImage ? 800 : 600;
-
-            if (Math.max(width, height) > maxDim) {
-                if (width > height) {
-                    height = Math.round((height * maxDim) / width);
-                    width = maxDim;
-                } else {
-                    width = Math.round((width * maxDim) / height);
-                    height = maxDim;
-                }
-            } else if (Math.max(width, height) < minDim) {
-                if (width > height) {
-                    height = Math.round((height * minDim) / width);
-                    width = minDim;
-                } else {
-                    width = Math.round((width * minDim) / height);
-                    height = minDim;
-                }
-            }
-
-            // Configurer le canvas
-            canvas.width = width;
-            canvas.height = height;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, width, height);
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // Compression progressive
-            let quality = 0.9;
-            let result = canvas.toDataURL('image/jpeg', quality).split(',')[1];
-            let currentSize = (result.length * 3) / 4 / 1024 / 1024;
-
-            while (currentSize > targetSizeMB && quality > 0.1) {
-                quality -= 0.1;
-                result = canvas.toDataURL('image/jpeg', quality).split(',')[1];
-                currentSize = (result.length * 3) / 4 / 1024 / 1024;
-            }
-
-            return result;
-        }
-
-        // Initialisation de la base de données IndexedDB
-        let db;
-        const DB_NAME = 'restaurantDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'images';
-
-        // Fonction pour initialiser IndexedDB
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
-
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                    }
-                    if (!db.objectStoreNames.contains('drafts')) {
-                        db.createObjectStore('drafts', { keyPath: 'id' });
-                    }
-                };
-            });
-        }
-
-        // Fonction pour sauvegarder une image dans IndexedDB
-        async function saveImageToIndexedDB(imageData, filename, draftId) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                
-                const id = `${draftId}_${filename}`;
-                const request = store.put({
-                    id: id,
-                    data: imageData,
-                    filename: filename,
-                    draftId: draftId,
-                    timestamp: new Date().toISOString()
-                });
-
-                request.onsuccess = () => resolve(id);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Fonction pour récupérer une image depuis IndexedDB
-        async function getImageFromIndexedDB(id) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.get(id);
-
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Fonction pour supprimer les images d'un brouillon
-        async function deleteImagesForDraft(draftId) {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            
-            return new Promise((resolve, reject) => {
-                const request = store.openCursor();
-                
-                request.onsuccess = (event) => {
-                    const cursor = event.target.result;
-                    if (cursor) {
-                        if (cursor.value.draftId === draftId) {
-                            cursor.delete();
-                        }
-                        cursor.continue();
-                    } else {
-                        resolve();
-                    }
-                };
-                
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Modifier la fonction saveDraft pour utiliser IndexedDB
-        async function saveDraft() {
-            try {
-                // Initialiser IndexedDB si ce n'est pas déjà fait
-                if (!db) {
-                    await initDB();
-                }
-
-                const formData = getFormData();
-                const draftId = Date.now().toString();
-                
-                // Préparer une version légère des métadonnées pour localStorage
-                const lightDraftData = {
-                    id: draftId,
-                    title: formData.title,
-                    date: formData.date,
-                    timestamp: new Date().toISOString()
-                };
-
-                // Préparer les données complètes pour IndexedDB
-                const fullDraftData = {
-                    ...formData,
-                    id: draftId,
-                    imageRefs: [],
-                    timestamp: new Date().toISOString()
-                };
-
-                try {
-                    // Sauvegarder d'abord dans IndexedDB
-                    const transaction = db.transaction(['drafts'], 'readwrite');
-                    const store = transaction.objectStore('drafts');
-                    await new Promise((resolve, reject) => {
-                        const request = store.put(fullDraftData);
-                        request.onsuccess = () => resolve();
-                        request.onerror = () => reject(request.error);
-                    });
-
-                    // Sauvegarder les images
-                    if (mainImageFile) {
-                        const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
-                        const imageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                        fullDraftData.imageRefs.push({
-                            id: imageId,
-                            name: mainImageFile.name,
-                            isMain: true
-                        });
-                    }
-
-                    // Traiter les images de la galerie
-                    const batchSize = 5;
-                    for (let i = 0; i < galleryImageFiles.length; i += batchSize) {
-                        const batch = galleryImageFiles.slice(i, i + batchSize);
-                        const optimizedBatch = await Promise.all(
-                            batch.map(file => optimizeImageForStorage(file, false))
-                        );
-
-                        for (let j = 0; j < batch.length; j++) {
-                            const imageId = await saveImageToIndexedDB(
-                                optimizedBatch[j],
-                                batch[j].name,
-                                draftId
-                            );
-                            fullDraftData.imageRefs.push({
-                                id: imageId,
-                                name: batch[j].name,
-                                isMain: false
-                            });
-                        }
-                    }
-
-                    // Mettre à jour le brouillon dans IndexedDB avec les références d'images
-                    await new Promise((resolve, reject) => {
-                        const updateTx = db.transaction(['drafts'], 'readwrite');
-                        const updateStore = updateTx.objectStore('drafts');
-                        const updateRequest = updateStore.put(fullDraftData);
-                        updateRequest.onsuccess = () => resolve();
-                        updateRequest.onerror = () => reject(updateRequest.error);
-                    });
-
-                    // Sauvegarder la version légère dans localStorage
-                    try {
-                        let lightDrafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                        lightDrafts.push(lightDraftData);
-                        
-                        // Garder seulement les 3 derniers
-                        if (lightDrafts.length > 3) {
-                            const removedDrafts = lightDrafts.slice(0, -3);
-                            // Nettoyer les anciens brouillons de IndexedDB
-                            for (const oldDraft of removedDrafts) {
-                                await deleteImagesForDraft(oldDraft.id);
-                                await new Promise((resolve, reject) => {
-                                    const deleteTx = db.transaction(['drafts'], 'readwrite');
-                                    const deleteStore = deleteTx.objectStore('drafts');
-                                    const deleteRequest = deleteStore.delete(oldDraft.id);
-                                    deleteRequest.onsuccess = () => resolve();
-                                    deleteRequest.onerror = () => reject(deleteRequest.error);
-                                });
-                            }
-                            lightDrafts = lightDrafts.slice(-3);
-                        }
-
-                        localStorage.setItem('drafts', JSON.stringify(lightDrafts));
-                    } catch (storageError) {
-                        // Si localStorage échoue, on continue quand même car les données sont dans IndexedDB
-                        console.warn('Impossible de sauvegarder dans localStorage:', storageError);
-                    }
-
-                    showNotification('Brouillon sauvegardé avec succès', 'success');
-                    return true;
-
-                } catch (error) {
-                    throw new Error(`Erreur lors de la sauvegarde : ${error.message}`);
-                }
-            } catch (error) {
-                console.error('Erreur lors de la sauvegarde:', error);
-                showNotification('Erreur lors de la sauvegarde', 'error', error.message);
-                return false;
-            }
-        }
-
-        // Modifier le gestionnaire de formulaire
-        function initializeForm() {
-            const form = document.getElementById('restaurantForm');
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    // Désactiver le bouton de sauvegarde et montrer le spinner
-                    const saveButton = document.getElementById('saveButton');
-                    if (saveButton) showLoadingState(saveButton);
-                    
-                    try {
-                        if (!validateForm()) {
-                            return;
-                        }
-                        
-                        const saveSuccess = await saveDraft();
-                        console.log('Résultat de la sauvegarde:', saveSuccess);
-                        
-                        // Ne rediriger que si la sauvegarde a réussi
-                        if (saveSuccess === true) {
-                            setTimeout(() => {
-                                window.location.href = 'index.html';
-                            }, 1500);
-                        }
-                    } catch (error) {
-                        console.error('Erreur lors de la sauvegarde:', error);
-                    } finally {
-                        // Réactiver le bouton de sauvegarde et cacher le spinner
-                        if (saveButton) hideLoadingState(saveButton);
+                    if (zoneId === 'mainImageZone' && files.length > 0) {
+                        input.files = files;
+                        handleMainImageUpload(files[0]);
+                    } else if (zoneId === 'galleryZone') {
+                        input.files = files;
+                        handleGalleryUpload(files);
                     }
                 });
-            } else {
-                console.error('Formulaire non trouvé');
-            }
-        }
-
-        // Initialiser le formulaire une fois le DOM chargé
-        document.addEventListener('DOMContentLoaded', initializeForm);
-
-        // Fonction pour charger un brouillon
-        async function loadDraft(draftId) {
-            try {
-                if (!db) {
-                    await initDB();
-                }
-
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                const draft = drafts.find(d => d.id === draftId);
-
-                if (!draft) {
-                    throw new Error('Brouillon non trouvé');
-                }
-
-                // Charger les images depuis IndexedDB
-                for (const imageRef of draft.imageRefs) {
-                    const imageData = await getImageFromIndexedDB(imageRef.id);
-                    if (imageRef.isMain) {
-                        // Restaurer l'image principale
-                        mainImageFile = new File(
-                            [dataURItoBlob(`data:image/jpeg;base64,${imageData.data}`)],
-                            imageRef.name,
-                            { type: 'image/jpeg' }
-                        );
-                        await createImagePreview(mainImageFile, document.getElementById('mainImagePreview'), true);
-                    } else {
-                        // Restaurer les images de la galerie
-                        const galleryFile = new File(
-                            [dataURItoBlob(`data:image/jpeg;base64,${imageData.data}`)],
-                            imageRef.name,
-                            { type: 'image/jpeg' }
-                        );
-                        galleryImageFiles.push(galleryFile);
-                        await createImagePreview(galleryFile, document.getElementById('galleryPreview'), false);
-                    }
-                }
-
-                // Restaurer les autres données du formulaire
-                // ... (code existant pour remplir le formulaire)
-
-                updateMarkdownPreview();
-            } catch (error) {
-                console.error('Erreur lors du chargement du brouillon:', error);
-                showNotification('Erreur lors du chargement', 'error', error.message);
-            }
-        }
-
-        // Utilitaire pour convertir une dataURI en Blob
-        function dataURItoBlob(dataURI) {
-            const byteString = atob(dataURI.split(',')[1]);
-            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            
-            return new Blob([ab], { type: mimeString });
-        }
-
-        // Fonction pour annuler les modifications
-        function cancelChanges() {
-            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
-                deleteDraft(filename);
-                window.location.href = 'restaurants.html';
-            }
-        }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            // Vérifier si on charge un brouillon existant
-            const urlParams = new URLSearchParams(window.location.search);
-            const draftFilename = urlParams.get('draft');
-            
-            if (draftFilename) {
-                filename = draftFilename;
-                loadDraft(draftFilename);
-            }
-            
-            // Mettre à jour les boutons
-            updatePendingChangesButtons();
-        });
-
-        // Fonction pour compresser une image
-        async function compressImage(base64String, maxSizeMB = 0.5) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.src = base64String;
-                
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    // Calculer les nouvelles dimensions tout en gardant le ratio
-                    const maxDimension = 1200;
-                    if (width > maxDimension || height > maxDimension) {
-                        if (width > height) {
-                            height = Math.round((height * maxDimension) / width);
-                            width = maxDimension;
-                        } else {
-                            width = Math.round((width * maxDimension) / height);
-                            height = maxDimension;
-                        }
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // Compression progressive jusqu'à atteindre la taille souhaitée
-                    let quality = 0.7;
-                    let compressed = canvas.toDataURL('image/jpeg', quality);
-                    
-                    while (compressed.length > maxSizeMB * 1024 * 1024 && quality > 0.1) {
-                        quality -= 0.1;
-                        compressed = canvas.toDataURL('image/jpeg', quality);
-                    }
-                    
-                    resolve(compressed);
-                };
-                
-                img.onerror = () => {
-                    reject(new Error('Erreur lors du chargement de l\'image'));
-                };
             });
         }
 
-        // Fonction pour nettoyer les anciens brouillons
-        function cleanupOldDrafts() {
-            try {
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                // Garder seulement les 5 brouillons les plus récents
-                if (drafts.length > 5) {
-                    drafts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    const newDrafts = drafts.slice(0, 5);
-                    localStorage.setItem('drafts', JSON.stringify(newDrafts));
-                }
-            } catch (error) {
-                console.error('Erreur lors du nettoyage des brouillons:', error);
-            }
-        }
-
-        async function handleMainImageUpload(file) {
-            try {
-                // Vérification simple de la taille (20MB max)
-                const maxSize = 20 * 1024 * 1024; // 20MB
-                if (file.size > maxSize) {
-                    showNotification(
-                        'Image trop volumineuse',
-                        'error',
-                        `L'image fait ${(file.size / (1024 * 1024)).toFixed(2)}MB alors que la limite est de 20MB.`
-                    );
-                    return;
-                }
-
-                // Mise à jour de l'image principale
+        function handleMainImageUpload(file) {
+            if (file && file.type.startsWith('image/')) {
                 mainImageFile = file;
-                
-                // Mise à jour de la prévisualisation
                 const container = document.getElementById('mainImagePreview');
-                if (container) {
-                    container.innerHTML = '';
-                    await createImagePreview(file, container, true);
-                }
-
-                // Supprimer l'état d'erreur
-                const mainImageZone = document.getElementById('mainImageZone');
-                if (mainImageZone) {
-                    mainImageZone.classList.remove('show-error');
-                    const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
-                    if (errorDiv) {
-                        errorDiv.remove();
-                    }
-                }
-
-                updateMarkdownPreview();
+                container.innerHTML = '';
+                createImagePreview(file, container, true);
                 
-            } catch (error) {
-                console.error('Erreur lors du traitement de l\'image:', error);
-                showNotification(
-                    'Erreur de traitement',
-                    'error',
-                    'Une erreur est survenue lors du traitement de l\'image. Veuillez réessayer.'
-                );
+                // Supprimer l'état d'erreur et le message
+                const mainImageZone = document.getElementById('mainImageZone');
+                mainImageZone.classList.remove('show-error');
+                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                
+                updateMarkdownPreview();
             }
+        }
+
+        function handleGalleryUpload(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    galleryImageFiles.push(file);
+                }
+            });
+            updateGalleryPreview();
+            updateMarkdownPreview();
         }
 
         function validateForm() {
@@ -2356,30 +1768,13 @@
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            
-            let title = type === 'error' ? 'Erreur' : 'Succès';
-            let icon = type === 'error' ? 'exclamation-circle' : 'check-circle';
-            
-            notification.innerHTML = `
-                <div class="notification-content">
-                    <div class="notification-icon">
-                        <i class="fas fa-${icon}"></i>
-                    </div>
-                    <div class="notification-text">
-                        <div class="notification-title">${title}</div>
-                        <div class="notification-message">
-                            ${message}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
+            notification.textContent = message;
             document.body.appendChild(notification);
             
-            // Supprimer la notification après 5 secondes pour les succès, 8 secondes pour les erreurs
+            // Supprimer la notification après 3 secondes
             setTimeout(() => {
                 notification.remove();
-            }, type === 'error' ? 8000 : 5000);
+            }, 3000);
         }
 
         // Fonction pour mettre à jour les boutons de gestion des modifications
@@ -2520,222 +1915,193 @@ ${editorContent}`;
         }
 
         function updateMarkdownPreview() {
-            try {
-                const preview = document.querySelector('.restaurant-preview');
+            const preview = document.querySelector('.restaurant-preview');
+            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
+            
+            // Récupérer les valeurs du formulaire
+            const title = document.getElementById('title').value || 'Nom du restaurant';
+            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
+            const description = document.getElementById('description').value || 'Description du restaurant';
+            const address = document.getElementById('address').value || 'Adresse du restaurant';
+            const style = document.getElementById('style').value || 'Style de cuisine';
+            const price = document.getElementById('price').value || 'Gamme de prix';
+            
+            // Récupérer les notes
+            const foodScore = document.getElementById('foodScore').value || '5';
+            const serviceScore = document.getElementById('serviceScore').value || '5';
+            const ambianceScore = document.getElementById('ambianceScore').value || '5';
+            const valueScore = document.getElementById('valueScore').value || '5';
+            const originalityScore = document.getElementById('originalityScore').value || '5';
+            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+            
+            // Récupérer les commentaires
+            const foodComment = document.getElementById('foodComment').value || '';
+            const serviceComment = document.getElementById('serviceComment').value || '';
+            const ambianceComment = document.getElementById('ambianceComment').value || '';
+            const valueComment = document.getElementById('valueComment').value || '';
+            const originalityComment = document.getElementById('originalityComment').value || '';
+            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+            
+            // Récupérer le contenu de l'éditeur
+            const editorContent = editor.getHTML() || '';
+            
+            // Créer le HTML de l'aperçu
+            preview.innerHTML = `
+                <div class="restaurant-header">
+                    <h1 class="restaurant-title">${title}</h1>
+                    <div class="restaurant-meta">
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${address}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-star"></i>
+                            ${calculateOverallRating()}/10
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-utensils"></i>
+                            ${style}
+                        </span>
+                        ${document.getElementById('vegetarian').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-leaf"></i>
+                                Options végétariennes
+                            </span>
+                        ` : ''}
+                        ${document.getElementById('vegan').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-seedling"></i>
+                                Options végétaliennes
+                            </span>
+                        ` : ''}
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            ${date}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-tag"></i>
+                            ${price}
+                        </span>
+                    </div>
+                </div>
                 
-                // Récupérer les valeurs du formulaire
-                const title = document.getElementById('title').value || 'Nom du restaurant';
-                const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
-                const description = document.getElementById('description').value || 'Description du restaurant';
-                const address = document.getElementById('address').value || 'Adresse du restaurant';
-                const style = document.getElementById('style').value || 'Style de cuisine';
-                const price = document.getElementById('price').value || 'Gamme de prix';
+                <div class="restaurant-image">
+                    ${mainImageFile ? 
+                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
+                        `<i class="fas fa-image"></i>`
+                    }
+                </div>
                 
-                // Récupérer les notes
-                const foodScore = document.getElementById('foodScore').value || '5';
-                const serviceScore = document.getElementById('serviceScore').value || '5';
-                const ambianceScore = document.getElementById('ambianceScore').value || '5';
-                const valueScore = document.getElementById('valueScore').value || '5';
-                const originalityScore = document.getElementById('originalityScore').value || '5';
-                const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+                <div class="restaurant-description">
+                    ${description}
+                </div>
                 
-                // Récupérer les commentaires
-                const foodComment = document.getElementById('foodComment').value || '';
-                const serviceComment = document.getElementById('serviceComment').value || '';
-                const ambianceComment = document.getElementById('ambianceComment').value || '';
-                const valueComment = document.getElementById('valueComment').value || '';
-                const originalityComment = document.getElementById('originalityComment').value || '';
-                const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+                <div class="restaurant-content">
+                    ${editorContent}
+                </div>
                 
-                // Récupérer le contenu de l'éditeur
-                const editorContent = editor ? editor.getHTML() : '';
-
-                // Modification de la section galerie pour éviter les doublons
-                const gallerySection = `
-                    <h2 class="gallery-title">Galerie photos</h2>
-                    <div class="restaurant-gallery">
-                        ${galleryImageFiles.length > 0 ? 
-                            Array.from(new Set(galleryImageFiles)).map(file => `
-                                <div class="gallery-image">
-                                    <img src="${URL.createObjectURL(file)}" alt="Galerie ${file.name}">
-                                </div>
-                            `).join('') : 
-                            `<div class="gallery-image">
-                                <i class="fas fa-images"></i>
-                            </div>`
-                        }
-                    </div>
-                `;
-
-                preview.innerHTML = `
-                    <div class="restaurant-header">
-                        <h1 class="restaurant-title">${title}</h1>
-                        <div class="restaurant-meta">
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                ${address}
-                            </span>
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-star"></i>
-                                ${calculateOverallRating()}/10
-                            </span>
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-utensils"></i>
-                                ${style}
-                            </span>
-                            ${document.getElementById('vegetarian').checked ? `
-                                <span class="restaurant-meta-item">
-                                    <i class="fas fa-leaf"></i>
-                                    Options végétariennes
-                                </span>
-                            ` : ''}
-                            ${document.getElementById('vegan').checked ? `
-                                <span class="restaurant-meta-item">
-                                    <i class="fas fa-seedling"></i>
-                                    Options végétaliennes
-                                </span>
-                            ` : ''}
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                ${date}
-                            </span>
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-tag"></i>
-                                ${price}
-                            </span>
+                <div class="restaurant-ratings">
+                    <h2>Pourquoi cette note ?</h2>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Qualité de la nourriture</span>
+                            <span class="rating-score">${foodScore}/10</span>
                         </div>
+                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
+                        <div class="rating-comment">${foodComment}</div>
                     </div>
                     
-                    <div class="restaurant-image">
-                        ${mainImageFile ? 
-                            `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}" data-filename="${mainImageFile.name}">` : 
-                            `<i class="fas fa-image"></i>`
-                        }
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Service</span>
+                            <span class="rating-score">${serviceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
+                        <div class="rating-comment">${serviceComment}</div>
                     </div>
                     
-                    <div class="restaurant-description">
-                        ${description}
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Ambiance</span>
+                            <span class="rating-score">${ambianceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
+                        <div class="rating-comment">${ambianceComment}</div>
                     </div>
                     
-                    <div class="restaurant-content">
-                        ${editorContent}
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Rapport qualité/prix</span>
+                            <span class="rating-score">${valueScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
+                        <div class="rating-comment">${valueComment}</div>
                     </div>
                     
-                    <div class="restaurant-ratings">
-                        <h2>Pourquoi cette note ?</h2>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Qualité de la nourriture</span>
-                                <span class="rating-score">${foodScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
-                            <div class="rating-comment">${foodComment}</div>
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Originalité / Concept</span>
+                            <span class="rating-score">${originalityScore}/10</span>
                         </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Service</span>
-                                <span class="rating-score">${serviceScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
-                            <div class="rating-comment">${serviceComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Ambiance</span>
-                                <span class="rating-score">${ambianceScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
-                            <div class="rating-comment">${ambianceComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Rapport qualité/prix</span>
-                                <span class="rating-score">${valueScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
-                            <div class="rating-comment">${valueComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Originalité</span>
-                                <span class="rating-score">${originalityScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
-                            <div class="rating-comment">${originalityComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Expérience globale</span>
-                                <span class="rating-score">${overallExperienceScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Facteur "wow"</div>
-                            <div class="rating-comment">${overallExperienceComment}</div>
-                        </div>
+                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
+                        <div class="rating-comment">${originalityComment}</div>
                     </div>
                     
-                    ${gallerySection}
-                `;
-            } catch (error) {
-                console.error('Erreur dans updateMarkdownPreview:', error);
-                showNotification(
-                    'Erreur de prévisualisation',
-                    'error',
-                    'Une erreur est survenue lors de la mise à jour de l\'aperçu.'
-                );
-            }
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Expérience globale</span>
+                            <span class="rating-score">${overallExperienceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Facteur "wow"</div>
+                        <div class="rating-comment">${overallExperienceComment}</div>
+                    </div>
+                </div>
+                
+                <h2 class="gallery-title">Galerie photos</h2>
+                <div class="restaurant-gallery">
+                    ${galleryImageFiles.length > 0 ? 
+                        galleryImageFiles.map(file => `
+                            <div class="gallery-image">
+                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
+                            </div>
+                        `).join('') : 
+                        `<div class="gallery-image">
+                            <i class="fas fa-images"></i>
+                        </div>`
+                    }
+                </div>
+            `;
         }
 
-        async function createImagePreview(file, container, isMainImage = false) {
-            // Nettoyer le conteneur si c'est l'image principale
-            if (isMainImage) {
-                container.innerHTML = '';
-            }
-            
-            // Vérifier si l'image existe déjà dans le conteneur
-            const existingPreviews = container.querySelectorAll('img');
-            for (const preview of existingPreviews) {
-                if (preview.src.includes(file.name)) {
-                    console.log(`Image ${file.name} déjà présente dans la prévisualisation, ignorée.`);
-                    return;
-                }
-            }
-
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'image-preview-container';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" class="image-preview" alt="Image preview">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    
-                    div.querySelector('.delete-image').addEventListener('click', function() {
-                        div.remove();
-                        if (isMainImage) {
-                            mainImageFile = null;
-                        } else {
-                            const index = galleryImageFiles.findIndex(f => f.name === file.name);
-                            if (index > -1) {
-                                galleryImageFiles.splice(index, 1);
-                            }
+        function createImagePreview(file, container, isMainImage = false) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-preview-container';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                    <button type="button" class="delete-image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                div.querySelector('.delete-image').addEventListener('click', function() {
+                    div.remove();
+                    if (isMainImage) {
+                        mainImageFile = null;
+                    } else {
+                        const index = galleryImageFiles.indexOf(file);
+                        if (index > -1) {
+                            galleryImageFiles.splice(index, 1);
                         }
-                        updateMarkdownPreview();
-                    });
-                    
-                    container.appendChild(div);
-                    resolve();
-                };
-                reader.readAsDataURL(file);
-            });
+                    }
+                    updateMarkdownPreview();
+                });
+                
+                container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
         }
 
         function updateGalleryPreview() {
@@ -2843,252 +2209,131 @@ ${editorContent}`;
             }
         }
 
-        // Fonction pour récupérer les données du formulaire
-        function getFormData() {
-            return {
-                title: document.getElementById('title').value,
-                date: document.getElementById('date').value,
-                description: document.getElementById('description').value,
-                address: document.getElementById('address').value,
-                style: document.getElementById('style').value,
-                price: document.getElementById('price').value,
-                diet: {
-                    vegetarian: document.getElementById('vegetarian').checked,
-                    vegan: document.getElementById('vegan').checked
-                },
-                imageContent: mainImageFile ? URL.createObjectURL(mainImageFile) : null,
-                galleryImages: galleryImageFiles.map(file => URL.createObjectURL(file)),
-                ratings: {
-                    food: {
-                        score: document.getElementById('foodScore').value,
-                        comment: document.getElementById('foodComment').value
-                    },
-                    service: {
-                        score: document.getElementById('serviceScore').value,
-                        comment: document.getElementById('serviceComment').value
-                    },
-                    ambiance: {
-                        score: document.getElementById('ambianceScore').value,
-                        comment: document.getElementById('ambianceComment').value
-                    },
-                    value: {
-                        score: document.getElementById('valueScore').value,
-                        comment: document.getElementById('valueComment').value
-                    },
-                    originality: {
-                        score: document.getElementById('originalityScore').value,
-                        comment: document.getElementById('originalityComment').value
-                    },
-                    overallExperience: {
-                        score: document.getElementById('overallExperienceScore').value,
-                        comment: document.getElementById('overallExperienceComment').value
-                    }
-                },
-                content: editor.getHTML()
-            };
-        }
-
-        // Fonction pour afficher un modal de confirmation
-        function showStorageCleanupModal() {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'confirmation-modal';
-                modal.innerHTML = `
-                    <div class="confirmation-content">
-                        <h3 class="confirmation-title">Espace de stockage insuffisant</h3>
-                        <p class="confirmation-message">Le brouillon est trop volumineux pour être sauvegardé avec les brouillons existants. Voulez-vous supprimer les anciens brouillons et ne garder que celui-ci ?</p>
-                        <div class="confirmation-buttons">
-                            <button class="confirmation-button confirm">Oui, supprimer les anciens brouillons</button>
-                            <button class="confirmation-button cancel">Non, annuler la sauvegarde</button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(modal);
-
-                const confirmButton = modal.querySelector('.confirmation-button.confirm');
-                const cancelButton = modal.querySelector('.confirmation-button.cancel');
-
-                confirmButton.onclick = () => {
-                    modal.remove();
-                    resolve(true);
-                };
-
-                cancelButton.onclick = () => {
-                    modal.remove();
-                    resolve(false);
-                };
-            });
-        }
-
-        // Fonction pour vérifier la taille des images
-        function checkImageSize(file, maxSize = 5) {
-            const sizeInMB = file.size / (1024 * 1024);
-            return {
-                isValid: sizeInMB <= maxSize,
-                size: sizeInMB.toFixed(2)
-            };
-        }
-
-        class StorageError extends Error {
-            constructor(message, details = '') {
-                super(message);
-                this.name = 'StorageError';
-                this.details = details;
-            }
-        }
-
+        // Fonction pour sauvegarder le brouillon
         async function saveDraft() {
             try {
-                // Nettoyer les anciens brouillons d'abord
-                cleanupOldDrafts();
+                const formData = new FormData(document.getElementById('restaurantForm'));
+                const title = formData.get('title');
                 
-                const formData = getFormData();
-                let processedData = { ...formData };
+                // Générer le nom du fichier à partir du titre
+                const filename = title.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
                 
-                // Vérifier la taille des images avant compression
-                if (mainImageFile) {
-                    const mainImageCheck = checkImageSize(mainImageFile);
-                    if (!mainImageCheck.isValid) {
-                        throw new StorageError(
-                            'Image principale trop volumineuse',
-                            `L'image fait ${mainImageCheck.size}MB alors que la limite est de 5MB. Veuillez la réduire avant de la télécharger.`
-                        );
-                    }
-                }
+                const date = new Date().toISOString().split('T')[0];
+                const filePath = `${date}-${filename}.md`;
 
-                if (galleryImageFiles.length > 0) {
-                    const largeImages = galleryImageFiles
-                        .map(file => ({
-                            name: file.name,
-                            ...checkImageSize(file)
-                        }))
-                        .filter(img => !img.isValid);
-
-                    if (largeImages.length > 0) {
-                        const details = largeImages
-                            .map(img => `${img.name} (${img.size}MB)`)
-                            .join(', ');
-                        throw new StorageError(
-                            'Images de galerie trop volumineuses',
-                            `Les images suivantes dépassent la limite de 5MB : ${details}`
-                        );
-                    }
-                }
-
-                // Compresser l'image principale si elle existe
-                if (formData.imageContent) {
-                    try {
-                        processedData.imageContent = await compressImage(formData.imageContent, 0.3);
-                        console.log('Image principale compressée avec succès');
-                    } catch (error) {
-                        throw new StorageError(
-                            'Erreur de compression',
-                            'Impossible de compresser l\'image principale. Veuillez essayer avec une image plus petite.'
-                        );
-                    }
-                }
-
-                // Compresser les images de la galerie
-                if (formData.galleryImages && formData.galleryImages.length > 0) {
-                    try {
-                        processedData.galleryImages = await Promise.all(
-                            formData.galleryImages.map(img => compressImage(img, 0.2))
-                        );
-                        console.log('Images de la galerie compressées avec succès');
-                    } catch (error) {
-                        throw new StorageError(
-                            'Erreur de compression',
-                            'Impossible de compresser les images de la galerie. Veuillez essayer avec des images plus petites.'
-                        );
-                    }
-                }
-
-                // Récupérer les brouillons existants
-                let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                
-                // Limiter le nombre de brouillons à 3 maximum
-                if (drafts.length >= 3) {
-                    const confirmed = await showStorageCleanupModal();
-                    if (!confirmed) {
-                        throw new StorageError('Opération annulée', 'La sauvegarde a été annulée par l\'utilisateur.');
-                    }
-                    drafts = drafts.slice(-2);
-                }
-
-                // Ajouter le nouveau brouillon
-                const draft = {
-                    ...processedData,
-                    timestamp: new Date().toISOString()
+                // Créer l'objet du brouillon avec le contenu initial
+                let markdownContent = generateMarkdown();
+                const draftData = {
+                    filename: filePath,
+                    title: title,
+                    images: []
                 };
 
-                try {
-                    localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
-                    showNotification('Brouillon sauvegardé avec succès', 'success');
-                    return true;
-                } catch (storageError) {
-                    if (storageError.name === 'QuotaExceededError') {
-                        const confirmed = await showStorageCleanupModal();
-                        if (!confirmed) {
-                            throw new StorageError('Opération annulée', 'La sauvegarde a été annulée par l\'utilisateur.');
-                        }
-                        
-                        drafts = drafts.slice(-1);
-                        try {
-                            localStorage.setItem('drafts', JSON.stringify([...drafts, draft]));
-                            showNotification('Brouillon sauvegardé avec succès (anciens brouillons nettoyés)', 'success');
-                            return true;
-                        } catch (finalError) {
-                            throw new StorageError(
-                                'Erreur de stockage',
-                                'Les images sont trop volumineuses pour être sauvegardées. Veuillez réduire leur taille ou en utiliser moins.'
-                            );
-                        }
-                    }
-                    throw new StorageError('Erreur de stockage', storageError.message);
+                // Traiter l'image principale
+                if (mainImageFile) {
+                    const mainImageBase64 = await fileToBase64(mainImageFile);
+                    const mainImageExtension = mainImageFile.name.split('.').pop();
+                    const mainImageName = `${filename}-main-${Date.now()}.${mainImageExtension}`;
+                    
+                    draftData.images.push({
+                        name: mainImageName,
+                        content: mainImageBase64.split(',')[1],
+                        isMain: true
+                    });
+
+                    // Mettre à jour le contenu avec le chemin de l'image principale
+                    markdownContent = markdownContent.replace(
+                        /image:\s*"[^"]*"/,
+                        `image: "/images/${mainImageName}"`
+                    );
                 }
+
+                // Traiter les images de la galerie
+                if (galleryImageFiles && galleryImageFiles.length > 0) {
+                    const timestamp = Date.now(); // Utiliser le même timestamp pour toutes les images de la galerie
+                    for (let i = 0; i < galleryImageFiles.length; i++) {
+                        const file = galleryImageFiles[i];
+                        const galleryImageBase64 = await fileToBase64(file);
+                        const galleryImageExtension = file.name.split('.').pop();
+                        const galleryImageName = `${filename}-gallery-${i + 1}-${timestamp}.${galleryImageExtension}`;
+                        
+                        draftData.images.push({
+                            name: galleryImageName,
+                            content: galleryImageBase64.split(',')[1],
+                            isMain: false,
+                            originalName: file.name // Stocker le nom original pour le remplacement
+                        });
+
+                        // Mettre à jour le contenu avec le chemin de l'image de la galerie
+                        markdownContent = markdownContent.replace(
+                            new RegExp(`!\\[.*?\\]\\(${escapeRegExp(file.name)}\\)`, 'g'),
+                            `![](/images/${galleryImageName})`
+                        );
+                    }
+                }
+
+                // Ajouter le contenu Markdown mis à jour
+                draftData.content = markdownContent;
+
+                // Récupérer les brouillons existants
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                
+                // Vérifier si un brouillon avec le même nom existe déjà
+                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                
+                if (existingIndex !== -1) {
+                    // Mettre à jour le brouillon existant
+                    drafts[existingIndex] = {
+                        ...drafts[existingIndex],
+                        ...draftData,
+                        lastModified: new Date().toISOString()
+                    };
+                } else {
+                    // Ajouter un nouveau brouillon
+                    drafts.push({
+                        ...draftData,
+                        lastModified: new Date().toISOString()
+                    });
+                }
+
+                // Sauvegarder dans localStorage
+                localStorage.setItem('drafts', JSON.stringify(drafts));
+
+                showNotification('Brouillon enregistré avec succès', 'success');
+                
+                // Mettre à jour l'interface
+                updatePendingChangesButtons();
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
             } catch (error) {
-                console.error('Erreur lors de la sauvegarde du brouillon:', error);
-                showNotification(
-                    error instanceof StorageError ? error.message : 'Erreur lors de la sauvegarde',
-                    'error',
-                    error instanceof StorageError ? error.details : error.message
-                );
-                return false;
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
             }
         }
 
-        // Modifier le gestionnaire de formulaire
+        // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Gestionnaire de soumission du formulaire
         function initializeForm() {
             const form = document.getElementById('restaurantForm');
             if (form) {
                 form.addEventListener('submit', async function(e) {
                     e.preventDefault();
-                    
-                    // Désactiver le bouton de sauvegarde et montrer le spinner
-                    const saveButton = document.getElementById('saveButton');
-                    if (saveButton) showLoadingState(saveButton);
-                    
-                    try {
-                        if (!validateForm()) {
-                            return;
-                        }
-                        
-                        const saveSuccess = await saveDraft();
-                        console.log('Résultat de la sauvegarde:', saveSuccess);
-                        
-                        // Ne rediriger que si la sauvegarde a réussi
-                        if (saveSuccess === true) {
-                            setTimeout(() => {
-                                window.location.href = 'index.html';
-                            }, 1500);
-                        }
-                    } catch (error) {
-                        console.error('Erreur lors de la sauvegarde:', error);
-                    } finally {
-                        // Réactiver le bouton de sauvegarde et cacher le spinner
-                        if (saveButton) hideLoadingState(saveButton);
+                    if (!validateForm()) {
+                        return;
                     }
+                    await saveDraft();
                 });
             } else {
                 console.error('Formulaire non trouvé');
@@ -3125,68 +2370,6 @@ ${editorContent}`;
             // Mettre à jour les boutons
             updatePendingChangesButtons();
         });
-
-        // Fonction pour compresser une image
-        async function compressImage(base64String, maxSizeMB = 0.5) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.src = base64String;
-                
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    // Calculer les nouvelles dimensions tout en gardant le ratio
-                    const maxDimension = 1200;
-                    if (width > maxDimension || height > maxDimension) {
-                        if (width > height) {
-                            height = Math.round((height * maxDimension) / width);
-                            width = maxDimension;
-                        } else {
-                            width = Math.round((width * maxDimension) / height);
-                            height = maxDimension;
-                        }
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // Compression progressive jusqu'à atteindre la taille souhaitée
-                    let quality = 0.7;
-                    let compressed = canvas.toDataURL('image/jpeg', quality);
-                    
-                    while (compressed.length > maxSizeMB * 1024 * 1024 && quality > 0.1) {
-                        quality -= 0.1;
-                        compressed = canvas.toDataURL('image/jpeg', quality);
-                    }
-                    
-                    resolve(compressed);
-                };
-                
-                img.onerror = () => {
-                    reject(new Error('Erreur lors du chargement de l\'image'));
-                };
-            });
-        }
-
-        // Fonction pour nettoyer les anciens brouillons
-        function cleanupOldDrafts() {
-            try {
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                // Garder seulement les 5 brouillons les plus récents
-                if (drafts.length > 5) {
-                    drafts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    const newDrafts = drafts.slice(0, 5);
-                    localStorage.setItem('drafts', JSON.stringify(newDrafts));
-                }
-            } catch (error) {
-                console.error('Erreur lors du nettoyage des brouillons:', error);
-            }
-        }
     </script>
 </head>
 <body>
