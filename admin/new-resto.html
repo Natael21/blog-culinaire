@@ -1948,6 +1948,15 @@
                 const draftId = Date.now().toString();
                 console.log('[DRAFT] Création:', { id: draftId, title: formData.title });
 
+                // Préparer les données de base du brouillon
+                const draftData = {
+                    id: draftId,
+                    title: formData.title,
+                    date: formData.date,
+                    timestamp: Date.now(),
+                    imageRefs: []
+                };
+
                 // Traiter l'image principale
                 if (mainImageFile) {
                     try {
@@ -1957,6 +1966,11 @@
                         });
                         const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
                         const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
+                        draftData.imageRefs.push({
+                            id: mainImageId,
+                            name: mainImageFile.name,
+                            isMain: true
+                        });
                         console.log('[IMAGE] Image principale sauvegardée:', { id: mainImageId });
                     } catch (error) {
                         console.error('[IMAGE ERROR] Image principale:', error);
@@ -1972,7 +1986,12 @@
                     for (const file of galleryImageFiles) {
                         try {
                             const optimizedImage = await optimizeImageForStorage(file, false);
-                            await saveImageToIndexedDB(optimizedImage, file.name, draftId);
+                            const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
+                            draftData.imageRefs.push({
+                                id: imageId,
+                                name: file.name,
+                                isMain: false
+                            });
                             processedCount++;
                             console.log('[GALLERY] Progression:', {
                                 processed: processedCount,
@@ -2011,313 +2030,44 @@
                     console.log('[SAVE] Tentative sauvegarde localStorage');
                     const minimalData = {
                         i: draftId,
-                        request.onsuccess = () => resolve();
-                        request.onerror = () => reject(request.error);
-                    });
-
-                    // Si IndexedDB réussit, sauvegarder le minimum dans localStorage
-                    console.log('Sauvegarde des métadonnées dans localStorage...');
-                    const minimalData = {
-                        i: draftId,
-                        t: formData.title.substring(0, 20), // Réduire encore plus la taille
+                        t: formData.title.substring(0, 20),
                         d: Date.now()
                     };
-                    localStorage.setItem('drafts', JSON.stringify([minimalData]));
                     
-                    success = true;
-                    console.log('Sauvegarde réussie');
-                    showNotification('Brouillon sauvegardé avec succès', 'success');
-                    
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    window.location.href = 'index.html';
+                    try {
+                        localStorage.setItem('drafts', JSON.stringify([minimalData]));
+                        console.log('[SAVE] localStorage OK');
+                        success = true;
+                    } catch (error) {
+                        console.error('[SAVE ERROR] localStorage:', {
+                            error: error.message,
+                            quotaExceeded: error.name === 'QuotaExceededError',
+                            dataSize: JSON.stringify([minimalData]).length
+                        });
+                        throw error;
+                    }
 
                 } catch (error) {
-                    console.error('Erreur lors de la sauvegarde:', error);
-                    throw new Error('Erreur lors de la sauvegarde du brouillon');
-                }
-
-            } catch (error) {
-                console.error('Erreur globale:', error);
-                await cleanupAndUpdateCounter();
-                showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
-                return false;
-            }
-
-            return success;
-        }
-
-        // Initialisation au chargement de la page
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Initialisation de la page...');
-            updatePendingChangesButtons();
-            
-            // Écouter les changements dans le localStorage
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'drafts') {
-                    console.log('Changement détecté dans localStorage');
-                    updatePendingChangesButtons();
-                }
-            });
-        });
-
-        // Fonction pour récupérer les données du formulaire
-        function getFormData() {
-            const form = document.getElementById('restaurantForm');
-            if (!form) {
-                throw new Error('Formulaire non trouvé');
-            }
-
-            // Fonction utilitaire pour obtenir la valeur en toute sécurité
-            const safeGetValue = (selector, defaultValue = '') => {
-                const element = form.querySelector(selector);
-                return element ? element.value || defaultValue : defaultValue;
-            };
-
-            // Fonction utilitaire pour obtenir l'état d'une checkbox en toute sécurité
-            const safeGetChecked = (selector) => {
-                const element = form.querySelector(selector);
-                return element ? element.checked : false;
-            };
-
-            // Fonction utilitaire pour obtenir un rating en toute sécurité
-            const safeGetRating = (selector) => {
-                const value = safeGetValue(selector, '0');
-                return parseInt(value) || 0;
-            };
-
-            return {
-                title: safeGetValue('#title'),
-                date: safeGetValue('#date'),
-                summary: safeGetValue('#summary'),
-                description: editor ? editor.getHTML() : '',
-                address: safeGetValue('#address'),
-                style: safeGetValue('#style'),
-                price: safeGetValue('#price'),
-                diet: {
-                    vegetarian: safeGetChecked('#vegetarian'),
-                    vegan: safeGetChecked('#vegan')
-                },
-                ratings: {
-                    food: safeGetRating('#foodRating'),
-                    service: safeGetRating('#serviceRating'),
-                    ambiance: safeGetRating('#ambianceRating'),
-                    value: safeGetRating('#valueRating'),
-                    originality: safeGetRating('#originalityRating')
-                }
-            };
-        }
-
-        // Fonction pour optimiser une image avant le stockage
-        async function optimizeImageForStorage(file, isMain = false) {
-            console.log(`Début optimisation image ${file.name} (${file.size} bytes)`);
-
-            // Créer un canvas pour redimensionner l'image
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-
-            return new Promise((resolve, reject) => {
-                img.onload = async function() {
-                    // Calculer les nouvelles dimensions
-                    let maxWidth = isMain ? 1200 : 800;
-                    let maxHeight = isMain ? 1200 : 800;
-                    let width = img.width;
-                    let height = img.height;
-
-                    // Redimensionner si nécessaire
-                    if (width > maxWidth || height > maxHeight) {
-                        if (width > height) {
-                            height *= maxWidth / width;
-                            width = maxWidth;
-                        } else {
-                            width *= maxHeight / height;
-                            height = maxHeight;
-                        }
-                    }
-
-                    // Définir les dimensions du canvas
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    // Dessiner l'image redimensionnée
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Fonction pour tester différentes qualités
-                    const tryQuality = async (quality) => {
-                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        const size = Math.round((dataUrl.length - 22) * 3 / 4);
-                        console.log(`Test qualité ${quality}: ${size} bytes`);
-                        return { dataUrl, size };
-                    };
-
-                    // Recherche binaire pour trouver la meilleure qualité
-                    let minQuality = 0.1;
-                    let maxQuality = 0.9;
-                    let targetSize = isMain ? 300000 : 200000; // 300KB pour principale, 200KB pour galerie
-                    let bestResult = null;
-
-                    while (maxQuality - minQuality > 0.05) {
-                        const quality = (maxQuality + minQuality) / 2;
-                        const result = await tryQuality(quality);
-
-                        if (!bestResult || Math.abs(result.size - targetSize) < Math.abs(bestResult.size - targetSize)) {
-                            bestResult = { ...result, quality };
-                        }
-
-                        if (result.size > targetSize) {
-                            maxQuality = quality;
-                        } else {
-                            minQuality = quality;
-                        }
-                    }
-
-                    console.log(`Optimisation terminée: ${bestResult.size} bytes (qualité: ${bestResult.quality})`);
-                    resolve(bestResult.dataUrl);
-                };
-
-                img.onerror = reject;
-                img.src = URL.createObjectURL(file);
-            });
-        }
-
-        // Mise à jour de la fonction loadDraft pour charger depuis IndexedDB
-        async function loadDraft(draftId) {
-            try {
-                if (!db) {
-                    await initDB();
-                }
-
-                // Charger les données complètes depuis IndexedDB
-                const draftData = await new Promise((resolve, reject) => {
-                    const transaction = db.transaction([STORE_NAMES.DRAFTS], 'readonly');
-                    const store = transaction.objectStore(STORE_NAMES.DRAFTS);
-                    const request = store.get(draftId);
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = () => reject(request.error);
-                });
-
-                if (!draftData) {
-                    throw new Error('Brouillon non trouvé');
-                }
-
-                // Charger les images
-                for (const imageRef of draftData.imageRefs) {
-                    const imageData = await new Promise((resolve, reject) => {
-                        const transaction = db.transaction([STORE_NAMES.IMAGES], 'readonly');
-                        const store = transaction.objectStore(STORE_NAMES.IMAGES);
-                        const request = store.get(imageRef.id);
-                        request.onsuccess = () => resolve(request.result);
-                        request.onerror = () => reject(request.error);
+                    console.error('[SAVE ERROR] Détails:', {
+                        type: error.name,
+                        message: error.message,
+                        stack: error.stack
                     });
-
-                    if (imageRef.isMain) {
-                        mainImageFile = dataURLtoFile(imageData.data, imageRef.name);
-                        await createImagePreview(mainImageFile, document.getElementById('mainImagePreview'), true);
-                    } else {
-                        const file = dataURLtoFile(imageData.data, imageRef.name);
-                        galleryImageFiles.push(file);
-                        await createImagePreview(file, document.getElementById('galleryPreview'), false);
-                    }
+                    throw error;
                 }
 
-                // Remplir le formulaire
-                populateFormData(draftData);
-                updateMarkdownPreview();
+                if (success) {
+                    console.log('[SUCCESS] Sauvegarde complète réussie');
+                    return true;
+                }
 
             } catch (error) {
-                console.error('Erreur lors du chargement du brouillon:', error);
-                showNotification('Erreur lors du chargement', 'error', error.message);
-            }
-        }
-
-        // Fonction utilitaire pour convertir une URL de données en fichier
-        function dataURLtoFile(dataurl, filename) {
-            const arr = dataurl.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while(n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new File([u8arr], filename, {type: mime});
-        }
-
-        // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
-        function escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        // Gestionnaire de soumission du formulaire
-        function initializeForm() {
-            const form = document.getElementById('restaurantForm');
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    if (!validateForm()) {
-                        return;
-                    }
-                    await saveDraft();
+                console.error('[FATAL ERROR]', {
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
                 });
-            } else {
-                console.error('Formulaire non trouvé');
-            }
-        }
-
-        // Initialiser le formulaire une fois le DOM chargé
-        document.addEventListener('DOMContentLoaded', initializeForm);
-
-        // Fonction pour annuler les modifications
-        function cancelChanges() {
-            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
-                deleteDraft(filename);
-                window.location.href = 'restaurants.html';
-            }
-        }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            // Vérifier si on charge un brouillon existant
-            const urlParams = new URLSearchParams(window.location.search);
-            const draftFilename = urlParams.get('draft');
-            
-            if (draftFilename) {
-                filename = draftFilename;
-                loadDraft(draftFilename);
-            }
-            
-            // Mettre à jour les boutons
-            updatePendingChangesButtons();
-        });
-
-        // Fonction pour nettoyer le localStorage et mettre à jour le compteur
-        async function cleanupAndUpdateCounter() {
-            try {
-                console.log('Nettoyage du localStorage...');
-                localStorage.removeItem('drafts');
-                
-                // Vérifier et nettoyer IndexedDB si nécessaire
-                if (db) {
-                    try {
-                        const transaction = db.transaction([STORE_NAMES.DRAFTS, STORE_NAMES.IMAGES], 'readwrite');
-                        const draftsStore = transaction.objectStore(STORE_NAMES.DRAFTS);
-                        const imagesStore = transaction.objectStore(STORE_NAMES.IMAGES);
-                        
-                        await Promise.all([
-                            new Promise((resolve, reject) => {
-                                const request = draftsStore.clear();
-                                request.onsuccess = () => resolve();
-                                request.onerror = () => reject(request.error);
-                            }),
-                            new Promise((resolve, reject) => {
-                                const request = imagesStore.clear();
-                                request.onsuccess = () => resolve();
-                                request.onerror = () => reject(request.error);
-                            })
-                        ]);
-                        
-                        console.log('Nettoyage d\'IndexedDB terminé');
-                    } catch (error) {
+                await cleanupAndUpdateCounter();
                         console.error('Erreur lors du nettoyage d\'IndexedDB:', error);
                     }
                 }
@@ -2362,6 +2112,68 @@
                 }
             });
         });
+
+        // Fonction de nettoyage avec logs
+        async function cleanupAndUpdateCounter() {
+            console.log('[CLEANUP] Début nettoyage');
+            try {
+                // Nettoyer localStorage
+                localStorage.removeItem('drafts');
+                console.log('[CLEANUP] localStorage nettoyé');
+                
+                // Nettoyer IndexedDB si disponible
+                if (db) {
+                    try {
+                        const stores = [STORE_NAMES.DRAFTS, STORE_NAMES.IMAGES];
+                        const transaction = db.transaction(stores, 'readwrite');
+                        
+                        await Promise.all(stores.map(storeName => 
+                            new Promise((resolve, reject) => {
+                                const request = transaction.objectStore(storeName).clear();
+                                request.onsuccess = () => {
+                                    console.log(`[CLEANUP] Store ${storeName} nettoyé`);
+                                    resolve();
+                                };
+                                request.onerror = () => {
+                                    console.error(`[CLEANUP ERROR] Store ${storeName}:`, request.error);
+                                    reject(request.error);
+                                };
+                            })
+                        ));
+                        
+                        console.log('[CLEANUP] IndexedDB nettoyé');
+                    } catch (error) {
+                        console.error('[CLEANUP ERROR] IndexedDB:', {
+                            error: error.message,
+                            errorName: error.name,
+                            stack: error.stack
+                        });
+                    }
+                }
+                
+                // Mettre à jour l'affichage
+                const pendingChangesElement = document.getElementById('pendingChangesCount');
+                if (pendingChangesElement) {
+                    pendingChangesElement.textContent = '0 modification(s) en attente';
+                    console.log('[CLEANUP] Compteur mis à jour');
+                }
+                
+                // Déclencher l'événement de mise à jour
+                window.dispatchEvent(new CustomEvent('draftsUpdated', {
+                    detail: { count: 0 }
+                }));
+                console.log('[CLEANUP] Événement draftsUpdated déclenché');
+                
+                console.log('[CLEANUP] Terminé avec succès');
+            } catch (error) {
+                console.error('[CLEANUP ERROR] Global:', {
+                    error: error.message,
+                    errorName: error.name,
+                    stack: error.stack
+                });
+                throw error;
+            }
+        }
     </script>
 </head>
 <body>
