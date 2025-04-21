@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
       // Variables globales pour les modules TipTap
-      const tiptap = {};
+      window.tiptap = {};
 
       // Fonction d'initialisation de l'éditeur
       function initializeEditor() {
         // Créer l'éditeur avec uniquement StarterKit pour éviter les doublons
-        window.editor = new tiptap.Editor({
+        window.editor = new window.tiptap.Editor({
           element: document.querySelector('#editor'),
           extensions: [
-            tiptap.StarterKit,
+            window.tiptap.StarterKit,
           ],
           content: '',
           onUpdate: ({ editor }) => {
@@ -37,8 +37,8 @@
             import('https://esm.sh/@tiptap/starter-kit'),
           ]);
 
-          // Stocker les modules dans notre objet tiptap
-          Object.assign(tiptap, {
+          // Stocker les modules dans notre objet tiptap global
+          Object.assign(window.tiptap, {
             Editor,
             StarterKit,
           });
@@ -1360,10 +1360,10 @@
                 console.error('Formulaire non trouvé !');
             }
 
-            editor = new tiptap.Editor({
+            editor = new window.tiptap.Editor({
                 element: document.querySelector('#editor'),
                 extensions: [
-                    tiptap.StarterKit,
+                    window.tiptap.StarterKit,
                 ],
                 content: '',
                 editable: true,
@@ -1697,68 +1697,63 @@
             }
 
             // Définir la taille cible en fonction du type d'image
-            const targetSizeMB = isMainImage ? 0.5 : 0.3; // Image principale : 500KB, Galerie : 300KB
-
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let { width, height } = calculateDimensions(img.width, img.height, isMainImage);
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // Compression progressive
-                    let quality = 0.7;
-                    let result = canvas.toDataURL('image/jpeg', quality);
-                    let currentSize = (result.length * 3) / 4 / 1024 / 1024;
-
-                    // Boucle de compression adaptative
-                    while (currentSize > targetSizeMB && quality > 0.1) {
-                        quality -= 0.1;
-                        result = canvas.toDataURL('image/jpeg', quality);
-                        currentSize = (result.length * 3) / 4 / 1024 / 1024;
-                    }
-
-                    resolve(result.split(',')[1]);
-                };
-                img.src = `data:image/jpeg;base64,${base64}`;
+            const targetSizeMB = isMainImage ? 0.5 : 0.3; // 500KB pour l'image principale, 300KB pour la galerie
+            
+            // Créer un canvas pour la compression
+            const img = new Image();
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Charger l'image
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = 'data:image/jpeg;base64,' + base64;
             });
-        }
 
-        // Fonction pour calculer les dimensions optimales
-        function calculateDimensions(width, height, isMainImage) {
-            const maxDimension = isMainImage ? 1600 : 1200;
-            const minDimension = isMainImage ? 800 : 600;
+            // Calculer les dimensions optimales
+            let width = img.width;
+            let height = img.height;
+            const maxDim = isMainImage ? 1600 : 1200;
+            const minDim = isMainImage ? 800 : 600;
 
-            if (width <= maxDimension && height <= maxDimension) {
-                return { width, height };
-            }
-
-            let ratio = width / height;
-            if (width > height) {
-                width = maxDimension;
-                height = Math.round(width / ratio);
-            } else {
-                height = maxDimension;
-                width = Math.round(height * ratio);
-            }
-
-            // S'assurer que les dimensions ne sont pas trop petites
-            if (width < minDimension || height < minDimension) {
-                if (width < height) {
-                    width = minDimension;
-                    height = Math.round(width / ratio);
+            if (Math.max(width, height) > maxDim) {
+                if (width > height) {
+                    height = Math.round((height * maxDim) / width);
+                    width = maxDim;
                 } else {
-                    height = minDimension;
-                    width = Math.round(height * ratio);
+                    width = Math.round((width * maxDim) / height);
+                    height = maxDim;
+                }
+            } else if (Math.max(width, height) < minDim) {
+                if (width > height) {
+                    height = Math.round((height * minDim) / width);
+                    width = minDim;
+                } else {
+                    width = Math.round((width * minDim) / height);
+                    height = minDim;
                 }
             }
 
-            return { width, height };
+            // Configurer le canvas
+            canvas.width = width;
+            canvas.height = height;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Compression progressive
+            let quality = 0.9;
+            let result = canvas.toDataURL('image/jpeg', quality).split(',')[1];
+            let currentSize = (result.length * 3) / 4 / 1024 / 1024;
+
+            while (currentSize > targetSizeMB && quality > 0.1) {
+                quality -= 0.1;
+                result = canvas.toDataURL('image/jpeg', quality).split(',')[1];
+                currentSize = (result.length * 3) / 4 / 1024 / 1024;
+            }
+
+            return result;
         }
 
         // Initialisation de la base de données IndexedDB
