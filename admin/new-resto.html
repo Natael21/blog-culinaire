@@ -7,23 +7,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
-      // Variable globale pour l'éditeur
-      window.editor = null;
+      // Variables globales pour les modules TipTap
+      const tiptap = {};
 
       // Fonction d'initialisation de l'éditeur
       function initializeEditor() {
-        window.editor = new Editor({
+        // Créer l'éditeur avec uniquement StarterKit pour éviter les doublons
+        window.editor = new tiptap.Editor({
           element: document.querySelector('#editor'),
           extensions: [
-            Document,
-            Paragraph,
-            Text,
-            Bold,
-            Italic,
-            BulletList,
-            OrderedList,
-            ListItem,
-            StarterKit,
+            tiptap.StarterKit,
           ],
           content: '',
           onUpdate: ({ editor }) => {
@@ -37,41 +30,17 @@
       async function initializeTipTap() {
         try {
           const [
-            { Editor: EditorModule },
+            { Editor },
             { default: StarterKit },
-            { default: Document },
-            { default: Paragraph },
-            { default: Text },
-            { default: Bold },
-            { default: Italic },
-            { default: BulletList },
-            { default: OrderedList },
-            { default: ListItem },
           ] = await Promise.all([
             import('https://esm.sh/@tiptap/core'),
             import('https://esm.sh/@tiptap/starter-kit'),
-            import('https://esm.sh/@tiptap/extension-document'),
-            import('https://esm.sh/@tiptap/extension-paragraph'),
-            import('https://esm.sh/@tiptap/extension-text'),
-            import('https://esm.sh/@tiptap/extension-bold'),
-            import('https://esm.sh/@tiptap/extension-italic'),
-            import('https://esm.sh/@tiptap/extension-bullet-list'),
-            import('https://esm.sh/@tiptap/extension-ordered-list'),
-            import('https://esm.sh/@tiptap/extension-list-item'),
           ]);
 
-          // Assigner les modules à window une fois qu'ils sont tous chargés
-          Object.assign(window, {
-            Editor: EditorModule,
+          // Stocker les modules dans notre objet tiptap
+          Object.assign(tiptap, {
+            Editor,
             StarterKit,
-            Document,
-            Paragraph,
-            Text,
-            Bold,
-            Italic,
-            BulletList,
-            OrderedList,
-            ListItem,
           });
 
           // Attendre que le DOM soit chargé avant d'initialiser l'éditeur
@@ -1391,17 +1360,10 @@
                 console.error('Formulaire non trouvé !');
             }
 
-            editor = new Editor({
+            editor = new tiptap.Editor({
                 element: document.querySelector('#editor'),
                 extensions: [
-                    Document,
-                    Paragraph,
-                    Text,
-                    Bold,
-                    Italic,
-                    BulletList,
-                    OrderedList,
-                    ListItem
+                    tiptap.StarterKit,
                 ],
                 content: '',
                 editable: true,
