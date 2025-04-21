@@ -2068,38 +2068,9 @@
                     stack: error.stack
                 });
                 await cleanupAndUpdateCounter();
-                        console.error('Erreur lors du nettoyage d\'IndexedDB:', error);
-                    }
-                }
-                
-                // Mettre à jour l'affichage du compteur
-                const pendingChangesElement = document.getElementById('pendingChangesCount');
-                if (pendingChangesElement) {
-                    pendingChangesElement.textContent = '0 modification(s) en attente';
-                }
-                
-                // Déclencher un événement personnalisé pour informer les autres parties de l'application
-                window.dispatchEvent(new CustomEvent('draftsUpdated', {
-                    detail: { count: 0 }
-                }));
-                
-            } catch (error) {
-                console.error('Erreur lors du nettoyage:', error);
-            }
-        }
-
-        // Modifier la partie gestion d'erreur dans saveDraft
-        async function saveDraft() {
-            let success = false;
-            try {
-                // ... code existant ...
-            } catch (error) {
-                console.error('Erreur globale:', error);
-                await cleanupAndUpdateCounter();
                 showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
                 return false;
             }
-            return success;
         }
 
         // Écouter les événements de mise à jour des brouillons
