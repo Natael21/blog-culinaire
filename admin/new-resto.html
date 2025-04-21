@@ -1160,24 +1160,48 @@
         // Configuration d'IndexedDB
         const DB_NAME = 'restaurantDB';
         const DB_VERSION = 1;
-        const STORE_NAME = 'images';
+        const STORE_NAMES = {
+            IMAGES: 'images',
+            DRAFTS: 'drafts',
+            METADATA: 'metadata'
+        };
         let db;
 
         // Initialiser IndexedDB
         function initDB() {
             return new Promise((resolve, reject) => {
+                console.log('Initialisation de la base de données...');
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-                request.onerror = () => reject(request.error);
+                request.onerror = () => {
+                    console.error('Erreur lors de l\'ouverture de la base de données:', request.error);
+                    reject(request.error);
+                };
+
                 request.onsuccess = () => {
+                    console.log('Base de données ouverte avec succès');
                     db = request.result;
                     resolve(db);
                 };
 
                 request.onupgradeneeded = (event) => {
+                    console.log('Mise à niveau de la base de données...');
                     const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    
+                    // Créer ou vérifier tous les object stores nécessaires
+                    if (!db.objectStoreNames.contains(STORE_NAMES.IMAGES)) {
+                        console.log('Création du store images...');
+                        db.createObjectStore(STORE_NAMES.IMAGES, { keyPath: 'id' });
+                    }
+                    
+                    if (!db.objectStoreNames.contains(STORE_NAMES.DRAFTS)) {
+                        console.log('Création du store drafts...');
+                        db.createObjectStore(STORE_NAMES.DRAFTS, { keyPath: 'id' });
+                    }
+                    
+                    if (!db.objectStoreNames.contains(STORE_NAMES.METADATA)) {
+                        console.log('Création du store metadata...');
+                        db.createObjectStore(STORE_NAMES.METADATA, { keyPath: 'id' });
                     }
                 };
             });
@@ -1187,8 +1211,8 @@
         async function saveImageToIndexedDB(imageData, fileName, draftId) {
             const imageId = `${draftId}_${fileName}`;
             return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
+                const transaction = db.transaction([STORE_NAMES.IMAGES], 'readwrite');
+                const store = transaction.objectStore(STORE_NAMES.IMAGES);
                 const request = store.put({
                     id: imageId,
                     data: imageData,
@@ -1205,8 +1229,8 @@
         // Supprimer les images d'un brouillon
         async function deleteImagesForDraft(draftId) {
             return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
+                const transaction = db.transaction([STORE_NAMES.IMAGES], 'readwrite');
+                const store = transaction.objectStore(STORE_NAMES.IMAGES);
                 const request = store.openCursor();
 
                 request.onsuccess = (event) => {
@@ -2407,13 +2431,10 @@ ${editorContent}`;
                     throw new Error('IndexedDB n\'est pas supporté par votre navigateur');
                 }
 
-                // Initialiser IndexedDB
+                // Initialiser IndexedDB si nécessaire
                 if (!db) {
-                    try {
-                        await initDB();
-                    } catch (error) {
-                        throw new Error('Impossible d\'initialiser la base de données');
-                    }
+                    console.log('Initialisation de la base de données...');
+                    await initDB();
                 }
 
                 const formData = getFormData();
@@ -2428,7 +2449,9 @@ ${editorContent}`;
                     imageRefs: []
                 };
 
-                // Traiter l'image principale si elle existe
+                console.log('Traitement des images...');
+
+                // Traiter l'image principale
                 if (mainImageFile) {
                     try {
                         console.log('Optimisation de l\'image principale...');
@@ -2440,6 +2463,7 @@ ${editorContent}`;
                             isMain: true
                         });
                     } catch (error) {
+                        console.error('Erreur lors du traitement de l\'image principale:', error);
                         showNotification('Erreur lors du traitement de l\'image principale', 'error');
                         return false;
                     }
@@ -2459,6 +2483,7 @@ ${editorContent}`;
                             });
                         }
                     } catch (error) {
+                        console.error('Erreur lors du traitement des images de la galerie:', error);
                         showNotification('Erreur lors du traitement des images de la galerie', 'error');
                         return false;
                     }
@@ -2466,40 +2491,29 @@ ${editorContent}`;
 
                 // Sauvegarder les métadonnées dans localStorage
                 try {
-                    // Version légère pour localStorage
+                    console.log('Sauvegarde des métadonnées...');
+                    // Version très légère pour localStorage
                     const lightDraftData = {
-                        id: draftData.id,
-                        title: draftData.title.slice(0, 50),
-                        date: draftData.date,
-                        imageCount: draftData.imageRefs.length
+                        i: draftId,
+                        t: formData.title.slice(0, 30),
+                        d: Date.now()
                     };
 
-                    let drafts = [];
-                    try {
-                        drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                    } catch (e) {
-                        // Si le parsing échoue, on repart de zéro
-                        drafts = [];
-                    }
-
-                    // Garder uniquement le dernier brouillon
-                    if (drafts.length > 0) {
-                        drafts = drafts.slice(-1);
-                    }
-
-                    drafts.push(lightDraftData);
-                    localStorage.setItem('drafts', JSON.stringify(drafts));
+                    localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
 
                     // Sauvegarder les données complètes dans IndexedDB
+                    console.log('Sauvegarde dans IndexedDB...');
+                    const transaction = db.transaction([STORE_NAMES.DRAFTS], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAMES.DRAFTS);
                     await new Promise((resolve, reject) => {
-                        const transaction = db.transaction(['drafts'], 'readwrite');
-                        const store = transaction.objectStore('drafts');
                         const request = store.put(draftData);
                         request.onsuccess = () => resolve();
                         request.onerror = () => reject(request.error);
                     });
 
+                    console.log('Sauvegarde réussie');
                     showNotification('Brouillon sauvegardé avec succès', 'success');
+                    
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 1500);
@@ -2528,8 +2542,8 @@ ${editorContent}`;
 
                 // Charger les données complètes depuis IndexedDB
                 const draftData = await new Promise((resolve, reject) => {
-                    const transaction = db.transaction(['drafts'], 'readonly');
-                    const store = transaction.objectStore('drafts');
+                    const transaction = db.transaction([STORE_NAMES.DRAFTS], 'readonly');
+                    const store = transaction.objectStore(STORE_NAMES.DRAFTS);
                     const request = store.get(draftId);
                     request.onsuccess = () => resolve(request.result);
                     request.onerror = () => reject(request.error);
@@ -2542,8 +2556,8 @@ ${editorContent}`;
                 // Charger les images
                 for (const imageRef of draftData.imageRefs) {
                     const imageData = await new Promise((resolve, reject) => {
-                        const transaction = db.transaction([STORE_NAME], 'readonly');
-                        const store = transaction.objectStore(STORE_NAME);
+                        const transaction = db.transaction([STORE_NAMES.IMAGES], 'readonly');
+                        const store = transaction.objectStore(STORE_NAMES.IMAGES);
                         const request = store.get(imageRef.id);
                         request.onsuccess = () => resolve(request.result);
                         request.onerror = () => reject(request.error);
