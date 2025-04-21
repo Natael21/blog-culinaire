@@ -7,27 +7,56 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
-      import { Editor } from 'https://esm.sh/@tiptap/core'
-      import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
-      import Document from 'https://esm.sh/@tiptap/extension-document'
-      import Paragraph from 'https://esm.sh/@tiptap/extension-paragraph'
-      import Text from 'https://esm.sh/@tiptap/extension-text'
-      import Bold from 'https://esm.sh/@tiptap/extension-bold'
-      import Italic from 'https://esm.sh/@tiptap/extension-italic'
-      import BulletList from 'https://esm.sh/@tiptap/extension-bullet-list'
-      import OrderedList from 'https://esm.sh/@tiptap/extension-ordered-list'
-      import ListItem from 'https://esm.sh/@tiptap/extension-list-item'
+      // Attendre que tous les modules soient chargés
+      async function initializeTipTap() {
+        try {
+          const [
+            { Editor },
+            { default: StarterKit },
+            { default: Document },
+            { default: Paragraph },
+            { default: Text },
+            { default: Bold },
+            { default: Italic },
+            { default: BulletList },
+            { default: OrderedList },
+            { default: ListItem }
+          ] = await Promise.all([
+            import('https://esm.sh/@tiptap/core'),
+            import('https://esm.sh/@tiptap/starter-kit'),
+            import('https://esm.sh/@tiptap/extension-document'),
+            import('https://esm.sh/@tiptap/extension-paragraph'),
+            import('https://esm.sh/@tiptap/extension-text'),
+            import('https://esm.sh/@tiptap/extension-bold'),
+            import('https://esm.sh/@tiptap/extension-italic'),
+            import('https://esm.sh/@tiptap/extension-bullet-list'),
+            import('https://esm.sh/@tiptap/extension-ordered-list'),
+            import('https://esm.sh/@tiptap/extension-list-item')
+          ]);
 
-      window.Editor = Editor;
-      window.StarterKit = StarterKit;
-      window.Document = Document;
-      window.Paragraph = Paragraph;
-      window.Text = Text;
-      window.Bold = Bold;
-      window.Italic = Italic;
-      window.BulletList = BulletList;
-      window.OrderedList = OrderedList;
-      window.ListItem = ListItem;
+          // Assigner les modules à window une fois qu'ils sont tous chargés
+          Object.assign(window, {
+            Editor,
+            StarterKit,
+            Document,
+            Paragraph,
+            Text,
+            Bold,
+            Italic,
+            BulletList,
+            OrderedList,
+            ListItem
+          });
+
+          // Initialiser l'éditeur une fois que tous les modules sont chargés
+          initializeEditor();
+        } catch (error) {
+          console.error('Erreur lors du chargement des modules TipTap:', error);
+        }
+      }
+
+      // Démarrer l'initialisation
+      initializeTipTap();
     </script>
     <style>
         :root {
