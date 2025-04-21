@@ -1157,114 +1157,6 @@
         let selectedIndex = -1;
         let suggestions = [];
 
-        // Configuration d'IndexedDB
-        const DB_NAME = 'restaurantDB';
-        const DB_VERSION = 2; // Augmenter la version pour forcer la migration
-        const STORE_NAMES = {
-            IMAGES: 'images',
-            DRAFTS: 'drafts',
-            METADATA: 'metadata'
-        };
-        let db = null;
-
-        // Initialiser IndexedDB
-        async function initDB() {
-            return new Promise((resolve, reject) => {
-                console.log('=== INITIALISATION DE LA BASE DE DONNÉES ===');
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-                request.onerror = (event) => {
-                    console.error('[DB ERROR]', {
-                        error: event.target.error,
-                        errorCode: event.target.error.code,
-                        errorName: event.target.error.name
-                    });
-                    reject(event.target.error);
-                };
-
-                request.onsuccess = (event) => {
-                    db = event.target.result;
-                    console.log('[DB SUCCESS] Base de données prête');
-                    resolve(db);
-                };
-
-                request.onupgradeneeded = (event) => {
-                    console.log('[DB UPGRADE] Migration de la base de données v' + event.oldVersion + ' -> v' + event.newVersion);
-                    const db = event.target.result;
-                    
-                    // Log des stores existants
-                    console.log('[DB STORES] Existants:', Array.from(db.objectStoreNames));
-                    
-                    // Supprimer et recréer les stores
-                    Object.values(STORE_NAMES).forEach(storeName => {
-                        if (db.objectStoreNames.contains(storeName)) {
-                            db.deleteObjectStore(storeName);
-                        }
-                        db.createObjectStore(storeName, { keyPath: 'id' });
-                    });
-                    
-                    console.log('[DB STORES] Créés:', Object.values(STORE_NAMES));
-                };
-            });
-        }
-
-        // Fonction pour vérifier si la base de données est prête
-        async function ensureDBReady() {
-            if (!db) {
-                console.log('Base de données non initialisée, initialisation...');
-                try {
-                    await initDB();
-                    console.log('Base de données initialisée avec succès');
-                } catch (error) {
-                    console.error('Erreur lors de l\'initialisation de la base de données:', error);
-                    throw new Error('Impossible d\'initialiser la base de données');
-                }
-            }
-            return db;
-        }
-
-        // Sauvegarder une image dans IndexedDB
-        async function saveImageToIndexedDB(imageData, fileName, draftId) {
-            const imageId = `${draftId}_${fileName}`;
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAMES.IMAGES], 'readwrite');
-                const store = transaction.objectStore(STORE_NAMES.IMAGES);
-                const request = store.put({
-                    id: imageId,
-                    data: imageData,
-                    name: fileName,
-                    draftId: draftId,
-                    timestamp: new Date().toISOString()
-                });
-
-                request.onsuccess = () => resolve(imageId);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Supprimer les images d'un brouillon
-        async function deleteImagesForDraft(draftId) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAMES.IMAGES], 'readwrite');
-                const store = transaction.objectStore(STORE_NAMES.IMAGES);
-                const request = store.openCursor();
-
-                request.onsuccess = (event) => {
-                    const cursor = event.target.result;
-                    if (cursor) {
-                        if (cursor.value.draftId === draftId) {
-                            cursor.delete();
-                        }
-                        cursor.continue();
-                    } else {
-                        resolve();
-                    }
-                };
-
-                request.onerror = () => reject(request.error);
-            });
-        }
-
         // Fonction pour convertir un fichier en base64
         async function fileToBase64(file) {
             return new Promise((resolve, reject) => {
@@ -1887,395 +1779,597 @@
 
         // Fonction pour mettre à jour les boutons de gestion des modifications
         function updatePendingChangesButtons() {
-            try {
-                console.log('Mise à jour du compteur de modifications...');
-                // Vérifier si les données sont valides dans localStorage
-                let drafts = [];
-                try {
-                    const draftsData = localStorage.getItem('drafts');
-                    if (draftsData) {
-                        drafts = JSON.parse(draftsData);
-                        if (!Array.isArray(drafts)) {
-                            console.warn('Format de drafts invalide, réinitialisation');
-                            drafts = [];
-                            localStorage.setItem('drafts', '[]');
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            
+            // Mettre à jour le compteur de modifications en attente
+            const totalChanges = pendingChanges.length + drafts.length;
+            
+            // Vous pouvez ajouter ici d'autres mises à jour de l'interface si nécessaire
+            console.log(`${totalChanges} modification(s) en attente`);
+        }
+
+        // Initialiser les boutons au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePendingChangesButtons();
+        });
+
+        // Écouter les changements dans le localStorage
+        window.addEventListener('storageUpdated', () => {
+            updatePendingChangesButtons();
+        });
+
+        function generateMarkdown() {
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+            const address = document.getElementById('address').value;
+            const style = document.getElementById('style').value;
+            const price = document.getElementById('price').value;
+            
+            const dietOptions = [];
+            if (document.getElementById('vegetarian').checked) {
+                dietOptions.push('vegetarian-friendly');
+            }
+            if (document.getElementById('vegan').checked) {
+                dietOptions.push('vegan-friendly');
+            }
+            const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
+
+            const mainImagePath = mainImageFile ? `/images/${mainImageFile.name}` : '';
+            const galleryPaths = galleryImageFiles.map(file => `  - image: "/images/${file.name}"`);
+
+            const overallRating = calculateOverallRating();
+            
+            const editorContent = editor.getHTML().replace(/<p>/g, '\n\n').replace(/<\/p>/g, '').replace(/<br>/g, '\n');
+
+            const ratings = {
+                food: {
+                    score: document.getElementById('foodScore').value || '0',
+                    comment: document.getElementById('foodComment').value || ''
+                },
+                service: {
+                    score: document.getElementById('serviceScore').value || '0',
+                    comment: document.getElementById('serviceComment').value || ''
+                },
+                ambiance: {
+                    score: document.getElementById('ambianceScore').value || '0',
+                    comment: document.getElementById('ambianceComment').value || ''
+                },
+                value: {
+                    score: document.getElementById('valueScore').value || '0',
+                    comment: document.getElementById('valueComment').value || ''
+                },
+                originality: {
+                    score: document.getElementById('originalityScore').value || '0',
+                    comment: document.getElementById('originalityComment').value || ''
+                },
+                overallExperience: {
+                    score: document.getElementById('overallExperienceScore').value || '0',
+                    comment: document.getElementById('overallExperienceComment').value || ''
+                }
+            };
+
+            const today = new Date().toISOString().split('T')[0];
+
+            return `---
+layout: restaurant
+title: '${title}'
+date: ${today}
+state: draft
+note: ${overallRating}
+style: '${style}'
+diet: '${diet}'
+description: '${description}'
+price: '${price}'
+address: '${address}'
+image: '${mainImagePath}'
+images:
+${galleryPaths.join('\n')}
+
+ratings:
+  food:
+    score: ${ratings.food.score}
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: '${ratings.food.comment}'
+  service:
+    score: ${ratings.service.score}
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: '${ratings.service.comment}'
+  ambiance:
+    score: ${ratings.ambiance.score}
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: '${ratings.ambiance.comment}'
+  value:
+    score: ${ratings.value.score}
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: '${ratings.value.comment}'
+  originality:
+    score: ${ratings.originality.score}
+    criteria: 'Innovation, créativité, authenticité'
+    comment: '${ratings.originality.comment}'
+  overall:
+    score: ${ratings.overallExperience.score}
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: '${ratings.overallExperience.comment}'
+---
+
+${editorContent}`;
+        }
+
+        function calculateOverallRating() {
+            const scores = [
+                parseFloat(document.getElementById('foodScore').value) || 0,
+                parseFloat(document.getElementById('serviceScore').value) || 0,
+                parseFloat(document.getElementById('ambianceScore').value) || 0,
+                parseFloat(document.getElementById('valueScore').value) || 0,
+                parseFloat(document.getElementById('originalityScore').value) || 0,
+                parseFloat(document.getElementById('overallExperienceScore').value) || 0
+            ];
+            
+            const sum = scores.reduce((a, b) => a + b, 0);
+            const average = (sum / scores.length).toFixed(1);
+            
+            document.getElementById('overallRating').value = average;
+            return average;
+        }
+
+        function updateMarkdownPreview() {
+            const preview = document.querySelector('.restaurant-preview');
+            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
+            
+            // Récupérer les valeurs du formulaire
+            const title = document.getElementById('title').value || 'Nom du restaurant';
+            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
+            const description = document.getElementById('description').value || 'Description du restaurant';
+            const address = document.getElementById('address').value || 'Adresse du restaurant';
+            const style = document.getElementById('style').value || 'Style de cuisine';
+            const price = document.getElementById('price').value || 'Gamme de prix';
+            
+            // Récupérer les notes
+            const foodScore = document.getElementById('foodScore').value || '5';
+            const serviceScore = document.getElementById('serviceScore').value || '5';
+            const ambianceScore = document.getElementById('ambianceScore').value || '5';
+            const valueScore = document.getElementById('valueScore').value || '5';
+            const originalityScore = document.getElementById('originalityScore').value || '5';
+            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+            
+            // Récupérer les commentaires
+            const foodComment = document.getElementById('foodComment').value || '';
+            const serviceComment = document.getElementById('serviceComment').value || '';
+            const ambianceComment = document.getElementById('ambianceComment').value || '';
+            const valueComment = document.getElementById('valueComment').value || '';
+            const originalityComment = document.getElementById('originalityComment').value || '';
+            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+            
+            // Récupérer le contenu de l'éditeur
+            const editorContent = editor.getHTML() || '';
+            
+            // Créer le HTML de l'aperçu
+            preview.innerHTML = `
+                <div class="restaurant-header">
+                    <h1 class="restaurant-title">${title}</h1>
+                    <div class="restaurant-meta">
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${address}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-star"></i>
+                            ${calculateOverallRating()}/10
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-utensils"></i>
+                            ${style}
+                        </span>
+                        ${document.getElementById('vegetarian').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-leaf"></i>
+                                Options végétariennes
+                            </span>
+                        ` : ''}
+                        ${document.getElementById('vegan').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-seedling"></i>
+                                Options végétaliennes
+                            </span>
+                        ` : ''}
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            ${date}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-tag"></i>
+                            ${price}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="restaurant-image">
+                    ${mainImageFile ? 
+                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
+                        `<i class="fas fa-image"></i>`
+                    }
+                </div>
+                
+                <div class="restaurant-description">
+                    ${description}
+                </div>
+                
+                <div class="restaurant-content">
+                    ${editorContent}
+                </div>
+                
+                <div class="restaurant-ratings">
+                    <h2>Pourquoi cette note ?</h2>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Qualité de la nourriture</span>
+                            <span class="rating-score">${foodScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
+                        <div class="rating-comment">${foodComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Service</span>
+                            <span class="rating-score">${serviceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
+                        <div class="rating-comment">${serviceComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Ambiance</span>
+                            <span class="rating-score">${ambianceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
+                        <div class="rating-comment">${ambianceComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Rapport qualité/prix</span>
+                            <span class="rating-score">${valueScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
+                        <div class="rating-comment">${valueComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Originalité / Concept</span>
+                            <span class="rating-score">${originalityScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
+                        <div class="rating-comment">${originalityComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Expérience globale</span>
+                            <span class="rating-score">${overallExperienceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Facteur "wow"</div>
+                        <div class="rating-comment">${overallExperienceComment}</div>
+                    </div>
+                </div>
+                
+                <h2 class="gallery-title">Galerie photos</h2>
+                <div class="restaurant-gallery">
+                    ${galleryImageFiles.length > 0 ? 
+                        galleryImageFiles.map(file => `
+                            <div class="gallery-image">
+                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
+                            </div>
+                        `).join('') : 
+                        `<div class="gallery-image">
+                            <i class="fas fa-images"></i>
+                        </div>`
+                    }
+                </div>
+            `;
+        }
+
+        function createImagePreview(file, container, isMainImage = false) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-preview-container';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                    <button type="button" class="delete-image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                div.querySelector('.delete-image').addEventListener('click', function() {
+                    div.remove();
+                    if (isMainImage) {
+                        mainImageFile = null;
+                    } else {
+                        const index = galleryImageFiles.indexOf(file);
+                        if (index > -1) {
+                            galleryImageFiles.splice(index, 1);
                         }
                     }
-                } catch (e) {
-                    console.error('Erreur lors de la lecture des drafts:', e);
-                    drafts = [];
-                    localStorage.setItem('drafts', '[]');
-                }
+                    updateMarkdownPreview();
+                });
+                
+                container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
 
-                // Vérifier que chaque brouillon a un ID valide
-                drafts = drafts.filter(draft => draft && (draft.id || draft.i));
+        function updateGalleryPreview() {
+            const container = document.getElementById('galleryPreview');
+            container.innerHTML = '';
+            galleryImageFiles.forEach(file => createImagePreview(file, container));
+        }
+
+        function showLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.add('loading');
+            button.disabled = true;
+            if (spinner) spinner.style.display = 'inline-block';
+            if (buttonText) buttonText.style.opacity = '0.7';
+        }
+
+        function hideLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.remove('loading');
+            button.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+            if (buttonText) buttonText.style.opacity = '1';
+        }
+
+        function showConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Confirmer</button>
+                            <button class="confirmation-button cancel">Annuler</button>
+                        </div>
+                    </div>
+                `;
                 
-                // Mettre à jour le compteur
-                const totalChanges = drafts.length;
-                console.log(`${totalChanges} modification(s) en attente`);
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        function showFormConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'form-confirmation-modal';
+                modal.innerHTML = `
+                    <div class="form-confirmation-content">
+                        <h3 class="form-confirmation-title">Annuler le formulaire</h3>
+                        <p class="form-confirmation-message">Êtes-vous sûr de vouloir annuler ? Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="form-confirmation-buttons">
+                            <button class="form-confirmation-button confirm">Oui, annuler</button>
+                            <button class="form-confirmation-button cancel">Non, continuer</button>
+                        </div>
+                    </div>
+                `;
                 
-                // Mettre à jour l'affichage si nécessaire
-                const pendingChangesElement = document.getElementById('pendingChangesCount');
-                if (pendingChangesElement) {
-                    pendingChangesElement.textContent = `${totalChanges} modification(s) en attente`;
-                }
-            } catch (error) {
-                console.error('Erreur lors de la mise à jour du compteur:', error);
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.form-confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.form-confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Modifier la fonction d'annulation existante
+        async function cancelForm() {
+            // Afficher le modal de confirmation
+            const confirmed = await showFormConfirmationModal();
+            
+            if (confirmed) {
+                // Vider le localStorage
+                localStorage.removeItem('currentDraft');
+                localStorage.removeItem('pendingChanges');
+                
+                // Rediriger vers la page d'administration
+                window.location.href = 'index.html';
             }
         }
 
-        // Fonction pour sauvegarder un brouillon
+        // Fonction pour sauvegarder le brouillon
         async function saveDraft() {
-            let success = false;
             try {
-                console.log('\n=== DÉBUT SAUVEGARDE ===');
-                console.log('État initial:', {
-                    dbInitialized: !!db,
-                    mainImage: mainImageFile ? {
-                        name: mainImageFile.name,
-                        size: mainImageFile.size
-                    } : null,
-                    galleryCount: galleryImageFiles.length
-                });
-
-                await ensureDBReady();
+                const formData = new FormData(document.getElementById('restaurantForm'));
+                const title = formData.get('title');
                 
-                const formData = getFormData();
-                if (!formData) {
-                    throw new Error('Données du formulaire invalides');
-                }
+                // Générer le nom du fichier à partir du titre
+                const filename = title.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                
+                const date = new Date().toISOString().split('T')[0];
+                const filePath = `${date}-${filename}.md`;
 
-                const draftId = Date.now().toString();
-                console.log('[DRAFT] Création:', { id: draftId, title: formData.title });
-
-                // Préparer les données de base du brouillon
+                // Créer l'objet du brouillon avec le contenu initial
+                let markdownContent = generateMarkdown();
                 const draftData = {
-                    id: draftId,
-                    title: formData.title,
-                    date: formData.date,
-                    timestamp: Date.now(),
-                    imageRefs: []
+                    filename: filePath,
+                    title: title,
+                    images: []
                 };
 
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    try {
-                        console.log('[IMAGE] Traitement image principale:', {
-                            name: mainImageFile.name,
-                            originalSize: mainImageFile.size
-                        });
-                        const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
-                        const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                        draftData.imageRefs.push({
-                            id: mainImageId,
-                            name: mainImageFile.name,
-                            isMain: true
-                        });
-                        console.log('[IMAGE] Image principale sauvegardée:', { id: mainImageId });
-                    } catch (error) {
-                        console.error('[IMAGE ERROR] Image principale:', error);
-                        throw error;
-                    }
-                }
-
-                // Traiter la galerie
-                if (galleryImageFiles.length > 0) {
-                    console.log('[GALLERY] Début traitement:', { count: galleryImageFiles.length });
-                    let processedCount = 0;
+                    const mainImageBase64 = await fileToBase64(mainImageFile);
+                    const mainImageExtension = mainImageFile.name.split('.').pop();
+                    const mainImageName = `${filename}-main-${Date.now()}.${mainImageExtension}`;
                     
-                    for (const file of galleryImageFiles) {
-                        try {
-                            const optimizedImage = await optimizeImageForStorage(file, false);
-                            const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
-                            draftData.imageRefs.push({
-                                id: imageId,
-                                name: file.name,
-                                isMain: false
-                            });
-                            processedCount++;
-                            console.log('[GALLERY] Progression:', {
-                                processed: processedCount,
-                                total: galleryImageFiles.length
-                            });
-                        } catch (error) {
-                            console.error('[GALLERY ERROR]', {
-                                file: file.name,
-                                error: error.message,
-                                processedCount
-                            });
-                            throw error;
-                        }
-                    }
-                }
-
-                // Sauvegarder dans IndexedDB
-                try {
-                    console.log('[SAVE] Tentative sauvegarde IndexedDB');
-                    const transaction = db.transaction([STORE_NAMES.DRAFTS], 'readwrite');
-                    const store = transaction.objectStore(STORE_NAMES.DRAFTS);
-                    
-                    await new Promise((resolve, reject) => {
-                        const request = store.put(draftData);
-                        request.onsuccess = () => {
-                            console.log('[SAVE] IndexedDB OK');
-                            resolve();
-                        };
-                        request.onerror = () => {
-                            console.error('[SAVE ERROR] IndexedDB:', request.error);
-                            reject(request.error);
-                        };
+                    draftData.images.push({
+                        name: mainImageName,
+                        content: mainImageBase64.split(',')[1],
+                        isMain: true
                     });
 
-                    // Sauvegarder dans localStorage
-                    console.log('[SAVE] Tentative sauvegarde localStorage');
-                    const minimalData = {
-                        i: draftId,
-                        t: formData.title.substring(0, 20),
-                        d: Date.now()
+                    // Mettre à jour le contenu avec le chemin de l'image principale
+                    markdownContent = markdownContent.replace(
+                        /image:\s*"[^"]*"/,
+                        `image: "/images/${mainImageName}"`
+                    );
+                }
+
+                // Traiter les images de la galerie
+                if (galleryImageFiles && galleryImageFiles.length > 0) {
+                    const timestamp = Date.now(); // Utiliser le même timestamp pour toutes les images de la galerie
+                    for (let i = 0; i < galleryImageFiles.length; i++) {
+                        const file = galleryImageFiles[i];
+                        const galleryImageBase64 = await fileToBase64(file);
+                        const galleryImageExtension = file.name.split('.').pop();
+                        const galleryImageName = `${filename}-gallery-${i + 1}-${timestamp}.${galleryImageExtension}`;
+                        
+                        draftData.images.push({
+                            name: galleryImageName,
+                            content: galleryImageBase64.split(',')[1],
+                            isMain: false,
+                            originalName: file.name // Stocker le nom original pour le remplacement
+                        });
+
+                        // Mettre à jour le contenu avec le chemin de l'image de la galerie
+                        markdownContent = markdownContent.replace(
+                            new RegExp(`!\\[.*?\\]\\(${escapeRegExp(file.name)}\\)`, 'g'),
+                            `![](/images/${galleryImageName})`
+                        );
+                    }
+                }
+
+                // Ajouter le contenu Markdown mis à jour
+                draftData.content = markdownContent;
+
+                // Récupérer les brouillons existants
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                
+                // Vérifier si un brouillon avec le même nom existe déjà
+                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                
+                if (existingIndex !== -1) {
+                    // Mettre à jour le brouillon existant
+                    drafts[existingIndex] = {
+                        ...drafts[existingIndex],
+                        ...draftData,
+                        lastModified: new Date().toISOString()
                     };
-                    
-                    try {
-                        localStorage.setItem('drafts', JSON.stringify([minimalData]));
-                        console.log('[SAVE] localStorage OK');
-                        success = true;
-                    } catch (error) {
-                        console.error('[SAVE ERROR] localStorage:', {
-                            error: error.message,
-                            quotaExceeded: error.name === 'QuotaExceededError',
-                            dataSize: JSON.stringify([minimalData]).length
-                        });
-                        throw error;
-                    }
-
-                } catch (error) {
-                    console.error('[SAVE ERROR] Détails:', {
-                        type: error.name,
-                        message: error.message,
-                        stack: error.stack
+                } else {
+                    // Ajouter un nouveau brouillon
+                    drafts.push({
+                        ...draftData,
+                        lastModified: new Date().toISOString()
                     });
-                    throw error;
                 }
 
-                if (success) {
-                    console.log('[SUCCESS] Sauvegarde complète réussie');
-                    return true;
-                }
+                // Sauvegarder dans localStorage
+                localStorage.setItem('drafts', JSON.stringify(drafts));
+
+                showNotification('Brouillon enregistré avec succès', 'success');
+                
+                // Mettre à jour l'interface
+                updatePendingChangesButtons();
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
 
             } catch (error) {
-                console.error('[FATAL ERROR]', {
-                    type: error.name,
-                    message: error.message,
-                    stack: error.stack
-                });
-                await cleanupAndUpdateCounter();
-                showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
-                return false;
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
             }
         }
 
-        // Écouter les événements de mise à jour des brouillons
-        document.addEventListener('DOMContentLoaded', () => {
-            window.addEventListener('draftsUpdated', (event) => {
-                console.log(`Mise à jour du compteur: ${event.detail.count} modification(s)`);
-                const pendingChangesElement = document.getElementById('pendingChangesCount');
-                if (pendingChangesElement) {
-                    pendingChangesElement.textContent = `${event.detail.count} modification(s) en attente`;
-                }
-            });
-        });
-
-        // Fonction de nettoyage avec logs
-        async function cleanupAndUpdateCounter() {
-            console.log('[CLEANUP] Début nettoyage');
-            try {
-                // Nettoyer localStorage
-                localStorage.removeItem('drafts');
-                console.log('[CLEANUP] localStorage nettoyé');
-                
-                // Nettoyer IndexedDB si disponible
-                if (db) {
-                    try {
-                        const stores = [STORE_NAMES.DRAFTS, STORE_NAMES.IMAGES];
-                        const transaction = db.transaction(stores, 'readwrite');
-                        
-                        await Promise.all(stores.map(storeName => 
-                            new Promise((resolve, reject) => {
-                                const request = transaction.objectStore(storeName).clear();
-                                request.onsuccess = () => {
-                                    console.log(`[CLEANUP] Store ${storeName} nettoyé`);
-                                    resolve();
-                                };
-                                request.onerror = () => {
-                                    console.error(`[CLEANUP ERROR] Store ${storeName}:`, request.error);
-                                    reject(request.error);
-                                };
-                            })
-                        ));
-                        
-                        console.log('[CLEANUP] IndexedDB nettoyé');
-                    } catch (error) {
-                        console.error('[CLEANUP ERROR] IndexedDB:', {
-                            error: error.message,
-                            errorName: error.name,
-                            stack: error.stack
-                        });
-                    }
-                }
-                
-                // Mettre à jour l'affichage
-                const pendingChangesElement = document.getElementById('pendingChangesCount');
-                if (pendingChangesElement) {
-                    pendingChangesElement.textContent = '0 modification(s) en attente';
-                    console.log('[CLEANUP] Compteur mis à jour');
-                }
-                
-                // Déclencher l'événement de mise à jour
-                window.dispatchEvent(new CustomEvent('draftsUpdated', {
-                    detail: { count: 0 }
-                }));
-                console.log('[CLEANUP] Événement draftsUpdated déclenché');
-                
-                console.log('[CLEANUP] Terminé avec succès');
-            } catch (error) {
-                console.error('[CLEANUP ERROR] Global:', {
-                    error: error.message,
-                    errorName: error.name,
-                    stack: error.stack
-                });
-                throw error;
-            }
+        // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        // Fonction pour mettre à jour l'aperçu Markdown
-        function updateMarkdownPreview() {
-            console.log('Mise à jour de l\'aperçu Markdown...');
-            const preview = document.querySelector('.restaurant-preview');
-            if (!preview) return;
-
-            const formData = getFormData();
-            if (!formData) return;
-
-            let markdown = '';
-
-            // En-tête avec le titre
-            markdown += `# ${formData.title}\n\n`;
-
-            // Métadonnées
-            markdown += `- **Date de visite:** ${formData.date}\n`;
-            markdown += `- **Adresse:** ${formData.address}\n`;
-            markdown += `- **Style de cuisine:** ${formData.style}\n`;
-            markdown += `- **Gamme de prix:** ${formData.price}\n`;
-
-            // Options alimentaires
-            const diets = getSelectedDiets();
-            if (diets) {
-                markdown += `- **Options alimentaires:** ${diets}\n`;
-            }
-
-            markdown += '\n';
-
-            // Résumé
-            if (formData.description) {
-                markdown += `## Résumé\n\n${formData.description}\n\n`;
-            }
-
-            // Image principale
-            if (mainImageFile) {
-                markdown += `![Image principale](${mainImageFile.name})\n\n`;
-            }
-
-            // Description détaillée
-            if (editor) {
-                const content = editor.getHTML();
-                if (content) {
-                    markdown += `## Description détaillée\n\n${content}\n\n`;
-                }
-            }
-
-            // Évaluations
-            markdown += `## Évaluations\n\n`;
-            markdown += `### Note globale: ${formData.overallRating}/10\n\n`;
-
-            // Critères détaillés
-            const criteria = [
-                { name: 'Nourriture', score: formData.foodScore, comment: formData.foodComment },
-                { name: 'Service', score: formData.serviceScore, comment: formData.serviceComment },
-                { name: 'Ambiance', score: formData.ambianceScore, comment: formData.ambianceComment },
-                { name: 'Rapport qualité/prix', score: formData.valueScore, comment: formData.valueComment },
-                { name: 'Originalité', score: formData.originalityScore, comment: formData.originalityComment },
-                { name: 'Expérience globale', score: formData.overallExperienceScore, comment: formData.overallExperienceComment }
-            ];
-
-            criteria.forEach(criterion => {
-                if (criterion.score && criterion.comment) {
-                    markdown += `#### ${criterion.name}\n`;
-                    markdown += `- **Note:** ${criterion.score}/10\n`;
-                    markdown += `- **Commentaire:** ${criterion.comment}\n\n`;
-                }
-            });
-
-            // Galerie d'images
-            if (galleryImageFiles.length > 0) {
-                markdown += `## Galerie\n\n`;
-                galleryImageFiles.forEach(file => {
-                    markdown += `![${file.name}](${file.name})\n\n`;
-                });
-            }
-
-            // Mettre à jour l'aperçu
-            preview.innerHTML = markdown;
-            console.log('Aperçu Markdown mis à jour');
-        }
-
-        // Fonction pour calculer la note globale
-        function calculateOverallRating() {
-            const scores = [
-                parseInt(document.getElementById('foodScore').value),
-                parseInt(document.getElementById('serviceScore').value),
-                parseInt(document.getElementById('ambianceScore').value),
-                parseInt(document.getElementById('valueScore').value),
-                parseInt(document.getElementById('originalityScore').value),
-                parseInt(document.getElementById('overallExperienceScore').value)
-            ];
-
-            const validScores = scores.filter(score => !isNaN(score));
-            if (validScores.length === 0) return 0;
-
-            const average = validScores.reduce((a, b) => a + b, 0) / validScores.length;
-            document.getElementById('overallRating').value = Math.round(average * 10) / 10;
-        }
-
-        function getFormData() {
+        // Gestionnaire de soumission du formulaire
+        function initializeForm() {
             const form = document.getElementById('restaurantForm');
-            if (!form) {
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    if (!validateForm()) {
+                        return;
+                    }
+                    await saveDraft();
+                });
+            } else {
                 console.error('Formulaire non trouvé');
-                return null;
             }
-
-            const formData = {
-                title: form.querySelector('#title').value,
-                date: form.querySelector('#date').value,
-                address: form.querySelector('#address').value,
-                style: form.querySelector('#style').value,
-                price: form.querySelector('#price').value,
-                description: form.querySelector('#description').value,
-                foodScore: form.querySelector('#foodScore').value,
-                foodComment: form.querySelector('#foodComment').value,
-                serviceScore: form.querySelector('#serviceScore').value,
-                serviceComment: form.querySelector('#serviceComment').value,
-                ambianceScore: form.querySelector('#ambianceScore').value,
-                ambianceComment: form.querySelector('#ambianceComment').value,
-                valueScore: form.querySelector('#valueScore').value,
-                valueComment: form.querySelector('#valueComment').value,
-                originalityScore: form.querySelector('#originalityScore').value,
-                originalityComment: form.querySelector('#originalityComment').value,
-                overallExperienceScore: form.querySelector('#overallExperienceScore').value,
-                overallExperienceComment: form.querySelector('#overallExperienceComment').value,
-                overallRating: form.querySelector('#overallRating').value
-            };
-
-            return formData;
         }
+
+        // Initialiser le formulaire une fois le DOM chargé
+        document.addEventListener('DOMContentLoaded', initializeForm);
+
+        // Fonction pour charger un brouillon
+        function loadDraft(filename) {
+                showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
+        }
+
+        // Fonction pour annuler les modifications
+        function cancelChanges() {
+            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
+                deleteDraft(filename);
+                window.location.href = 'restaurants.html';
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Vérifier si on charge un brouillon existant
+            const urlParams = new URLSearchParams(window.location.search);
+            const draftFilename = urlParams.get('draft');
+            
+            if (draftFilename) {
+                filename = draftFilename;
+                loadDraft(draftFilename);
+            }
+            
+            // Mettre à jour les boutons
+            updatePendingChangesButtons();
+        });
     </script>
 </head>
 <body>
