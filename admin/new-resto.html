@@ -1145,48 +1145,6 @@
             font-size: 1.5rem;
             font-weight: 600;
         }
-
-        .storage-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--background-color);
-            padding: 10px 15px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            font-size: 0.9rem;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .storage-indicator i {
-            color: var(--accent-color);
-        }
-
-        .storage-progress {
-            width: 100px;
-            height: 4px;
-            background: #e9ecef;
-            border-radius: 2px;
-            overflow: hidden;
-            margin-left: 8px;
-        }
-
-        .storage-progress-bar {
-            height: 100%;
-            background: var(--accent-color);
-            transition: width 0.3s ease;
-        }
-
-        .storage-progress.warning .storage-progress-bar {
-            background: #f39c12;
-        }
-
-        .storage-progress.danger .storage-progress-bar {
-            background: var(--secondary-color);
-        }
     </style>
 
     <script>
@@ -2438,70 +2396,6 @@ ${editorContent}`;
             // Mettre à jour les boutons
             updatePendingChangesButtons();
         });
-
-        // Fonction pour calculer l'espace utilisé dans le localStorage
-        function calculateStorageUsage() {
-            let total = 0;
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                const value = localStorage.getItem(key);
-                total += (key.length + value.length) * 2; // *2 car les caractères sont stockés en UTF-16
-            }
-            return total;
-        }
-
-        // Fonction pour mettre à jour l'indicateur de stockage
-        function updateStorageIndicator() {
-            const used = calculateStorageUsage();
-            const max = 5 * 1024 * 1024; // 5MB en bytes
-            const percentage = (used / max) * 100;
-            
-            const indicator = document.querySelector('.storage-indicator');
-            const progressBar = indicator.querySelector('.storage-progress-bar');
-            
-            progressBar.style.width = `${percentage}%`;
-            
-            // Mettre à jour la classe en fonction du niveau d'utilisation
-            const progressContainer = indicator.querySelector('.storage-progress');
-            progressContainer.classList.remove('warning', 'danger');
-            
-            if (percentage > 80) {
-                progressContainer.classList.add('danger');
-            } else if (percentage > 60) {
-                progressContainer.classList.add('warning');
-            }
-            
-            // Mettre à jour le texte
-            const usedMB = (used / (1024 * 1024)).toFixed(2);
-            const maxMB = (max / (1024 * 1024)).toFixed(2);
-            indicator.querySelector('span').textContent = `${usedMB}MB / ${maxMB}MB`;
-        }
-
-        // Initialiser l'indicateur de stockage
-        function initializeStorageIndicator() {
-            const header = document.querySelector('.admin-header');
-            const indicator = document.createElement('div');
-            indicator.className = 'storage-indicator';
-            indicator.innerHTML = `
-                <i class="fas fa-database"></i>
-                <span>0MB / 5MB</span>
-                <div class="storage-progress">
-                    <div class="storage-progress-bar"></div>
-                </div>
-            `;
-            header.appendChild(indicator);
-            
-            // Mettre à jour l'indicateur
-            updateStorageIndicator();
-            
-            // Mettre à jour l'indicateur après chaque sauvegarde
-            window.addEventListener('storage', updateStorageIndicator);
-        }
-
-        // Appeler l'initialisation au chargement de la page
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeStorageIndicator();
-        });
     </script>
 </head>
 <body>
@@ -2510,13 +2404,6 @@ ${editorContent}`;
         <a href="index.html" class="action-button">
             <i class="fas fa-arrow-left"></i> Retour à l'administration
         </a>
-        <div class="storage-indicator">
-            <i class="fas fa-database"></i>
-            <span>0MB / 5MB</span>
-            <div class="storage-progress">
-                <div class="storage-progress-bar"></div>
-            </div>
-        </div>
     </header>
 
     <div class="page-container">
