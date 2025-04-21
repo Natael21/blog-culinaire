@@ -7,55 +7,66 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
-      // Variables globales pour les modules TipTap
-      window.tiptap = {};
+      import { Editor } from 'https://esm.sh/@tiptap/core'
+      import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
 
-      // Fonction d'initialisation de l'éditeur
-      function initializeEditor() {
-        // Créer l'éditeur avec uniquement StarterKit pour éviter les doublons
-        window.editor = new window.tiptap.Editor({
+      // Rendre les modules disponibles globalement
+      window.Editor = Editor;
+      window.StarterKit = StarterKit;
+      window.editor = null;
+
+      // Initialiser l'éditeur quand le DOM est chargé
+      window.addEventListener('load', () => {
+        console.log('=== INITIALISATION DE LA PAGE ===');
+        
+        // Initialiser l'éditeur avec StarterKit uniquement
+        window.editor = new Editor({
           element: document.querySelector('#editor'),
           extensions: [
-            window.tiptap.StarterKit,
+            StarterKit,
           ],
           content: '',
           onUpdate: ({ editor }) => {
             const content = editor.getHTML();
             document.querySelector('#description').value = content;
+            updateMarkdownPreview();
           },
         });
-      }
 
-      // Attendre que tous les modules soient chargés
-      async function initializeTipTap() {
-        try {
-          const [
-            { Editor },
-            { default: StarterKit },
-          ] = await Promise.all([
-            import('https://esm.sh/@tiptap/core'),
-            import('https://esm.sh/@tiptap/starter-kit'),
-          ]);
-
-          // Stocker les modules dans notre objet tiptap global
-          Object.assign(window.tiptap, {
-            Editor,
-            StarterKit,
+        // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
+        const saveButton = document.getElementById('saveButton');
+        console.log('Étape 2: Recherche du bouton de sauvegarde');
+        
+        if (saveButton) {
+          console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
+          
+          // Ajouter le spinner au bouton
+          const spinnerDiv = document.createElement('div');
+          spinnerDiv.className = 'spinner';
+          const textSpan = document.createElement('span');
+          textSpan.className = 'button-text';
+          textSpan.innerHTML = saveButton.innerHTML;
+          saveButton.innerHTML = '';
+          saveButton.appendChild(spinnerDiv);
+          saveButton.appendChild(textSpan);
+          
+          saveButton.addEventListener('click', async function(e) {
+            e.preventDefault();
+            showLoadingState(this);
+            
+            const form = document.getElementById('restaurantForm');
+            if (form) {
+              form.dispatchEvent(new Event('submit'));
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            hideLoadingState(this);
           });
-
-          // Attendre que le DOM soit chargé avant d'initialiser l'éditeur
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeEditor);
-          } else {
-            initializeEditor();
-          }
-        } catch (error) {
-          console.error('Erreur lors du chargement des modules TipTap:', error);
         }
-      }
 
-      // Démarrer l'initialisation
-      initializeTipTap();
+        // Initialiser les zones de drop
+        initializeDropZones();
+      });
     </script>
     <style>
         :root {
@@ -2651,7 +2662,7 @@ ${editorContent}`;
                         
                         <div class="rating-category">
                             <div class="rating-header">
-                                <span class="rating-title">Originalité / Concept</span>
+                                <span class="rating-title">Originalité</span>
                                 <span class="rating-score">${originalityScore}/10</span>
                             </div>
                             <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
