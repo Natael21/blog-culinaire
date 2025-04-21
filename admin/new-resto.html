@@ -1404,20 +1404,6 @@
                 checkbox.addEventListener('change', updateMarkdownPreview);
             });
 
-            // Écouter les changements d'image principale
-            document.getElementById('mainImage').addEventListener('change', function(e) {
-                if (this.files && this.files[0]) {
-                    handleMainImageUpload(this.files[0]);
-                }
-            });
-
-            // Écouter les changements d'images de galerie
-            document.getElementById('galleryImages').addEventListener('change', function(e) {
-                if (this.files) {
-                    handleGalleryUpload(this.files);
-                }
-            });
-
             // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
         });
@@ -1789,95 +1775,90 @@
         }
 
         async function handleMainImageUpload(file) {
-            // Vérification du type de fichier
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                showNotification(
-                    'Format d\'image non supporté',
-                    'error',
-                    'Seuls les formats JPEG, PNG et WebP sont acceptés. Veuillez convertir votre image dans l\'un de ces formats.'
-                );
-                return;
-            }
-
-            // Vérification de la taille
-            const imageCheck = checkImageSize(file);
-            if (!imageCheck.isValid) {
-                showNotification(
-                    'Image trop volumineuse',
-                    'error',
-                    `L'image fait ${imageCheck.size}MB alors que la limite est de 5MB. Veuillez la réduire avant de la télécharger.`
-                );
-                return;
-            }
-
-            // Vérification des dimensions avec message détaillé
-            const dimensions = await checkImageDimensions(file);
-            if (!dimensions.isValid) {
-                let errorMessage = `Dimensions actuelles: ${dimensions.details.currentSize}\nDimensions requises: ${dimensions.details.requiredSize}\n\n`;
-                if (dimensions.details.tooSmall) {
-                    errorMessage += "L'image est trop petite. Elle doit faire au minimum 800x600 pixels.";
-                } else if (dimensions.details.tooBig) {
-                    errorMessage += "L'image est trop grande. Elle doit faire au maximum 3000x3000 pixels.";
-                }
-                showNotification(
-                    'Dimensions d\'image non valides',
-                    'error',
-                    errorMessage
-                );
-                return;
-            }
-
             try {
-                // Compression intelligente basée sur la taille
-                let compressionRatio;
-                if (file.size > 3 * 1024 * 1024) {
-                    compressionRatio = 0.2;
+                // Vérification du type de fichier
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
                     showNotification(
-                        'Compression forte appliquée',
-                        'warning',
-                        'L\'image a été fortement compressée pour réduire sa taille. La qualité peut être légèrement affectée.'
+                        'Format d\'image non supporté',
+                        'error',
+                        'Seuls les formats JPEG, PNG et WebP sont acceptés. Veuillez convertir votre image dans l\'un de ces formats.'
                     );
-                } else if (file.size > 2 * 1024 * 1024) {
-                    compressionRatio = 0.3;
-                } else if (file.size > 1 * 1024 * 1024) {
-                    compressionRatio = 0.5;
-                } else {
-                    compressionRatio = 0.7;
+                    return;
                 }
 
-                const compressed = await compressImage(URL.createObjectURL(file), compressionRatio);
-                const response = await fetch(compressed);
-                const blob = await response.blob();
-                
-                // Générer un nom de fichier unique avec hash
-                const hash = await generateHash(blob);
-                const timestamp = new Date().getTime();
-                const newFileName = `${timestamp}-${hash}-${file.name}`;
-                
-                // Créer un nouveau File avec le nom unique
-                file = new File([blob], newFileName, { type: file.type });
+                // Vérification de la taille
+                const imageCheck = checkImageSize(file);
+                if (!imageCheck.isValid) {
+                    showNotification(
+                        'Image trop volumineuse',
+                        'error',
+                        `L'image fait ${imageCheck.size}MB alors que la limite est de 5MB. Veuillez la réduire avant de la télécharger.`
+                    );
+                    return;
+                }
 
-                mainImageFile = file;
+                // Vérification des dimensions
+                const dimensions = await checkImageDimensions(file);
+                if (!dimensions.isValid) {
+                    let errorMessage = `Dimensions actuelles: ${dimensions.details.currentSize}\nDimensions requises: ${dimensions.details.requiredSize}\n\n`;
+                    if (dimensions.details.tooSmall) {
+                        errorMessage += "L'image est trop petite. Elle doit faire au minimum 800x600 pixels.";
+                    } else if (dimensions.details.tooBig) {
+                        errorMessage += "L'image est trop grande. Elle doit faire au maximum 3000x3000 pixels.";
+                    }
+                    showNotification(
+                        'Dimensions d\'image non valides',
+                        'error',
+                        errorMessage
+                    );
+                    return;
+                }
+
+                // Compression et traitement
+                let processedFile = file;
+                if (file.size > 1 * 1024 * 1024) {
+                    const compressed = await compressImage(URL.createObjectURL(file), 0.3);
+                    const response = await fetch(compressed);
+                    const blob = await response.blob();
+                    
+                    // Générer un nom de fichier unique
+                    const hash = await generateHash(blob);
+                    const timestamp = new Date().getTime();
+                    const newFileName = `${timestamp}-${hash}-${file.name}`;
+                    
+                    processedFile = new File([blob], newFileName, { type: file.type });
+                }
+
+                // Mise à jour de l'image principale
+                mainImageFile = processedFile;
+                
+                // Mise à jour de la prévisualisation
                 const container = document.getElementById('mainImagePreview');
-                container.innerHTML = '';
-                await createImagePreview(file, container, true);
-                
-                // Supprimer l'état d'erreur et le message
-                const mainImageZone = document.getElementById('mainImageZone');
-                mainImageZone.classList.remove('show-error');
-                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
-                if (errorDiv) {
-                    errorDiv.remove();
+                if (container) {
+                    container.innerHTML = ''; // Vider le conteneur existant
+                    await createImagePreview(processedFile, container, true);
                 }
-                
+
+                // Supprimer l'état d'erreur
+                const mainImageZone = document.getElementById('mainImageZone');
+                if (mainImageZone) {
+                    mainImageZone.classList.remove('show-error');
+                    const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+
+                // Mettre à jour l'aperçu une seule fois à la fin
                 updateMarkdownPreview();
+                
             } catch (error) {
                 console.error('Erreur lors du traitement de l\'image:', error);
                 showNotification(
                     'Erreur de traitement',
                     'error',
-                    'Une erreur est survenue lors du traitement de l\'image. Veuillez essayer avec une autre image.'
+                    'Une erreur est survenue lors du traitement de l\'image. Veuillez réessayer.'
                 );
             }
         }
@@ -2199,141 +2180,175 @@ ${editorContent}`;
         }
 
         function updateMarkdownPreview() {
-            const preview = document.querySelector('.restaurant-preview');
-            
-            // ... code existant ...
+            try {
+                const preview = document.querySelector('.restaurant-preview');
+                
+                // Récupérer les valeurs du formulaire
+                const title = document.getElementById('title').value || 'Nom du restaurant';
+                const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
+                const description = document.getElementById('description').value || 'Description du restaurant';
+                const address = document.getElementById('address').value || 'Adresse du restaurant';
+                const style = document.getElementById('style').value || 'Style de cuisine';
+                const price = document.getElementById('price').value || 'Gamme de prix';
+                
+                // Récupérer les notes
+                const foodScore = document.getElementById('foodScore').value || '5';
+                const serviceScore = document.getElementById('serviceScore').value || '5';
+                const ambianceScore = document.getElementById('ambianceScore').value || '5';
+                const valueScore = document.getElementById('valueScore').value || '5';
+                const originalityScore = document.getElementById('originalityScore').value || '5';
+                const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+                
+                // Récupérer les commentaires
+                const foodComment = document.getElementById('foodComment').value || '';
+                const serviceComment = document.getElementById('serviceComment').value || '';
+                const ambianceComment = document.getElementById('ambianceComment').value || '';
+                const valueComment = document.getElementById('valueComment').value || '';
+                const originalityComment = document.getElementById('originalityComment').value || '';
+                const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+                
+                // Récupérer le contenu de l'éditeur
+                const editorContent = editor ? editor.getHTML() : '';
 
-            // Modification de la section galerie pour éviter les doublons
-            const gallerySection = `
-                <h2 class="gallery-title">Galerie photos</h2>
-                <div class="restaurant-gallery">
-                    ${galleryImageFiles.length > 0 ? 
-                        Array.from(new Set(galleryImageFiles)).map(file => `
-                            <div class="gallery-image">
-                                <img src="${URL.createObjectURL(file)}" alt="Galerie ${file.name}">
+                // Modification de la section galerie pour éviter les doublons
+                const gallerySection = `
+                    <h2 class="gallery-title">Galerie photos</h2>
+                    <div class="restaurant-gallery">
+                        ${galleryImageFiles.length > 0 ? 
+                            Array.from(new Set(galleryImageFiles)).map(file => `
+                                <div class="gallery-image">
+                                    <img src="${URL.createObjectURL(file)}" alt="Galerie ${file.name}">
+                                </div>
+                            `).join('') : 
+                            `<div class="gallery-image">
+                                <i class="fas fa-images"></i>
+                            </div>`
+                        }
+                    </div>
+                `;
+
+                preview.innerHTML = `
+                    <div class="restaurant-header">
+                        <h1 class="restaurant-title">${title}</h1>
+                        <div class="restaurant-meta">
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                ${address}
+                            </span>
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-star"></i>
+                                ${calculateOverallRating()}/10
+                            </span>
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-utensils"></i>
+                                ${style}
+                            </span>
+                            ${document.getElementById('vegetarian').checked ? `
+                                <span class="restaurant-meta-item">
+                                    <i class="fas fa-leaf"></i>
+                                    Options végétariennes
+                                </span>
+                            ` : ''}
+                            ${document.getElementById('vegan').checked ? `
+                                <span class="restaurant-meta-item">
+                                    <i class="fas fa-seedling"></i>
+                                    Options végétaliennes
+                                </span>
+                            ` : ''}
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-calendar"></i>
+                                ${date}
+                            </span>
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-tag"></i>
+                                ${price}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="restaurant-image">
+                        ${mainImageFile ? 
+                            `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}" data-filename="${mainImageFile.name}">` : 
+                            `<i class="fas fa-image"></i>`
+                        }
+                    </div>
+                    
+                    <div class="restaurant-description">
+                        ${description}
+                    </div>
+                    
+                    <div class="restaurant-content">
+                        ${editorContent}
+                    </div>
+                    
+                    <div class="restaurant-ratings">
+                        <h2>Pourquoi cette note ?</h2>
+                        
+                        <div class="rating-category">
+                            <div class="rating-header">
+                                <span class="rating-title">Qualité de la nourriture</span>
+                                <span class="rating-score">${foodScore}/10</span>
                             </div>
-                        `).join('') : 
-                        `<div class="gallery-image">
-                            <i class="fas fa-images"></i>
-                        </div>`
-                    }
-                </div>
-            `;
-
-            preview.innerHTML = `
-                <div class="restaurant-header">
-                    <h1 class="restaurant-title">${title}</h1>
-                    <div class="restaurant-meta">
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${address}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-star"></i>
-                            ${calculateOverallRating()}/10
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-utensils"></i>
-                            ${style}
-                        </span>
-                        ${document.getElementById('vegetarian').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-leaf"></i>
-                                Options végétariennes
-                            </span>
-                        ` : ''}
-                        ${document.getElementById('vegan').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-seedling"></i>
-                                Options végétaliennes
-                            </span>
-                        ` : ''}
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-calendar"></i>
-                            ${date}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-tag"></i>
-                            ${price}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="restaurant-image">
-                    ${mainImageFile ? 
-                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}" data-filename="${mainImageFile.name}">` : 
-                        `<i class="fas fa-image"></i>`
-                    }
-                </div>
-                
-                <div class="restaurant-description">
-                    ${description}
-                </div>
-                
-                <div class="restaurant-content">
-                    ${editorContent}
-                </div>
-                
-                <div class="restaurant-ratings">
-                    <h2>Pourquoi cette note ?</h2>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Qualité de la nourriture</span>
-                            <span class="rating-score">${foodScore}/10</span>
+                            <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
+                            <div class="rating-comment">${foodComment}</div>
                         </div>
-                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
-                        <div class="rating-comment">${foodComment}</div>
+                        
+                        <div class="rating-category">
+                            <div class="rating-header">
+                                <span class="rating-title">Service</span>
+                                <span class="rating-score">${serviceScore}/10</span>
+                            </div>
+                            <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
+                            <div class="rating-comment">${serviceComment}</div>
+                        </div>
+                        
+                        <div class="rating-category">
+                            <div class="rating-header">
+                                <span class="rating-title">Ambiance</span>
+                                <span class="rating-score">${ambianceScore}/10</span>
+                            </div>
+                            <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
+                            <div class="rating-comment">${ambianceComment}</div>
+                        </div>
+                        
+                        <div class="rating-category">
+                            <div class="rating-header">
+                                <span class="rating-title">Rapport qualité/prix</span>
+                                <span class="rating-score">${valueScore}/10</span>
+                            </div>
+                            <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
+                            <div class="rating-comment">${valueComment}</div>
+                        </div>
+                        
+                        <div class="rating-category">
+                            <div class="rating-header">
+                                <span class="rating-title">Originalité / Concept</span>
+                                <span class="rating-score">${originalityScore}/10</span>
+                            </div>
+                            <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
+                            <div class="rating-comment">${originalityComment}</div>
+                        </div>
+                        
+                        <div class="rating-category">
+                            <div class="rating-header">
+                                <span class="rating-title">Expérience globale</span>
+                                <span class="rating-score">${overallExperienceScore}/10</span>
+                            </div>
+                            <div class="rating-criteria">Facteur "wow"</div>
+                            <div class="rating-comment">${overallExperienceComment}</div>
+                        </div>
                     </div>
                     
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Service</span>
-                            <span class="rating-score">${serviceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
-                        <div class="rating-comment">${serviceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Ambiance</span>
-                            <span class="rating-score">${ambianceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
-                        <div class="rating-comment">${ambianceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Rapport qualité/prix</span>
-                            <span class="rating-score">${valueScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
-                        <div class="rating-comment">${valueComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Originalité / Concept</span>
-                            <span class="rating-score">${originalityScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
-                        <div class="rating-comment">${originalityComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Expérience globale</span>
-                            <span class="rating-score">${overallExperienceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Facteur "wow"</div>
-                        <div class="rating-comment">${overallExperienceComment}</div>
-                    </div>
-                </div>
-                
-                ${gallerySection}
-            `;
+                    ${gallerySection}
+                `;
+            } catch (error) {
+                console.error('Erreur dans updateMarkdownPreview:', error);
+                showNotification(
+                    'Erreur de prévisualisation',
+                    'error',
+                    'Une erreur est survenue lors de la mise à jour de l\'aperçu.'
+                );
+            }
         }
 
         async function createImagePreview(file, container, isMainImage = false) {
