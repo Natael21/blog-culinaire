@@ -1159,52 +1159,68 @@
 
         // Configuration d'IndexedDB
         const DB_NAME = 'restaurantDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2; // Augmenter la version pour forcer la migration
         const STORE_NAMES = {
             IMAGES: 'images',
             DRAFTS: 'drafts',
             METADATA: 'metadata'
         };
-        let db;
+        let db = null;
 
         // Initialiser IndexedDB
-        function initDB() {
+        async function initDB() {
             return new Promise((resolve, reject) => {
-                console.log('Initialisation de la base de données...');
+                console.log('=== INITIALISATION DE LA BASE DE DONNÉES ===');
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-                request.onerror = () => {
-                    console.error('Erreur lors de l\'ouverture de la base de données:', request.error);
-                    reject(request.error);
+                request.onerror = (event) => {
+                    console.error('[DB ERROR]', {
+                        error: event.target.error,
+                        errorCode: event.target.error.code,
+                        errorName: event.target.error.name
+                    });
+                    reject(event.target.error);
                 };
 
-                request.onsuccess = () => {
-                    console.log('Base de données ouverte avec succès');
-                    db = request.result;
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    console.log('[DB SUCCESS] Base de données prête');
                     resolve(db);
                 };
 
                 request.onupgradeneeded = (event) => {
-                    console.log('Mise à niveau de la base de données...');
+                    console.log('[DB UPGRADE] Migration de la base de données v' + event.oldVersion + ' -> v' + event.newVersion);
                     const db = event.target.result;
                     
-                    // Créer ou vérifier tous les object stores nécessaires
-                    if (!db.objectStoreNames.contains(STORE_NAMES.IMAGES)) {
-                        console.log('Création du store images...');
-                        db.createObjectStore(STORE_NAMES.IMAGES, { keyPath: 'id' });
-                    }
+                    // Log des stores existants
+                    console.log('[DB STORES] Existants:', Array.from(db.objectStoreNames));
                     
-                    if (!db.objectStoreNames.contains(STORE_NAMES.DRAFTS)) {
-                        console.log('Création du store drafts...');
-                        db.createObjectStore(STORE_NAMES.DRAFTS, { keyPath: 'id' });
-                    }
+                    // Supprimer et recréer les stores
+                    Object.values(STORE_NAMES).forEach(storeName => {
+                        if (db.objectStoreNames.contains(storeName)) {
+                            db.deleteObjectStore(storeName);
+                        }
+                        db.createObjectStore(storeName, { keyPath: 'id' });
+                    });
                     
-                    if (!db.objectStoreNames.contains(STORE_NAMES.METADATA)) {
-                        console.log('Création du store metadata...');
-                        db.createObjectStore(STORE_NAMES.METADATA, { keyPath: 'id' });
-                    }
+                    console.log('[DB STORES] Créés:', Object.values(STORE_NAMES));
                 };
             });
+        }
+
+        // Fonction pour vérifier si la base de données est prête
+        async function ensureDBReady() {
+            if (!db) {
+                console.log('Base de données non initialisée, initialisation...');
+                try {
+                    await initDB();
+                    console.log('Base de données initialisée avec succès');
+                } catch (error) {
+                    console.error('Erreur lors de l\'initialisation de la base de données:', error);
+                    throw new Error('Impossible d\'initialiser la base de données');
+                }
+            }
+            return db;
         }
 
         // Sauvegarder une image dans IndexedDB
@@ -1912,102 +1928,108 @@
         async function saveDraft() {
             let success = false;
             try {
-                console.log('=== DÉBUT DE LA SAUVEGARDE ===');
+                console.log('\n=== DÉBUT SAUVEGARDE ===');
+                console.log('État initial:', {
+                    dbInitialized: !!db,
+                    mainImage: mainImageFile ? {
+                        name: mainImageFile.name,
+                        size: mainImageFile.size
+                    } : null,
+                    galleryCount: galleryImageFiles.length
+                });
+
+                await ensureDBReady();
                 
-                // Vérifier si IndexedDB est disponible
-                if (!window.indexedDB) {
-                    throw new Error('IndexedDB n\'est pas supporté par votre navigateur');
-                }
-
-                // Initialiser IndexedDB si nécessaire
-                if (!db) {
-                    console.log('Initialisation de la base de données...');
-                    await initDB();
-                }
-
                 const formData = getFormData();
+                if (!formData) {
+                    throw new Error('Données du formulaire invalides');
+                }
+
                 const draftId = Date.now().toString();
-
-                // Préparer les données de base du brouillon
-                const draftData = {
-                    id: draftId,
-                    title: formData.title,
-                    date: formData.date,
-                    timestamp: Date.now(),
-                    imageRefs: []
-                };
-
-                console.log('Traitement des images...');
+                console.log('[DRAFT] Création:', { id: draftId, title: formData.title });
 
                 // Traiter l'image principale
                 if (mainImageFile) {
                     try {
-                        console.log('Optimisation de l\'image principale...');
+                        console.log('[IMAGE] Traitement image principale:', {
+                            name: mainImageFile.name,
+                            originalSize: mainImageFile.size
+                        });
                         const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
                         const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                        draftData.imageRefs.push({
-                            id: mainImageId,
-                            name: mainImageFile.name,
-                            isMain: true
-                        });
+                        console.log('[IMAGE] Image principale sauvegardée:', { id: mainImageId });
                     } catch (error) {
-                        console.error('Erreur lors du traitement de l\'image principale:', error);
-                        throw new Error('Erreur lors du traitement de l\'image principale');
+                        console.error('[IMAGE ERROR] Image principale:', error);
+                        throw error;
                     }
                 }
 
-                // Traiter les images de la galerie
+                // Traiter la galerie
                 if (galleryImageFiles.length > 0) {
-                    try {
-                        for (const file of galleryImageFiles) {
-                            console.log(`Optimisation de l'image ${file.name}...`);
+                    console.log('[GALLERY] Début traitement:', { count: galleryImageFiles.length });
+                    let processedCount = 0;
+                    
+                    for (const file of galleryImageFiles) {
+                        try {
                             const optimizedImage = await optimizeImageForStorage(file, false);
-                            const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
-                            draftData.imageRefs.push({
-                                id: imageId,
-                                name: file.name,
-                                isMain: false
+                            await saveImageToIndexedDB(optimizedImage, file.name, draftId);
+                            processedCount++;
+                            console.log('[GALLERY] Progression:', {
+                                processed: processedCount,
+                                total: galleryImageFiles.length
                             });
+                        } catch (error) {
+                            console.error('[GALLERY ERROR]', {
+                                file: file.name,
+                                error: error.message,
+                                processedCount
+                            });
+                            throw error;
                         }
-                    } catch (error) {
-                        console.error('Erreur lors du traitement des images de la galerie:', error);
-                        throw new Error('Erreur lors du traitement des images de la galerie');
                     }
                 }
 
-                // Sauvegarder les métadonnées dans localStorage
+                // Sauvegarder dans IndexedDB
                 try {
-                    console.log('Sauvegarde des métadonnées...');
-                    // Version très légère pour localStorage
-                    const lightDraftData = {
-                        i: draftId,
-                        t: formData.title.slice(0, 30),
-                        d: Date.now()
-                    };
-
-                    // Sauvegarder d'abord dans IndexedDB
-                    console.log('Sauvegarde dans IndexedDB...');
+                    console.log('[SAVE] Tentative sauvegarde IndexedDB');
                     const transaction = db.transaction([STORE_NAMES.DRAFTS], 'readwrite');
                     const store = transaction.objectStore(STORE_NAMES.DRAFTS);
+                    
                     await new Promise((resolve, reject) => {
                         const request = store.put(draftData);
+                        request.onsuccess = () => {
+                            console.log('[SAVE] IndexedDB OK');
+                            resolve();
+                        };
+                        request.onerror = () => {
+                            console.error('[SAVE ERROR] IndexedDB:', request.error);
+                            reject(request.error);
+                        };
+                    });
+
+                    // Sauvegarder dans localStorage
+                    console.log('[SAVE] Tentative sauvegarde localStorage');
+                    const minimalData = {
+                        i: draftId,
                         request.onsuccess = () => resolve();
                         request.onerror = () => reject(request.error);
                     });
 
-                    // Si IndexedDB réussit, sauvegarder dans localStorage
-                    localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
+                    // Si IndexedDB réussit, sauvegarder le minimum dans localStorage
+                    console.log('Sauvegarde des métadonnées dans localStorage...');
+                    const minimalData = {
+                        i: draftId,
+                        t: formData.title.substring(0, 20), // Réduire encore plus la taille
+                        d: Date.now()
+                    };
+                    localStorage.setItem('drafts', JSON.stringify([minimalData]));
                     
                     success = true;
                     console.log('Sauvegarde réussie');
                     showNotification('Brouillon sauvegardé avec succès', 'success');
                     
-                    // Attendre que la notification soit visible
                     await new Promise(resolve => setTimeout(resolve, 1500));
-                    
-                    if (success) {
-                        window.location.href = 'index.html';
-                    }
+                    window.location.href = 'index.html';
 
                 } catch (error) {
                     console.error('Erreur lors de la sauvegarde:', error);
@@ -2016,12 +2038,7 @@
 
             } catch (error) {
                 console.error('Erreur globale:', error);
-                // En cas d'erreur, nettoyer localStorage
-                try {
-                    localStorage.removeItem('drafts');
-                } catch (e) {
-                    console.error('Erreur lors du nettoyage du localStorage:', e);
-                }
+                await cleanupAndUpdateCounter();
                 showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
                 return false;
             }
