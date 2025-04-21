@@ -1705,12 +1705,19 @@
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
-                    resolve({
+                    const result = {
                         width: img.width,
                         height: img.height,
                         isValid: img.width >= 800 && img.height >= 600 && 
-                                img.width <= 3000 && img.height <= 3000
-                    });
+                                img.width <= 3000 && img.height <= 3000,
+                        details: {
+                            tooSmall: img.width < 800 || img.height < 600,
+                            tooBig: img.width > 3000 || img.height > 3000,
+                            currentSize: `${img.width}x${img.height}`,
+                            requiredSize: "entre 800x600 et 3000x3000"
+                        }
+                    };
+                    resolve(result);
                 };
                 img.src = URL.createObjectURL(file);
             });
@@ -1777,13 +1784,19 @@
                 return;
             }
 
-            // Vérification des dimensions
+            // Vérification des dimensions avec message détaillé
             const dimensions = await checkImageDimensions(file);
             if (!dimensions.isValid) {
+                let errorMessage = `Dimensions actuelles: ${dimensions.details.currentSize}\nDimensions requises: ${dimensions.details.requiredSize}\n\n`;
+                if (dimensions.details.tooSmall) {
+                    errorMessage += "L'image est trop petite. Elle doit faire au minimum 800x600 pixels.";
+                } else if (dimensions.details.tooBig) {
+                    errorMessage += "L'image est trop grande. Elle doit faire au maximum 3000x3000 pixels.";
+                }
                 showNotification(
                     'Dimensions d\'image non valides',
                     'error',
-                    'L\'image doit faire entre 800x600 et 3000x3000 pixels. Veuillez redimensionner votre image.'
+                    errorMessage
                 );
                 return;
             }
@@ -2318,7 +2331,21 @@ ${editorContent}`;
             `;
         }
 
-        function createImagePreview(file, container, isMainImage = false) {
+        async function createImagePreview(file, container, isMainImage = false) {
+            // Nettoyer le conteneur si c'est l'image principale
+            if (isMainImage) {
+                container.innerHTML = '';
+            }
+            
+            // Vérifier si l'image existe déjà dans le conteneur
+            const existingPreviews = container.querySelectorAll('img');
+            for (const preview of existingPreviews) {
+                if (preview.src.includes(file.name)) {
+                    console.log(`Image ${file.name} déjà présente dans la prévisualisation, ignorée.`);
+                    return;
+                }
+            }
+
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
