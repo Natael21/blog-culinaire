@@ -2324,118 +2324,176 @@ ${editorContent}`;
             };
         }
 
+        // Fonction pour optimiser une image avant le stockage
+        async function optimizeImageForStorage(file, isMain = false) {
+            console.log(`Début optimisation image ${file.name} (${file.size} bytes)`);
+
+            // Créer un canvas pour redimensionner l'image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            return new Promise((resolve, reject) => {
+                img.onload = async function() {
+                    // Calculer les nouvelles dimensions
+                    let maxWidth = isMain ? 1200 : 800;
+                    let maxHeight = isMain ? 1200 : 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Redimensionner si nécessaire
+                    if (width > maxWidth || height > maxHeight) {
+                        if (width > height) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        } else {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    // Définir les dimensions du canvas
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Dessiner l'image redimensionnée
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Fonction pour tester différentes qualités
+                    const tryQuality = async (quality) => {
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        const size = Math.round((dataUrl.length - 22) * 3 / 4);
+                        console.log(`Test qualité ${quality}: ${size} bytes`);
+                        return { dataUrl, size };
+                    };
+
+                    // Recherche binaire pour trouver la meilleure qualité
+                    let minQuality = 0.1;
+                    let maxQuality = 0.9;
+                    let targetSize = isMain ? 300000 : 200000; // 300KB pour principale, 200KB pour galerie
+                    let bestResult = null;
+
+                    while (maxQuality - minQuality > 0.05) {
+                        const quality = (maxQuality + minQuality) / 2;
+                        const result = await tryQuality(quality);
+
+                        if (!bestResult || Math.abs(result.size - targetSize) < Math.abs(bestResult.size - targetSize)) {
+                            bestResult = { ...result, quality };
+                        }
+
+                        if (result.size > targetSize) {
+                            maxQuality = quality;
+                        } else {
+                            minQuality = quality;
+                        }
+                    }
+
+                    console.log(`Optimisation terminée: ${bestResult.size} bytes (qualité: ${bestResult.quality})`);
+                    resolve(bestResult.dataUrl);
+                };
+
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
         // Fonction pour sauvegarder un brouillon
         async function saveDraft() {
             try {
-                // Initialiser IndexedDB si ce n'est pas déjà fait
+                console.log('=== DÉBUT DE LA SAUVEGARDE ===');
+                
+                // Initialiser IndexedDB
                 if (!db) {
                     await initDB();
                 }
 
                 const formData = getFormData();
                 const draftId = Date.now().toString();
-                
-                // Préparer une version très légère des métadonnées pour localStorage
-                // Ne garder que l'essentiel pour économiser l'espace
+
+                // 1. Sauvegarder d'abord les métadonnées légères
                 const lightDraftData = {
-                    i: draftId,                    // id raccourci
-                    t: formData.title.slice(0, 50), // titre tronqué
-                    d: formData.date,              // date
-                    ts: Date.now()                 // timestamp en nombre
+                    i: draftId,
+                    t: formData.title.slice(0, 50),
+                    d: formData.date,
+                    ts: Date.now()
                 };
 
-                // Sauvegarder les images dans IndexedDB
-                const imageRefs = [];
+                // 2. Optimiser et sauvegarder l'image principale
+                console.log('Traitement de l\'image principale...');
+                let mainImageRef = null;
                 if (mainImageFile) {
                     const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
-                    const imageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                    imageRefs.push({ i: imageId, n: mainImageFile.name, m: true }); // Format compact
+                    const mainImageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
+                    mainImageRef = { i: mainImageId, n: mainImageFile.name, m: true };
                 }
 
-                // Traiter les images de la galerie par lots de 3
-                const galleryBatches = [];
-                for (let i = 0; i < galleryImageFiles.length; i += 3) {
-                    const batch = galleryImageFiles.slice(i, i + 3);
-                    galleryBatches.push(batch);
-                }
-
-                for (const batch of galleryBatches) {
+                // 3. Traiter les images de la galerie par lots de 2
+                console.log('Traitement des images de la galerie...');
+                const galleryRefs = [];
+                for (let i = 0; i < galleryImageFiles.length; i += 2) {
+                    const batch = galleryImageFiles.slice(i, Math.min(i + 2, galleryImageFiles.length));
+                    console.log(`Traitement du lot ${i/2 + 1}/${Math.ceil(galleryImageFiles.length/2)}`);
+                    
                     const batchPromises = batch.map(async file => {
                         const optimizedImage = await optimizeImageForStorage(file, false);
                         const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
                         return { i: imageId, n: file.name, m: false };
                     });
+
                     const batchResults = await Promise.all(batchPromises);
-                    imageRefs.push(...batchResults);
+                    galleryRefs.push(...batchResults);
                 }
 
-                // Sauvegarder les données complètes dans IndexedDB
-                await new Promise((resolve, reject) => {
-                    const transaction = db.transaction(['drafts'], 'readwrite');
-                    const store = transaction.objectStore('drafts');
-                    const request = store.put({
-                        id: draftId,
-                        ...formData,
-                        imageRefs,
-                        timestamp: Date.now()
-                    });
-                    request.onsuccess = () => resolve();
-                    request.onerror = () => reject(request.error);
-                });
-
-                // Sauvegarder les métadonnées légères dans localStorage
+                // 4. Sauvegarder les références dans localStorage
                 try {
                     let drafts = [];
                     try {
                         drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                     } catch (e) {
-                        console.warn('Erreur de parsing localStorage, réinitialisation');
-                        localStorage.removeItem('drafts');
+                        console.warn('Réinitialisation du localStorage');
                     }
 
-                    // Nettoyer les anciens brouillons avant d'ajouter le nouveau
-                    if (drafts.length >= 3) {
-                        const removedDrafts = drafts.slice(0, -2); // Garder 2 pour avoir de la place pour le nouveau
-                        for (const oldDraft of removedDrafts) {
-                            await deleteImagesForDraft(oldDraft.i || oldDraft.id);
-                            await new Promise((resolve, reject) => {
-                                const transaction = db.transaction(['drafts'], 'readwrite');
-                                const store = transaction.objectStore('drafts');
-                                const request = store.delete(oldDraft.i || oldDraft.id);
-                                request.onsuccess = () => resolve();
-                                request.onerror = () => reject(request.error);
-                            });
-                        }
-                        drafts = drafts.slice(-2);
+                    // Ne garder que le dernier brouillon
+                    if (drafts.length > 0) {
+                        drafts = drafts.slice(-1);
                     }
 
-                    drafts.push(lightDraftData);
+                    // Ajouter le nouveau brouillon avec les références
+                    const newDraft = {
+                        ...lightDraftData,
+                        main: mainImageRef?.i,
+                        gallery: galleryRefs.map(ref => ref.i)
+                    };
 
-                    // Essayer de sauvegarder avec le format compact
-                    try {
-                        localStorage.setItem('drafts', JSON.stringify(drafts));
-                    } catch (e) {
-                        // Si ça échoue, essayer de sauvegarder uniquement le dernier brouillon
-                        console.warn('Échec de sauvegarde de tous les brouillons, tentative avec un seul');
-                        localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
-                    }
+                    drafts.push(newDraft);
+
+                    // Sauvegarder dans localStorage
+                    const draftsString = JSON.stringify(drafts);
+                    console.log('Taille des données localStorage:', draftsString.length, 'caractères');
+                    localStorage.setItem('drafts', draftsString);
+
+                    showNotification('Brouillon sauvegardé avec succès', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+
+                    return true;
+
                 } catch (storageError) {
-                    console.warn('Erreur localStorage:', storageError);
-                    // Continue même si localStorage échoue car les données importantes sont dans IndexedDB
+                    console.error('Erreur de stockage:', storageError);
+                    // Si échec du localStorage, essayer de sauvegarder uniquement le nouveau brouillon
+                    try {
+                        localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
+                        return true;
+                    } catch (e) {
+                        throw new Error('Impossible de sauvegarder même les métadonnées minimales');
+                    }
                 }
-
-                showNotification('Brouillon sauvegardé avec succès', 'success');
-                
-                // Rediriger après un court délai
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
-
-                return true;
 
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde:', error);
-                showNotification('Erreur lors de la sauvegarde', 'error', error.message);
+                showNotification(error.message || 'Erreur lors de la sauvegarde', 'error');
                 return false;
             }
         }
