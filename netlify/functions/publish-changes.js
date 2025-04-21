@@ -52,6 +52,7 @@ exports.handler = async function(event, context) {
     console.log('Git configuration:', config);
 
     // Get the current commit SHA
+    console.log('Fetching current commit SHA...');
     const refResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, {
       headers: {
         'Authorization': `token ${githubToken}`,
@@ -60,13 +61,21 @@ exports.handler = async function(event, context) {
     });
 
     if (!refResponse.ok) {
-      throw new Error(`Failed to get ref: ${refResponse.status} ${refResponse.statusText}`);
+      const errorText = await refResponse.text();
+      console.error('Failed to get ref:', {
+        status: refResponse.status,
+        statusText: refResponse.statusText,
+        error: errorText
+      });
+      throw new Error(`Failed to get ref: ${refResponse.status} ${refResponse.statusText}\n${errorText}`);
     }
 
     const refData = await refResponse.json();
     const currentCommitSha = refData.object.sha;
+    console.log('Current commit SHA:', currentCommitSha);
 
     // Get the current tree
+    console.log('Fetching current tree...');
     const treeResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/trees/${currentCommitSha}?recursive=1`, {
       headers: {
         'Authorization': `token ${githubToken}`,
@@ -75,10 +84,17 @@ exports.handler = async function(event, context) {
     });
 
     if (!treeResponse.ok) {
-      throw new Error(`Failed to get tree: ${treeResponse.status} ${treeResponse.statusText}`);
+      const errorText = await treeResponse.text();
+      console.error('Failed to get tree:', {
+        status: treeResponse.status,
+        statusText: treeResponse.statusText,
+        error: errorText
+      });
+      throw new Error(`Failed to get tree: ${treeResponse.status} ${treeResponse.statusText}\n${errorText}`);
     }
 
     const treeData = await treeResponse.json();
+    console.log('Current tree retrieved successfully');
 
     // Prepare the new tree
     let newTree = treeData.tree.filter(item => {
@@ -136,10 +152,17 @@ exports.handler = async function(event, context) {
         });
 
         if (!createBlobResponse.ok) {
-          throw new Error(`Failed to create blob: ${createBlobResponse.status} ${createBlobResponse.statusText}`);
+          const errorText = await createBlobResponse.text();
+          console.error('Failed to create blob:', {
+            status: createBlobResponse.status,
+            statusText: createBlobResponse.statusText,
+            error: errorText
+          });
+          throw new Error(`Failed to create blob: ${createBlobResponse.status} ${createBlobResponse.statusText}\n${errorText}`);
         }
 
         const blobData = await createBlobResponse.json();
+        console.log('Blob created successfully:', blobData.sha);
         
         // Add the new file to the tree
         newTree.push({
@@ -155,25 +178,61 @@ exports.handler = async function(event, context) {
     console.log('\n=== Creating new tree ===');
     console.log('Number of items in new tree:', newTree.length);
     console.log('Tree items:', newTree.map(item => item.path));
-
-    const createTreeResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/trees`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `token ${githubToken}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        base_tree: currentCommitSha,
-        tree: newTree
-      })
-    });
-
-    if (!createTreeResponse.ok) {
-      throw new Error(`Failed to create tree: ${createTreeResponse.status} ${createTreeResponse.statusText}`);
+    
+    // Diviser l'arbre en morceaux plus petits
+    const CHUNK_SIZE = 50;
+    const treeChunks = [];
+    for (let i = 0; i < newTree.length; i += CHUNK_SIZE) {
+      treeChunks.push(newTree.slice(i, i + CHUNK_SIZE));
     }
 
-    const newTreeData = await createTreeResponse.json();
+    console.log('Tree divided into chunks:', treeChunks.length);
+    
+    let baseTreeSha = currentCommitSha;
+    let finalTreeSha = null;
+
+    // Créer les arbres de manière séquentielle
+    for (let i = 0; i < treeChunks.length; i++) {
+      console.log(`Creating tree chunk ${i + 1}/${treeChunks.length}`);
+      const chunk = treeChunks[i];
+      
+      const createTreeResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/trees`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          base_tree: baseTreeSha,
+          tree: chunk
+        })
+      });
+
+      if (!createTreeResponse.ok) {
+        const errorText = await createTreeResponse.text();
+        console.error('Failed to create tree chunk:', {
+          chunkIndex: i,
+          status: createTreeResponse.status,
+          statusText: createTreeResponse.statusText,
+          error: errorText,
+          headers: Object.fromEntries(createTreeResponse.headers.entries())
+        });
+        throw new Error(`Failed to create tree chunk ${i + 1}: ${createTreeResponse.status} ${createTreeResponse.statusText}\n${errorText}`);
+      }
+
+      const newTreeData = await createTreeResponse.json();
+      console.log(`Tree chunk ${i + 1} created successfully:`, newTreeData.sha);
+      
+      baseTreeSha = newTreeData.sha;
+      finalTreeSha = newTreeData.sha;
+    }
+
+    if (!finalTreeSha) {
+      throw new Error('Failed to create final tree');
+    }
+
+    console.log('Final tree SHA:', finalTreeSha);
 
     // Create a commit message that includes both additions and deletions
     const deletions = changes.filter(c => c.type === 'delete');
@@ -198,6 +257,7 @@ exports.handler = async function(event, context) {
         : `Add ${additions.length} restaurants:\n${additions.map(c => `+ ${c.filename}`).join('\n')}`;
     }
 
+    console.log('Creating commit with message:', commitMessage);
     const createCommitResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/commits`, {
       method: 'POST',
       headers: {
@@ -207,16 +267,23 @@ exports.handler = async function(event, context) {
       },
       body: JSON.stringify({
         message: commitMessage,
-        tree: newTreeData.sha,
+        tree: finalTreeSha,
         parents: [currentCommitSha]
       })
     });
 
     if (!createCommitResponse.ok) {
-      throw new Error(`Failed to create commit: ${createCommitResponse.status} ${createCommitResponse.statusText}`);
+      const errorText = await createCommitResponse.text();
+      console.error('Failed to create commit:', {
+        status: createCommitResponse.status,
+        statusText: createCommitResponse.statusText,
+        error: errorText
+      });
+      throw new Error(`Failed to create commit: ${createCommitResponse.status} ${createCommitResponse.statusText}\n${errorText}`);
     }
 
     const commitData = await createCommitResponse.json();
+    console.log('Commit created successfully:', commitData.sha);
 
     // Update the reference with force
     console.log('Updating Git reference with force...');
@@ -240,13 +307,13 @@ exports.handler = async function(event, context) {
     });
 
     if (!updateRefResponse.ok) {
-      const errorBody = await updateRefResponse.text();
+      const errorText = await updateRefResponse.text();
       console.error('GitHub reference update failed:', {
         status: updateRefResponse.status,
         statusText: updateRefResponse.statusText,
-        body: errorBody
+        error: errorText
       });
-      throw new Error(`Failed to update ref: ${updateRefResponse.status} ${updateRefResponse.statusText}\n${errorBody}`);
+      throw new Error(`Failed to update ref: ${updateRefResponse.status} ${updateRefResponse.statusText}\n${errorText}`);
     }
 
     const updatedRefData = await updateRefResponse.json();
