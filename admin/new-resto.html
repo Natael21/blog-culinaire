@@ -1762,6 +1762,9 @@
                     if (!db.objectStoreNames.contains(STORE_NAME)) {
                         db.createObjectStore(STORE_NAME, { keyPath: 'id' });
                     }
+                    if (!db.objectStoreNames.contains('drafts')) {
+                        db.createObjectStore('drafts', { keyPath: 'id' });
+                    }
                 };
             });
         }
@@ -1831,68 +1834,110 @@
                 }
 
                 const formData = getFormData();
-                const draftId = Date.now().toString(); // Identifiant unique pour ce brouillon
+                const draftId = Date.now().toString();
                 
-                // Préparer les données du brouillon sans les images
-                const draftData = {
-                    ...formData,
+                // Préparer une version légère des métadonnées pour localStorage
+                const lightDraftData = {
                     id: draftId,
-                    imageRefs: [] // Stockera les références aux images dans IndexedDB
+                    title: formData.title,
+                    date: formData.date,
+                    timestamp: new Date().toISOString()
                 };
 
-                // Sauvegarder l'image principale dans IndexedDB
-                if (mainImageFile) {
-                    const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
-                    const imageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                    draftData.imageRefs.push({
-                        id: imageId,
-                        name: mainImageFile.name,
-                        isMain: true
+                // Préparer les données complètes pour IndexedDB
+                const fullDraftData = {
+                    ...formData,
+                    id: draftId,
+                    imageRefs: [],
+                    timestamp: new Date().toISOString()
+                };
+
+                try {
+                    // Sauvegarder d'abord dans IndexedDB
+                    const transaction = db.transaction(['drafts'], 'readwrite');
+                    const store = transaction.objectStore('drafts');
+                    await new Promise((resolve, reject) => {
+                        const request = store.put(fullDraftData);
+                        request.onsuccess = () => resolve();
+                        request.onerror = () => reject(request.error);
                     });
-                }
 
-                // Sauvegarder les images de la galerie dans IndexedDB
-                const batchSize = 5;
-                for (let i = 0; i < galleryImageFiles.length; i += batchSize) {
-                    const batch = galleryImageFiles.slice(i, i + batchSize);
-                    const optimizedBatch = await Promise.all(
-                        batch.map(file => optimizeImageForStorage(file, false))
-                    );
-
-                    for (let j = 0; j < batch.length; j++) {
-                        const imageId = await saveImageToIndexedDB(
-                            optimizedBatch[j],
-                            batch[j].name,
-                            draftId
-                        );
-                        draftData.imageRefs.push({
+                    // Sauvegarder les images
+                    if (mainImageFile) {
+                        const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
+                        const imageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
+                        fullDraftData.imageRefs.push({
                             id: imageId,
-                            name: batch[j].name,
-                            isMain: false
+                            name: mainImageFile.name,
+                            isMain: true
                         });
                     }
-                }
 
-                // Sauvegarder les métadonnées dans localStorage
-                let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                drafts.push({
-                    ...draftData,
-                    timestamp: new Date().toISOString()
-                });
+                    // Traiter les images de la galerie
+                    const batchSize = 5;
+                    for (let i = 0; i < galleryImageFiles.length; i += batchSize) {
+                        const batch = galleryImageFiles.slice(i, i + batchSize);
+                        const optimizedBatch = await Promise.all(
+                            batch.map(file => optimizeImageForStorage(file, false))
+                        );
 
-                // Garder seulement les 3 derniers brouillons
-                if (drafts.length > 3) {
-                    // Supprimer les images des anciens brouillons
-                    for (const oldDraft of drafts.slice(0, -3)) {
-                        await deleteImagesForDraft(oldDraft.id);
+                        for (let j = 0; j < batch.length; j++) {
+                            const imageId = await saveImageToIndexedDB(
+                                optimizedBatch[j],
+                                batch[j].name,
+                                draftId
+                            );
+                            fullDraftData.imageRefs.push({
+                                id: imageId,
+                                name: batch[j].name,
+                                isMain: false
+                            });
+                        }
                     }
-                    drafts = drafts.slice(-3);
+
+                    // Mettre à jour le brouillon dans IndexedDB avec les références d'images
+                    await new Promise((resolve, reject) => {
+                        const updateTx = db.transaction(['drafts'], 'readwrite');
+                        const updateStore = updateTx.objectStore('drafts');
+                        const updateRequest = updateStore.put(fullDraftData);
+                        updateRequest.onsuccess = () => resolve();
+                        updateRequest.onerror = () => reject(updateRequest.error);
+                    });
+
+                    // Sauvegarder la version légère dans localStorage
+                    try {
+                        let lightDrafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                        lightDrafts.push(lightDraftData);
+                        
+                        // Garder seulement les 3 derniers
+                        if (lightDrafts.length > 3) {
+                            const removedDrafts = lightDrafts.slice(0, -3);
+                            // Nettoyer les anciens brouillons de IndexedDB
+                            for (const oldDraft of removedDrafts) {
+                                await deleteImagesForDraft(oldDraft.id);
+                                await new Promise((resolve, reject) => {
+                                    const deleteTx = db.transaction(['drafts'], 'readwrite');
+                                    const deleteStore = deleteTx.objectStore('drafts');
+                                    const deleteRequest = deleteStore.delete(oldDraft.id);
+                                    deleteRequest.onsuccess = () => resolve();
+                                    deleteRequest.onerror = () => reject(deleteRequest.error);
+                                });
+                            }
+                            lightDrafts = lightDrafts.slice(-3);
+                        }
+
+                        localStorage.setItem('drafts', JSON.stringify(lightDrafts));
+                    } catch (storageError) {
+                        // Si localStorage échoue, on continue quand même car les données sont dans IndexedDB
+                        console.warn('Impossible de sauvegarder dans localStorage:', storageError);
+                    }
+
+                    showNotification('Brouillon sauvegardé avec succès', 'success');
+                    return true;
+
+                } catch (error) {
+                    throw new Error(`Erreur lors de la sauvegarde : ${error.message}`);
                 }
-
-                localStorage.setItem('drafts', JSON.stringify(drafts));
-                showNotification('Brouillon sauvegardé avec succès', 'success');
-                return true;
-
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde:', error);
                 showNotification('Erreur lors de la sauvegarde', 'error', error.message);
