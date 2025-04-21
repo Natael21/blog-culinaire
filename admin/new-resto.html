@@ -2277,7 +2277,32 @@ ${editorContent}`;
             }
         }
 
-        // Fonction pour sauvegarder le brouillon
+        // Fonction pour récupérer les données du formulaire
+        function getFormData() {
+            const form = document.getElementById('restaurantForm');
+            return {
+                title: form.querySelector('#title').value,
+                date: form.querySelector('#date').value,
+                summary: form.querySelector('#summary').value,
+                description: editor.getHTML(),
+                address: form.querySelector('#address').value,
+                style: form.querySelector('#style').value,
+                price: form.querySelector('#price').value,
+                diet: {
+                    vegetarian: form.querySelector('#vegetarian').checked,
+                    vegan: form.querySelector('#vegan').checked
+                },
+                ratings: {
+                    food: parseInt(form.querySelector('#foodRating').value) || 0,
+                    service: parseInt(form.querySelector('#serviceRating').value) || 0,
+                    ambiance: parseInt(form.querySelector('#ambianceRating').value) || 0,
+                    value: parseInt(form.querySelector('#valueRating').value) || 0,
+                    originality: parseInt(form.querySelector('#originalityRating').value) || 0
+                }
+            };
+        }
+
+        // Fonction pour sauvegarder un brouillon
         async function saveDraft() {
             try {
                 // Initialiser IndexedDB si ce n'est pas déjà fait
@@ -2293,6 +2318,7 @@ ${editorContent}`;
                     id: draftId,
                     title: formData.title,
                     date: formData.date,
+                    summary: formData.summary,
                     timestamp: new Date().toISOString()
                 };
 
@@ -2319,25 +2345,56 @@ ${editorContent}`;
                     });
                 }
 
-                // Sauvegarder les métadonnées dans localStorage
-                let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                drafts.push({
-                    ...lightDraftData,
-                    imageRefs
+                // Sauvegarder les données complètes dans IndexedDB
+                await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['drafts'], 'readwrite');
+                    const store = transaction.objectStore('drafts');
+                    const request = store.put({
+                        id: draftId,
+                        ...formData,
+                        imageRefs,
+                        timestamp: new Date().toISOString()
+                    });
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
                 });
 
-                // Garder seulement les 3 derniers brouillons
-                if (drafts.length > 3) {
-                    const removedDrafts = drafts.slice(0, -3);
-                    // Nettoyer les anciens brouillons
-                    for (const oldDraft of removedDrafts) {
-                        await deleteImagesForDraft(oldDraft.id);
+                // Sauvegarder seulement les références légères dans localStorage
+                try {
+                    let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                    drafts.push(lightDraftData);
+
+                    // Garder seulement les 3 derniers brouillons
+                    if (drafts.length > 3) {
+                        const removedDrafts = drafts.slice(0, -3);
+                        // Nettoyer les anciens brouillons
+                        for (const oldDraft of removedDrafts) {
+                            await deleteImagesForDraft(oldDraft.id);
+                            // Supprimer aussi les données complètes
+                            await new Promise((resolve, reject) => {
+                                const transaction = db.transaction(['drafts'], 'readwrite');
+                                const store = transaction.objectStore('drafts');
+                                const request = store.delete(oldDraft.id);
+                                request.onsuccess = () => resolve();
+                                request.onerror = () => reject(request.error);
+                            });
+                        }
+                        drafts = drafts.slice(-3);
                     }
-                    drafts = drafts.slice(-3);
+
+                    localStorage.setItem('drafts', JSON.stringify(drafts));
+                } catch (storageError) {
+                    console.warn('Erreur localStorage:', storageError);
+                    // Continue même si localStorage échoue car les données importantes sont dans IndexedDB
                 }
 
-                localStorage.setItem('drafts', JSON.stringify(drafts));
                 showNotification('Brouillon sauvegardé avec succès', 'success');
+                
+                // Rediriger après un court délai
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
                 return true;
 
             } catch (error) {
@@ -2347,45 +2404,48 @@ ${editorContent}`;
             }
         }
 
-        // Fonction pour charger un brouillon
+        // Mise à jour de la fonction loadDraft pour charger depuis IndexedDB
         async function loadDraft(draftId) {
             try {
-                // Initialiser IndexedDB si ce n'est pas déjà fait
                 if (!db) {
                     await initDB();
                 }
 
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                const draft = drafts.find(d => d.id === draftId);
+                // Charger les données complètes depuis IndexedDB
+                const draftData = await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['drafts'], 'readonly');
+                    const store = transaction.objectStore('drafts');
+                    const request = store.get(draftId);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
 
-                if (!draft) {
+                if (!draftData) {
                     throw new Error('Brouillon non trouvé');
                 }
 
-                // Charger les images depuis IndexedDB
-                for (const imageRef of draft.imageRefs) {
-                    const transaction = db.transaction([STORE_NAME], 'readonly');
-                    const store = transaction.objectStore(STORE_NAME);
+                // Charger les images
+                for (const imageRef of draftData.imageRefs) {
                     const imageData = await new Promise((resolve, reject) => {
+                        const transaction = db.transaction([STORE_NAME], 'readonly');
+                        const store = transaction.objectStore(STORE_NAME);
                         const request = store.get(imageRef.id);
                         request.onsuccess = () => resolve(request.result);
                         request.onerror = () => reject(request.error);
                     });
 
                     if (imageRef.isMain) {
-                        // Restaurer l'image principale
                         mainImageFile = dataURLtoFile(imageData.data, imageRef.name);
                         await createImagePreview(mainImageFile, document.getElementById('mainImagePreview'), true);
                     } else {
-                        // Restaurer les images de la galerie
                         const file = dataURLtoFile(imageData.data, imageRef.name);
                         galleryImageFiles.push(file);
                         await createImagePreview(file, document.getElementById('galleryPreview'), false);
                     }
                 }
 
-                // Mettre à jour le formulaire avec les données du brouillon
-                populateFormData(draft);
+                // Remplir le formulaire
+                populateFormData(draftData);
                 updateMarkdownPreview();
 
             } catch (error) {
