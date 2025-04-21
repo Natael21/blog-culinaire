@@ -1161,9 +1161,57 @@
         async function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onload = async () => {
+                    try {
+                        const compressedImage = await compressImage(reader.result);
+                        resolve(compressedImage.split(',')[1]);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
+            });
+        }
+
+        // Fonction pour compresser une image en WebP
+        async function compressImage(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Définir la taille maximale souhaitée
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    
+                    // Calculer les nouvelles dimensions en conservant le ratio
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > MAX_WIDTH) {
+                        height = (height * MAX_WIDTH) / width;
+                        width = MAX_WIDTH;
+                    }
+                    
+                    if (height > MAX_HEIGHT) {
+                        width = (width * MAX_HEIGHT) / height;
+                        height = MAX_HEIGHT;
+                    }
+                    
+                    // Redimensionner l'image
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convertir en WebP avec une qualité de 80%
+                    const webpDataUrl = canvas.toDataURL('image/webp', 0.8);
+                    resolve(webpDataUrl);
+                };
+                
+                img.onerror = reject;
+                img.src = dataUrl;
             });
         }
 
@@ -2231,54 +2279,31 @@ ${editorContent}`;
                 const draftData = {
                     filename: filePath,
                     title: title,
-                    images: []
+                    content: markdownContent,
+                    images: [],
+                    lastModified: new Date().toISOString()
                 };
 
                 // Traiter l'image principale
                 if (mainImageFile) {
                     const mainImageBase64 = await fileToBase64(mainImageFile);
-                    const mainImageExtension = mainImageFile.name.split('.').pop();
-                    const mainImageName = `${filename}-main-${Date.now()}.${mainImageExtension}`;
-                    
                     draftData.images.push({
-                        name: mainImageName,
-                        content: mainImageBase64.split(',')[1],
+                        name: mainImageFile.name,
+                        data: mainImageBase64,
                         isMain: true
                     });
-
-                    // Mettre à jour le contenu avec le chemin de l'image principale
-                    markdownContent = markdownContent.replace(
-                        /image:\s*"[^"]*"/,
-                        `image: "/images/${mainImageName}"`
-                    );
                 }
 
                 // Traiter les images de la galerie
-                if (galleryImageFiles && galleryImageFiles.length > 0) {
-                    const timestamp = Date.now(); // Utiliser le même timestamp pour toutes les images de la galerie
-                    for (let i = 0; i < galleryImageFiles.length; i++) {
-                        const file = galleryImageFiles[i];
-                        const galleryImageBase64 = await fileToBase64(file);
-                        const galleryImageExtension = file.name.split('.').pop();
-                        const galleryImageName = `${filename}-gallery-${i + 1}-${timestamp}.${galleryImageExtension}`;
-                        
-                        draftData.images.push({
-                            name: galleryImageName,
-                            content: galleryImageBase64.split(',')[1],
-                            isMain: false,
-                            originalName: file.name // Stocker le nom original pour le remplacement
-                        });
-
-                        // Mettre à jour le contenu avec le chemin de l'image de la galerie
-                        markdownContent = markdownContent.replace(
-                            new RegExp(`!\\[.*?\\]\\(${escapeRegExp(file.name)}\\)`, 'g'),
-                            `![](/images/${galleryImageName})`
-                        );
-                    }
+                for (let i = 0; i < galleryImageFiles.length; i++) {
+                    const file = galleryImageFiles[i];
+                    const galleryBase64 = await fileToBase64(file);
+                    draftData.images.push({
+                        name: file.name,
+                        data: galleryBase64,
+                        isMain: false
+                    });
                 }
-
-                // Ajouter le contenu Markdown mis à jour
-                draftData.content = markdownContent;
 
                 // Récupérer les brouillons existants
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
@@ -2288,30 +2313,31 @@ ${editorContent}`;
                 
                 if (existingIndex !== -1) {
                     // Mettre à jour le brouillon existant
-                    drafts[existingIndex] = {
-                        ...drafts[existingIndex],
-                        ...draftData,
-                        lastModified: new Date().toISOString()
-                    };
+                    drafts[existingIndex] = draftData;
                 } else {
                     // Ajouter un nouveau brouillon
-                    drafts.push({
-                        ...draftData,
-                        lastModified: new Date().toISOString()
-                    });
+                    drafts.push(draftData);
                 }
 
-                // Sauvegarder dans localStorage
-                localStorage.setItem('drafts', JSON.stringify(drafts));
-
-                showNotification('Brouillon enregistré avec succès', 'success');
-                
-                // Mettre à jour l'interface
-                updatePendingChangesButtons();
-                
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
+                try {
+                    // Sauvegarder dans localStorage
+                    localStorage.setItem('drafts', JSON.stringify(drafts));
+                    showNotification('Brouillon enregistré avec succès', 'success');
+                    
+                    // Mettre à jour l'interface
+                    updatePendingChangesButtons();
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } catch (storageError) {
+                    if (storageError.name === 'QuotaExceededError') {
+                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des brouillons existants.', 'error');
+                    } else {
+                        showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+                    }
+                    console.error('Erreur de stockage:', storageError);
+                }
 
             } catch (error) {
                 console.error('Erreur:', error);
