@@ -2145,6 +2145,137 @@
                 throw error;
             }
         }
+
+        // Fonction pour mettre à jour l'aperçu Markdown
+        function updateMarkdownPreview() {
+            console.log('Mise à jour de l\'aperçu Markdown...');
+            const preview = document.querySelector('.restaurant-preview');
+            if (!preview) return;
+
+            const formData = getFormData();
+            if (!formData) return;
+
+            let markdown = '';
+
+            // En-tête avec le titre
+            markdown += `# ${formData.title}\n\n`;
+
+            // Métadonnées
+            markdown += `- **Date de visite:** ${formData.date}\n`;
+            markdown += `- **Adresse:** ${formData.address}\n`;
+            markdown += `- **Style de cuisine:** ${formData.style}\n`;
+            markdown += `- **Gamme de prix:** ${formData.price}\n`;
+
+            // Options alimentaires
+            const diets = getSelectedDiets();
+            if (diets) {
+                markdown += `- **Options alimentaires:** ${diets}\n`;
+            }
+
+            markdown += '\n';
+
+            // Résumé
+            if (formData.description) {
+                markdown += `## Résumé\n\n${formData.description}\n\n`;
+            }
+
+            // Image principale
+            if (mainImageFile) {
+                markdown += `![Image principale](${mainImageFile.name})\n\n`;
+            }
+
+            // Description détaillée
+            if (editor) {
+                const content = editor.getHTML();
+                if (content) {
+                    markdown += `## Description détaillée\n\n${content}\n\n`;
+                }
+            }
+
+            // Évaluations
+            markdown += `## Évaluations\n\n`;
+            markdown += `### Note globale: ${formData.overallRating}/10\n\n`;
+
+            // Critères détaillés
+            const criteria = [
+                { name: 'Nourriture', score: formData.foodScore, comment: formData.foodComment },
+                { name: 'Service', score: formData.serviceScore, comment: formData.serviceComment },
+                { name: 'Ambiance', score: formData.ambianceScore, comment: formData.ambianceComment },
+                { name: 'Rapport qualité/prix', score: formData.valueScore, comment: formData.valueComment },
+                { name: 'Originalité', score: formData.originalityScore, comment: formData.originalityComment },
+                { name: 'Expérience globale', score: formData.overallExperienceScore, comment: formData.overallExperienceComment }
+            ];
+
+            criteria.forEach(criterion => {
+                if (criterion.score && criterion.comment) {
+                    markdown += `#### ${criterion.name}\n`;
+                    markdown += `- **Note:** ${criterion.score}/10\n`;
+                    markdown += `- **Commentaire:** ${criterion.comment}\n\n`;
+                }
+            });
+
+            // Galerie d'images
+            if (galleryImageFiles.length > 0) {
+                markdown += `## Galerie\n\n`;
+                galleryImageFiles.forEach(file => {
+                    markdown += `![${file.name}](${file.name})\n\n`;
+                });
+            }
+
+            // Mettre à jour l'aperçu
+            preview.innerHTML = markdown;
+            console.log('Aperçu Markdown mis à jour');
+        }
+
+        // Fonction pour calculer la note globale
+        function calculateOverallRating() {
+            const scores = [
+                parseInt(document.getElementById('foodScore').value),
+                parseInt(document.getElementById('serviceScore').value),
+                parseInt(document.getElementById('ambianceScore').value),
+                parseInt(document.getElementById('valueScore').value),
+                parseInt(document.getElementById('originalityScore').value),
+                parseInt(document.getElementById('overallExperienceScore').value)
+            ];
+
+            const validScores = scores.filter(score => !isNaN(score));
+            if (validScores.length === 0) return 0;
+
+            const average = validScores.reduce((a, b) => a + b, 0) / validScores.length;
+            document.getElementById('overallRating').value = Math.round(average * 10) / 10;
+        }
+
+        function getFormData() {
+            const form = document.getElementById('restaurantForm');
+            if (!form) {
+                console.error('Formulaire non trouvé');
+                return null;
+            }
+
+            const formData = {
+                title: form.querySelector('#title').value,
+                date: form.querySelector('#date').value,
+                address: form.querySelector('#address').value,
+                style: form.querySelector('#style').value,
+                price: form.querySelector('#price').value,
+                description: form.querySelector('#description').value,
+                foodScore: form.querySelector('#foodScore').value,
+                foodComment: form.querySelector('#foodComment').value,
+                serviceScore: form.querySelector('#serviceScore').value,
+                serviceComment: form.querySelector('#serviceComment').value,
+                ambianceScore: form.querySelector('#ambianceScore').value,
+                ambianceComment: form.querySelector('#ambianceComment').value,
+                valueScore: form.querySelector('#valueScore').value,
+                valueComment: form.querySelector('#valueComment').value,
+                originalityScore: form.querySelector('#originalityScore').value,
+                originalityComment: form.querySelector('#originalityComment').value,
+                overallExperienceScore: form.querySelector('#overallExperienceScore').value,
+                overallExperienceComment: form.querySelector('#overallExperienceComment').value,
+                overallRating: form.querySelector('#overallRating').value
+            };
+
+            return formData;
+        }
     </script>
 </head>
 <body>
