@@ -1157,6 +1157,74 @@
         let selectedIndex = -1;
         let suggestions = [];
 
+        // Configuration d'IndexedDB
+        const DB_NAME = 'restaurantDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'images';
+        let db;
+
+        // Initialiser IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        // Sauvegarder une image dans IndexedDB
+        async function saveImageToIndexedDB(imageData, fileName, draftId) {
+            const imageId = `${draftId}_${fileName}`;
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put({
+                    id: imageId,
+                    data: imageData,
+                    name: fileName,
+                    draftId: draftId,
+                    timestamp: new Date().toISOString()
+                });
+
+                request.onsuccess = () => resolve(imageId);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Supprimer les images d'un brouillon
+        async function deleteImagesForDraft(draftId) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.openCursor();
+
+                request.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        if (cursor.value.draftId === draftId) {
+                            cursor.delete();
+                        }
+                        cursor.continue();
+                    } else {
+                        resolve();
+                    }
+                };
+
+                request.onerror = () => reject(request.error);
+            });
+        }
+
         // Fonction pour convertir un fichier en base64
         async function fileToBase64(file) {
             return new Promise((resolve, reject) => {
@@ -2212,111 +2280,131 @@ ${editorContent}`;
         // Fonction pour sauvegarder le brouillon
         async function saveDraft() {
             try {
-                const formData = new FormData(document.getElementById('restaurantForm'));
-                const title = formData.get('title');
-                
-                // Générer le nom du fichier à partir du titre
-                const filename = title.toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .replace(/[^a-z0-9]/g, '-')
-                    .replace(/-+/g, '-')
-                    .replace(/^-|-$/g, '');
-                
-                const date = new Date().toISOString().split('T')[0];
-                const filePath = `${date}-${filename}.md`;
+                // Initialiser IndexedDB si ce n'est pas déjà fait
+                if (!db) {
+                    await initDB();
+                }
 
-                // Créer l'objet du brouillon avec le contenu initial
-                let markdownContent = generateMarkdown();
-                const draftData = {
-                    filename: filePath,
-                    title: title,
-                    images: []
+                const formData = getFormData();
+                const draftId = Date.now().toString();
+                
+                // Préparer une version légère des métadonnées pour localStorage
+                const lightDraftData = {
+                    id: draftId,
+                    title: formData.title,
+                    date: formData.date,
+                    timestamp: new Date().toISOString()
                 };
 
-                // Traiter l'image principale
+                // Sauvegarder les images dans IndexedDB
+                const imageRefs = [];
                 if (mainImageFile) {
-                    const mainImageBase64 = await fileToBase64(mainImageFile);
-                    const mainImageExtension = mainImageFile.name.split('.').pop();
-                    const mainImageName = `${filename}-main-${Date.now()}.${mainImageExtension}`;
-                    
-                    draftData.images.push({
-                        name: mainImageName,
-                        content: mainImageBase64.split(',')[1],
+                    const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
+                    const imageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
+                    imageRefs.push({
+                        id: imageId,
+                        name: mainImageFile.name,
                         isMain: true
                     });
-
-                    // Mettre à jour le contenu avec le chemin de l'image principale
-                    markdownContent = markdownContent.replace(
-                        /image:\s*"[^"]*"/,
-                        `image: "/images/${mainImageName}"`
-                    );
                 }
 
                 // Traiter les images de la galerie
-                if (galleryImageFiles && galleryImageFiles.length > 0) {
-                    const timestamp = Date.now(); // Utiliser le même timestamp pour toutes les images de la galerie
-                    for (let i = 0; i < galleryImageFiles.length; i++) {
-                        const file = galleryImageFiles[i];
-                        const galleryImageBase64 = await fileToBase64(file);
-                        const galleryImageExtension = file.name.split('.').pop();
-                        const galleryImageName = `${filename}-gallery-${i + 1}-${timestamp}.${galleryImageExtension}`;
-                        
-                        draftData.images.push({
-                            name: galleryImageName,
-                            content: galleryImageBase64.split(',')[1],
-                            isMain: false,
-                            originalName: file.name // Stocker le nom original pour le remplacement
-                        });
-
-                        // Mettre à jour le contenu avec le chemin de l'image de la galerie
-                        markdownContent = markdownContent.replace(
-                            new RegExp(`!\\[.*?\\]\\(${escapeRegExp(file.name)}\\)`, 'g'),
-                            `![](/images/${galleryImageName})`
-                        );
-                    }
-                }
-
-                // Ajouter le contenu Markdown mis à jour
-                draftData.content = markdownContent;
-
-                // Récupérer les brouillons existants
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                
-                // Vérifier si un brouillon avec le même nom existe déjà
-                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
-                
-                if (existingIndex !== -1) {
-                    // Mettre à jour le brouillon existant
-                    drafts[existingIndex] = {
-                        ...drafts[existingIndex],
-                        ...draftData,
-                        lastModified: new Date().toISOString()
-                    };
-                } else {
-                    // Ajouter un nouveau brouillon
-                    drafts.push({
-                        ...draftData,
-                        lastModified: new Date().toISOString()
+                for (const file of galleryImageFiles) {
+                    const optimizedImage = await optimizeImageForStorage(file, false);
+                    const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
+                    imageRefs.push({
+                        id: imageId,
+                        name: file.name,
+                        isMain: false
                     });
                 }
 
-                // Sauvegarder dans localStorage
-                localStorage.setItem('drafts', JSON.stringify(drafts));
+                // Sauvegarder les métadonnées dans localStorage
+                let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                drafts.push({
+                    ...lightDraftData,
+                    imageRefs
+                });
 
-                showNotification('Brouillon enregistré avec succès', 'success');
-                
-                // Mettre à jour l'interface
-                updatePendingChangesButtons();
-                
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
+                // Garder seulement les 3 derniers brouillons
+                if (drafts.length > 3) {
+                    const removedDrafts = drafts.slice(0, -3);
+                    // Nettoyer les anciens brouillons
+                    for (const oldDraft of removedDrafts) {
+                        await deleteImagesForDraft(oldDraft.id);
+                    }
+                    drafts = drafts.slice(-3);
+                }
+
+                localStorage.setItem('drafts', JSON.stringify(drafts));
+                showNotification('Brouillon sauvegardé avec succès', 'success');
+                return true;
 
             } catch (error) {
-                console.error('Erreur:', error);
-                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+                console.error('Erreur lors de la sauvegarde:', error);
+                showNotification('Erreur lors de la sauvegarde', 'error', error.message);
+                return false;
             }
+        }
+
+        // Fonction pour charger un brouillon
+        async function loadDraft(draftId) {
+            try {
+                // Initialiser IndexedDB si ce n'est pas déjà fait
+                if (!db) {
+                    await initDB();
+                }
+
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                const draft = drafts.find(d => d.id === draftId);
+
+                if (!draft) {
+                    throw new Error('Brouillon non trouvé');
+                }
+
+                // Charger les images depuis IndexedDB
+                for (const imageRef of draft.imageRefs) {
+                    const transaction = db.transaction([STORE_NAME], 'readonly');
+                    const store = transaction.objectStore(STORE_NAME);
+                    const imageData = await new Promise((resolve, reject) => {
+                        const request = store.get(imageRef.id);
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = () => reject(request.error);
+                    });
+
+                    if (imageRef.isMain) {
+                        // Restaurer l'image principale
+                        mainImageFile = dataURLtoFile(imageData.data, imageRef.name);
+                        await createImagePreview(mainImageFile, document.getElementById('mainImagePreview'), true);
+                    } else {
+                        // Restaurer les images de la galerie
+                        const file = dataURLtoFile(imageData.data, imageRef.name);
+                        galleryImageFiles.push(file);
+                        await createImagePreview(file, document.getElementById('galleryPreview'), false);
+                    }
+                }
+
+                // Mettre à jour le formulaire avec les données du brouillon
+                populateFormData(draft);
+                updateMarkdownPreview();
+
+            } catch (error) {
+                console.error('Erreur lors du chargement du brouillon:', error);
+                showNotification('Erreur lors du chargement', 'error', error.message);
+            }
+        }
+
+        // Fonction utilitaire pour convertir une URL de données en fichier
+        function dataURLtoFile(dataurl, filename) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while(n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], filename, {type: mime});
         }
 
         // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
@@ -2342,11 +2430,6 @@ ${editorContent}`;
 
         // Initialiser le formulaire une fois le DOM chargé
         document.addEventListener('DOMContentLoaded', initializeForm);
-
-        // Fonction pour charger un brouillon
-        function loadDraft(filename) {
-                showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
-        }
 
         // Fonction pour annuler les modifications
         function cancelChanges() {
