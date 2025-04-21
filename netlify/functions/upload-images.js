@@ -17,13 +17,34 @@ exports.handler = async function(event, context) {
             gallery: []
         };
 
+        // Vérifier les doublons potentiels
+        const existingFiles = new Set();
+
         // Uploader chaque image
         for (const imageData of images) {
             const { image, filename, isMain } = imageData;
 
-            // Générer un nom de fichier unique
-            const timestamp = new Date().getTime();
-            const finalFilename = `images/${timestamp}-${filename}`;
+            // Vérifier si le fichier existe déjà
+            if (existingFiles.has(filename)) {
+                console.warn(`Fichier en double détecté: ${filename}`);
+                continue; // Skip les doublons
+            }
+            existingFiles.add(filename);
+
+            // Vérifier le format de l'image
+            const imageType = image.split(',')[0].split(':')[1].split(';')[0];
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(imageType)) {
+                throw new Error(`Format d'image non supporté: ${imageType}`);
+            }
+
+            // Vérifier la taille de l'image
+            const imageSize = Math.ceil((image.length * 3) / 4); // Approximative size in bytes
+            if (imageSize > 5 * 1024 * 1024) { // 5MB max
+                throw new Error(`Image trop volumineuse: ${Math.round(imageSize / 1024 / 1024)}MB`);
+            }
+
+            // Le nom de fichier est déjà unique grâce au hash côté client
+            const finalFilename = `images/${filename}`;
 
             // Créer le fichier sur GitHub
             const createFileResponse = await fetch(`https://api.github.com/repos/Natael21/blog-culinaire/contents/${finalFilename}`, {
