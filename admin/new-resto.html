@@ -2280,24 +2280,46 @@ ${editorContent}`;
         // Fonction pour récupérer les données du formulaire
         function getFormData() {
             const form = document.getElementById('restaurantForm');
+            if (!form) {
+                throw new Error('Formulaire non trouvé');
+            }
+
+            // Fonction utilitaire pour obtenir la valeur en toute sécurité
+            const safeGetValue = (selector, defaultValue = '') => {
+                const element = form.querySelector(selector);
+                return element ? element.value || defaultValue : defaultValue;
+            };
+
+            // Fonction utilitaire pour obtenir l'état d'une checkbox en toute sécurité
+            const safeGetChecked = (selector) => {
+                const element = form.querySelector(selector);
+                return element ? element.checked : false;
+            };
+
+            // Fonction utilitaire pour obtenir un rating en toute sécurité
+            const safeGetRating = (selector) => {
+                const value = safeGetValue(selector, '0');
+                return parseInt(value) || 0;
+            };
+
             return {
-                title: form.querySelector('#title').value,
-                date: form.querySelector('#date').value,
-                summary: form.querySelector('#summary').value,
-                description: editor.getHTML(),
-                address: form.querySelector('#address').value,
-                style: form.querySelector('#style').value,
-                price: form.querySelector('#price').value,
+                title: safeGetValue('#title'),
+                date: safeGetValue('#date'),
+                summary: safeGetValue('#summary'),
+                description: editor ? editor.getHTML() : '',
+                address: safeGetValue('#address'),
+                style: safeGetValue('#style'),
+                price: safeGetValue('#price'),
                 diet: {
-                    vegetarian: form.querySelector('#vegetarian').checked,
-                    vegan: form.querySelector('#vegan').checked
+                    vegetarian: safeGetChecked('#vegetarian'),
+                    vegan: safeGetChecked('#vegan')
                 },
                 ratings: {
-                    food: parseInt(form.querySelector('#foodRating').value) || 0,
-                    service: parseInt(form.querySelector('#serviceRating').value) || 0,
-                    ambiance: parseInt(form.querySelector('#ambianceRating').value) || 0,
-                    value: parseInt(form.querySelector('#valueRating').value) || 0,
-                    originality: parseInt(form.querySelector('#originalityRating').value) || 0
+                    food: safeGetRating('#foodRating'),
+                    service: safeGetRating('#serviceRating'),
+                    ambiance: safeGetRating('#ambianceRating'),
+                    value: safeGetRating('#valueRating'),
+                    originality: safeGetRating('#originalityRating')
                 }
             };
         }
@@ -2313,13 +2335,13 @@ ${editorContent}`;
                 const formData = getFormData();
                 const draftId = Date.now().toString();
                 
-                // Préparer une version légère des métadonnées pour localStorage
+                // Préparer une version très légère des métadonnées pour localStorage
+                // Ne garder que l'essentiel pour économiser l'espace
                 const lightDraftData = {
-                    id: draftId,
-                    title: formData.title,
-                    date: formData.date,
-                    summary: formData.summary,
-                    timestamp: new Date().toISOString()
+                    i: draftId,                    // id raccourci
+                    t: formData.title.slice(0, 50), // titre tronqué
+                    d: formData.date,              // date
+                    ts: Date.now()                 // timestamp en nombre
                 };
 
                 // Sauvegarder les images dans IndexedDB
@@ -2327,22 +2349,24 @@ ${editorContent}`;
                 if (mainImageFile) {
                     const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
                     const imageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
-                    imageRefs.push({
-                        id: imageId,
-                        name: mainImageFile.name,
-                        isMain: true
-                    });
+                    imageRefs.push({ i: imageId, n: mainImageFile.name, m: true }); // Format compact
                 }
 
-                // Traiter les images de la galerie
-                for (const file of galleryImageFiles) {
-                    const optimizedImage = await optimizeImageForStorage(file, false);
-                    const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
-                    imageRefs.push({
-                        id: imageId,
-                        name: file.name,
-                        isMain: false
+                // Traiter les images de la galerie par lots de 3
+                const galleryBatches = [];
+                for (let i = 0; i < galleryImageFiles.length; i += 3) {
+                    const batch = galleryImageFiles.slice(i, i + 3);
+                    galleryBatches.push(batch);
+                }
+
+                for (const batch of galleryBatches) {
+                    const batchPromises = batch.map(async file => {
+                        const optimizedImage = await optimizeImageForStorage(file, false);
+                        const imageId = await saveImageToIndexedDB(optimizedImage, file.name, draftId);
+                        return { i: imageId, n: file.name, m: false };
                     });
+                    const batchResults = await Promise.all(batchPromises);
+                    imageRefs.push(...batchResults);
                 }
 
                 // Sauvegarder les données complètes dans IndexedDB
@@ -2353,36 +2377,48 @@ ${editorContent}`;
                         id: draftId,
                         ...formData,
                         imageRefs,
-                        timestamp: new Date().toISOString()
+                        timestamp: Date.now()
                     });
                     request.onsuccess = () => resolve();
                     request.onerror = () => reject(request.error);
                 });
 
-                // Sauvegarder seulement les références légères dans localStorage
+                // Sauvegarder les métadonnées légères dans localStorage
                 try {
-                    let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                    drafts.push(lightDraftData);
+                    let drafts = [];
+                    try {
+                        drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                    } catch (e) {
+                        console.warn('Erreur de parsing localStorage, réinitialisation');
+                        localStorage.removeItem('drafts');
+                    }
 
-                    // Garder seulement les 3 derniers brouillons
-                    if (drafts.length > 3) {
-                        const removedDrafts = drafts.slice(0, -3);
-                        // Nettoyer les anciens brouillons
+                    // Nettoyer les anciens brouillons avant d'ajouter le nouveau
+                    if (drafts.length >= 3) {
+                        const removedDrafts = drafts.slice(0, -2); // Garder 2 pour avoir de la place pour le nouveau
                         for (const oldDraft of removedDrafts) {
-                            await deleteImagesForDraft(oldDraft.id);
-                            // Supprimer aussi les données complètes
+                            await deleteImagesForDraft(oldDraft.i || oldDraft.id);
                             await new Promise((resolve, reject) => {
                                 const transaction = db.transaction(['drafts'], 'readwrite');
                                 const store = transaction.objectStore('drafts');
-                                const request = store.delete(oldDraft.id);
+                                const request = store.delete(oldDraft.i || oldDraft.id);
                                 request.onsuccess = () => resolve();
                                 request.onerror = () => reject(request.error);
                             });
                         }
-                        drafts = drafts.slice(-3);
+                        drafts = drafts.slice(-2);
                     }
 
-                    localStorage.setItem('drafts', JSON.stringify(drafts));
+                    drafts.push(lightDraftData);
+
+                    // Essayer de sauvegarder avec le format compact
+                    try {
+                        localStorage.setItem('drafts', JSON.stringify(drafts));
+                    } catch (e) {
+                        // Si ça échoue, essayer de sauvegarder uniquement le dernier brouillon
+                        console.warn('Échec de sauvegarde de tous les brouillons, tentative avec un seul');
+                        localStorage.setItem('drafts', JSON.stringify([lightDraftData]));
+                    }
                 } catch (storageError) {
                     console.warn('Erreur localStorage:', storageError);
                     // Continue même si localStorage échoue car les données importantes sont dans IndexedDB
