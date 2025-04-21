@@ -171,6 +171,50 @@ exports.handler = async function(event, context) {
           type: 'blob',
           sha: blobData.sha
         });
+
+        // Traiter les images si elles existent
+        if (change.images && Array.isArray(change.images)) {
+          console.log('Processing images for file:', change.filename);
+          for (const image of change.images) {
+            console.log('Creating blob for image:', image.name);
+            
+            // Créer un blob pour l'image
+            const imageBlobResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/git/blobs`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `token ${githubToken}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                content: image.data,
+                encoding: 'base64'
+              })
+            });
+
+            if (!imageBlobResponse.ok) {
+              const errorText = await imageBlobResponse.text();
+              console.error('Failed to create image blob:', {
+                imageName: image.name,
+                status: imageBlobResponse.status,
+                statusText: imageBlobResponse.statusText,
+                error: errorText
+              });
+              throw new Error(`Failed to create image blob: ${imageBlobResponse.status} ${imageBlobResponse.statusText}\n${errorText}`);
+            }
+
+            const imageBlobData = await imageBlobResponse.json();
+            console.log('Image blob created successfully:', imageBlobData.sha);
+
+            // Ajouter l'image à l'arbre
+            newTree.push({
+              path: `images/${image.name}`,
+              mode: '100644',
+              type: 'blob',
+              sha: imageBlobData.sha
+            });
+          }
+        }
       }
     }
 
