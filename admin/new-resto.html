@@ -1642,112 +1642,260 @@
             updateMarkdownPreview();
         }
 
-        // Fonction pour optimiser une image avant le stockage
-        async function optimizeImageForStorage(file) {
-            // Si l'image est petite, on la garde telle quelle
-            if (file.size <= 500 * 1024) { // 500KB
-                return await fileToBase64(file);
+        // Fonction pour estimer la taille du localStorage utilisé
+        function getLocalStorageUsage() {
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += (localStorage[key].length * 2) / 1024 / 1024; // Taille en MB
+                }
+            }
+            return total;
+        }
+
+        // Fonction pour estimer l'espace disponible (en gardant une marge de sécurité)
+        function getAvailableSpace() {
+            // La plupart des navigateurs ont une limite de 5-10MB
+            const estimatedLimit = 5; // MB
+            const currentUsage = getLocalStorageUsage();
+            return Math.max(0, estimatedLimit - currentUsage);
+        }
+
+        // Fonction améliorée pour optimiser une image avant le stockage
+        async function optimizeImageForStorage(file, isMainImage = false) {
+            // Calculer l'espace disponible
+            const availableSpace = getAvailableSpace();
+            
+            // Convertir d'abord en base64 pour avoir la taille initiale
+            const base64 = await fileToBase64(file);
+            const initialSizeMB = (base64.length * 3) / 4 / 1024 / 1024; // Taille approximative en MB
+
+            // Si l'image est déjà petite, pas besoin de compression
+            if (initialSizeMB < 0.1) { // Moins de 100KB
+                return base64;
             }
 
-            // Sinon, on la compresse progressivement
-            const img = new Image();
-            const imageUrl = URL.createObjectURL(file);
-            
+            // Définir la taille cible en fonction du type d'image
+            const targetSizeMB = isMainImage ? 0.5 : 0.3; // Image principale : 500KB, Galerie : 300KB
+
             return new Promise((resolve) => {
+                const img = new Image();
                 img.onload = () => {
-                    URL.revokeObjectURL(imageUrl);
                     const canvas = document.createElement('canvas');
+                    let { width, height } = calculateDimensions(img.width, img.height, isMainImage);
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
                     const ctx = canvas.getContext('2d');
-                    
-                    // Garder les dimensions d'origine
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, width, height);
                     
                     // Compression progressive
                     let quality = 0.7;
                     let result = canvas.toDataURL('image/jpeg', quality);
-                    
-                    // Réduire la qualité jusqu'à ce que la taille soit raisonnable
-                    while (result.length > 1024 * 1024 && quality > 0.1) { // 1MB max
+                    let currentSize = (result.length * 3) / 4 / 1024 / 1024;
+
+                    // Boucle de compression adaptative
+                    while (currentSize > targetSizeMB && quality > 0.1) {
                         quality -= 0.1;
                         result = canvas.toDataURL('image/jpeg', quality);
+                        currentSize = (result.length * 3) / 4 / 1024 / 1024;
                     }
-                    
-                    resolve(result.split(',')[1]); // Retourner seulement la partie base64
+
+                    resolve(result.split(',')[1]);
                 };
-                img.src = imageUrl;
+                img.src = `data:image/jpeg;base64,${base64}`;
             });
         }
 
-        // Modifier la fonction saveDraft pour utiliser l'optimisation
-        async function saveDraft() {
-            try {
-                // Nettoyer les anciens brouillons d'abord
-                cleanupOldDrafts();
-                
-                const formData = getFormData();
-                
-                // Préparer les images pour le stockage
-                const draftData = {
-                    ...formData,
-                    images: []
+        // Fonction pour calculer les dimensions optimales
+        function calculateDimensions(width, height, isMainImage) {
+            const maxDimension = isMainImage ? 1600 : 1200;
+            const minDimension = isMainImage ? 800 : 600;
+
+            if (width <= maxDimension && height <= maxDimension) {
+                return { width, height };
+            }
+
+            let ratio = width / height;
+            if (width > height) {
+                width = maxDimension;
+                height = Math.round(width / ratio);
+            } else {
+                height = maxDimension;
+                width = Math.round(height * ratio);
+            }
+
+            // S'assurer que les dimensions ne sont pas trop petites
+            if (width < minDimension || height < minDimension) {
+                if (width < height) {
+                    width = minDimension;
+                    height = Math.round(width / ratio);
+                } else {
+                    height = minDimension;
+                    width = Math.round(height * ratio);
+                }
+            }
+
+            return { width, height };
+        }
+
+        // Initialisation de la base de données IndexedDB
+        let db;
+        const DB_NAME = 'restaurantDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'images';
+
+        // Fonction pour initialiser IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
                 };
 
-                // Optimiser l'image principale
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        // Fonction pour sauvegarder une image dans IndexedDB
+        async function saveImageToIndexedDB(imageData, filename, draftId) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const id = `${draftId}_${filename}`;
+                const request = store.put({
+                    id: id,
+                    data: imageData,
+                    filename: filename,
+                    draftId: draftId,
+                    timestamp: new Date().toISOString()
+                });
+
+                request.onsuccess = () => resolve(id);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Fonction pour récupérer une image depuis IndexedDB
+        async function getImageFromIndexedDB(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(id);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Fonction pour supprimer les images d'un brouillon
+        async function deleteImagesForDraft(draftId) {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            
+            return new Promise((resolve, reject) => {
+                const request = store.openCursor();
+                
+                request.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        if (cursor.value.draftId === draftId) {
+                            cursor.delete();
+                        }
+                        cursor.continue();
+                    } else {
+                        resolve();
+                    }
+                };
+                
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Modifier la fonction saveDraft pour utiliser IndexedDB
+        async function saveDraft() {
+            try {
+                // Initialiser IndexedDB si ce n'est pas déjà fait
+                if (!db) {
+                    await initDB();
+                }
+
+                const formData = getFormData();
+                const draftId = Date.now().toString(); // Identifiant unique pour ce brouillon
+                
+                // Préparer les données du brouillon sans les images
+                const draftData = {
+                    ...formData,
+                    id: draftId,
+                    imageRefs: [] // Stockera les références aux images dans IndexedDB
+                };
+
+                // Sauvegarder l'image principale dans IndexedDB
                 if (mainImageFile) {
-                    const optimizedMain = await optimizeImageForStorage(mainImageFile);
-                    draftData.images.push({
+                    const optimizedMain = await optimizeImageForStorage(mainImageFile, true);
+                    const imageId = await saveImageToIndexedDB(optimizedMain, mainImageFile.name, draftId);
+                    draftData.imageRefs.push({
+                        id: imageId,
                         name: mainImageFile.name,
-                        data: optimizedMain,
                         isMain: true
                     });
                 }
 
-                // Optimiser les images de la galerie
-                for (const file of galleryImageFiles) {
-                    const optimizedGallery = await optimizeImageForStorage(file);
-                    draftData.images.push({
-                        name: file.name,
-                        data: optimizedGallery,
-                        isMain: false
-                    });
+                // Sauvegarder les images de la galerie dans IndexedDB
+                const batchSize = 5;
+                for (let i = 0; i < galleryImageFiles.length; i += batchSize) {
+                    const batch = galleryImageFiles.slice(i, i + batchSize);
+                    const optimizedBatch = await Promise.all(
+                        batch.map(file => optimizeImageForStorage(file, false))
+                    );
+
+                    for (let j = 0; j < batch.length; j++) {
+                        const imageId = await saveImageToIndexedDB(
+                            optimizedBatch[j],
+                            batch[j].name,
+                            draftId
+                        );
+                        draftData.imageRefs.push({
+                            id: imageId,
+                            name: batch[j].name,
+                            isMain: false
+                        });
+                    }
                 }
 
-                // Récupérer les brouillons existants
+                // Sauvegarder les métadonnées dans localStorage
                 let drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                
-                // Ajouter le nouveau brouillon
                 drafts.push({
                     ...draftData,
                     timestamp: new Date().toISOString()
                 });
 
                 // Garder seulement les 3 derniers brouillons
-                drafts = drafts.slice(-3);
-
-                try {
-                    localStorage.setItem('drafts', JSON.stringify(drafts));
-                    showNotification('Brouillon sauvegardé avec succès', 'success');
-                    return true;
-                } catch (storageError) {
-                    if (storageError.name === 'QuotaExceededError') {
-                        // Si le stockage est plein, on garde que le dernier brouillon
-                        drafts = [drafts[drafts.length - 1]];
-                        localStorage.setItem('drafts', JSON.stringify(drafts));
-                        showNotification('Brouillon sauvegardé (anciens brouillons supprimés)', 'success');
-                        return true;
+                if (drafts.length > 3) {
+                    // Supprimer les images des anciens brouillons
+                    for (const oldDraft of drafts.slice(0, -3)) {
+                        await deleteImagesForDraft(oldDraft.id);
                     }
-                    throw storageError;
+                    drafts = drafts.slice(-3);
                 }
+
+                localStorage.setItem('drafts', JSON.stringify(drafts));
+                showNotification('Brouillon sauvegardé avec succès', 'success');
+                return true;
+
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde:', error);
-                showNotification(
-                    'Erreur lors de la sauvegarde',
-                    'error',
-                    error.message
-                );
+                showNotification('Erreur lors de la sauvegarde', 'error', error.message);
                 return false;
             }
         }
@@ -1793,8 +1941,64 @@
         document.addEventListener('DOMContentLoaded', initializeForm);
 
         // Fonction pour charger un brouillon
-        function loadDraft(filename) {
-                showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
+        async function loadDraft(draftId) {
+            try {
+                if (!db) {
+                    await initDB();
+                }
+
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                const draft = drafts.find(d => d.id === draftId);
+
+                if (!draft) {
+                    throw new Error('Brouillon non trouvé');
+                }
+
+                // Charger les images depuis IndexedDB
+                for (const imageRef of draft.imageRefs) {
+                    const imageData = await getImageFromIndexedDB(imageRef.id);
+                    if (imageRef.isMain) {
+                        // Restaurer l'image principale
+                        mainImageFile = new File(
+                            [dataURItoBlob(`data:image/jpeg;base64,${imageData.data}`)],
+                            imageRef.name,
+                            { type: 'image/jpeg' }
+                        );
+                        await createImagePreview(mainImageFile, document.getElementById('mainImagePreview'), true);
+                    } else {
+                        // Restaurer les images de la galerie
+                        const galleryFile = new File(
+                            [dataURItoBlob(`data:image/jpeg;base64,${imageData.data}`)],
+                            imageRef.name,
+                            { type: 'image/jpeg' }
+                        );
+                        galleryImageFiles.push(galleryFile);
+                        await createImagePreview(galleryFile, document.getElementById('galleryPreview'), false);
+                    }
+                }
+
+                // Restaurer les autres données du formulaire
+                // ... (code existant pour remplir le formulaire)
+
+                updateMarkdownPreview();
+            } catch (error) {
+                console.error('Erreur lors du chargement du brouillon:', error);
+                showNotification('Erreur lors du chargement', 'error', error.message);
+            }
+        }
+
+        // Utilitaire pour convertir une dataURI en Blob
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            
+            return new Blob([ab], { type: mimeString });
         }
 
         // Fonction pour annuler les modifications
@@ -2620,10 +2824,10 @@ ${editorContent}`;
                 modal.innerHTML = `
                     <div class="confirmation-content">
                         <h3 class="confirmation-title">Espace de stockage insuffisant</h3>
-                        <p class="confirmation-message">Pour sauvegarder ce brouillon, nous devons supprimer les anciens brouillons. Voulez-vous continuer ?</p>
+                        <p class="confirmation-message">Le brouillon est trop volumineux pour être sauvegardé avec les brouillons existants. Voulez-vous supprimer les anciens brouillons et ne garder que celui-ci ?</p>
                         <div class="confirmation-buttons">
                             <button class="confirmation-button confirm">Oui, supprimer les anciens brouillons</button>
-                            <button class="confirmation-button cancel">Non, annuler</button>
+                            <button class="confirmation-button cancel">Non, annuler la sauvegarde</button>
                         </div>
                     </div>
                 `;
