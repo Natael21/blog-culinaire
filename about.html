@@ -266,11 +266,21 @@ document.addEventListener('DOMContentLoaded', function() {
   // Attendre que l'audio soit prêt
   hoverSound.addEventListener('canplaythrough', function() {
     console.log('Audio prêt à être joué');
-    // Initialiser l'audio context après le premier clic sur la page
-    document.addEventListener('click', function initOnClick() {
+    // Initialiser l'audio context après n'importe quelle interaction utilisateur
+    function initOnInteraction() {
       initAudio();
-      document.removeEventListener('click', initOnClick);
-    }, { once: true });
+      // Supprimer tous les écouteurs d'événements une fois l'audio activé
+      document.removeEventListener('click', initOnInteraction);
+      document.removeEventListener('mousemove', initOnInteraction);
+      document.removeEventListener('scroll', initOnInteraction);
+      document.removeEventListener('touchstart', initOnInteraction);
+    }
+    
+    // Écouter plusieurs types d'interactions
+    document.addEventListener('click', initOnInteraction);
+    document.addEventListener('mousemove', initOnInteraction);
+    document.addEventListener('scroll', initOnInteraction);
+    document.addEventListener('touchstart', initOnInteraction);
   });
   
   nicolasSection.addEventListener('mouseenter', function() {
