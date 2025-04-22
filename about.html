@@ -43,13 +43,10 @@ permalink: /about/
         <p class="member-intro">Amateur de bonne cuisine et explorateur culinaire sherbrookois.</p>
         <div class="member-bio">
           <p>
-            Diplômé en musique au Cégep et détenteur d'un baccalauréat en musique, je combine ma passion pour la composition musicale avec mon amour pour la gastronomie sherbrookoise. Pianiste passionné, j'ai remporté plusieurs prix et distinctions pour mes compositions, tout en enseignant le piano. Mon parcours unique est marqué par ma détermination et ma sensibilité artistique particulière, qui nourrissent ma capacité d'analyse et ma créativité.
+            Diplômé en musique au Cégep et détenteur d'un baccalauréat en musique, je combine ma passion pour la composition musicale avec mon amour pour la gastronomie sherbrookoise. Pianiste passionné et enseignant, j'ai remporté plusieurs prix pour mes compositions. Ma sensibilité artistique particulière nourrit ma créativité et ma façon unique d'aborder tant la musique que la critique culinaire.
           </p>
           <p>
-            Actuellement, je poursuis une maîtrise en musique de film à Montréal, avec l'ambition de faire carrière dans la composition pour le cinéma. Fasciné par l'évolution des technologies musicales, j'explore constamment de nouvelles façons de créer et d'enseigner la musique. Cette même curiosité et rigueur, je les applique dans mes critiques culinaires, où je cherche à mettre en valeur les petits restaurateurs locaux de Sherbrooke.
-          </p>
-          <p>
-            Débrouillard et dévoué, j'aime partager mes découvertes culinaires pour aider les gens à faire les meilleurs choix gastronomiques. Mon approche analytique et ma sensibilité artistique me permettent d'offrir des critiques nuancées et constructives, toujours dans le but de soutenir la scène culinaire locale.
+            Actuellement en maîtrise en musique de film à Montréal, j'explore de nouvelles façons de créer et d'enseigner la musique. Cette même curiosité et rigueur, je les applique dans mes critiques culinaires, où je cherche à mettre en valeur les restaurateurs locaux de Sherbrooke, toujours avec une approche constructive et nuancée.
           </p>
         </div>
       </div>
@@ -249,21 +246,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const nicolasSection = document.getElementById('nicolas-section');
   const hoverSound = document.getElementById('hover-sound');
   let audioEnabled = false;
+  let isPlaying = false;
   
   // Activer l'audio après la première interaction utilisateur
   function enableAudio() {
     if (!audioEnabled) {
       audioEnabled = true;
-      // Tenter de jouer un son silencieux pour débloquer l'audio
-      const playPromise = hoverSound.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          hoverSound.pause();
-          hoverSound.currentTime = 0;
-        }).catch(error => {
-          console.log("L'audio n'est pas encore disponible");
-        });
-      }
+      // Précharger l'audio sans le jouer
+      hoverSound.load();
     }
   }
 
@@ -271,17 +261,22 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', enableAudio, { once: true });
   
   nicolasSection.addEventListener('mouseenter', function() {
-    if (audioEnabled) {
+    if (audioEnabled && !isPlaying) {
+      isPlaying = true;
       hoverSound.currentTime = 0;
-      hoverSound.play().catch(error => {
+      hoverSound.play().then(() => {
+        isPlaying = false;
+      }).catch(error => {
         console.log("Erreur de lecture audio:", error);
+        isPlaying = false;
       });
     }
   });
   
   nicolasSection.addEventListener('mouseleave', function() {
-    if (audioEnabled) {
+    if (audioEnabled && isPlaying) {
       hoverSound.pause();
+      isPlaying = false;
     }
   });
 });
