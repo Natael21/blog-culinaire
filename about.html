@@ -238,73 +238,51 @@ permalink: /about/
 </style>
 
 <audio id="hover-sound" preload="auto" style="display: none;">
+  <source src="/Emancipation.ogg" type="audio/ogg">
   <source src="/Emancipation.mp3" type="audio/mpeg">
+  Votre navigateur ne supporte pas l'élément audio.
 </audio>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const nicolasSection = document.getElementById('nicolas-section');
   const hoverSound = document.getElementById('hover-sound');
-  let audioContext;
-  let audioBuffer;
-  let sourceNode;
+  let isPlaying = false;
   
-  // Initialiser l'audio context
-  function initAudio() {
-    try {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      loadAudio();
-    } catch (e) {
-      console.log('Erreur lors de l\'initialisation de l\'audio:', e);
-    }
-  }
+  // Précharger l'audio
+  hoverSound.load();
   
-  // Charger le fichier audio
-  function loadAudio() {
-    fetch('/Emancipation.mp3')
-      .then(response => response.arrayBuffer())
-      .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-      .then(buffer => {
-        audioBuffer = buffer;
-        console.log('Audio chargé avec succès');
-      })
-      .catch(error => {
-        console.log('Erreur lors du chargement de l\'audio:', error);
-      });
-  }
+  // Attendre que l'audio soit prêt
+  hoverSound.addEventListener('canplaythrough', function() {
+    console.log('Audio prêt à être joué');
+  });
   
-  // Jouer l'audio
-  function playAudio() {
-    if (audioBuffer && audioContext) {
-      sourceNode = audioContext.createBufferSource();
-      sourceNode.buffer = audioBuffer;
-      sourceNode.connect(audioContext.destination);
-      sourceNode.start(0);
-      console.log('Lecture démarrée');
-    }
-  }
-  
-  // Arrêter l'audio
-  function stopAudio() {
-    if (sourceNode) {
-      sourceNode.stop();
-      sourceNode = null;
-      console.log('Lecture arrêtée');
-    }
-  }
-  
-  // Initialiser l'audio au chargement de la page
-  initAudio();
-  
-  // Gérer les événements de survol
   nicolasSection.addEventListener('mouseenter', function() {
-    console.log('Début du survol');
-    playAudio();
+    if (!isPlaying) {
+      console.log('Début du survol - Tentative de lecture');
+      isPlaying = true;
+      hoverSound.currentTime = 0;
+      
+      // Créer un nouveau contexte audio pour chaque lecture
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaElementSource(hoverSound);
+      source.connect(audioContext.destination);
+      
+      hoverSound.play().then(() => {
+        console.log('Lecture démarrée avec succès');
+      }).catch(error => {
+        console.log('Erreur de lecture:', error);
+        isPlaying = false;
+      });
+    }
   });
   
   nicolasSection.addEventListener('mouseleave', function() {
-    console.log('Fin du survol');
-    stopAudio();
+    if (isPlaying) {
+      console.log('Fin du survol - Arrêt de la lecture');
+      hoverSound.pause();
+      isPlaying = false;
+    }
   });
 });
 </script> 
