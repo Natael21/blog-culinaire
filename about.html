@@ -34,7 +34,7 @@ permalink: /about/
       </div>
     </div>
 
-    <div class="team-member">
+    <div class="team-member" id="nicolas-section">
       <div class="member-photo">
         <img src="/images/nicolas_profil.jpg" alt="Nicolas Girard">
       </div>
@@ -230,4 +230,24 @@ permalink: /about/
     font-size: 1rem;
   }
 }
-</style> 
+</style>
+
+<audio id="hover-sound" preload="auto">
+  <source src="/Emancipation.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const nicolasSection = document.getElementById('nicolas-section');
+  const hoverSound = document.getElementById('hover-sound');
+  
+  nicolasSection.addEventListener('mouseenter', function() {
+    hoverSound.currentTime = 0; // Réinitialise le son à chaque survol
+    hoverSound.play();
+  });
+  
+  nicolasSection.addEventListener('mouseleave', function() {
+    hoverSound.pause();
+  });
+});
+</script> 
