@@ -245,74 +245,18 @@ permalink: /about/
 document.addEventListener('DOMContentLoaded', function() {
   const nicolasSection = document.getElementById('nicolas-section');
   const hoverSound = document.getElementById('hover-sound');
-  let audioEnabled = false;
-  let isPlaying = false;
-  
-  // Activer l'audio après la première interaction utilisateur
-  function enableAudio() {
-    console.log('Tentative d\'activation de l\'audio...');
-    if (!audioEnabled) {
-      audioEnabled = true;
-      console.log('Audio activé, préchargement en cours...');
-      hoverSound.load();
-      console.log('État de l\'audio après préchargement:', {
-        readyState: hoverSound.readyState,
-        paused: hoverSound.paused,
-        currentTime: hoverSound.currentTime
-      });
-    }
-  }
-
-  // Activer l'audio au premier clic sur la page
-  document.addEventListener('click', enableAudio, { once: true });
   
   nicolasSection.addEventListener('mouseenter', function() {
-    console.log('MouseEnter - État actuel:', {
-      audioEnabled,
-      isPlaying,
-      readyState: hoverSound.readyState,
-      paused: hoverSound.paused,
-      currentTime: hoverSound.currentTime
+    console.log('Début du survol - Tentative de lecture');
+    hoverSound.currentTime = 0;
+    hoverSound.play().catch(error => {
+      console.log('Erreur de lecture:', error);
     });
-    
-    if (audioEnabled && !isPlaying) {
-      isPlaying = true;
-      hoverSound.currentTime = 0;
-      console.log('Tentative de lecture...');
-      hoverSound.play().then(() => {
-        console.log('Lecture réussie');
-        isPlaying = false;
-      }).catch(error => {
-        console.log('Erreur de lecture audio:', error);
-        console.log('État de l\'audio lors de l\'erreur:', {
-          readyState: hoverSound.readyState,
-          paused: hoverSound.paused,
-          currentTime: hoverSound.currentTime
-        });
-        isPlaying = false;
-      });
-    }
   });
   
   nicolasSection.addEventListener('mouseleave', function() {
-    console.log('MouseLeave - État actuel:', {
-      audioEnabled,
-      isPlaying,
-      readyState: hoverSound.readyState,
-      paused: hoverSound.paused,
-      currentTime: hoverSound.currentTime
-    });
-    
-    if (audioEnabled && isPlaying) {
-      console.log('Tentative de pause...');
-      hoverSound.pause();
-      isPlaying = false;
-      console.log('État après pause:', {
-        readyState: hoverSound.readyState,
-        paused: hoverSound.paused,
-        currentTime: hoverSound.currentTime
-      });
-    }
+    console.log('Fin du survol - Arrêt de la lecture');
+    hoverSound.pause();
   });
 });
 </script> 
