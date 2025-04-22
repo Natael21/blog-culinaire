@@ -248,6 +248,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const nicolasSection = document.getElementById('nicolas-section');
   const hoverSound = document.getElementById('hover-sound');
   let isPlaying = false;
+  let audioContext;
+  let source;
+  
+  // Initialiser l'audio context une seule fois
+  function initAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      source = audioContext.createMediaElementSource(hoverSound);
+      source.connect(audioContext.destination);
+    }
+  }
   
   // Précharger l'audio
   hoverSound.load();
@@ -255,18 +266,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // Attendre que l'audio soit prêt
   hoverSound.addEventListener('canplaythrough', function() {
     console.log('Audio prêt à être joué');
+    // Initialiser l'audio context après le premier clic sur la page
+    document.addEventListener('click', function initOnClick() {
+      initAudio();
+      document.removeEventListener('click', initOnClick);
+    }, { once: true });
   });
   
   nicolasSection.addEventListener('mouseenter', function() {
-    if (!isPlaying) {
+    if (!isPlaying && audioContext) {
       console.log('Début du survol - Tentative de lecture');
       isPlaying = true;
       hoverSound.currentTime = 0;
-      
-      // Créer un nouveau contexte audio pour chaque lecture
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioContext.createMediaElementSource(hoverSound);
-      source.connect(audioContext.destination);
       
       hoverSound.play().then(() => {
         console.log('Lecture démarrée avec succès');
