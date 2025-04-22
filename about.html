@@ -250,10 +250,16 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Activer l'audio après la première interaction utilisateur
   function enableAudio() {
+    console.log('Tentative d\'activation de l\'audio...');
     if (!audioEnabled) {
       audioEnabled = true;
-      // Précharger l'audio sans le jouer
+      console.log('Audio activé, préchargement en cours...');
       hoverSound.load();
+      console.log('État de l\'audio après préchargement:', {
+        readyState: hoverSound.readyState,
+        paused: hoverSound.paused,
+        currentTime: hoverSound.currentTime
+      });
     }
   }
 
@@ -261,22 +267,51 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', enableAudio, { once: true });
   
   nicolasSection.addEventListener('mouseenter', function() {
+    console.log('MouseEnter - État actuel:', {
+      audioEnabled,
+      isPlaying,
+      readyState: hoverSound.readyState,
+      paused: hoverSound.paused,
+      currentTime: hoverSound.currentTime
+    });
+    
     if (audioEnabled && !isPlaying) {
       isPlaying = true;
       hoverSound.currentTime = 0;
+      console.log('Tentative de lecture...');
       hoverSound.play().then(() => {
+        console.log('Lecture réussie');
         isPlaying = false;
       }).catch(error => {
-        console.log("Erreur de lecture audio:", error);
+        console.log('Erreur de lecture audio:', error);
+        console.log('État de l\'audio lors de l\'erreur:', {
+          readyState: hoverSound.readyState,
+          paused: hoverSound.paused,
+          currentTime: hoverSound.currentTime
+        });
         isPlaying = false;
       });
     }
   });
   
   nicolasSection.addEventListener('mouseleave', function() {
+    console.log('MouseLeave - État actuel:', {
+      audioEnabled,
+      isPlaying,
+      readyState: hoverSound.readyState,
+      paused: hoverSound.paused,
+      currentTime: hoverSound.currentTime
+    });
+    
     if (audioEnabled && isPlaying) {
+      console.log('Tentative de pause...');
       hoverSound.pause();
       isPlaying = false;
+      console.log('État après pause:', {
+        readyState: hoverSound.readyState,
+        paused: hoverSound.paused,
+        currentTime: hoverSound.currentTime
+      });
     }
   });
 });
