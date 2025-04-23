@@ -1340,10 +1340,10 @@
                         // Sauvegarder dans localStorage
                         localStorage.setItem('drafts', JSON.stringify(drafts));
 
-                        showNotification('Resto enregistré avec succès !', 'success');
+                        showNotification('Brouillon enregistré avec succès !', 'success');
                         
                         setTimeout(() => {
-                            window.location.href = 'restaurants.html';
+                            window.location.href = 'index.html';
                         }, 1500);
 
                     } catch (error) {
@@ -2252,8 +2252,8 @@ ${editorContent}`;
                 localStorage.removeItem('currentDraft');
                 localStorage.removeItem('pendingChanges');
                 
-                // Rediriger vers la page restaurants
-                window.location.href = 'restaurants.html';
+                // Rediriger vers la page d'administration
+                window.location.href = 'index.html';
             }
         }
 
@@ -2322,13 +2322,13 @@ ${editorContent}`;
                 try {
                     // Sauvegarder dans localStorage
                     localStorage.setItem('drafts', JSON.stringify(drafts));
-                    showNotification('Resto enregistré avec succès', 'success');
+                    showNotification('Brouillon enregistré avec succès', 'success');
                     
                     // Mettre à jour l'interface
                     updatePendingChangesButtons();
                     
                     setTimeout(() => {
-                        window.location.href = 'restaurants.html';
+                        window.location.href = 'index.html';
                     }, 1500);
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
@@ -2384,140 +2384,26 @@ ${editorContent}`;
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('=== Début du chargement de la page d\'édition ===');
-            
             // Vérifier si on charge un brouillon existant
             const urlParams = new URLSearchParams(window.location.search);
-            const filename = urlParams.get('filename');
-            console.log('Filename extrait de l\'URL:', filename);
+            const draftFilename = urlParams.get('draft');
             
-            if (filename) {
-                console.log('Tentative de chargement des données du restaurant...');
-                
-                // Charger les données du restaurant
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                console.log('Nombre de brouillons trouvés:', drafts.length);
-                console.log('Contenu des brouillons:', drafts);
-                
-                const restaurant = drafts.find(d => d.filename === filename);
-                console.log('Restaurant trouvé:', restaurant);
-                
-                if (restaurant) {
-                    console.log('Remplissage du formulaire avec les données du restaurant...');
-                    
-                    // Extraire l'état du contenu Markdown
-                    const stateMatch = restaurant.content.match(/state:\s*(\w+)/);
-                    const state = stateMatch ? stateMatch[1] : 'draft';
-                    console.log('État extrait du Markdown:', state);
-                    
-                    // Remplir le formulaire avec les données du restaurant
-                    document.getElementById('state').value = state;
-                    document.getElementById('title').value = restaurant.title;
-                    document.getElementById('date').value = restaurant.date;
-                    document.getElementById('description').value = restaurant.description;
-                    document.getElementById('address').value = restaurant.address;
-                    document.getElementById('style').value = restaurant.style;
-                    document.getElementById('price').value = restaurant.price;
-                    
-                    console.log('Données de base remplies:', {
-                        state: restaurant.state,
-                        title: restaurant.title,
-                        date: restaurant.date,
-                        description: restaurant.description,
-                        address: restaurant.address,
-                        style: restaurant.style,
-                        price: restaurant.price
-                    });
-                    
-                    // Gérer les options alimentaires
-                    if (restaurant.diet) {
-                        const diets = restaurant.diet.split(',');
-                        console.log('Options alimentaires trouvées:', diets);
-                        document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
-                        document.getElementById('vegan').checked = diets.includes('vegan-friendly');
-                    }
-                    
-                    // Charger les images
-                    if (restaurant.images && restaurant.images.length > 0) {
-                        console.log('Nombre d\'images trouvées:', restaurant.images.length);
-                        const mainImage = restaurant.images.find(img => img.isMain);
-                        if (mainImage) {
-                            console.log('Image principale trouvée:', mainImage);
-                            // Convertir base64 en File
-                            const mainImageFile = base64ToFile(mainImage.data, mainImage.name);
-                            handleMainImageUpload(mainImageFile);
-                        }
-                        
-                        // Charger les images de la galerie
-                        const galleryImages = restaurant.images.filter(img => !img.isMain);
-                        console.log('Nombre d\'images de galerie:', galleryImages.length);
-                        galleryImages.forEach(img => {
-                            const galleryFile = base64ToFile(img.data, img.name);
-                            handleGalleryUpload([galleryFile]);
-                        });
-                    }
-                    
-                    // Charger les notes et commentaires
-                    if (restaurant.ratings) {
-                        console.log('Notes trouvées:', restaurant.ratings);
-                        document.getElementById('foodScore').value = restaurant.ratings.food.score;
-                        document.getElementById('foodComment').value = restaurant.ratings.food.comment;
-                        document.getElementById('serviceScore').value = restaurant.ratings.service.score;
-                        document.getElementById('serviceComment').value = restaurant.ratings.service.comment;
-                        document.getElementById('ambianceScore').value = restaurant.ratings.ambiance.score;
-                        document.getElementById('ambianceComment').value = restaurant.ratings.ambiance.comment;
-                        document.getElementById('valueScore').value = restaurant.ratings.value.score;
-                        document.getElementById('valueComment').value = restaurant.ratings.value.comment;
-                        document.getElementById('originalityScore').value = restaurant.ratings.originality.score;
-                        document.getElementById('originalityComment').value = restaurant.ratings.originality.comment;
-                        document.getElementById('overallExperienceScore').value = restaurant.ratings.overall.score;
-                        document.getElementById('overallExperienceComment').value = restaurant.ratings.overall.comment;
-                    }
-                    
-                    // Charger le contenu de l'éditeur
-                    if (restaurant.content) {
-                        console.log('Contenu trouvé, longueur:', restaurant.content.length);
-                        editor.commands.setContent(restaurant.content);
-                    }
-                    
-                    // Mettre à jour l'aperçu
-                    updateMarkdownPreview();
-                    console.log('=== Fin du chargement des données ===');
-                } else {
-                    console.error('Aucun restaurant trouvé avec le filename:', filename);
-                }
-            } else {
-                console.error('Aucun filename trouvé dans l\'URL');
+            if (draftFilename) {
+                filename = draftFilename;
+                loadDraft(draftFilename);
             }
             
             // Mettre à jour les boutons
             updatePendingChangesButtons();
         });
-
-        // Fonction pour convertir base64 en File
-        function base64ToFile(base64, filename) {
-            const arr = base64.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            
-            while(n--){
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            
-            return new File([u8arr], filename, {type: mime});
-        }
     </script>
 </head>
 <body>
     <header class="admin-header">
-        <h1 class="admin-title">Édition de Restaurant</h1>
-        <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="index.html" class="back-button">
-                <i class="fas fa-arrow-left"></i> Retour à l'administration
-            </a>
-        </div>
+        <h1 class="admin-title">Nouveau Restaurant</h1>
+        <a href="index.html" class="action-button">
+            <i class="fas fa-arrow-left"></i> Retour à l'administration
+        </a>
     </header>
 
     <div class="page-container">
@@ -2526,15 +2412,6 @@ ${editorContent}`;
                 <!-- Informations de base -->
                 <div class="form-section">
                     <h2 class="form-section-title">Informations de base</h2>
-                    <div class="form-group">
-                        <label for="state">État</label>
-                        <select id="state" class="form-control" required>
-                            <option value="draft">Brouillon</option>
-                            <option value="ready">Prêt à publier</option>
-                        </select>
-                        <div class="invalid-feedback">Veuillez sélectionner un état</div>
-                    </div>
-
                     <div class="form-group">
                         <label for="title" class="form-label">Nom du restaurant</label>
                         <div class="input-wrapper">
@@ -2779,12 +2656,14 @@ ${editorContent}`;
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="action-button">
-                        <i class="fas fa-save"></i> Enregistrer les modifications
-                    </button>
-                    <button type="button" class="action-button cancel-button" onclick="cancelChanges()">
-                        <i class="fas fa-times"></i> Annuler
-                    </button>
+                    <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="submit" class="action-button" id="saveButton">
+                            <i class="fas fa-save"></i> Enregistrer un brouillon
+                        </button>
+                        <button type="button" class="action-button cancel" onclick="cancelForm()">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
