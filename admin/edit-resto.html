@@ -1218,16 +1218,10 @@
         // Initialiser TipTap
         let editor;
         window.addEventListener('load', () => {
-            console.log('=== INITIALISATION DE LA PAGE ===');
-            console.log('Étape 1: Début de l\'initialisation');
-            
             // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
             const saveButton = document.getElementById('saveButton');
-            console.log('Étape 2: Recherche du bouton de sauvegarde');
             
             if (saveButton) {
-                console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
-                
                 // Ajouter le spinner au bouton
                 const spinnerDiv = document.createElement('div');
                 spinnerDiv.className = 'spinner';
@@ -1239,7 +1233,6 @@
                 saveButton.appendChild(textSpan);
                 
                 saveButton.addEventListener('click', async function(e) {
-                    console.log('Étape 4: Clic sur le bouton détecté');
                     e.preventDefault();
                     
                     // Afficher l'état de chargement
@@ -1247,7 +1240,6 @@
                     
                     const form = document.getElementById('restaurantForm');
                     if (form) {
-                        console.log('Étape 5: Formulaire trouvé, déclenchement de la soumission');
                         form.dispatchEvent(new Event('submit'));
                     }
                     
@@ -1261,22 +1253,15 @@
 
             // Ajouter un gestionnaire d'événements sur le formulaire
             const form = document.getElementById('restaurantForm');
-            console.log('Étape 9: Recherche du formulaire pour le gestionnaire de soumission');
             
             if (form) {
-                console.log('Étape 10: Formulaire trouvé, ajout du gestionnaire de soumission');
                 form.addEventListener('submit', async function(e) {
-                    console.log('Étape 11: Événement de soumission du formulaire déclenché');
                     e.preventDefault();
-                    console.log('Étape 12: Début de la validation');
                     
                     if (!validateForm()) {
-                        console.log('Étape 13: Validation échouée');
                         return;
                     }
                     
-                    console.log('Étape 14: Validation réussie, traitement du formulaire');
-
                     try {
                         // Générer le nom du fichier à partir du titre
                         const title = document.getElementById('title').value;
@@ -1343,9 +1328,8 @@
                         showNotification('Restaurant enregistré avec succès !', 'success');
                         
                         setTimeout(() => {
-                            window.location.href = 'restaurants.html';
+                            window.location.href = `edit-resto.html?filename=${filePath}`;
                         }, 1500);
-
                     } catch (error) {
                         console.error('Erreur:', error);
                         showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
@@ -2370,16 +2354,190 @@ ${editorContent}`;
         document.addEventListener('DOMContentLoaded', initializeForm);
 
         // Fonction pour charger un resto
-        function loadDraft(filename) {
-                showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
+        async function loadDraft(filename) {
+            try {
+                // D'abord vérifier dans le localStorage
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                const localDraft = drafts.find(d => d.filename === filename);
+
+                let markdown;
+                let restaurantData;
+                let content;
+
+                if (localDraft) {
+                    // Utiliser les données du localStorage
+                    markdown = localDraft.content;
+                    const frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
+                    content = markdown.split('---')[2].trim();
+
+                    // Parser le front matter
+                    restaurantData = {};
+                    frontMatter.split('\n').forEach(line => {
+                        const [key, ...value] = line.split(':');
+                        if (key && value) {
+                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
+                        }
+                    });
+
+                    // Charger les images depuis le localStorage
+                    if (localDraft.images && localDraft.images.length > 0) {
+                        // Trouver l'image principale
+                        const mainImage = localDraft.images.find(img => img.isMain);
+                        if (mainImage) {
+                            const mainImageBlob = base64ToBlob(mainImage.data, 'image/webp');
+                            mainImageFile = new File([mainImageBlob], mainImage.name, { type: 'image/webp' });
+                            handleMainImageUpload(mainImageFile);
+                        }
+
+                        // Charger les images de la galerie
+                        const galleryImages = localDraft.images.filter(img => !img.isMain);
+                        galleryImageFiles = [];
+                        galleryImages.forEach(img => {
+                            const galleryBlob = base64ToBlob(img.data, 'image/webp');
+                            const galleryFile = new File([galleryBlob], img.name, { type: 'image/webp' });
+                            galleryImageFiles.push(galleryFile);
+                        });
+                        updateGalleryPreview();
+                    }
+                } else {
+                    // Si pas dans le localStorage, aller chercher sur GitHub
+                    console.log('=== TENTATIVE DE RÉCUPÉRATION DEPUIS GITHUB ===');
+                    console.log('Repository:', repo);
+                    const repo = 'Natael21/blog-culinaire';
+                    const path = `_restaurants/${filename}`;
+                    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+                    console.log('URL de la requête:', url);
+
+                    // Récupérer le contenu du fichier
+                    const response = await fetch(url);
+                    console.log('Statut de la réponse:', response.status);
+                    
+                    if (!response.ok) {
+                        console.error('Erreur lors de la récupération du fichier:', {
+                            status: response.status,
+                            statusText: response.statusText
+                        });
+                        throw new Error('Fichier non trouvé');
+                    }
+
+                    const data = await response.json();
+                    console.log('Données reçues:', {
+                        type: data.type,
+                        size: data.size,
+                        name: data.name
+                    });
+                    markdown = atob(data.content);
+
+                    // Extraire les données du markdown
+                    const frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
+                    content = markdown.split('---')[2].trim();
+
+                    // Parser le front matter
+                    restaurantData = {};
+                    frontMatter.split('\n').forEach(line => {
+                        const [key, ...value] = line.split(':');
+                        if (key && value) {
+                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
+                        }
+                    });
+
+                    // Charger les images depuis GitHub
+                    if (restaurantData.image) {
+                        const imagePath = restaurantData.image.replace(/^\//, '');
+                        const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${imagePath}`;
+                        
+                        try {
+                            const imageResponse = await fetch(imageUrl);
+                            if (imageResponse.ok) {
+                                const imageBlob = await imageResponse.blob();
+                                mainImageFile = new File([imageBlob], imagePath.split('/').pop(), { type: 'image/webp' });
+                                handleMainImageUpload(mainImageFile);
+                            }
+                        } catch (error) {
+                            console.error('Erreur lors du chargement de l\'image principale:', error);
+                        }
+                    }
+
+                    // Charger les images de la galerie
+                    if (restaurantData.images) {
+                        galleryImageFiles = [];
+                        for (const imagePath of restaurantData.images) {
+                            const cleanPath = imagePath.image.replace(/^\//, '');
+                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${cleanPath}`;
+                            
+                            try {
+                                const imageResponse = await fetch(imageUrl);
+                                if (imageResponse.ok) {
+                                    const imageBlob = await imageResponse.blob();
+                                    const galleryFile = new File([imageBlob], cleanPath.split('/').pop(), { type: 'image/webp' });
+                                    galleryImageFiles.push(galleryFile);
+                                }
+                            } catch (error) {
+                                console.error('Erreur lors du chargement d\'une image de la galerie:', error);
+                            }
+                        }
+                        updateGalleryPreview();
+                    }
+                }
+
+                // Remplir les champs du formulaire
+                document.getElementById('state').value = restaurantData.state || 'draft';
+                document.getElementById('title').value = restaurantData.title || '';
+                document.getElementById('date').value = restaurantData.date || '';
+                document.getElementById('description').value = restaurantData.description || '';
+                document.getElementById('address').value = restaurantData.address || '';
+                document.getElementById('style').value = restaurantData.style || '';
+                document.getElementById('price').value = restaurantData.price || '';
+                
+                // Remplir les options alimentaires
+                const diets = (restaurantData.diet || '').split(',');
+                document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
+                document.getElementById('vegan').checked = diets.includes('vegan-friendly');
+
+                // Remplir les notes et commentaires
+                const ratingsMatch = frontMatter.match(/ratings:([\s\S]*?)(?=\n\w|$)/);
+                if (ratingsMatch) {
+                    const ratings = JSON.parse(ratingsMatch[1]);
+                    document.getElementById('foodScore').value = ratings.food.score;
+                    document.getElementById('foodComment').value = ratings.food.comment;
+                    document.getElementById('serviceScore').value = ratings.service.score;
+                    document.getElementById('serviceComment').value = ratings.service.comment;
+                    document.getElementById('ambianceScore').value = ratings.ambiance.score;
+                    document.getElementById('ambianceComment').value = ratings.ambiance.comment;
+                    document.getElementById('valueScore').value = ratings.value.score;
+                    document.getElementById('valueComment').value = ratings.value.comment;
+                    document.getElementById('originalityScore').value = ratings.originality.score;
+                    document.getElementById('originalityComment').value = ratings.originality.comment;
+                    document.getElementById('overallExperienceScore').value = ratings.overall.score;
+                    document.getElementById('overallExperienceComment').value = ratings.overall.comment;
+                }
+
+                // Mettre à jour les affichages des notes
+                document.querySelectorAll('.rating-value').forEach(el => {
+                    el.textContent = el.previousElementSibling.value;
+                });
+                calculateOverallRating();
+
+                // Remplir l'éditeur avec le contenu
+                editor.commands.setContent(content);
+
+                // Mettre à jour l'aperçu
+                updateMarkdownPreview();
+
+            } catch (error) {
+                console.error('Erreur lors du chargement du restaurant:', error);
+                showNotification('Erreur lors du chargement du restaurant', 'error');
+            }
         }
 
-        // Fonction pour annuler les modifications
-        function cancelChanges() {
-            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
-                deleteDraft(filename);
-                window.location.href = 'edit-resto.html';
+        // Fonction utilitaire pour convertir base64 en Blob
+        function base64ToBlob(base64, type) {
+            const binaryString = window.atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
             }
+            return new Blob([bytes], { type });
         }
 
         // Initialisation
@@ -2389,13 +2547,20 @@ ${editorContent}`;
             const draftFilename = urlParams.get('draft');
             
             if (draftFilename) {
-                filename = draftFilename;
                 loadDraft(draftFilename);
             }
             
             // Mettre à jour les boutons
             updatePendingChangesButtons();
         });
+
+        // Fonction pour annuler les modifications
+        function cancelChanges() {
+            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
+                deleteDraft(filename);
+                window.location.href = 'edit-resto.html';
+            }
+        }
     </script>
 </head>
 <body>
