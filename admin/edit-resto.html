@@ -1290,7 +1290,7 @@
                         const date = new Date().toISOString().split('T')[0];
                         const filePath = `${date}-${filename}.md`;
 
-                        // Créer un objet pour stocker les données du brouillon
+                        // Créer un objet pour stocker les données du resto
                         const draftData = {
                             filename: filePath,
                             title: title,
@@ -1316,21 +1316,21 @@
                             });
                         }
 
-                        // Récupérer les brouillons existants
+                        // Récupérer les restos existants
                         const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                         
-                        // Vérifier si un brouillon avec le même nom existe déjà
+                        // Vérifier si un resto avec le même nom existe déjà
                         const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
                         
                         if (existingIndex !== -1) {
-                            // Mettre à jour le brouillon existant
+                            // Mettre à jour le resto existant
                             drafts[existingIndex] = {
                                 ...drafts[existingIndex],
                                 ...draftData,
                                 lastModified: new Date().toISOString()
                             };
                         } else {
-                            // Ajouter un nouveau brouillon
+                            // Ajouter un nouveau resto
                             drafts.push({
                                 ...draftData,
                                 lastModified: new Date().toISOString()
@@ -1340,15 +1340,15 @@
                         // Sauvegarder dans localStorage
                         localStorage.setItem('drafts', JSON.stringify(drafts));
 
-                        showNotification('Brouillon enregistré avec succès !', 'success');
+                        showNotification('Restaurant enregistré avec succès !', 'success');
                         
                         setTimeout(() => {
-                            window.location.href = 'index.html';
+                            window.location.href = 'restaurants.html';
                         }, 1500);
 
                     } catch (error) {
                         console.error('Erreur:', error);
-                        showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
+                        showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
                         
                         // En cas d'erreur, on cache le spinner
                         const saveButton = document.getElementById('saveButton');
@@ -2253,11 +2253,11 @@ ${editorContent}`;
                 localStorage.removeItem('pendingChanges');
                 
                 // Rediriger vers la page d'administration
-                window.location.href = 'index.html';
+                window.location.href = 'restaurants.html';
             }
         }
 
-        // Fonction pour sauvegarder le brouillon
+        // Fonction pour sauvegarder le resto
         async function saveDraft() {
             try {
                 const formData = new FormData(document.getElementById('restaurantForm'));
@@ -2274,7 +2274,7 @@ ${editorContent}`;
                 const date = new Date().toISOString().split('T')[0];
                 const filePath = `${date}-${filename}.md`;
 
-                // Créer l'objet du brouillon avec le contenu initial
+                // Créer l'objet du resto avec le contenu initial
                 let markdownContent = generateMarkdown();
                 const draftData = {
                     filename: filePath,
@@ -2305,43 +2305,43 @@ ${editorContent}`;
                     });
                 }
 
-                // Récupérer les brouillons existants
+                // Récupérer les resto existants
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 
-                // Vérifier si un brouillon avec le même nom existe déjà
+                // Vérifier si un resto avec le même nom existe déjà
                 const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
                 
                 if (existingIndex !== -1) {
-                    // Mettre à jour le brouillon existant
+                    // Mettre à jour le resto existant
                     drafts[existingIndex] = draftData;
                 } else {
-                    // Ajouter un nouveau brouillon
+                    // Ajouter un nouveau resto
                     drafts.push(draftData);
                 }
 
                 try {
                     // Sauvegarder dans localStorage
                     localStorage.setItem('drafts', JSON.stringify(drafts));
-                    showNotification('Brouillon enregistré avec succès', 'success');
+                    showNotification('Restaurant enregistré avec succès', 'success');
                     
                     // Mettre à jour l'interface
                     updatePendingChangesButtons();
                     
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'restaurants.html';
                     }, 1500);
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
-                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des brouillons existants.', 'error');
+                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des restos existants.', 'error');
                     } else {
-                        showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+                        showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
                     }
                     console.error('Erreur de stockage:', storageError);
                 }
 
             } catch (error) {
                 console.error('Erreur:', error);
-                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+                showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
             }
         }
 
@@ -2369,7 +2369,7 @@ ${editorContent}`;
         // Initialiser le formulaire une fois le DOM chargé
         document.addEventListener('DOMContentLoaded', initializeForm);
 
-        // Fonction pour charger un brouillon
+        // Fonction pour charger un resto
         function loadDraft(filename) {
                 showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
         }
@@ -2378,13 +2378,13 @@ ${editorContent}`;
         function cancelChanges() {
             if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
                 deleteDraft(filename);
-                window.location.href = 'restaurants.html';
+                window.location.href = 'edit-resto.html';
             }
         }
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
-            // Vérifier si on charge un brouillon existant
+            // Vérifier si on charge un resto existant
             const urlParams = new URLSearchParams(window.location.search);
             const draftFilename = urlParams.get('draft');
             
@@ -2412,6 +2412,17 @@ ${editorContent}`;
                 <!-- Informations de base -->
                 <div class="form-section">
                     <h2 class="form-section-title">Informations de base</h2>
+                    <div class="form-group">
+                        <label for="state" class="form-label">État du restaurant</label>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="state" name="state" required>
+                                <option value="draft">Draft</option>
+                                <option value="ready">Ready</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner l'état du restaurant</div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="title" class="form-label">Nom du restaurant</label>
                         <div class="input-wrapper">
@@ -2658,7 +2669,7 @@ ${editorContent}`;
                 <div class="form-actions">
                     <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
                         <button type="submit" class="action-button" id="saveButton">
-                            <i class="fas fa-save"></i> Enregistrer un brouillon
+                            <i class="fas fa-save"></i> Enregistrer les modifications
                         </button>
                         <button type="button" class="action-button cancel" onclick="cancelForm()">
                             <i class="fas fa-times"></i> Annuler
