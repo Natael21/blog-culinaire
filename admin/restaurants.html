@@ -744,9 +744,10 @@
                         </div>
                     </div>
                     <div class="restaurant-actions">
-                        <button class="action-button edit-button" onclick="editRestaurant('${restaurant.filename}')">
-                            <i class="fas fa-pencil-alt"></i> Éditer
-                        </button>
+                        <a href="edit-resto.html?id=${restaurant.id}" class="action-button edit-button">
+                            <i class="fas fa-edit"></i>
+                            <span class="button-text">Modifier</span>
+                        </a>
                         <button class="action-button delete-button" onclick="deleteRestaurant('${restaurant.filename}')">
                             <i class="fas fa-trash"></i> Supprimer
                         </button>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier Restaurant - Administration</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="module">
+      import { Editor } from 'https://esm.sh/@tiptap/core'
+      import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
+      import Document from 'https://esm.sh/@tiptap/extension-document'
+      import Paragraph from 'https://esm.sh/@tiptap/extension-paragraph'
+      import Text from 'https://esm.sh/@tiptap/extension-text'
+      import Bold from 'https://esm.sh/@tiptap/extension-bold'
+      import Italic from 'https://esm.sh/@tiptap/extension-italic'
+      import BulletList from 'https://esm.sh/@tiptap/extension-bullet-list'
+      import OrderedList from 'https://esm.sh/@tiptap/extension-ordered-list'
+      import ListItem from 'https://esm.sh/@tiptap/extension-list-item'
+
+      window.Editor = Editor;
+      window.StarterKit = StarterKit;
+      window.Document = Document;
+      window.Paragraph = Paragraph;
+      window.Text = Text;
+      window.Bold = Bold;
+      window.Italic = Italic;
+      window.BulletList = BulletList;
+      window.OrderedList = OrderedList;
+      window.ListItem = ListItem;
+    </script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #e74c3c;
+            --accent-color: #3498db;
+            --background-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+            --input-bg: #ffffff;
+            --input-border: #e1e5ea;
+            --input-focus: #3498db;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+
+        .page-container {
+            display: flex;
+            gap: 40px;
+            padding: 0 2rem 2rem;
+            position: relative;
+            min-height: calc(100vh - 120px);
+        }
+
+        .header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--background-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .admin-header {
+            padding: 2rem 2rem 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
+        }
+
+        .admin-title {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 700;
+            background: linear-gradient(120deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .back-button {
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-left: auto;
+        }
+
+        .back-button:hover {
+            background: #1a2634;
+            transform: translateY(-2px);
+        }
+
+        .form-column {
+            flex: 1;
+            max-width: 60%;
+        }
+
+        .preview-column {
+            flex: 1;
+            max-width: 40%;
+            position: sticky;
+            top: 100px;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-section:first-child,
+        .preview-title {
+            margin-top: 0;
+        }
+
+        /* Styles pour les champs en erreur */
+        .form-control.is-invalid,
+        .form-control.show-error.is-invalid,
+        select.is-invalid,
+        textarea.is-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        /* Style pour les messages d'erreur */
+        .invalid-feedback {
+            display: none;
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Afficher les messages d'erreur */
+        .form-control.is-invalid + .invalid-feedback,
+        .form-control.show-error.is-invalid + .invalid-feedback,
+        select.is-invalid + .invalid-feedback,
+        textarea.is-invalid + .invalid-feedback {
+            display: block !important;
+        }
+
+        /* Style pour la zone d'upload en erreur */
+        .upload-zone.show-error {
+            border: 2px dashed var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        /* Style pour les sliders en erreur */
+        .form-range.is-invalid::-webkit-slider-thumb {
+            background-color: var(--secondary-color) !important;
+        }
+
+        .form-range.is-invalid::-webkit-slider-runnable-track {
+            background-color: rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .form-section {
+            background: var(--card-bg);
+            padding: 35px;
+            margin-bottom: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: none;
+        }
+
+        .form-section-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #edf2f7;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: -0.2px;
+        }
+
+        .form-check-container {
+            padding-left: 16px;
+        }
+
+        .form-check {
+            margin-bottom: 12px;
+            padding-left: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 32px;
+        }
+
+        .form-check-input {
+            position: relative;
+            margin: 0;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--input-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: var(--input-bg);
+            flex-shrink: 0;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23fff' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+            background-size: 14px;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+        }
+
+        .form-select:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1a2634;
+            border-color: #1a2634;
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-draft {
+            background-color: #f1c40f;
+            color: #fff;
+        }
+
+        .status-ready {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <h1 class="admin-title">Modifier Restaurant</h1>
+        <a href="#" class="back-button" id="backButton">
+            <i class="fas fa-arrow-left"></i>
+            Retour à l'administration
+        </a>
+    </div>
+
+    <div class="page-container">
+        <div class="form-column">
+            <form id="restaurantForm">
+                <div class="form-section">
+                    <h2 class="form-section-title">Informations Générales</h2>
+                    
+                    <div class="form-group">
+                        <label for="status">État</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="draft">Brouillon</option>
+                            <option value="ready">Prêt</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">Titre</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Adresse</label>
+                        <input type="text" class="form-control" id="address" name="address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="style">Style de cuisine</label>
+                        <input type="text" class="form-control" id="style" name="style" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Date de visite</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="content">Contenu</label>
+                        <div id="editor"></div>
+                        <input type="hidden" id="content" name="content">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">Image principale</label>
+                        <div class="upload-zone" id="imageUpload">
+                            <input type="file" id="image" name="image" accept="image/*" style="display: none;">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Glissez-déposez une image ou cliquez pour sélectionner</p>
+                            </div>
+                            <div class="image-preview" style="display: none;">
+                                <img src="" alt="Aperçu">
+                                <button type="button" class="remove-image">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='restaurants.html'">
+                        <i class="fas fa-times"></i>
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="saveButton">
+                        <i class="fas fa-save"></i>
+                        Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('=== DÉBUT DU CHARGEMENT DE LA PAGE EDIT-RESTO ===');
+            
+            // Récupérer l'ID du restaurant depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const restaurantId = urlParams.get('id');
+            console.log('ID du restaurant à modifier:', restaurantId);
+
+            if (!restaurantId) {
+                console.error('Aucun ID de restaurant trouvé dans l\'URL');
+                alert('Aucun restaurant sélectionné');
+                window.location.href = 'restaurants.html';
+                return;
+            }
+
+            try {
+                console.log('Tentative de chargement des données du restaurant...');
+                // Charger les données du restaurant
+                const response = await fetch(`/api/restaurants/${restaurantId}`);
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement du restaurant');
+                }
+                const restaurant = await response.json();
+                console.log('Données du restaurant chargées:', restaurant);
+
+                // Pré-remplir le formulaire
+                console.log('Pré-remplissage du formulaire...');
+                document.getElementById('status').value = restaurant.status;
+                document.getElementById('title').value = restaurant.title;
+                document.getElementById('address').value = restaurant.address;
+                document.getElementById('style').value = restaurant.style;
+                document.getElementById('date').value = restaurant.date;
+                document.getElementById('content').value = restaurant.content;
+                console.log('Formulaire pré-rempli avec succès');
+
+                // Charger les images
+                console.log('Chargement des images...');
+                if (restaurant.images) {
+                    const imageContainer = document.getElementById('imageContainer');
+                    console.log('Nombre d\'images à charger:', restaurant.images.length);
+                    restaurant.images.forEach(image => {
+                        console.log('Chargement de l\'image:', image.url);
+                        const imgElement = document.createElement('img');
+                        imgElement.src = image.url;
+                        imgElement.alt = image.alt;
+                        imageContainer.appendChild(imgElement);
+                    });
+                }
+
+                // Modifier le comportement du bouton de sauvegarde
+                console.log('Configuration du bouton de sauvegarde...');
+                const saveButton = document.getElementById('saveButton');
+                saveButton.textContent = 'Enregistrer les modifications';
+                saveButton.onclick = async function(e) {
+                    console.log('=== DÉBUT DE LA SAUVEGARDE ===');
+                    e.preventDefault();
+                    
+                    // Récupérer les données du formulaire
+                    const formData = new FormData(document.getElementById('restaurantForm'));
+                    const data = Object.fromEntries(formData.entries());
+                    console.log('Données du formulaire:', data);
+                    
+                    // Ajouter l'ID du restaurant
+                    data.id = restaurantId;
+
+                    try {
+                        console.log('Envoi des données au serveur...');
+                        // Sauvegarder les modifications
+                        const saveResponse = await fetch('/api/restaurants/update', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        if (!saveResponse.ok) {
+                            throw new Error('Erreur lors de la sauvegarde');
+                        }
+
+                        console.log('Sauvegarde réussie, redirection vers la page admin...');
+                        // Rediriger vers la page admin
+                        window.location.href = 'index.html';
+                    } catch (error) {
+                        console.error('Erreur lors de la sauvegarde:', error);
+                        alert('Une erreur est survenue lors de la sauvegarde');
+                    }
+                };
+            } catch (error) {
+                console.error('Erreur lors du chargement du restaurant:', error);
+                alert('Une erreur est survenue lors du chargement du restaurant');
+                window.location.href = 'restaurants.html';
+            }
+        });
+
+        // Fonction pour afficher le modal de confirmation
+        function showConfirmationModal() {
+            console.log('Affichage du modal de confirmation...');
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                        <p class="confirmation-message">Toutes les modifications non sauvegardées seront perdues. Voulez-vous continuer ?</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Confirmer</button>
+                            <button class="confirmation-button cancel">Annuler</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                console.log('Modal créé et ajouté au DOM');
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    console.log('Confirmation de l\'annulation');
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    console.log('Annulation de l\'annulation');
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Modifier le bouton Retour pour utiliser la confirmation
+        document.getElementById('backButton').onclick = async function(e) {
+            console.log('Clic sur le bouton Retour à l\'administration');
+            e.preventDefault();
+            const confirmed = await showConfirmationModal();
+            if (confirmed) {
+                console.log('Redirection vers index.html');
+                window.location.href = 'index.html';
+            }
+        };
+    </script>
+</body>
+</html> 
