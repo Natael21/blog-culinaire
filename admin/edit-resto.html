@@ -2384,17 +2384,34 @@ ${editorContent}`;
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('=== Début du chargement de la page d\'édition ===');
+            
             // Vérifier si on charge un brouillon existant
             const urlParams = new URLSearchParams(window.location.search);
             const filename = urlParams.get('filename');
+            console.log('Filename extrait de l\'URL:', filename);
             
             if (filename) {
+                console.log('Tentative de chargement des données du restaurant...');
+                
                 // Charger les données du restaurant
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                console.log('Nombre de brouillons trouvés:', drafts.length);
+                console.log('Contenu des brouillons:', drafts);
+                
                 const restaurant = drafts.find(d => d.filename === filename);
+                console.log('Restaurant trouvé:', restaurant);
                 
                 if (restaurant) {
+                    console.log('Remplissage du formulaire avec les données du restaurant...');
+                    
+                    // Extraire l'état du contenu Markdown
+                    const stateMatch = restaurant.content.match(/state:\s*(\w+)/);
+                    const state = stateMatch ? stateMatch[1] : 'draft';
+                    console.log('État extrait du Markdown:', state);
+                    
                     // Remplir le formulaire avec les données du restaurant
+                    document.getElementById('state').value = state;
                     document.getElementById('title').value = restaurant.title;
                     document.getElementById('date').value = restaurant.date;
                     document.getElementById('description').value = restaurant.description;
@@ -2402,17 +2419,30 @@ ${editorContent}`;
                     document.getElementById('style').value = restaurant.style;
                     document.getElementById('price').value = restaurant.price;
                     
+                    console.log('Données de base remplies:', {
+                        state: restaurant.state,
+                        title: restaurant.title,
+                        date: restaurant.date,
+                        description: restaurant.description,
+                        address: restaurant.address,
+                        style: restaurant.style,
+                        price: restaurant.price
+                    });
+                    
                     // Gérer les options alimentaires
                     if (restaurant.diet) {
                         const diets = restaurant.diet.split(',');
+                        console.log('Options alimentaires trouvées:', diets);
                         document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
                         document.getElementById('vegan').checked = diets.includes('vegan-friendly');
                     }
                     
                     // Charger les images
                     if (restaurant.images && restaurant.images.length > 0) {
+                        console.log('Nombre d\'images trouvées:', restaurant.images.length);
                         const mainImage = restaurant.images.find(img => img.isMain);
                         if (mainImage) {
+                            console.log('Image principale trouvée:', mainImage);
                             // Convertir base64 en File
                             const mainImageFile = base64ToFile(mainImage.data, mainImage.name);
                             handleMainImageUpload(mainImageFile);
@@ -2420,6 +2450,7 @@ ${editorContent}`;
                         
                         // Charger les images de la galerie
                         const galleryImages = restaurant.images.filter(img => !img.isMain);
+                        console.log('Nombre d\'images de galerie:', galleryImages.length);
                         galleryImages.forEach(img => {
                             const galleryFile = base64ToFile(img.data, img.name);
                             handleGalleryUpload([galleryFile]);
@@ -2428,6 +2459,7 @@ ${editorContent}`;
                     
                     // Charger les notes et commentaires
                     if (restaurant.ratings) {
+                        console.log('Notes trouvées:', restaurant.ratings);
                         document.getElementById('foodScore').value = restaurant.ratings.food.score;
                         document.getElementById('foodComment').value = restaurant.ratings.food.comment;
                         document.getElementById('serviceScore').value = restaurant.ratings.service.score;
@@ -2444,12 +2476,18 @@ ${editorContent}`;
                     
                     // Charger le contenu de l'éditeur
                     if (restaurant.content) {
+                        console.log('Contenu trouvé, longueur:', restaurant.content.length);
                         editor.commands.setContent(restaurant.content);
                     }
                     
                     // Mettre à jour l'aperçu
                     updateMarkdownPreview();
+                    console.log('=== Fin du chargement des données ===');
+                } else {
+                    console.error('Aucun restaurant trouvé avec le filename:', filename);
                 }
+            } else {
+                console.error('Aucun filename trouvé dans l\'URL');
             }
             
             // Mettre à jour les boutons
@@ -2474,10 +2512,12 @@ ${editorContent}`;
 </head>
 <body>
     <header class="admin-header">
-        <h1 class="admin-title">Nouveau Restaurant</h1>
-        <a href="index.html" class="action-button">
-            <i class="fas fa-arrow-left"></i> Retour à l'administration
-        </a>
+        <h1 class="admin-title">Édition de Restaurant</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <a href="index.html" class="back-button">
+                <i class="fas fa-arrow-left"></i> Retour à l'administration
+            </a>
+        </div>
     </header>
 
     <div class="page-container">
@@ -2486,6 +2526,15 @@ ${editorContent}`;
                 <!-- Informations de base -->
                 <div class="form-section">
                     <h2 class="form-section-title">Informations de base</h2>
+                    <div class="form-group">
+                        <label for="state">État</label>
+                        <select id="state" class="form-control" required>
+                            <option value="draft">Brouillon</option>
+                            <option value="ready">Prêt à publier</option>
+                        </select>
+                        <div class="invalid-feedback">Veuillez sélectionner un état</div>
+                    </div>
+
                     <div class="form-group">
                         <label for="title" class="form-label">Nom du restaurant</label>
                         <div class="input-wrapper">
