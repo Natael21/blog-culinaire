@@ -744,7 +744,7 @@
                         </div>
                     </div>
                     <div class="restaurant-actions">
-                        <a href="edit-resto.html?id=${restaurant.id}" class="action-button edit-button">
+                        <a href="edit-resto.html?filename=${restaurant.filename}" class="action-button edit-button">
                             <i class="fas fa-edit"></i>
                             <span class="button-text">Modifier</span>
                         </a>
@@ -806,9 +806,8 @@
 
         // Fonction pour éditer un restaurant
         function editRestaurant(filename) {
-            // Temporairement désactivé
-            console.log('Édition désactivée pour:', filename);
-            return false;
+            window.location.href = `edit-resto.html?filename=${filename}`;
+            return true;
         }
 
         // Fonction de recherche

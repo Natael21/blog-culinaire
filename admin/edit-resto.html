@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier Restaurant - Administration</title>
+    <title>Nouveau Restaurant - Administration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
@@ -56,7 +56,7 @@
         .page-container {
             display: flex;
             gap: 40px;
-            padding: 80px 2rem 2rem;
+            padding: 0 2rem 2rem;
             position: relative;
             min-height: calc(100vh - 120px);
         }
@@ -73,7 +73,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            box-shadow: var(--box-shadow);
+        }
+
+        .admin-header {
+            padding: 2rem 2rem 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
         }
 
         .admin-title {
@@ -90,7 +98,7 @@
         .back-button {
             padding: 12px 24px;
             background: var(--primary-color);
-            color: white !important;
+            color: white;
             border: none;
             border-radius: var(--border-radius);
             font-weight: 600;
@@ -100,19 +108,74 @@
             gap: 8px;
             transition: all 0.3s ease;
             text-decoration: none;
+            margin-left: auto;
         }
 
         .back-button:hover {
             background: #1a2634;
             transform: translateY(-2px);
-            color: white !important;
-            text-decoration: none;
         }
 
         .form-column {
             flex: 1;
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 60%;
+        }
+
+        .preview-column {
+            flex: 1;
+            max-width: 40%;
+            position: sticky;
+            top: 100px;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-section:first-child,
+        .preview-title {
+            margin-top: 0;
+        }
+
+        /* Styles pour les champs en erreur */
+        .form-control.is-invalid,
+        .form-control.show-error.is-invalid,
+        select.is-invalid,
+        textarea.is-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        /* Style pour les messages d'erreur */
+        .invalid-feedback {
+            display: none;
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Afficher les messages d'erreur */
+        .form-control.is-invalid + .invalid-feedback,
+        .form-control.show-error.is-invalid + .invalid-feedback,
+        select.is-invalid + .invalid-feedback,
+        textarea.is-invalid + .invalid-feedback {
+            display: block !important;
+        }
+
+        /* Style pour la zone d'upload en erreur */
+        .upload-zone.show-error {
+            border: 2px dashed var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        /* Style pour les sliders en erreur */
+        .form-range.is-invalid::-webkit-slider-thumb {
+            background-color: var(--secondary-color) !important;
+        }
+
+        .form-range.is-invalid::-webkit-slider-runnable-track {
+            background-color: rgba(231, 76, 60, 0.25) !important;
         }
 
         .form-section {
@@ -121,6 +184,7 @@
             margin-bottom: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            border: none;
         }
 
         .form-section-title {
@@ -130,9 +194,11 @@
             padding-bottom: 15px;
             border-bottom: 2px solid #edf2f7;
             font-weight: 700;
+            letter-spacing: -0.3px;
         }
 
         .form-group {
+            position: relative;
             margin-bottom: 25px;
         }
 
@@ -141,41 +207,60 @@
             margin-bottom: 10px;
             color: var(--text-color);
             font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: -0.2px;
         }
 
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
+        .form-check-container {
+            padding-left: 16px;
+        }
+
+        .form-check {
+            margin-bottom: 12px;
+            padding-left: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 32px;
+        }
+
+        .form-check-input {
+            position: relative;
+            margin: 0;
+            width: 22px;
+            height: 22px;
             border: 2px solid var(--input-border);
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-            outline: none;
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--input-border);
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 16px 12px;
+            -webkit-appearance: none;
+            background-color: var(--input-bg);
+            flex-shrink: 0;
         }
 
-        .form-select:focus {
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-            outline: none;
+        .form-check-input:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23fff' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+            background-size: 14px;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .form-check-input:hover {
+            border-color: var(--accent-color);
+        }
+
+        .form-check-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            margin: 0;
+            user-select: none;
+            line-height: 1.4;
         }
 
         .editor-toolbar {
@@ -185,6 +270,7 @@
             padding: 12px;
             display: flex;
             gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .editor-toolbar button {
@@ -195,13 +281,28 @@
             color: var(--text-color);
             cursor: pointer;
             transition: all 0.2s ease;
+            font-weight: 600;
+            min-width: 40px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .editor-toolbar button:hover,
+        .editor-toolbar button:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
         .editor-toolbar button.is-active {
             background: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
         }
 
         .ProseMirror {
@@ -209,12 +310,147 @@
             border: 2px solid var(--input-border);
             border-top: none;
             border-radius: 0 0 var(--border-radius) var(--border-radius);
-            min-height: 200px;
+            min-height: 300px;
+            font-size: 1rem;
+            line-height: 1.6;
             background: var(--input-bg);
         }
 
-        .ProseMirror:focus {
-            outline: none;
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 40px;
+        }
+
+        .save-btn, .cancel-btn {
+            padding: 14px 30px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            letter-spacing: -0.2px;
+        }
+
+        .save-btn {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .save-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .cancel-btn {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .cancel-btn:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--card-bg);
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .rating-input {
+            width: 80px !important;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem !important;
+            color: var(--accent-color);
+            padding: 12px !important;
+        }
+
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-preview-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+        }
+
+        .delete-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            font-size: 1.2rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .image-preview-container:hover .delete-image {
+            opacity: 1;
+        }
+
+        .delete-image:hover {
+            background: rgba(231, 76, 60, 1);
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 1200px) {
+            .page-container {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .form-column,
+            .preview-column {
+                max-width: 100%;
+            }
+
+            .preview-column {
+                position: relative;
+                top: 0;
+                height: 500px;
+                margin-top: 40px;
+            }
+
+            .form-section {
+                padding: 25px;
+            }
         }
 
         .upload-zone {
@@ -225,95 +461,376 @@
             background: var(--input-bg);
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
-        .upload-zone:hover {
+        .upload-zone:hover, .upload-zone.dragover {
             border-color: var(--accent-color);
             background-color: rgba(52, 152, 219, 0.05);
         }
 
-        .upload-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
+        .upload-zone input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
         }
 
-        .upload-placeholder i {
+        .upload-icon {
             font-size: 2.5rem;
             color: var(--accent-color);
+            margin-bottom: 15px;
         }
 
-        .image-preview {
-            display: none;
-            position: relative;
-            max-width: 300px;
-            margin: 0 auto;
+        .upload-text {
+            color: var(--text-color);
+            font-weight: 500;
+            margin-bottom: 5px;
         }
 
-        .image-preview img {
-            width: 100%;
-            height: auto;
-            border-radius: var(--border-radius);
+        .upload-subtext {
+            color: #6c757d;
+            font-size: 0.875rem;
         }
 
-        .remove-image {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(231, 76, 60, 0.9);
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .form-actions {
-            display: flex;
+        .gallery-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
-            justify-content: flex-end;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
-        .btn {
+        .pac-container {
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            border: 2px solid var(--input-border);
+            border-top: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: -2px;
+            font-family: inherit;
+        }
+
+        .pac-item {
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pac-item:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .pac-icon {
+            margin-right: 10px;
+        }
+
+        .pac-item-query {
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .address-suggestions {
+            position: absolute;
+            width: 100%;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: -2px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .address-suggestion {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .address-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .address-suggestion:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .address-suggestion.selected {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.4) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .ProseMirror.editor-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .upload-zone.is-invalid {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .preview-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            padding: 35px 35px 15px;
+            border-bottom: 2px solid #edf2f7;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            box-shadow: var(--box-shadow);
+            margin: 0;
+        }
+
+        .markdown-preview {
+            background: var(--card-bg);
+            padding: 0 35px 35px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--box-shadow);
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        #markdownPreview {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-width: 100%;
+            padding-top: 30px;
+        }
+
+        .form-control.show-error.is-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .form-control.show-error.is-invalid:focus {
+            border-color: var(--secondary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.4) !important;
+        }
+
+        .ProseMirror.show-error.editor-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .upload-zone.show-error {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .action-button {
             padding: 12px 24px;
+            border: none;
             border-radius: var(--border-radius);
             font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            font-size: 0.95rem;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            position: relative;
         }
 
-        .btn-primary {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-            border-color: #2980b9;
+        .action-button:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #2573a7);
         }
 
-        .btn-secondary {
-            background: #e9ecef;
-            border-color: #e9ecef;
-            color: #495057;
+        .action-button.cancel {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
         }
 
-        .btn-secondary:hover {
-            background: #dee2e6;
-            border-color: #dee2e6;
-            transform: translateY(-2px);
+        .action-button.cancel:hover {
+            background: linear-gradient(135deg, #c0392b, #a93224);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
         }
 
-        /* Style pour le modal de confirmation */
+        .action-button i {
+            font-size: 1rem;
+        }
+
+        .action-button .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        .action-button.loading {
+            opacity: 0.8;
+            cursor: wait;
+        }
+
+        .action-button.loading:hover {
+            transform: none;
+        }
+
+        .action-button.loading .spinner {
+            display: inline-block;
+        }
+
+        .action-button.loading .button-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .form-range {
+            width: 100%;
+            height: 1.5rem;
+            padding: 0;
+            background-color: transparent;
+            -webkit-appearance: none;
+        }
+
+        .form-range:focus {
+            outline: none;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 1rem;
+            height: 1rem;
+            margin-top: -0.25rem;
+            background-color: var(--accent-color);
+            border: 0;
+            border-radius: 1rem;
+            transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+
+        .form-range::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 0.5rem;
+            color: transparent;
+            cursor: pointer;
+            background-color: var(--input-border);
+            border-color: transparent;
+            border-radius: 1rem;
+        }
+
+        .rating-value {
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--box-shadow);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification.success i {
+            color: #2ecc71;
+        }
+
+        .notification.error i {
+            color: var(--secondary-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-control.show-error.is-invalid {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .form-control.show-error.is-invalid ~ .invalid-feedback {
+            display: block !important;
+        }
+
+        .upload-zone.show-error {
+            border-color: var(--secondary-color) !important;
+            background-color: #fff5f5 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
+        }
+
+        .form-range.show-error {
+            background-color: #fff5f5 !important;
+        }
+
+        .form-range.show-error::-webkit-slider-thumb {
+            background-color: var(--secondary-color) !important;
+        }
+
+        /* Styles pour le modal de confirmation */
         .confirmation-modal {
             position: fixed;
             top: 0;
@@ -322,44 +839,46 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
             display: flex;
-            align-items: center;
             justify-content: center;
-            z-index: 1050;
+            align-items: center;
+            z-index: 10000;
         }
 
         .confirmation-content {
             background: white;
-            padding: 30px;
+            padding: 2rem;
             border-radius: var(--border-radius);
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            box-shadow: var(--box-shadow);
         }
 
         .confirmation-title {
-            color: var(--primary-color);
             font-size: 1.5rem;
-            margin-bottom: 15px;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
             font-weight: 600;
         }
 
         .confirmation-message {
-            color: var(--text-color);
-            margin-bottom: 25px;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
         }
 
         .confirmation-buttons {
             display: flex;
-            gap: 15px;
-            justify-content: flex-end;
+            justify-content: center;
+            gap: 1rem;
         }
 
         .confirmation-button {
-            padding: 10px 20px;
+            padding: 0.75rem 1.5rem;
             border-radius: var(--border-radius);
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            font-weight: 500;
+            transition: all 0.3s;
             border: none;
         }
 
@@ -368,130 +887,481 @@
             color: white;
         }
 
-        .confirmation-button.cancel {
-            background: #e9ecef;
-            color: #495057;
-        }
-
-        .confirmation-button:hover {
+        .confirmation-button.confirm:hover {
+            background: #c0392b;
             transform: translateY(-2px);
         }
 
-        @media (max-width: 768px) {
-            .page-container {
-                padding: 100px 1rem 2rem;
-            }
+        .confirmation-button.cancel {
+            background: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
 
-            .form-column {
-                max-width: 100%;
-            }
+        .confirmation-button.cancel:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
 
-            .form-section {
-                padding: 20px;
-            }
+        /* Styles pour le modal de confirmation du formulaire */
+        .form-confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
 
-            .form-actions {
-                flex-direction: column;
-            }
+        .form-confirmation-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
 
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
+        .form-confirmation-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .form-confirmation-message {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .form-confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .form-confirmation-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .form-confirmation-button.confirm {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .form-confirmation-button.confirm:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .form-confirmation-button.cancel {
+            background: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .form-confirmation-button.cancel:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .restaurant-preview {
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--box-shadow);
+            flex: 1;
+            overflow-y: auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .restaurant-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .restaurant-title {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .restaurant-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .restaurant-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .restaurant-meta-item i {
+            color: var(--accent-color);
+        }
+
+        .restaurant-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+        }
+
+        .restaurant-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+        }
+
+        .restaurant-description {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .restaurant-content {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .restaurant-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .restaurant-ratings {
+            margin-top: 3rem;
+        }
+
+        .rating-category {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .rating-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .rating-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .rating-score {
+            font-weight: 600;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .rating-criteria {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+
+        .rating-comment {
+            color: var(--text-color);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .restaurant-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            overflow: hidden;
+        }
+
+        .gallery-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-image i {
+            font-size: 2rem;
+        }
+
+        .gallery-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
         }
     </style>
-</head>
-<body>
-    <div class="header-container">
-        <h1 class="admin-title">Modifier Restaurant</h1>
-        <a href="#" class="back-button" id="backButton">
-            <i class="fas fa-arrow-left"></i>
-            Retour à l'administration
-        </a>
-    </div>
 
-    <div class="page-container">
-        <div class="form-column">
-            <form id="restaurantForm">
-                <div class="form-section">
-                    <h2 class="form-section-title">Informations Générales</h2>
-                    
-                    <div class="form-group">
-                        <label for="status">État</label>
-                        <select class="form-select" id="status" name="status" required>
-                            <option value="draft">Brouillon</option>
-                            <option value="ready">Prêt</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="title">Titre</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="address">Adresse</label>
-                        <input type="text" class="form-control" id="address" name="address" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="style">Style de cuisine</label>
-                        <input type="text" class="form-control" id="style" name="style" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="date">Date de visite</label>
-                        <input type="date" class="form-control" id="date" name="date" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="content">Contenu</label>
-                        <div id="editor"></div>
-                        <input type="hidden" id="content" name="content">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="image">Image principale</label>
-                        <div class="upload-zone" id="imageUpload">
-                            <input type="file" id="image" name="image" accept="image/*" style="display: none;">
-                            <div class="upload-placeholder">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Glissez-déposez une image ou cliquez pour sélectionner</p>
-                            </div>
-                            <div class="image-preview" style="display: none;">
-                                <img src="" alt="Aperçu">
-                                <button type="button" class="remove-image">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelButton">
-                        <i class="fas fa-times"></i>
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="saveButton">
-                        <i class="fas fa-save"></i>
-                        Enregistrer les modifications
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('=== DÉBUT DU CHARGEMENT DE LA PAGE EDIT-RESTO ===');
+        // Variables globales pour stocker les fichiers d'images
+        let mainImageFile = null;
+        let galleryImageFiles = [];
+        
+        // Variables globales pour l'autocomplétion d'adresse
+        let debounceTimer;
+        let selectedIndex = -1;
+        let suggestions = [];
+
+        // Fonction pour convertir un fichier en base64
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        const compressedImage = await compressImage(reader.result);
+                        resolve(compressedImage.split(',')[1]);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Fonction pour compresser une image en WebP
+        async function compressImage(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Définir la taille maximale souhaitée
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    
+                    // Calculer les nouvelles dimensions en conservant le ratio
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > MAX_WIDTH) {
+                        height = (height * MAX_WIDTH) / width;
+                        width = MAX_WIDTH;
+                    }
+                    
+                    if (height > MAX_HEIGHT) {
+                        width = (width * MAX_HEIGHT) / height;
+                        height = MAX_HEIGHT;
+                    }
+                    
+                    // Redimensionner l'image
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convertir en WebP avec une qualité de 80%
+                    const webpDataUrl = canvas.toDataURL('image/webp', 0.8);
+                    resolve(webpDataUrl);
+                };
+                
+                img.onerror = reject;
+                img.src = dataUrl;
+            });
+        }
+
+        // Initialiser TipTap
+        let editor;
+        window.addEventListener('load', () => {
+            console.log('=== INITIALISATION DE LA PAGE ===');
+            console.log('Étape 1: Début de l\'initialisation');
             
-            // Initialiser l'éditeur TipTap
-            const editor = new Editor({
-                element: document.getElementById('editor'),
+            // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
+            const saveButton = document.getElementById('saveButton');
+            console.log('Étape 2: Recherche du bouton de sauvegarde');
+            
+            if (saveButton) {
+                console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
+                
+                // Ajouter le spinner au bouton
+                const spinnerDiv = document.createElement('div');
+                spinnerDiv.className = 'spinner';
+                const textSpan = document.createElement('span');
+                textSpan.className = 'button-text';
+                textSpan.innerHTML = saveButton.innerHTML;
+                saveButton.innerHTML = '';
+                saveButton.appendChild(spinnerDiv);
+                saveButton.appendChild(textSpan);
+                
+                saveButton.addEventListener('click', async function(e) {
+                    console.log('Étape 4: Clic sur le bouton détecté');
+                    e.preventDefault();
+                    
+                    // Afficher l'état de chargement
+                    showLoadingState(this);
+                    
+                    const form = document.getElementById('restaurantForm');
+                    if (form) {
+                        console.log('Étape 5: Formulaire trouvé, déclenchement de la soumission');
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                    
+                    // Simuler un délai minimum pour le spinner (au moins 500ms)
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Cacher l'état de chargement
+                    hideLoadingState(this);
+                });
+            }
+
+            // Ajouter un gestionnaire d'événements sur le formulaire
+            const form = document.getElementById('restaurantForm');
+            console.log('Étape 9: Recherche du formulaire pour le gestionnaire de soumission');
+            
+            if (form) {
+                console.log('Étape 10: Formulaire trouvé, ajout du gestionnaire de soumission');
+                form.addEventListener('submit', async function(e) {
+                    console.log('Étape 11: Événement de soumission du formulaire déclenché');
+                    e.preventDefault();
+                    console.log('Étape 12: Début de la validation');
+                    
+                    if (!validateForm()) {
+                        console.log('Étape 13: Validation échouée');
+                        return;
+                    }
+                    
+                    console.log('Étape 14: Validation réussie, traitement du formulaire');
+
+                    try {
+                        // Générer le nom du fichier à partir du titre
+                        const title = document.getElementById('title').value;
+                        const filename = title.toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[^a-z0-9]/g, '-')
+                            .replace(/-+/g, '-')
+                            .replace(/^-|-$/g, '');
+                        
+                        const date = new Date().toISOString().split('T')[0];
+                        const filePath = `${date}-${filename}.md`;
+
+                        // Créer un objet pour stocker les données du brouillon
+                        const draftData = {
+                            filename: filePath,
+                            title: title,
+                            content: generateMarkdown(),
+                            images: []
+                        };
+
+                        // Sauvegarder les images localement en base64
+                        if (mainImageFile) {
+                            const mainImageBase64 = await fileToBase64(mainImageFile);
+                            draftData.images.push({
+                                name: mainImageFile.name,
+                                data: mainImageBase64
+                            });
+                        }
+
+                        for (let i = 0; i < galleryImageFiles.length; i++) {
+                            const file = galleryImageFiles[i];
+                            const galleryBase64 = await fileToBase64(file);
+                            draftData.images.push({
+                                name: file.name,
+                                data: galleryBase64
+                            });
+                        }
+
+                        // Récupérer les brouillons existants
+                        const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                        
+                        // Vérifier si un brouillon avec le même nom existe déjà
+                        const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                        
+                        if (existingIndex !== -1) {
+                            // Mettre à jour le brouillon existant
+                            drafts[existingIndex] = {
+                                ...drafts[existingIndex],
+                                ...draftData,
+                                lastModified: new Date().toISOString()
+                            };
+                        } else {
+                            // Ajouter un nouveau brouillon
+                            drafts.push({
+                                ...draftData,
+                                lastModified: new Date().toISOString()
+                            });
+                        }
+
+                        // Sauvegarder dans localStorage
+                        localStorage.setItem('drafts', JSON.stringify(drafts));
+
+                        showNotification('Brouillon enregistré avec succès !', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
+                        
+                        // En cas d'erreur, on cache le spinner
+                        const saveButton = document.getElementById('saveButton');
+                        if (saveButton) hideLoadingState(saveButton);
+                    }
+                });
+            } else {
+                console.error('Formulaire non trouvé !');
+            }
+
+            editor = new Editor({
+                element: document.querySelector('#editor'),
                 extensions: [
-                    StarterKit,
                     Document,
                     Paragraph,
                     Text,
@@ -502,204 +1372,1380 @@
                     ListItem
                 ],
                 content: '',
+                editable: true,
                 onUpdate: ({ editor }) => {
-                    document.getElementById('content').value = editor.getHTML();
+                    updateMarkdownPreview();
                 }
             });
 
-            // Ajouter la barre d'outils de l'éditeur
-            const toolbar = document.createElement('div');
-            toolbar.className = 'editor-toolbar';
-            toolbar.innerHTML = `
-                <button onclick="editor.chain().focus().toggleBold().run()" class="bold">
-                    <i class="fas fa-bold"></i>
-                </button>
-                <button onclick="editor.chain().focus().toggleItalic().run()" class="italic">
-                    <i class="fas fa-italic"></i>
-                </button>
-                <button onclick="editor.chain().focus().toggleBulletList().run()" class="bullet-list">
-                    <i class="fas fa-list-ul"></i>
-                </button>
-                <button onclick="editor.chain().focus().toggleOrderedList().run()" class="ordered-list">
-                    <i class="fas fa-list-ol"></i>
-                </button>
-            `;
-            document.getElementById('editor').parentNode.insertBefore(toolbar, document.getElementById('editor'));
+            // Gérer les boutons de la barre d'outils
+            document.querySelectorAll('.editor-toolbar button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const command = button.dataset.command;
+                    editor.chain().focus();
+                    
+                    switch(command) {
+                        case 'bold':
+                            editor.chain().toggleBold().run();
+                            break;
+                        case 'italic':
+                            editor.chain().toggleItalic().run();
+                            break;
+                        case 'bulletList':
+                            editor.chain().toggleBulletList().run();
+                            break;
+                        case 'orderedList':
+                            editor.chain().toggleOrderedList().run();
+                            break;
+                    }
+                    
+                    button.classList.toggle('is-active', editor.isActive(command));
+                });
 
-            // Récupérer l'ID du restaurant depuis l'URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const restaurantId = urlParams.get('id');
-            console.log('ID du restaurant à modifier:', restaurantId);
+                const command = button.dataset.command;
+                button.classList.toggle('is-active', editor.isActive(command));
+            });
 
-            if (!restaurantId) {
-                console.error('Aucun ID de restaurant trouvé dans l\'URL');
-                alert('Aucun restaurant sélectionné');
-                window.location.href = 'restaurants.html';
+            // Initialiser les autres fonctionnalités
+            initializeAddressAutocomplete();
+            initializeDropZones();
+            
+            // Écouter les changements dans les champs de notation
+            document.querySelectorAll('.form-range').forEach(input => {
+                input.addEventListener('input', function() {
+                    const valueDisplay = this.nextElementSibling;
+                    valueDisplay.textContent = this.value;
+                    calculateOverallRating();
+                    updateMarkdownPreview();
+                });
+            });
+
+            // Écouter les changements dans tous les champs du formulaire
+            document.querySelectorAll('input, textarea, select').forEach(element => {
+                element.addEventListener('input', updateMarkdownPreview);
+            });
+
+            // Écouter les changements dans les checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateMarkdownPreview);
+            });
+
+            // Écouter les changements d'image principale
+            document.getElementById('mainImage').addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    handleMainImageUpload(this.files[0]);
+                }
+            });
+
+            // Écouter les changements d'images de galerie
+            document.getElementById('galleryImages').addEventListener('change', function(e) {
+                if (this.files) {
+                    handleGalleryUpload(this.files);
+                }
+            });
+
+            // Initialiser l'aperçu markdown au chargement
+            updateMarkdownPreview();
+        });
+
+        async function searchAddress(query) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erreur lors de la recherche d\'adresse:', error);
+                return [];
+            }
+        }
+
+        function initializeAddressAutocomplete() {
+            const input = document.getElementById('address');
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'address-suggestions';
+            input.parentNode.appendChild(suggestionsContainer);
+
+            input.addEventListener('input', async function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+
+                if (query.length < 3) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                debounceTimer = setTimeout(async () => {
+                    suggestions = await searchAddress(query);
+                    displaySuggestions(suggestions, suggestionsContainer);
+                }, 300);
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (!['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
+                
+                const suggestionElements = suggestionsContainer.getElementsByClassName('address-suggestion');
+                
+                if (e.key === 'Escape') {
+                    suggestionsContainer.style.display = 'none';
+                    selectedIndex = -1;
+                    return;
+                }
+
+                if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    selectAddress(suggestions[selectedIndex], input, suggestionsContainer);
+                    return;
+                }
+
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, suggestionElements.length - 1);
+                }
+
+                Array.from(suggestionElements).forEach((el, index) => {
+                    el.classList.toggle('selected', index === selectedIndex);
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        function displaySuggestions(suggestions, container) {
+            if (!suggestions.length) {
+                container.style.display = 'none';
                 return;
             }
 
-            try {
-                console.log('Tentative de chargement des données du restaurant...');
-                // Charger les données du restaurant
-                const response = await fetch(`/api/restaurants/${restaurantId}`);
-                if (!response.ok) {
-                    throw new Error('Erreur lors du chargement du restaurant');
-                }
-                const restaurant = await response.json();
-                console.log('Données du restaurant chargées:', restaurant);
-
-                // Pré-remplir le formulaire
-                console.log('Pré-remplissage du formulaire...');
-                document.getElementById('status').value = restaurant.status;
-                document.getElementById('title').value = restaurant.title;
-                document.getElementById('address').value = restaurant.address;
-                document.getElementById('style').value = restaurant.style;
-                document.getElementById('date').value = restaurant.date;
+            container.innerHTML = '';
+            suggestions.forEach((suggestion, index) => {
+                const div = document.createElement('div');
+                div.className = 'address-suggestion';
+                div.textContent = suggestion.display_name;
                 
-                // Mettre à jour l'éditeur avec le contenu
-                editor.commands.setContent(restaurant.content);
-                document.getElementById('content').value = restaurant.content;
-                
-                console.log('Formulaire pré-rempli avec succès');
+                div.addEventListener('click', () => {
+                    selectAddress(suggestion, document.getElementById('address'), container);
+                });
 
-                // Charger l'image
-                console.log('Chargement de l\'image...');
-                if (restaurant.image) {
-                    const imagePreview = document.querySelector('.image-preview');
-                    const previewImg = imagePreview.querySelector('img');
-                    previewImg.src = restaurant.image;
-                    previewImg.alt = restaurant.title;
-                    imagePreview.style.display = 'block';
-                    document.querySelector('.upload-placeholder').style.display = 'none';
+                div.addEventListener('mouseenter', () => {
+                    selectedIndex = index;
+                    Array.from(container.children).forEach((el, i) => {
+                        el.classList.toggle('selected', i === index);
+                    });
+                });
+
+                container.appendChild(div);
+            });
+
+            container.style.display = 'block';
+        }
+
+        function selectAddress(suggestion, input, container) {
+            let formattedAddress = '';
+            
+            if (suggestion.address) {
+                const addr = suggestion.address;
+                const components = [];
+
+                if (addr.house_number) {
+                    components.push(addr.house_number);
                 }
 
-                // Configuration du bouton de sauvegarde
-                console.log('Configuration du bouton de sauvegarde...');
-                document.getElementById('restaurantForm').onsubmit = async function(e) {
+                if (addr.road) {
+                    components.push(addr.road);
+                }
+
+                if (addr.city || addr.town || addr.village) {
+                    components.push(addr.city || addr.town || addr.village);
+                }
+
+                if (addr.state) {
+                    components.push(addr.state);
+                }
+
+                if (addr.postcode) {
+                    components.push(addr.postcode);
+                }
+
+                if (addr.country) {
+                    components.push(addr.country);
+                }
+
+                formattedAddress = components.join(', ');
+            } else {
+                formattedAddress = suggestion.display_name.split(',').slice(0, 4).join(',');
+            }
+
+            input.value = formattedAddress;
+            container.style.display = 'none';
+            selectedIndex = -1;
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+            updateMarkdownPreview();
+        }
+
+        function initializeDropZones() {
+            const zones = ['mainImageZone', 'galleryZone'];
+            
+            zones.forEach(zoneId => {
+                const zone = document.getElementById(zoneId);
+                const input = zone.querySelector('input[type="file"]');
+
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
                     e.preventDefault();
-                    console.log('=== DÉBUT DE LA SAUVEGARDE ===');
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => {
+                        zone.classList.add('dragover');
+                    });
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => {
+                        zone.classList.remove('dragover');
+                    });
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+
+                    if (zoneId === 'mainImageZone' && files.length > 0) {
+                        input.files = files;
+                        handleMainImageUpload(files[0]);
+                    } else if (zoneId === 'galleryZone') {
+                        input.files = files;
+                        handleGalleryUpload(files);
+                    }
+                });
+            });
+        }
+
+        function handleMainImageUpload(file) {
+            if (file && file.type.startsWith('image/')) {
+                mainImageFile = file;
+                const container = document.getElementById('mainImagePreview');
+                container.innerHTML = '';
+                createImagePreview(file, container, true);
+                
+                // Supprimer l'état d'erreur et le message
+                const mainImageZone = document.getElementById('mainImageZone');
+                mainImageZone.classList.remove('show-error');
+                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                
+                updateMarkdownPreview();
+            }
+        }
+
+        function handleGalleryUpload(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    galleryImageFiles.push(file);
+                }
+            });
+            updateGalleryPreview();
+            updateMarkdownPreview();
+        }
+
+        function validateForm() {
+            console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
+            let isValid = true;
+            let errorFields = [];
+
+            // Fonction pour valider un champ individuel et collecter les erreurs
+            function validateField(fieldId, fieldName, isRequired = true) {
+                const field = document.getElementById(fieldId);
+                const value = field ? field.value.trim() : '';
+                const wrapper = field ? field.closest('.input-wrapper') : null;
+                const errorDiv = wrapper ? wrapper.querySelector('.invalid-feedback') : null;
+
+                console.log(`\nValidation du champ ${fieldName}:`);
+                console.log(`- valeur: ${value}`);
+                console.log(`- requis: ${isRequired}`);
+
+                if (isRequired && !value) {
+                    console.log(`⚠️ Champ ${fieldName} vide - ajout de l'état d'erreur`);
+                    if (field) {
+                        field.classList.add('is-invalid');
+                        field.classList.add('show-error');
+                        errorFields.push(field);
+                    }
+                    if (errorDiv) {
+                        errorDiv.style.display = 'block';
+                    }
+                    isValid = false;
+                } else {
+                    console.log(`✓ Champ ${fieldName} valide`);
+                    if (field) {
+                        field.classList.remove('is-invalid');
+                        field.classList.remove('show-error');
+                    }
+                    if (errorDiv) {
+                        errorDiv.style.display = 'none';
+                    }
+                }
+            }
+
+            // Valider tous les champs dans l'ordre
+            validateField('title', 'Nom du restaurant');
+            validateField('date', 'Date de visite');
+            validateField('description', 'Résumé');
+            validateField('address', 'Adresse');
+            validateField('style', 'Style de cuisine');
+            validateField('price', 'Gamme de prix');
+
+            // Valider l'image principale
+            console.log('\n=== VALIDATION DE L\'IMAGE PRINCIPALE ===');
+            const mainImageZone = document.getElementById('mainImageZone');
+            console.log('Image principale présente:', !!mainImageFile);
+            
+            if (!mainImageFile) {
+                console.log('⚠️ Pas d\'image principale - ajout de l\'état d\'erreur');
+                mainImageZone.classList.add('show-error');
+                let errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = 'Veuillez ajouter une image principale';
+                    mainImageZone.parentNode.appendChild(errorDiv);
+                }
+                errorFields.push(mainImageZone);
+                isValid = false;
+            } else {
+                console.log('✓ Image principale présente');
+                mainImageZone.classList.remove('show-error');
+                const existingError = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            // Valider l'éditeur
+            console.log('\n=== VALIDATION DE L\'ÉDITEUR ===');
+            const editorContent = editor.getHTML();
+            console.log('Contenu HTML de l\'éditeur:', editorContent);
+            
+            const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
+            console.log('L\'éditeur est vide:', isEmpty);
+            
+            const editorElement = document.querySelector('.ProseMirror');
+            if (isEmpty) {
+                console.log('⚠️ L\'éditeur est vide - ajout de l\'état d\'erreur');
+                editorElement.classList.add('editor-invalid');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                errorDiv.textContent = 'Veuillez ajouter une description détaillée';
+                editorElement.parentNode.appendChild(errorDiv);
+                errorFields.push(editorElement);
+                isValid = false;
+            } else {
+                console.log('✓ L\'éditeur contient du contenu');
+                editorElement.classList.remove('editor-invalid');
+                const existingError = editorElement.parentNode.querySelector('.invalid-feedback');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            // Valider les critères détaillés
+            validateField('foodScore', 'Note nourriture');
+            validateField('foodComment', 'Commentaire nourriture');
+            validateField('serviceScore', 'Note service');
+            validateField('serviceComment', 'Commentaire service');
+            validateField('ambianceScore', 'Note ambiance');
+            validateField('ambianceComment', 'Commentaire ambiance');
+            validateField('valueScore', 'Note rapport qualité/prix');
+            validateField('valueComment', 'Commentaire rapport qualité/prix');
+            validateField('originalityScore', 'Note originalité');
+            validateField('originalityComment', 'Commentaire originalité');
+            validateField('overallExperienceScore', 'Note expérience globale');
+            validateField('overallExperienceComment', 'Commentaire expérience globale');
+
+            // Trouver le premier champ en erreur dans l'ordre du DOM
+            if (errorFields.length > 0) {
+                console.log('Recherche du premier champ en erreur dans l\'ordre du DOM');
+                const allElements = document.querySelectorAll('*');
+                let firstErrorInDOM = null;
+                
+                for (const element of allElements) {
+                    if (errorFields.includes(element)) {
+                        firstErrorInDOM = element;
+                        break;
+                    }
+                }
+
+                if (firstErrorInDOM) {
+                    console.log('Défilement vers le premier champ en erreur');
+                    firstErrorInDOM.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            console.log(`\n=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
+            return isValid;
+        }
+
+        function getSelectedDiets() {
+            const diets = [];
+            if (document.getElementById('vegetarian').checked) {
+                diets.push('vegetarian-friendly');
+            }
+            if (document.getElementById('vegan').checked) {
+                diets.push('vegan-friendly');
+            }
+            return diets.join(',');
+        }
+
+        // Fonction pour afficher une notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Supprimer la notification après 3 secondes
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Fonction pour mettre à jour les boutons de gestion des modifications
+        function updatePendingChangesButtons() {
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            
+            // Mettre à jour le compteur de modifications en attente
+            const totalChanges = pendingChanges.length + drafts.length;
+            
+            // Vous pouvez ajouter ici d'autres mises à jour de l'interface si nécessaire
+            console.log(`${totalChanges} modification(s) en attente`);
+        }
+
+        // Initialiser les boutons au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePendingChangesButtons();
+        });
+
+        // Écouter les changements dans le localStorage
+        window.addEventListener('storageUpdated', () => {
+            updatePendingChangesButtons();
+        });
+
+        function generateMarkdown() {
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+            const address = document.getElementById('address').value;
+            const style = document.getElementById('style').value;
+            const price = document.getElementById('price').value;
+            
+            const dietOptions = [];
+            if (document.getElementById('vegetarian').checked) {
+                dietOptions.push('vegetarian-friendly');
+            }
+            if (document.getElementById('vegan').checked) {
+                dietOptions.push('vegan-friendly');
+            }
+            const diet = dietOptions.length > 0 ? dietOptions.join(',') : 'none';
+
+            const mainImagePath = mainImageFile ? `/images/${mainImageFile.name}` : '';
+            const galleryPaths = galleryImageFiles.map(file => `  - image: "/images/${file.name}"`);
+
+            const overallRating = calculateOverallRating();
+            
+            const editorContent = editor.getHTML().replace(/<p>/g, '\n\n').replace(/<\/p>/g, '').replace(/<br>/g, '\n');
+
+            const ratings = {
+                food: {
+                    score: document.getElementById('foodScore').value || '0',
+                    comment: document.getElementById('foodComment').value || ''
+                },
+                service: {
+                    score: document.getElementById('serviceScore').value || '0',
+                    comment: document.getElementById('serviceComment').value || ''
+                },
+                ambiance: {
+                    score: document.getElementById('ambianceScore').value || '0',
+                    comment: document.getElementById('ambianceComment').value || ''
+                },
+                value: {
+                    score: document.getElementById('valueScore').value || '0',
+                    comment: document.getElementById('valueComment').value || ''
+                },
+                originality: {
+                    score: document.getElementById('originalityScore').value || '0',
+                    comment: document.getElementById('originalityComment').value || ''
+                },
+                overallExperience: {
+                    score: document.getElementById('overallExperienceScore').value || '0',
+                    comment: document.getElementById('overallExperienceComment').value || ''
+                }
+            };
+
+            const today = new Date().toISOString().split('T')[0];
+
+            return `---
+layout: restaurant
+title: '${title}'
+date: ${today}
+state: draft
+note: ${overallRating}
+style: '${style}'
+diet: '${diet}'
+description: '${description}'
+price: '${price}'
+address: '${address}'
+image: '${mainImagePath}'
+images:
+${galleryPaths.join('\n')}
+
+ratings:
+  food:
+    score: ${ratings.food.score}
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: '${ratings.food.comment}'
+  service:
+    score: ${ratings.service.score}
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: '${ratings.service.comment}'
+  ambiance:
+    score: ${ratings.ambiance.score}
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: '${ratings.ambiance.comment}'
+  value:
+    score: ${ratings.value.score}
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: '${ratings.value.comment}'
+  originality:
+    score: ${ratings.originality.score}
+    criteria: 'Innovation, créativité, authenticité'
+    comment: '${ratings.originality.comment}'
+  overall:
+    score: ${ratings.overallExperience.score}
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: '${ratings.overallExperience.comment}'
+---
+
+${editorContent}`;
+        }
+
+        function calculateOverallRating() {
+            const scores = [
+                parseFloat(document.getElementById('foodScore').value) || 0,
+                parseFloat(document.getElementById('serviceScore').value) || 0,
+                parseFloat(document.getElementById('ambianceScore').value) || 0,
+                parseFloat(document.getElementById('valueScore').value) || 0,
+                parseFloat(document.getElementById('originalityScore').value) || 0,
+                parseFloat(document.getElementById('overallExperienceScore').value) || 0
+            ];
+            
+            const sum = scores.reduce((a, b) => a + b, 0);
+            const average = (sum / scores.length).toFixed(1);
+            
+            document.getElementById('overallRating').value = average;
+            return average;
+        }
+
+        function updateMarkdownPreview() {
+            const preview = document.querySelector('.restaurant-preview');
+            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
+            
+            // Récupérer les valeurs du formulaire
+            const title = document.getElementById('title').value || 'Nom du restaurant';
+            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
+            const description = document.getElementById('description').value || 'Description du restaurant';
+            const address = document.getElementById('address').value || 'Adresse du restaurant';
+            const style = document.getElementById('style').value || 'Style de cuisine';
+            const price = document.getElementById('price').value || 'Gamme de prix';
+            
+            // Récupérer les notes
+            const foodScore = document.getElementById('foodScore').value || '5';
+            const serviceScore = document.getElementById('serviceScore').value || '5';
+            const ambianceScore = document.getElementById('ambianceScore').value || '5';
+            const valueScore = document.getElementById('valueScore').value || '5';
+            const originalityScore = document.getElementById('originalityScore').value || '5';
+            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+            
+            // Récupérer les commentaires
+            const foodComment = document.getElementById('foodComment').value || '';
+            const serviceComment = document.getElementById('serviceComment').value || '';
+            const ambianceComment = document.getElementById('ambianceComment').value || '';
+            const valueComment = document.getElementById('valueComment').value || '';
+            const originalityComment = document.getElementById('originalityComment').value || '';
+            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+            
+            // Récupérer le contenu de l'éditeur
+            const editorContent = editor.getHTML() || '';
+            
+            // Créer le HTML de l'aperçu
+            preview.innerHTML = `
+                <div class="restaurant-header">
+                    <h1 class="restaurant-title">${title}</h1>
+                    <div class="restaurant-meta">
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${address}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-star"></i>
+                            ${calculateOverallRating()}/10
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-utensils"></i>
+                            ${style}
+                        </span>
+                        ${document.getElementById('vegetarian').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-leaf"></i>
+                                Options végétariennes
+                            </span>
+                        ` : ''}
+                        ${document.getElementById('vegan').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-seedling"></i>
+                                Options végétaliennes
+                            </span>
+                        ` : ''}
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            ${date}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-tag"></i>
+                            ${price}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="restaurant-image">
+                    ${mainImageFile ? 
+                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
+                        `<i class="fas fa-image"></i>`
+                    }
+                </div>
+                
+                <div class="restaurant-description">
+                    ${description}
+                </div>
+                
+                <div class="restaurant-content">
+                    ${editorContent}
+                </div>
+                
+                <div class="restaurant-ratings">
+                    <h2>Pourquoi cette note ?</h2>
                     
-                    try {
-                        const formData = new FormData(this);
-                        const data = Object.fromEntries(formData.entries());
-                        data.id = restaurantId;
-                        data.content = editor.getHTML();
-                        
-                        console.log('Données à envoyer:', data);
-                        
-                        const saveResponse = await fetch('/api/restaurants/update', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(data)
-                        });
-
-                        if (!saveResponse.ok) {
-                            throw new Error('Erreur lors de la sauvegarde');
-                        }
-
-                        console.log('Sauvegarde réussie, redirection...');
-                        window.location.href = 'index.html';
-                    } catch (error) {
-                        console.error('Erreur lors de la sauvegarde:', error);
-                        alert('Une erreur est survenue lors de la sauvegarde');
-                    }
-                };
-
-                // Gestion de l'upload d'image
-                const imageUpload = document.getElementById('imageUpload');
-                const imageInput = document.getElementById('image');
-                const imagePreview = document.querySelector('.image-preview');
-                const uploadPlaceholder = document.querySelector('.upload-placeholder');
-                const previewImg = imagePreview.querySelector('img');
-                const removeButton = imagePreview.querySelector('.remove-image');
-
-                imageUpload.onclick = () => imageInput.click();
-
-                imageInput.onchange = function() {
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            previewImg.src = e.target.result;
-                            imagePreview.style.display = 'block';
-                            uploadPlaceholder.style.display = 'none';
-                        };
-                        reader.readAsDataURL(this.files[0]);
-                    }
-                };
-
-                removeButton.onclick = function() {
-                    imageInput.value = '';
-                    previewImg.src = '';
-                    imagePreview.style.display = 'none';
-                    uploadPlaceholder.style.display = 'block';
-                };
-
-                // Fonction pour afficher le modal de confirmation
-                function showConfirmationModal() {
-                    console.log('Affichage du modal de confirmation...');
-                    return new Promise((resolve) => {
-                        const modal = document.createElement('div');
-                        modal.className = 'confirmation-modal';
-                        modal.innerHTML = `
-                            <div class="confirmation-content">
-                                <h3 class="confirmation-title">Confirmer l'annulation</h3>
-                                <p class="confirmation-message">Toutes les modifications non sauvegardées seront perdues. Voulez-vous continuer ?</p>
-                                <div class="confirmation-buttons">
-                                    <button class="confirmation-button confirm">Confirmer</button>
-                                    <button class="confirmation-button cancel">Annuler</button>
-                                </div>
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Qualité de la nourriture</span>
+                            <span class="rating-score">${foodScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
+                        <div class="rating-comment">${foodComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Service</span>
+                            <span class="rating-score">${serviceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
+                        <div class="rating-comment">${serviceComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Ambiance</span>
+                            <span class="rating-score">${ambianceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
+                        <div class="rating-comment">${ambianceComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Rapport qualité/prix</span>
+                            <span class="rating-score">${valueScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
+                        <div class="rating-comment">${valueComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Originalité / Concept</span>
+                            <span class="rating-score">${originalityScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
+                        <div class="rating-comment">${originalityComment}</div>
+                    </div>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Expérience globale</span>
+                            <span class="rating-score">${overallExperienceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Facteur "wow"</div>
+                        <div class="rating-comment">${overallExperienceComment}</div>
+                    </div>
+                </div>
+                
+                <h2 class="gallery-title">Galerie photos</h2>
+                <div class="restaurant-gallery">
+                    ${galleryImageFiles.length > 0 ? 
+                        galleryImageFiles.map(file => `
+                            <div class="gallery-image">
+                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
                             </div>
-                        `;
-                        
-                        document.body.appendChild(modal);
-                        console.log('Modal créé et ajouté au DOM');
+                        `).join('') : 
+                        `<div class="gallery-image">
+                            <i class="fas fa-images"></i>
+                        </div>`
+                    }
+                </div>
+            `;
+        }
 
-                        const confirmButton = modal.querySelector('.confirmation-button.confirm');
-                        const cancelButton = modal.querySelector('.confirmation-button.cancel');
+        function createImagePreview(file, container, isMainImage = false) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-preview-container';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                    <button type="button" class="delete-image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                div.querySelector('.delete-image').addEventListener('click', function() {
+                    div.remove();
+                    if (isMainImage) {
+                        mainImageFile = null;
+                    } else {
+                        const index = galleryImageFiles.indexOf(file);
+                        if (index > -1) {
+                            galleryImageFiles.splice(index, 1);
+                        }
+                    }
+                    updateMarkdownPreview();
+                });
+                
+                container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
 
-                        confirmButton.onclick = () => {
-                            console.log('Confirmation de l\'annulation');
-                            modal.remove();
-                            resolve(true);
-                        };
+        function updateGalleryPreview() {
+            const container = document.getElementById('galleryPreview');
+            container.innerHTML = '';
+            galleryImageFiles.forEach(file => createImagePreview(file, container));
+        }
 
-                        cancelButton.onclick = () => {
-                            console.log('Annulation de l\'annulation');
-                            modal.remove();
-                            resolve(false);
-                        };
+        function showLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.add('loading');
+            button.disabled = true;
+            if (spinner) spinner.style.display = 'inline-block';
+            if (buttonText) buttonText.style.opacity = '0.7';
+        }
+
+        function hideLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.remove('loading');
+            button.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+            if (buttonText) buttonText.style.opacity = '1';
+        }
+
+        function showConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Confirmer</button>
+                            <button class="confirmation-button cancel">Annuler</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        function showFormConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'form-confirmation-modal';
+                modal.innerHTML = `
+                    <div class="form-confirmation-content">
+                        <h3 class="form-confirmation-title">Annuler le formulaire</h3>
+                        <p class="form-confirmation-message">Êtes-vous sûr de vouloir annuler ? Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="form-confirmation-buttons">
+                            <button class="form-confirmation-button confirm">Oui, annuler</button>
+                            <button class="form-confirmation-button cancel">Non, continuer</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.form-confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.form-confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Modifier la fonction d'annulation existante
+        async function cancelForm() {
+            // Afficher le modal de confirmation
+            const confirmed = await showFormConfirmationModal();
+            
+            if (confirmed) {
+                // Vider le localStorage
+                localStorage.removeItem('currentDraft');
+                localStorage.removeItem('pendingChanges');
+                
+                // Rediriger vers la page d'administration
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Fonction pour sauvegarder le brouillon
+        async function saveDraft() {
+            try {
+                const formData = new FormData(document.getElementById('restaurantForm'));
+                const title = formData.get('title');
+                
+                // Générer le nom du fichier à partir du titre
+                const filename = title.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                
+                const date = new Date().toISOString().split('T')[0];
+                const filePath = `${date}-${filename}.md`;
+
+                // Créer l'objet du brouillon avec le contenu initial
+                let markdownContent = generateMarkdown();
+                const draftData = {
+                    filename: filePath,
+                    title: title,
+                    content: markdownContent,
+                    images: [],
+                    lastModified: new Date().toISOString()
+                };
+
+                // Traiter l'image principale
+                if (mainImageFile) {
+                    const mainImageBase64 = await fileToBase64(mainImageFile);
+                    draftData.images.push({
+                        name: mainImageFile.name,
+                        data: mainImageBase64,
+                        isMain: true
                     });
                 }
 
-                // Gérer le clic sur le bouton Annuler
-                document.getElementById('cancelButton').onclick = async function() {
-                    console.log('Clic sur le bouton Annuler');
-                    const confirmed = await showConfirmationModal();
-                    if (confirmed) {
-                        console.log('Redirection vers restaurants.html');
-                        window.location.href = 'restaurants.html';
-                    }
-                };
+                // Traiter les images de la galerie
+                for (let i = 0; i < galleryImageFiles.length; i++) {
+                    const file = galleryImageFiles[i];
+                    const galleryBase64 = await fileToBase64(file);
+                    draftData.images.push({
+                        name: file.name,
+                        data: galleryBase64,
+                        isMain: false
+                    });
+                }
 
-                // Gérer le clic sur le bouton Retour
-                document.getElementById('backButton').onclick = async function(e) {
-                    e.preventDefault();
-                    console.log('Clic sur le bouton Retour');
-                    const confirmed = await showConfirmationModal();
-                    if (confirmed) {
-                        console.log('Redirection vers index.html');
+                // Récupérer les brouillons existants
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                
+                // Vérifier si un brouillon avec le même nom existe déjà
+                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                
+                if (existingIndex !== -1) {
+                    // Mettre à jour le brouillon existant
+                    drafts[existingIndex] = draftData;
+                } else {
+                    // Ajouter un nouveau brouillon
+                    drafts.push(draftData);
+                }
+
+                try {
+                    // Sauvegarder dans localStorage
+                    localStorage.setItem('drafts', JSON.stringify(drafts));
+                    showNotification('Brouillon enregistré avec succès', 'success');
+                    
+                    // Mettre à jour l'interface
+                    updatePendingChangesButtons();
+                    
+                    setTimeout(() => {
                         window.location.href = 'index.html';
+                    }, 1500);
+                } catch (storageError) {
+                    if (storageError.name === 'QuotaExceededError') {
+                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des brouillons existants.', 'error');
+                    } else {
+                        showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
                     }
-                };
+                    console.error('Erreur de stockage:', storageError);
+                }
 
             } catch (error) {
-                console.error('Erreur lors du chargement du restaurant:', error);
-                alert('Une erreur est survenue lors du chargement du restaurant');
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+            }
+        }
+
+        // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Gestionnaire de soumission du formulaire
+        function initializeForm() {
+            const form = document.getElementById('restaurantForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    if (!validateForm()) {
+                        return;
+                    }
+                    await saveDraft();
+                });
+            } else {
+                console.error('Formulaire non trouvé');
+            }
+        }
+
+        // Initialiser le formulaire une fois le DOM chargé
+        document.addEventListener('DOMContentLoaded', initializeForm);
+
+        // Fonction pour charger un brouillon
+        function loadDraft(filename) {
+                showNotification(`Erreur lors de la publication: ${error.message}`, 'error');
+        }
+
+        // Fonction pour annuler les modifications
+        function cancelChanges() {
+            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
+                deleteDraft(filename);
                 window.location.href = 'restaurants.html';
             }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Vérifier si on charge un brouillon existant
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('filename');
+            
+            if (filename) {
+                // Charger les données du restaurant
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                const restaurant = drafts.find(d => d.filename === filename);
+                
+                if (restaurant) {
+                    // Remplir le formulaire avec les données du restaurant
+                    document.getElementById('title').value = restaurant.title;
+                    document.getElementById('date').value = restaurant.date;
+                    document.getElementById('description').value = restaurant.description;
+                    document.getElementById('address').value = restaurant.address;
+                    document.getElementById('style').value = restaurant.style;
+                    document.getElementById('price').value = restaurant.price;
+                    
+                    // Gérer les options alimentaires
+                    if (restaurant.diet) {
+                        const diets = restaurant.diet.split(',');
+                        document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
+                        document.getElementById('vegan').checked = diets.includes('vegan-friendly');
+                    }
+                    
+                    // Charger les images
+                    if (restaurant.images && restaurant.images.length > 0) {
+                        const mainImage = restaurant.images.find(img => img.isMain);
+                        if (mainImage) {
+                            // Convertir base64 en File
+                            const mainImageFile = base64ToFile(mainImage.data, mainImage.name);
+                            handleMainImageUpload(mainImageFile);
+                        }
+                        
+                        // Charger les images de la galerie
+                        const galleryImages = restaurant.images.filter(img => !img.isMain);
+                        galleryImages.forEach(img => {
+                            const galleryFile = base64ToFile(img.data, img.name);
+                            handleGalleryUpload([galleryFile]);
+                        });
+                    }
+                    
+                    // Charger les notes et commentaires
+                    if (restaurant.ratings) {
+                        document.getElementById('foodScore').value = restaurant.ratings.food.score;
+                        document.getElementById('foodComment').value = restaurant.ratings.food.comment;
+                        document.getElementById('serviceScore').value = restaurant.ratings.service.score;
+                        document.getElementById('serviceComment').value = restaurant.ratings.service.comment;
+                        document.getElementById('ambianceScore').value = restaurant.ratings.ambiance.score;
+                        document.getElementById('ambianceComment').value = restaurant.ratings.ambiance.comment;
+                        document.getElementById('valueScore').value = restaurant.ratings.value.score;
+                        document.getElementById('valueComment').value = restaurant.ratings.value.comment;
+                        document.getElementById('originalityScore').value = restaurant.ratings.originality.score;
+                        document.getElementById('originalityComment').value = restaurant.ratings.originality.comment;
+                        document.getElementById('overallExperienceScore').value = restaurant.ratings.overall.score;
+                        document.getElementById('overallExperienceComment').value = restaurant.ratings.overall.comment;
+                    }
+                    
+                    // Charger le contenu de l'éditeur
+                    if (restaurant.content) {
+                        editor.commands.setContent(restaurant.content);
+                    }
+                    
+                    // Mettre à jour l'aperçu
+                    updateMarkdownPreview();
+                }
+            }
+            
+            // Mettre à jour les boutons
+            updatePendingChangesButtons();
         });
+
+        // Fonction pour convertir base64 en File
+        function base64ToFile(base64, filename) {
+            const arr = base64.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            
+            return new File([u8arr], filename, {type: mime});
+        }
     </script>
+</head>
+<body>
+    <header class="admin-header">
+        <h1 class="admin-title">Nouveau Restaurant</h1>
+        <a href="index.html" class="action-button">
+            <i class="fas fa-arrow-left"></i> Retour à l'administration
+        </a>
+    </header>
+
+    <div class="page-container">
+        <div class="form-column">
+            <form id="restaurantForm" class="form-card">
+                <!-- Informations de base -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Informations de base</h2>
+                    <div class="form-group">
+                        <label for="title" class="form-label">Nom du restaurant</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="title" name="title" class="form-control" required>
+                            <div class="invalid-feedback">Veuillez entrer le nom du restaurant</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date" class="form-label">Date de visite</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="date" name="date" class="form-control" required>
+                            <div class="invalid-feedback">Veuillez sélectionner la date de visite</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">Résumé</label>
+                        <div class="input-wrapper">
+                            <textarea id="description" name="description" class="form-control" maxlength="150" required></textarea>
+                            <div class="invalid-feedback">Veuillez entrer un résumé</div>
+                        </div>
+                        <small class="text-muted">Maximum 150 caractères</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address" class="form-label">Adresse</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="address" name="address" class="form-control" required placeholder="Commencez à taper une adresse...">
+                            <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="style" class="form-label">Style de cuisine</label>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="style" name="style" required>
+                                <option value="">Sélectionner un style</option>
+                                <option value="Asiatique">Asiatique</option>
+                                <option value="Américain">Américain</option>
+                                <option value="Moyen-Orient">Moyen-Orient</option>
+                                <option value="Mexicain & Latino">Mexicain & Latino</option>
+                                <option value="Bistro & Café">Bistro & Café</option>
+                                <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
+                                <option value="Italien">Italien</option>
+                                <option value="Indien & Épicé">Indien & Épicé</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner un style de cuisine</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price" class="form-label">Gamme de prix</label>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="price" name="price" required>
+                                <option value="">Sélectionner une gamme de prix</option>
+                                <option value="$ (0-20$)">$ (0-20$)</option>
+                                <option value="$$ (20-40$)">$$ (20-40$)</option>
+                                <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner une gamme de prix</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label d-block">Options alimentaires disponibles</label>
+                        <div class="form-check-container">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
+                                <label class="form-check-label" for="vegetarian">Options végétariennes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
+                                <label class="form-check-label" for="vegan">Options végétaliennes</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mainImage" class="form-label">Image principale</label>
+                        <div class="upload-zone" id="mainImageZone">
+                            <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">Glissez et déposez votre image principale ici</div>
+                            <div class="upload-subtext">ou cliquez pour sélectionner un fichier</div>
+                        </div>
+                        <div id="mainImagePreview" class="image-preview-container mt-3"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="galleryImages" class="form-label">Images de la galerie</label>
+                        <div class="upload-zone" id="galleryZone">
+                            <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
+                            <div class="upload-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="upload-text">Glissez et déposez vos images ici</div>
+                            <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
+                        </div>
+                        <div id="galleryPreview" class="gallery-preview"></div>
+                    </div>
+                </div>
+
+                <!-- Évaluations -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Évaluations</h2>
+                    <div class="mb-3">
+                        <label for="overallRating" class="form-label">Note globale (sur 10)</label>
+                        <input type="number" class="form-control rating-input" id="overallRating" readonly style="background-color: #e9ecef;">
+                        <small class="text-muted">Calculée automatiquement à partir des critères détaillés</small>
+                    </div>
+                    
+                    <!-- Critères d'évaluation -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Critères détaillés</h3>
+                        
+                        <!-- Nourriture -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Nourriture</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="foodScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="foodScore" name="foodScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="foodComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="foodComment" name="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Service</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="serviceScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="serviceScore" name="serviceScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="serviceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="serviceComment" name="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ambiance -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Ambiance</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="ambianceScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="ambianceScore" name="ambianceScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="ambianceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="ambianceComment" name="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rapport qualité/prix -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Rapport qualité/prix</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="valueScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="valueScore" name="valueScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="valueComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="valueComment" name="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Originalité -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Originalité</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="originalityScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="originalityScore" name="originalityScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="originalityComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="originalityComment" name="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expérience globale -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Expérience globale</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="overallExperienceScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="overallExperienceScore" name="overallExperienceScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="overallExperienceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="overallExperienceComment" name="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commentaires -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Description détaillée</h2>
+                    <div class="mb-3">
+                        <label for="editor" class="form-label">Description complète du restaurant</label>
+                        <div class="editor-toolbar">
+                            <button type="button" data-command="bold" title="Gras"><i class="fas fa-bold"></i></button>
+                            <button type="button" data-command="italic" title="Italique"><i class="fas fa-italic"></i></button>
+                            <button type="button" data-command="bulletList" title="Liste à puces"><i class="fas fa-list-ul"></i></button>
+                            <button type="button" data-command="orderedList" title="Liste numérotée"><i class="fas fa-list-ol"></i></button>
+                        </div>
+                        <div id="editor"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="submit" class="action-button" id="saveButton">
+                            <i class="fas fa-save"></i> Enregistrer un brouillon
+                        </button>
+                        <button type="button" class="action-button cancel" onclick="cancelForm()">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="preview-column">
+            <h2 class="preview-title">Aperçu</h2>
+            <div class="restaurant-preview"></div>
+        </div>
+    </div>
 </body>
-</html> 
+</html>
