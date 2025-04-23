@@ -56,7 +56,7 @@
         .page-container {
             display: flex;
             gap: 40px;
-            padding: 0 2rem 2rem;
+            padding: 80px 2rem 2rem;
             position: relative;
             min-height: calc(100vh - 120px);
         }
@@ -73,15 +73,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-        }
-
-        .admin-header {
-            padding: 2rem 2rem 1rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: transparent;
+            box-shadow: var(--box-shadow);
         }
 
         .admin-title {
@@ -98,7 +90,7 @@
         .back-button {
             padding: 12px 24px;
             background: var(--primary-color);
-            color: white;
+            color: white !important;
             border: none;
             border-radius: var(--border-radius);
             font-weight: 600;
@@ -108,74 +100,19 @@
             gap: 8px;
             transition: all 0.3s ease;
             text-decoration: none;
-            margin-left: auto;
         }
 
         .back-button:hover {
             background: #1a2634;
             transform: translateY(-2px);
+            color: white !important;
+            text-decoration: none;
         }
 
         .form-column {
             flex: 1;
-            max-width: 60%;
-        }
-
-        .preview-column {
-            flex: 1;
-            max-width: 40%;
-            position: sticky;
-            top: 100px;
-            height: calc(100vh - 120px);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-section:first-child,
-        .preview-title {
-            margin-top: 0;
-        }
-
-        /* Styles pour les champs en erreur */
-        .form-control.is-invalid,
-        .form-control.show-error.is-invalid,
-        select.is-invalid,
-        textarea.is-invalid {
-            border-color: var(--secondary-color) !important;
-            background-color: #fff5f5 !important;
-            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25) !important;
-        }
-
-        /* Style pour les messages d'erreur */
-        .invalid-feedback {
-            display: none;
-            color: var(--secondary-color);
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-        }
-
-        /* Afficher les messages d'erreur */
-        .form-control.is-invalid + .invalid-feedback,
-        .form-control.show-error.is-invalid + .invalid-feedback,
-        select.is-invalid + .invalid-feedback,
-        textarea.is-invalid + .invalid-feedback {
-            display: block !important;
-        }
-
-        /* Style pour la zone d'upload en erreur */
-        .upload-zone.show-error {
-            border: 2px dashed var(--secondary-color) !important;
-            background-color: #fff5f5 !important;
-        }
-
-        /* Style pour les sliders en erreur */
-        .form-range.is-invalid::-webkit-slider-thumb {
-            background-color: var(--secondary-color) !important;
-        }
-
-        .form-range.is-invalid::-webkit-slider-runnable-track {
-            background-color: rgba(231, 76, 60, 0.25) !important;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .form-section {
@@ -184,7 +121,6 @@
             margin-bottom: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            border: none;
         }
 
         .form-section-title {
@@ -194,11 +130,9 @@
             padding-bottom: 15px;
             border-bottom: 2px solid #edf2f7;
             font-weight: 700;
-            letter-spacing: -0.3px;
         }
 
         .form-group {
-            position: relative;
             margin-bottom: 25px;
         }
 
@@ -207,57 +141,14 @@
             margin-bottom: 10px;
             color: var(--text-color);
             font-weight: 600;
-            font-size: 0.95rem;
-            letter-spacing: -0.2px;
-        }
-
-        .form-check-container {
-            padding-left: 16px;
-        }
-
-        .form-check {
-            margin-bottom: 12px;
-            padding-left: 0;
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-height: 32px;
-        }
-
-        .form-check-input {
-            position: relative;
-            margin: 0;
-            width: 22px;
-            height: 22px;
-            border: 2px solid var(--input-border);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            appearance: none;
-            -webkit-appearance: none;
-            background-color: var(--input-bg);
-            flex-shrink: 0;
-        }
-
-        .form-check-input:checked {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23fff' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
-            background-size: 14px;
-            background-position: center;
-            background-repeat: no-repeat;
         }
 
         .form-control {
             width: 100%;
             padding: 12px 16px;
-            font-size: 1rem;
-            line-height: 1.5;
-            color: var(--text-color);
-            background-color: var(--input-bg);
             border: 2px solid var(--input-border);
             border-radius: var(--border-radius);
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
 
@@ -270,15 +161,11 @@
         .form-select {
             width: 100%;
             padding: 12px 16px;
-            font-size: 1rem;
-            line-height: 1.5;
-            color: var(--text-color);
-            background-color: var(--input-bg);
             border: 2px solid var(--input-border);
             border-radius: var(--border-radius);
+            font-size: 1rem;
             transition: all 0.3s ease;
             appearance: none;
-            -webkit-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 1rem center;
@@ -291,55 +178,226 @@
             outline: none;
         }
 
-        .btn-primary {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
+        .editor-toolbar {
+            background: white;
+            border: 2px solid var(--input-border);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .editor-toolbar button {
+            padding: 8px 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            background: white;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .editor-toolbar button:hover,
+        .editor-toolbar button.is-active {
+            background: var(--accent-color);
             color: white;
-            padding: 12px 24px;
-            font-weight: 600;
+            border-color: var(--accent-color);
+        }
+
+        .ProseMirror {
+            padding: 20px;
+            border: 2px solid var(--input-border);
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            min-height: 200px;
+            background: var(--input-bg);
+        }
+
+        .ProseMirror:focus {
+            outline: none;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--input-border);
             border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            background: var(--input-bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-placeholder i {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+        }
+
+        .image-preview {
+            display: none;
+            position: relative;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            border-radius: var(--border-radius);
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             transition: all 0.3s ease;
         }
 
+        .btn-primary {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
         .btn-primary:hover {
-            background-color: #2980b9;
+            background: #2980b9;
             border-color: #2980b9;
             transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-            padding: 12px 24px;
-            font-weight: 600;
-            border-radius: var(--border-radius);
-            transition: all 0.3s ease;
+            background: #e9ecef;
+            border-color: #e9ecef;
+            color: #495057;
         }
 
         .btn-secondary:hover {
-            background-color: #1a2634;
-            border-color: #1a2634;
+            background: #dee2e6;
+            border-color: #dee2e6;
             transform: translateY(-2px);
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.875rem;
+        /* Style pour le modal de confirmation */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050;
+        }
+
+        .confirmation-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .confirmation-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
             font-weight: 600;
-            margin-left: 10px;
         }
 
-        .status-draft {
-            background-color: #f1c40f;
-            color: #fff;
+        .confirmation-message {
+            color: var(--text-color);
+            margin-bottom: 25px;
         }
 
-        .status-ready {
-            background-color: #2ecc71;
-            color: #fff;
+        .confirmation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .confirmation-button {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .confirmation-button.confirm {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .confirmation-button.cancel {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .confirmation-button:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 100px 1rem 2rem;
+            }
+
+            .form-column {
+                max-width: 100%;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -409,8 +467,9 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="window.location.href='restaurants.html'">
+                    <button type="button" class="btn btn-secondary" id="cancelButton">
                         <i class="fas fa-times"></i>
                         Annuler
                     </button>
@@ -428,6 +487,45 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('=== DÉBUT DU CHARGEMENT DE LA PAGE EDIT-RESTO ===');
             
+            // Initialiser l'éditeur TipTap
+            const editor = new Editor({
+                element: document.getElementById('editor'),
+                extensions: [
+                    StarterKit,
+                    Document,
+                    Paragraph,
+                    Text,
+                    Bold,
+                    Italic,
+                    BulletList,
+                    OrderedList,
+                    ListItem
+                ],
+                content: '',
+                onUpdate: ({ editor }) => {
+                    document.getElementById('content').value = editor.getHTML();
+                }
+            });
+
+            // Ajouter la barre d'outils de l'éditeur
+            const toolbar = document.createElement('div');
+            toolbar.className = 'editor-toolbar';
+            toolbar.innerHTML = `
+                <button onclick="editor.chain().focus().toggleBold().run()" class="bold">
+                    <i class="fas fa-bold"></i>
+                </button>
+                <button onclick="editor.chain().focus().toggleItalic().run()" class="italic">
+                    <i class="fas fa-italic"></i>
+                </button>
+                <button onclick="editor.chain().focus().toggleBulletList().run()" class="bullet-list">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+                <button onclick="editor.chain().focus().toggleOrderedList().run()" class="ordered-list">
+                    <i class="fas fa-list-ol"></i>
+                </button>
+            `;
+            document.getElementById('editor').parentNode.insertBefore(toolbar, document.getElementById('editor'));
+
             // Récupérer l'ID du restaurant depuis l'URL
             const urlParams = new URLSearchParams(window.location.search);
             const restaurantId = urlParams.get('id');
@@ -457,42 +555,38 @@
                 document.getElementById('address').value = restaurant.address;
                 document.getElementById('style').value = restaurant.style;
                 document.getElementById('date').value = restaurant.date;
+                
+                // Mettre à jour l'éditeur avec le contenu
+                editor.commands.setContent(restaurant.content);
                 document.getElementById('content').value = restaurant.content;
+                
                 console.log('Formulaire pré-rempli avec succès');
 
-                // Charger les images
-                console.log('Chargement des images...');
-                if (restaurant.images) {
-                    const imageContainer = document.getElementById('imageContainer');
-                    console.log('Nombre d\'images à charger:', restaurant.images.length);
-                    restaurant.images.forEach(image => {
-                        console.log('Chargement de l\'image:', image.url);
-                        const imgElement = document.createElement('img');
-                        imgElement.src = image.url;
-                        imgElement.alt = image.alt;
-                        imageContainer.appendChild(imgElement);
-                    });
+                // Charger l'image
+                console.log('Chargement de l\'image...');
+                if (restaurant.image) {
+                    const imagePreview = document.querySelector('.image-preview');
+                    const previewImg = imagePreview.querySelector('img');
+                    previewImg.src = restaurant.image;
+                    previewImg.alt = restaurant.title;
+                    imagePreview.style.display = 'block';
+                    document.querySelector('.upload-placeholder').style.display = 'none';
                 }
 
-                // Modifier le comportement du bouton de sauvegarde
+                // Configuration du bouton de sauvegarde
                 console.log('Configuration du bouton de sauvegarde...');
-                const saveButton = document.getElementById('saveButton');
-                saveButton.textContent = 'Enregistrer les modifications';
-                saveButton.onclick = async function(e) {
-                    console.log('=== DÉBUT DE LA SAUVEGARDE ===');
+                document.getElementById('restaurantForm').onsubmit = async function(e) {
                     e.preventDefault();
+                    console.log('=== DÉBUT DE LA SAUVEGARDE ===');
                     
-                    // Récupérer les données du formulaire
-                    const formData = new FormData(document.getElementById('restaurantForm'));
-                    const data = Object.fromEntries(formData.entries());
-                    console.log('Données du formulaire:', data);
-                    
-                    // Ajouter l'ID du restaurant
-                    data.id = restaurantId;
-
                     try {
-                        console.log('Envoi des données au serveur...');
-                        // Sauvegarder les modifications
+                        const formData = new FormData(this);
+                        const data = Object.fromEntries(formData.entries());
+                        data.id = restaurantId;
+                        data.content = editor.getHTML();
+                        
+                        console.log('Données à envoyer:', data);
+                        
                         const saveResponse = await fetch('/api/restaurants/update', {
                             method: 'POST',
                             headers: {
@@ -505,68 +599,107 @@
                             throw new Error('Erreur lors de la sauvegarde');
                         }
 
-                        console.log('Sauvegarde réussie, redirection vers la page admin...');
-                        // Rediriger vers la page admin
+                        console.log('Sauvegarde réussie, redirection...');
                         window.location.href = 'index.html';
                     } catch (error) {
                         console.error('Erreur lors de la sauvegarde:', error);
                         alert('Une erreur est survenue lors de la sauvegarde');
                     }
                 };
+
+                // Gestion de l'upload d'image
+                const imageUpload = document.getElementById('imageUpload');
+                const imageInput = document.getElementById('image');
+                const imagePreview = document.querySelector('.image-preview');
+                const uploadPlaceholder = document.querySelector('.upload-placeholder');
+                const previewImg = imagePreview.querySelector('img');
+                const removeButton = imagePreview.querySelector('.remove-image');
+
+                imageUpload.onclick = () => imageInput.click();
+
+                imageInput.onchange = function() {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            imagePreview.style.display = 'block';
+                            uploadPlaceholder.style.display = 'none';
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                };
+
+                removeButton.onclick = function() {
+                    imageInput.value = '';
+                    previewImg.src = '';
+                    imagePreview.style.display = 'none';
+                    uploadPlaceholder.style.display = 'block';
+                };
+
+                // Fonction pour afficher le modal de confirmation
+                function showConfirmationModal() {
+                    console.log('Affichage du modal de confirmation...');
+                    return new Promise((resolve) => {
+                        const modal = document.createElement('div');
+                        modal.className = 'confirmation-modal';
+                        modal.innerHTML = `
+                            <div class="confirmation-content">
+                                <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                                <p class="confirmation-message">Toutes les modifications non sauvegardées seront perdues. Voulez-vous continuer ?</p>
+                                <div class="confirmation-buttons">
+                                    <button class="confirmation-button confirm">Confirmer</button>
+                                    <button class="confirmation-button cancel">Annuler</button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.body.appendChild(modal);
+                        console.log('Modal créé et ajouté au DOM');
+
+                        const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                        const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                        confirmButton.onclick = () => {
+                            console.log('Confirmation de l\'annulation');
+                            modal.remove();
+                            resolve(true);
+                        };
+
+                        cancelButton.onclick = () => {
+                            console.log('Annulation de l\'annulation');
+                            modal.remove();
+                            resolve(false);
+                        };
+                    });
+                }
+
+                // Gérer le clic sur le bouton Annuler
+                document.getElementById('cancelButton').onclick = async function() {
+                    console.log('Clic sur le bouton Annuler');
+                    const confirmed = await showConfirmationModal();
+                    if (confirmed) {
+                        console.log('Redirection vers restaurants.html');
+                        window.location.href = 'restaurants.html';
+                    }
+                };
+
+                // Gérer le clic sur le bouton Retour
+                document.getElementById('backButton').onclick = async function(e) {
+                    e.preventDefault();
+                    console.log('Clic sur le bouton Retour');
+                    const confirmed = await showConfirmationModal();
+                    if (confirmed) {
+                        console.log('Redirection vers index.html');
+                        window.location.href = 'index.html';
+                    }
+                };
+
             } catch (error) {
                 console.error('Erreur lors du chargement du restaurant:', error);
                 alert('Une erreur est survenue lors du chargement du restaurant');
                 window.location.href = 'restaurants.html';
             }
         });
-
-        // Fonction pour afficher le modal de confirmation
-        function showConfirmationModal() {
-            console.log('Affichage du modal de confirmation...');
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'confirmation-modal';
-                modal.innerHTML = `
-                    <div class="confirmation-content">
-                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
-                        <p class="confirmation-message">Toutes les modifications non sauvegardées seront perdues. Voulez-vous continuer ?</p>
-                        <div class="confirmation-buttons">
-                            <button class="confirmation-button confirm">Confirmer</button>
-                            <button class="confirmation-button cancel">Annuler</button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(modal);
-                console.log('Modal créé et ajouté au DOM');
-
-                const confirmButton = modal.querySelector('.confirmation-button.confirm');
-                const cancelButton = modal.querySelector('.confirmation-button.cancel');
-
-                confirmButton.onclick = () => {
-                    console.log('Confirmation de l\'annulation');
-                    modal.remove();
-                    resolve(true);
-                };
-
-                cancelButton.onclick = () => {
-                    console.log('Annulation de l\'annulation');
-                    modal.remove();
-                    resolve(false);
-                };
-            });
-        }
-
-        // Modifier le bouton Retour pour utiliser la confirmation
-        document.getElementById('backButton').onclick = async function(e) {
-            console.log('Clic sur le bouton Retour à l\'administration');
-            e.preventDefault();
-            const confirmed = await showConfirmationModal();
-            if (confirmed) {
-                console.log('Redirection vers index.html');
-                window.location.href = 'index.html';
-            }
-        };
     </script>
 </body>
 </html> 
