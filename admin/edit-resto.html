@@ -2480,21 +2480,40 @@ ${editorContent}`;
                 document.getElementById('vegan').checked = diets.includes('vegan-friendly');
 
                 // Remplir les notes et commentaires
-                const ratingsMatch = frontMatter.match(/ratings:([\s\S]*?)(?=\n\w|$)/);
+                const ratingsMatch = frontMatter ? frontMatter.match(/ratings:([\s\S]*?)(?=\n\w|$)/) : null;
                 if (ratingsMatch) {
-                    const ratings = JSON.parse(ratingsMatch[1]);
-                    document.getElementById('foodScore').value = ratings.food.score;
-                    document.getElementById('foodComment').value = ratings.food.comment;
-                    document.getElementById('serviceScore').value = ratings.service.score;
-                    document.getElementById('serviceComment').value = ratings.service.comment;
-                    document.getElementById('ambianceScore').value = ratings.ambiance.score;
-                    document.getElementById('ambianceComment').value = ratings.ambiance.comment;
-                    document.getElementById('valueScore').value = ratings.value.score;
-                    document.getElementById('valueComment').value = ratings.value.comment;
-                    document.getElementById('originalityScore').value = ratings.originality.score;
-                    document.getElementById('originalityComment').value = ratings.originality.comment;
-                    document.getElementById('overallExperienceScore').value = ratings.overall.score;
-                    document.getElementById('overallExperienceComment').value = ratings.overall.comment;
+                    try {
+                        const ratings = JSON.parse(ratingsMatch[1]);
+                        document.getElementById('foodScore').value = ratings.food.score;
+                        document.getElementById('foodComment').value = ratings.food.comment;
+                        document.getElementById('serviceScore').value = ratings.service.score;
+                        document.getElementById('serviceComment').value = ratings.service.comment;
+                        document.getElementById('ambianceScore').value = ratings.ambiance.score;
+                        document.getElementById('ambianceComment').value = ratings.ambiance.comment;
+                        document.getElementById('valueScore').value = ratings.value.score;
+                        document.getElementById('valueComment').value = ratings.value.comment;
+                        document.getElementById('originalityScore').value = ratings.originality.score;
+                        document.getElementById('originalityComment').value = ratings.originality.comment;
+                        document.getElementById('overallExperienceScore').value = ratings.overall.score;
+                        document.getElementById('overallExperienceComment').value = ratings.overall.comment;
+                    } catch (e) {
+                        console.error('Erreur lors du parsing des notes:', e);
+                        // Initialiser les notes par défaut
+                        document.getElementById('foodScore').value = '5';
+                        document.getElementById('serviceScore').value = '5';
+                        document.getElementById('ambianceScore').value = '5';
+                        document.getElementById('valueScore').value = '5';
+                        document.getElementById('originalityScore').value = '5';
+                        document.getElementById('overallExperienceScore').value = '5';
+                    }
+                } else {
+                    // Initialiser les notes par défaut si aucune note n'est trouvée
+                    document.getElementById('foodScore').value = '5';
+                    document.getElementById('serviceScore').value = '5';
+                    document.getElementById('ambianceScore').value = '5';
+                    document.getElementById('valueScore').value = '5';
+                    document.getElementById('originalityScore').value = '5';
+                    document.getElementById('overallExperienceScore').value = '5';
                 }
 
                 // Mettre à jour les affichages des notes
