@@ -2383,11 +2383,12 @@ ${editorContent}`;
                 let markdown;
                 let restaurantData;
                 let content;
+                let frontMatter;
 
                 if (localDraft) {
                     console.log('Utilisation des données du localStorage');
                     markdown = localDraft.content;
-                    const frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
+                    frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
 
                     // Parser le front matter
@@ -2447,8 +2448,8 @@ ${editorContent}`;
                         name: data.name
                     });
                     markdown = atob(data.content);
-
-                    // Extraire les données du markdown
+                    
+                    // Extraire le front matter et le contenu
                     const frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
 
