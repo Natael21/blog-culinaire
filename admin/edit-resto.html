@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouveau Restaurant - Administration</title>
+    <title>Modifier un restaurant - Administration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
@@ -1823,6 +1823,21 @@
 
         // Initialiser les boutons au chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('=== CHARGEMENT DE LA PAGE ===');
+            
+            // Vérifier si on charge un resto existant
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('filename');
+            console.log('Paramètres URL:', { filename });
+            
+            if (filename) {
+                console.log('Tentative de chargement du restaurant:', filename);
+                loadDraft(filename);
+            } else {
+                console.log('Aucun fichier spécifié, création d\'un nouveau restaurant');
+            }
+            
+            // Mettre à jour les boutons
             updatePendingChangesButtons();
         });
 
@@ -2356,16 +2371,21 @@ ${editorContent}`;
         // Fonction pour charger un resto
         async function loadDraft(filename) {
             try {
+                console.log('=== DÉBUT DU CHARGEMENT DU RESTAURANT ===');
+                console.log('Fichier à charger:', filename);
+                
                 // D'abord vérifier dans le localStorage
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                console.log('Drafts dans localStorage:', drafts);
                 const localDraft = drafts.find(d => d.filename === filename);
+                console.log('Draft local trouvé:', localDraft);
 
                 let markdown;
                 let restaurantData;
                 let content;
 
                 if (localDraft) {
-                    // Utiliser les données du localStorage
+                    console.log('Utilisation des données du localStorage');
                     markdown = localDraft.content;
                     const frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
@@ -2378,9 +2398,11 @@ ${editorContent}`;
                             restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
                         }
                     });
+                    console.log('Données du restaurant extraites:', restaurantData);
 
                     // Charger les images depuis le localStorage
                     if (localDraft.images && localDraft.images.length > 0) {
+                        console.log('Chargement des images depuis le localStorage');
                         // Trouver l'image principale
                         const mainImage = localDraft.images.find(img => img.isMain);
                         if (mainImage) {
@@ -2400,9 +2422,7 @@ ${editorContent}`;
                         updateGalleryPreview();
                     }
                 } else {
-                    // Si pas dans le localStorage, aller chercher sur GitHub
-                    console.log('=== TENTATIVE DE RÉCUPÉRATION DEPUIS GITHUB ===');
-                    console.log('Repository:', repo);
+                    console.log('Tentative de récupération depuis GitHub');
                     const repo = 'Natael21/blog-culinaire';
                     const path = `_restaurants/${filename}`;
                     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
@@ -2440,47 +2460,11 @@ ${editorContent}`;
                             restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
                         }
                     });
-
-                    // Charger les images depuis GitHub
-                    if (restaurantData.image) {
-                        const imagePath = restaurantData.image.replace(/^\//, '');
-                        const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${imagePath}`;
-                        
-                        try {
-                            const imageResponse = await fetch(imageUrl);
-                            if (imageResponse.ok) {
-                                const imageBlob = await imageResponse.blob();
-                                mainImageFile = new File([imageBlob], imagePath.split('/').pop(), { type: 'image/webp' });
-                                handleMainImageUpload(mainImageFile);
-                            }
-                        } catch (error) {
-                            console.error('Erreur lors du chargement de l\'image principale:', error);
-                        }
-                    }
-
-                    // Charger les images de la galerie
-                    if (restaurantData.images) {
-                        galleryImageFiles = [];
-                        for (const imagePath of restaurantData.images) {
-                            const cleanPath = imagePath.image.replace(/^\//, '');
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${cleanPath}`;
-                            
-                            try {
-                                const imageResponse = await fetch(imageUrl);
-                                if (imageResponse.ok) {
-                                    const imageBlob = await imageResponse.blob();
-                                    const galleryFile = new File([imageBlob], cleanPath.split('/').pop(), { type: 'image/webp' });
-                                    galleryImageFiles.push(galleryFile);
-                                }
-                            } catch (error) {
-                                console.error('Erreur lors du chargement d\'une image de la galerie:', error);
-                            }
-                        }
-                        updateGalleryPreview();
-                    }
+                    console.log('Données du restaurant extraites:', restaurantData);
                 }
 
                 // Remplir les champs du formulaire
+                console.log('Remplissage des champs du formulaire');
                 document.getElementById('state').value = restaurantData.state || 'draft';
                 document.getElementById('title').value = restaurantData.title || '';
                 document.getElementById('date').value = restaurantData.date || '';
@@ -2523,6 +2507,7 @@ ${editorContent}`;
 
                 // Mettre à jour l'aperçu
                 updateMarkdownPreview();
+                console.log('=== FIN DU CHARGEMENT DU RESTAURANT ===');
 
             } catch (error) {
                 console.error('Erreur lors du chargement du restaurant:', error);
@@ -2540,20 +2525,6 @@ ${editorContent}`;
             return new Blob([bytes], { type });
         }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            // Vérifier si on charge un resto existant
-            const urlParams = new URLSearchParams(window.location.search);
-            const draftFilename = urlParams.get('draft');
-            
-            if (draftFilename) {
-                loadDraft(draftFilename);
-            }
-            
-            // Mettre à jour les boutons
-            updatePendingChangesButtons();
-        });
-
         // Fonction pour annuler les modifications
         function cancelChanges() {
             if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
@@ -2565,7 +2536,7 @@ ${editorContent}`;
 </head>
 <body>
     <header class="admin-header">
-        <h1 class="admin-title">Nouveau Restaurant</h1>
+        <h1 class="admin-title">Modifier un restaurant</h1>
         <a href="index.html" class="action-button">
             <i class="fas fa-arrow-left"></i> Retour à l'administration
         </a>
