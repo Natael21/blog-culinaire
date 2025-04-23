@@ -1357,6 +1357,13 @@
                 ],
                 content: '',
                 editable: true,
+                onReady: () => {
+                    // Charger le contenu en attente s'il y en a
+                    if (window.pendingEditorContent) {
+                        editor.commands.setContent(window.pendingEditorContent);
+                        delete window.pendingEditorContent;
+                    }
+                },
                 onUpdate: ({ editor }) => {
                     updateMarkdownPreview();
                 }
@@ -2547,7 +2554,13 @@ ${editorContent}`;
                 calculateOverallRating();
 
                 // Remplir l'éditeur avec le contenu
-                editor.commands.setContent(content);
+                if (editor && editor.commands) {
+                    editor.commands.setContent(content || '');
+                } else {
+                    console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
+                    // Stocker le contenu pour le charger plus tard
+                    window.pendingEditorContent = content;
+                }
 
                 // Mettre à jour l'aperçu
                 updateMarkdownPreview();
@@ -2581,8 +2594,8 @@ ${editorContent}`;
 <body>
     <header class="admin-header">
         <h1 class="admin-title">Modifier un restaurant</h1>
-        <a href="index.html" class="action-button">
-            <i class="fas fa-arrow-left"></i> Retour à l'administration
+        <a href="restaurants.html" class="action-button">
+            <i class="fas fa-arrow-left"></i> Retour à au Gestionnaire
         </a>
     </header>
 
