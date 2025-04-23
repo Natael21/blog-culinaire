@@ -577,8 +577,22 @@
                     .filter(change => change.type === 'delete')
                     .map(change => change.filename);
                 
+                // Récupérer les drafts du localStorage
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                console.log('Drafts trouvés:', drafts);
+                
+                // Convertir les drafts en format compatible
+                const draftRestaurants = drafts.map(draft => ({
+                    ...draft,
+                    state: 'draft',
+                    date: draft.lastModified.split('T')[0]
+                }));
+                
+                // Combiner les restaurants de GitHub et les drafts
+                const allRestaurants = [...data, ...draftRestaurants];
+                
                 // Filtrer les restaurants supprimés
-                const filteredData = data.filter(restaurant => !deletedFiles.includes(restaurant.filename));
+                const filteredData = allRestaurants.filter(restaurant => !deletedFiles.includes(restaurant.filename));
                 
                 // Trier les restaurants : drafts d'abord, puis par date
                 const restaurants = filteredData.sort((a, b) => {
