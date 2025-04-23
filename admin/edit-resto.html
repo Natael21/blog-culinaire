@@ -1340,10 +1340,10 @@
                         // Sauvegarder dans localStorage
                         localStorage.setItem('drafts', JSON.stringify(drafts));
 
-                        showNotification('Brouillon enregistré avec succès !', 'success');
+                        showNotification('Resto enregistré avec succès !', 'success');
                         
                         setTimeout(() => {
-                            window.location.href = 'index.html';
+                            window.location.href = 'restaurants.html';
                         }, 1500);
 
                     } catch (error) {
@@ -2252,8 +2252,8 @@ ${editorContent}`;
                 localStorage.removeItem('currentDraft');
                 localStorage.removeItem('pendingChanges');
                 
-                // Rediriger vers la page d'administration
-                window.location.href = 'index.html';
+                // Rediriger vers la page restaurants
+                window.location.href = 'restaurants.html';
             }
         }
 
@@ -2322,13 +2322,13 @@ ${editorContent}`;
                 try {
                     // Sauvegarder dans localStorage
                     localStorage.setItem('drafts', JSON.stringify(drafts));
-                    showNotification('Brouillon enregistré avec succès', 'success');
+                    showNotification('Resto enregistré avec succès', 'success');
                     
                     // Mettre à jour l'interface
                     updatePendingChangesButtons();
                     
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'restaurants.html';
                     }, 1500);
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
@@ -2779,14 +2779,12 @@ ${editorContent}`;
                 </div>
 
                 <div class="form-actions">
-                    <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button type="submit" class="action-button" id="saveButton">
-                            <i class="fas fa-save"></i> Enregistrer un brouillon
-                        </button>
-                        <button type="button" class="action-button cancel" onclick="cancelForm()">
-                            <i class="fas fa-times"></i> Annuler
-                        </button>
-                    </div>
+                    <button type="submit" class="action-button">
+                        <i class="fas fa-save"></i> Enregistrer les modifications
+                    </button>
+                    <button type="button" class="action-button cancel-button" onclick="cancelChanges()">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
                 </div>
             </form>
         </div>
