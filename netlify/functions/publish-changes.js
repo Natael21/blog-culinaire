@@ -100,17 +100,24 @@ exports.handler = async function(event, context) {
     let newTree = treeData.tree.filter(item => {
       // Keep files that are not being deleted
       const filePath = item.path;
-      return !changes.some(change => 
-        change.type === 'delete' && 
-        filePath === `_posts/${change.filename}`
-      );
+      return !changes.some(change => {
+        if (change.type === 'delete') {
+          // Si c'est une image, utiliser le chemin tel quel
+          if (change.isImage) {
+            return filePath === change.filename;
+          }
+          // Sinon, ajouter le préfixe _posts/
+          return filePath === `_posts/${change.filename}`;
+        }
+        return false;
+      });
     });
 
     // Add explicit deletion entries for files to be deleted
     for (const change of changes) {
       if (change.type === 'delete') {
         newTree.push({
-          path: `_posts/${change.filename}`,
+          path: change.isImage ? change.filename : `_posts/${change.filename}`,
           mode: '100644',
           type: 'blob',
           sha: null  // This explicitly tells Git to delete the file
