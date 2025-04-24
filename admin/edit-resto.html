@@ -1157,67 +1157,82 @@
         let selectedIndex = -1;
         let suggestions = [];
 
-        // Fonction pour convertir un fichier en base64
-        async function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = async () => {
-                    try {
-                        const compressedImage = await compressImage(reader.result);
-                        resolve(compressedImage.split(',')[1]);
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
+        // Variable pour stocker l'éditeur
+        let editor = null;
+        let editorInitialized = false;
 
-        // Fonction pour compresser une image en WebP
-        async function compressImage(dataUrl) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Définir la taille maximale souhaitée
-                    const MAX_WIDTH = 1200;
-                    const MAX_HEIGHT = 1200;
-                    
-                    // Calculer les nouvelles dimensions en conservant le ratio
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    if (width > MAX_WIDTH) {
-                        height = (height * MAX_WIDTH) / width;
-                        width = MAX_WIDTH;
+        // Fonction pour initialiser l'éditeur
+        function initializeEditor() {
+            return new Promise((resolve) => {
+                if (editorInitialized) {
+                    resolve(editor);
+                    return;
+                }
+
+                editor = new Editor({
+                    element: document.querySelector('#editor'),
+                    extensions: [
+                        Document,
+                        Paragraph,
+                        Text,
+                        Bold,
+                        Italic,
+                        BulletList,
+                        OrderedList,
+                        ListItem
+                    ],
+                    content: '',
+                    editable: true,
+                    onReady: () => {
+                        editorInitialized = true;
+                        // Charger le contenu en attente s'il y en a
+                        if (window.pendingEditorContent) {
+                            editor.commands.setContent(window.pendingEditorContent);
+                            delete window.pendingEditorContent;
+                        }
+                        resolve(editor);
+                    },
+                    onUpdate: ({ editor }) => {
+                        updateMarkdownPreview();
                     }
-                    
-                    if (height > MAX_HEIGHT) {
-                        width = (width * MAX_HEIGHT) / height;
-                        height = MAX_HEIGHT;
-                    }
-                    
-                    // Redimensionner l'image
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // Convertir en WebP avec une qualité de 80%
-                    const webpDataUrl = canvas.toDataURL('image/webp', 0.8);
-                    resolve(webpDataUrl);
-                };
-                
-                img.onerror = reject;
-                img.src = dataUrl;
+                });
+
+                // Gérer les boutons de la barre d'outils
+                document.querySelectorAll('.editor-toolbar button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const command = button.dataset.command;
+                        editor.chain().focus();
+                        
+                        switch(command) {
+                            case 'bold':
+                                editor.chain().toggleBold().run();
+                                break;
+                            case 'italic':
+                                editor.chain().toggleItalic().run();
+                                break;
+                            case 'bulletList':
+                                editor.chain().toggleBulletList().run();
+                                break;
+                            case 'orderedList':
+                                editor.chain().toggleOrderedList().run();
+                                break;
+                        }
+                        
+                        button.classList.toggle('is-active', editor.isActive(command));
+                    });
+
+                    const command = button.dataset.command;
+                    button.classList.toggle('is-active', editor.isActive(command));
+                });
             });
         }
 
         // Initialiser TipTap
-        let editor;
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
+            // Initialiser l'éditeur
+            await initializeEditor();
+
             // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
             const saveButton = document.getElementById('saveButton');
             
@@ -1250,153 +1265,6 @@
                     hideLoadingState(this);
                 });
             }
-
-            // Ajouter un gestionnaire d'événements sur le formulaire
-            const form = document.getElementById('restaurantForm');
-            
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    if (!validateForm()) {
-                        return;
-                    }
-                    
-                    try {
-                        // Générer le nom du fichier à partir du titre
-                        const title = document.getElementById('title').value;
-                        const filename = title.toLowerCase()
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .replace(/[^a-z0-9]/g, '-')
-                            .replace(/-+/g, '-')
-                            .replace(/^-|-$/g, '');
-                        
-                        const date = new Date().toISOString().split('T')[0];
-                        const filePath = `${date}-${filename}.md`;
-
-                        // Créer un objet pour stocker les données du resto
-                        const draftData = {
-                            filename: filePath,
-                            title: title,
-                            content: generateMarkdown(),
-                            images: []
-                        };
-
-                        // Sauvegarder les images localement en base64
-                        if (mainImageFile) {
-                            const mainImageBase64 = await fileToBase64(mainImageFile);
-                            draftData.images.push({
-                                name: mainImageFile.name,
-                                data: mainImageBase64
-                            });
-                        }
-
-                        for (let i = 0; i < galleryImageFiles.length; i++) {
-                            const file = galleryImageFiles[i];
-                            const galleryBase64 = await fileToBase64(file);
-                            draftData.images.push({
-                                name: file.name,
-                                data: galleryBase64
-                            });
-                        }
-
-                        // Récupérer les restos existants
-                        const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                        
-                        // Vérifier si un resto avec le même nom existe déjà
-                        const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
-                        
-                        if (existingIndex !== -1) {
-                            // Mettre à jour le resto existant
-                            drafts[existingIndex] = {
-                                ...drafts[existingIndex],
-                                ...draftData,
-                                lastModified: new Date().toISOString()
-                            };
-                        } else {
-                            // Ajouter un nouveau resto
-                            drafts.push({
-                                ...draftData,
-                                lastModified: new Date().toISOString()
-                            });
-                        }
-
-                        // Sauvegarder dans localStorage
-                        localStorage.setItem('drafts', JSON.stringify(drafts));
-
-                        showNotification('Restaurant enregistré avec succès !', 'success');
-                        
-                        setTimeout(() => {
-                            window.location.href = `edit-resto.html?filename=${filePath}`;
-                        }, 1500);
-                    } catch (error) {
-                        console.error('Erreur:', error);
-                        showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
-                        
-                        // En cas d'erreur, on cache le spinner
-                        const saveButton = document.getElementById('saveButton');
-                        if (saveButton) hideLoadingState(saveButton);
-                    }
-                });
-            } else {
-                console.error('Formulaire non trouvé !');
-            }
-
-            editor = new Editor({
-                element: document.querySelector('#editor'),
-                extensions: [
-                    Document,
-                    Paragraph,
-                    Text,
-                    Bold,
-                    Italic,
-                    BulletList,
-                    OrderedList,
-                    ListItem
-                ],
-                content: '',
-                editable: true,
-                onReady: () => {
-                    // Charger le contenu en attente s'il y en a
-                    if (window.pendingEditorContent) {
-                        editor.commands.setContent(window.pendingEditorContent);
-                        delete window.pendingEditorContent;
-                    }
-                },
-                onUpdate: ({ editor }) => {
-                    updateMarkdownPreview();
-                }
-            });
-
-            // Gérer les boutons de la barre d'outils
-            document.querySelectorAll('.editor-toolbar button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const command = button.dataset.command;
-                    editor.chain().focus();
-                    
-                    switch(command) {
-                        case 'bold':
-                            editor.chain().toggleBold().run();
-                            break;
-                        case 'italic':
-                            editor.chain().toggleItalic().run();
-                            break;
-                        case 'bulletList':
-                            editor.chain().toggleBulletList().run();
-                            break;
-                        case 'orderedList':
-                            editor.chain().toggleOrderedList().run();
-                            break;
-                    }
-                    
-                    button.classList.toggle('is-active', editor.isActive(command));
-                });
-
-                const command = button.dataset.command;
-                button.classList.toggle('is-active', editor.isActive(command));
-            });
 
             // Initialiser les autres fonctionnalités
             initializeAddressAutocomplete();
@@ -1996,8 +1864,13 @@ ${editorContent}`;
             const originalityComment = document.getElementById('originalityComment').value || '';
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
             
-            // Récupérer le contenu de l'éditeur
-            const editorContent = editor.getHTML() || '';
+            // Récupérer le contenu de l'éditeur de manière sécurisée
+            let editorContent = '';
+            if (editor && editor.getHTML) {
+                editorContent = editor.getHTML();
+            } else if (window.pendingEditorContent) {
+                editorContent = window.pendingEditorContent;
+            }
             
             // Créer le HTML de l'aperçu
             preview.innerHTML = `
@@ -2606,6 +2479,9 @@ ${editorContent}`;
                     });
                     console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
                 }
+
+                // Attendre que l'éditeur soit initialisé
+                await initializeEditor();
 
                 // Remplir l'éditeur avec le contenu
                 if (editor && editor.commands) {
