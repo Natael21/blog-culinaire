@@ -2542,16 +2542,31 @@ ${editorContent}`;
                     const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
                     console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
                     console.log('Chemin original de l\'image:', imagePath);
+                    console.log('Données du restaurant:', {
+                        title: restaurantData.title,
+                        date: restaurantData.date,
+                        state: restaurantData.state
+                    });
                     
                     if (imagePath) {
                         try {
                             // Corriger le chemin de l'image en retirant le slash initial et en encodant les espaces
                             const correctedPath = imagePath.replace(/^\//, '').replace(/ /g, '%20');
                             console.log('Chemin corrigé:', correctedPath);
+                            console.log('Encodage des caractères spéciaux:', {
+                                original: imagePath,
+                                corrected: correctedPath,
+                                encoded: encodeURIComponent(correctedPath)
+                            });
                             
                             // Modifier le chemin pour pointer vers le bon dossier
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${correctedPath}`;
+                            const imageUrl = `https://raw.githubusercontent.com/Natael21/blog-culinaire/main/${correctedPath}`;
                             console.log('URL complète de l\'image:', imageUrl);
+                            console.log('En-têtes de la requête:', {
+                                method: 'GET',
+                                mode: 'cors',
+                                cache: 'no-cache'
+                            });
                             
                             console.log('Tentative de chargement de l\'image principale...');
                             const response = await fetch(imageUrl);
@@ -2559,7 +2574,9 @@ ${editorContent}`;
                                 status: response.status,
                                 statusText: response.statusText,
                                 ok: response.ok,
-                                headers: Object.fromEntries(response.headers.entries())
+                                headers: Object.fromEntries(response.headers.entries()),
+                                type: response.type,
+                                url: response.url
                             });
                             
                             if (response.ok) {
@@ -2567,26 +2584,48 @@ ${editorContent}`;
                                 const blob = await response.blob();
                                 console.log('Blob créé:', {
                                     type: blob.type,
-                                    size: blob.size
+                                    size: blob.size,
+                                    lastModified: blob.lastModified,
+                                    lastModifiedDate: blob.lastModifiedDate
                                 });
                                 
                                 const fileName = imagePath.split('/').pop();
                                 console.log('Création du fichier avec le nom:', fileName);
+                                console.log('Détails du fichier:', {
+                                    name: fileName,
+                                    type: 'image/jpeg',
+                                    size: blob.size
+                                });
+                                
                                 const file = new File([blob], fileName, { type: 'image/jpeg' });
                                 mainImageFile = file;
                                 handleMainImageUpload(file);
                                 console.log('Image principale chargée avec succès');
+                                console.log('État de l\'image principale:', {
+                                    name: mainImageFile.name,
+                                    type: mainImageFile.type,
+                                    size: mainImageFile.size,
+                                    lastModified: mainImageFile.lastModified
+                                });
                             } else {
                                 console.error('Erreur lors du chargement de l\'image principale:', response.status);
+                                console.error('Détails de l\'erreur:', {
+                                    status: response.status,
+                                    statusText: response.statusText,
+                                    url: response.url
+                                });
                             }
                         } catch (error) {
                             console.error('Erreur lors du chargement de l\'image principale:', error);
                             console.error('Détails de l\'erreur:', {
                                 name: error.name,
                                 message: error.message,
-                                stack: error.stack
+                                stack: error.stack,
+                                cause: error.cause
                             });
                         }
+                    } else {
+                        console.warn('Chemin de l\'image principale vide ou invalide');
                     }
                 }
 
@@ -2600,18 +2639,34 @@ ${editorContent}`;
                     const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
                         ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
                     console.log('Chemins des images de la galerie trouvés:', galleryPaths);
+                    console.log('Nombre d\'images dans la galerie:', galleryPaths.length);
 
                     galleryImageFiles = [];
                     for (const imagePath of galleryPaths) {
                         try {
                             console.log(`\nTraitement de l'image: ${imagePath}`);
+                            console.log('État actuel de la galerie:', {
+                                nombreImages: galleryImageFiles.length,
+                                nomsFichiers: galleryImageFiles.map(f => f.name)
+                            });
+                            
                             // Corriger le chemin de l'image en retirant le slash initial et en encodant les espaces
                             const correctedPath = imagePath.replace(/^\//, '').replace(/ /g, '%20');
                             console.log('Chemin corrigé:', correctedPath);
+                            console.log('Encodage des caractères spéciaux:', {
+                                original: imagePath,
+                                corrected: correctedPath,
+                                encoded: encodeURIComponent(correctedPath)
+                            });
                             
                             // Modifier le chemin pour pointer vers le bon dossier
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${correctedPath}`;
+                            const imageUrl = `https://raw.githubusercontent.com/Natael21/blog-culinaire/main/${correctedPath}`;
                             console.log('URL complète de l\'image:', imageUrl);
+                            console.log('En-têtes de la requête:', {
+                                method: 'GET',
+                                mode: 'cors',
+                                cache: 'no-cache'
+                            });
                             
                             console.log('Tentative de chargement de l\'image...');
                             const response = await fetch(imageUrl);
@@ -2619,7 +2674,9 @@ ${editorContent}`;
                                 status: response.status,
                                 statusText: response.statusText,
                                 ok: response.ok,
-                                headers: Object.fromEntries(response.headers.entries())
+                                headers: Object.fromEntries(response.headers.entries()),
+                                type: response.type,
+                                url: response.url
                             });
                             
                             if (response.ok) {
@@ -2627,28 +2684,50 @@ ${editorContent}`;
                                 const blob = await response.blob();
                                 console.log('Blob créé:', {
                                     type: blob.type,
-                                    size: blob.size
+                                    size: blob.size,
+                                    lastModified: blob.lastModified,
+                                    lastModifiedDate: blob.lastModifiedDate
                                 });
                                 
                                 const fileName = imagePath.split('/').pop();
                                 console.log('Création du fichier avec le nom:', fileName);
+                                console.log('Détails du fichier:', {
+                                    name: fileName,
+                                    type: 'image/jpeg',
+                                    size: blob.size
+                                });
+                                
                                 const file = new File([blob], fileName, { type: 'image/jpeg' });
                                 galleryImageFiles.push(file);
                                 console.log('Image ajoutée à la galerie avec succès');
+                                console.log('État de la galerie après ajout:', {
+                                    nombreImages: galleryImageFiles.length,
+                                    nomsFichiers: galleryImageFiles.map(f => f.name)
+                                });
                             } else {
                                 console.error('Erreur lors du chargement de l\'image:', response.status);
+                                console.error('Détails de l\'erreur:', {
+                                    status: response.status,
+                                    statusText: response.statusText,
+                                    url: response.url
+                                });
                             }
                         } catch (error) {
                             console.error('Erreur lors du chargement de l\'image:', error);
                             console.error('Détails de l\'erreur:', {
                                 name: error.name,
                                 message: error.message,
-                                stack: error.stack
+                                stack: error.stack,
+                                cause: error.cause
                             });
                         }
                     }
                     console.log('Mise à jour de l\'aperçu de la galerie...');
                     updateGalleryPreview();
+                    console.log('État final de la galerie:', {
+                        nombreImages: galleryImageFiles.length,
+                        nomsFichiers: galleryImageFiles.map(f => f.name)
+                    });
                     console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
                 }
 
