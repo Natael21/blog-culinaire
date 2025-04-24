@@ -638,103 +638,33 @@
                 console.log('=== Détails du restaurant ===');
                 console.log('Titre:', restaurant.title);
                 console.log('Données complètes:', restaurant);
-                console.log('Image path brut:', restaurant.image);
                 
-                // Nettoyer le chemin de l'image en supprimant les doublons de /images/
-                let imageUrl = restaurant.image;
-                if (imageUrl && imageUrl.includes('/images/images/')) {
-                    imageUrl = imageUrl.replace('/images/images/', '/images/');
-                    console.log('URL de l\'image nettoyée:', imageUrl);
-                }
-                
-                // Vérifier si l'image existe et commence par /images/
-                const finalImageUrl = imageUrl && imageUrl.startsWith('/images/') 
-                    ? imageUrl 
-                    : null;
-                console.log('URL de l\'image après vérification:', finalImageUrl);
-                console.log('L\'image sera-t-elle affichée ?', !!finalImageUrl);
+                // Gestion des images selon le type de restaurant
+                const imageHtml = restaurant.state === 'draft' 
+                    ? `<div class="restaurant-image">
+                         <img src="${restaurant.imageContent}" 
+                              alt="${restaurant.title}"
+                              style="object-fit: cover;">
+                       </div>`
+                    : restaurant.image && restaurant.image.startsWith('/images/')
+                        ? `<div class="restaurant-image">
+                             <img src="${restaurant.image}" 
+                                  alt="${restaurant.title}"
+                                  onerror="handleImageError(this)">
+                           </div>`
+                        : `<div class="restaurant-image">
+                             <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
+                               <i class="fas fa-image" style='font-size: 2em; color: #ccc;'></i>
+                               <div style="text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;">
+                                 Pas d'image
+                               </div>
+                             </div>
+                           </div>`;
 
                 const card = document.createElement('div');
                 card.className = 'restaurant-card';
                 card.setAttribute('data-filename', restaurant.filename);
                 
-                // Améliorer la gestion des erreurs d'images
-                const imageHtml = finalImageUrl 
-                    ? `<div class="restaurant-image">
-                         <img src="${finalImageUrl}" 
-                              alt="${restaurant.title}" 
-                              onerror="(function(e) {
-                                  // Tenter de charger l'image une seconde fois
-                                  if (!e.target.dataset.retried) {
-                                      console.log('Premier échec de chargement, nouvelle tentative pour:', {
-                                          url: '${finalImageUrl}',
-                                          restaurant: '${restaurant.title}'
-                                      });
-                                      e.target.dataset.retried = 'true';
-                                      e.target.src = '${finalImageUrl}' + '?t=' + new Date().getTime();
-                                      return;
-                                  }
-
-                                  console.error({
-                                      type: 'error',
-                                      message: 'Erreur de chargement de l\\'image',
-                                      url: '${finalImageUrl}',
-                                      restaurant: '${restaurant.title}',
-                                      timestamp: new Date().toISOString(),
-                                      status: 'Image non trouvée ou inaccessible après nouvelle tentative',
-                                      htmlError: e.target.error
-                                  });
-
-                                  // Vérifier si l'image existe avec un fetch
-                                  fetch('${finalImageUrl}')
-                                      .then(response => {
-                                          console.log('Vérification de l\\'image:', {
-                                              url: '${finalImageUrl}',
-                                              status: response.status,
-                                              ok: response.ok,
-                                              headers: response.headers
-                                          });
-                                      })
-                                      .catch(error => {
-                                          console.error('Erreur lors de la vérification:', {
-                                              url: '${finalImageUrl}',
-                                              error: error.message
-                                          });
-                                      });
-
-                                  // Remplacer par une icône avec un message d'erreur
-                                  e.target.parentNode.innerHTML = \`
-                                    <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
-                                      <i class='fas fa-image' style='font-size: 2em; color: #ccc;'></i>
-                                      <div style='text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;'>
-                                        Image non disponible
-                                      </div>
-                                      <div style='text-align: center; font-size: 0.7em; color: #999; margin-top: 4px;'>
-                                        Erreur: Image inaccessible
-                                      </div>
-                                    </div>
-                                  \`;
-                              })(event)"
-                              onload="(function(e) {
-                                  console.log({
-                                      type: 'success',
-                                      message: 'Image chargée avec succès',
-                                      url: '${finalImageUrl}',
-                                      restaurant: '${restaurant.title}',
-                                      timestamp: new Date().toISOString(),
-                                      dimensions: e.target.naturalWidth + 'x' + e.target.naturalHeight
-                                  });
-                              })(event)">
-                       </div>`
-                    : `<div class="restaurant-image">
-                         <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
-                           <i class="fas fa-image" style='font-size: 2em; color: #ccc;'></i>
-                           <div style="text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;">
-                             Pas d'image
-                           </div>
-                         </div>
-                       </div>`;
-
                 card.innerHTML = `
                     ${imageHtml}
                     <div class="restaurant-info">
@@ -771,6 +701,19 @@
                 console.log('Carte créée pour:', restaurant.title);
             });
             console.log('Affichage des restaurants terminé');
+        }
+
+        // Fonction pour gérer les erreurs de chargement d'images
+        function handleImageError(img) {
+            console.error('Erreur de chargement de l\'image:', img.src);
+            img.parentNode.innerHTML = `
+                <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
+                    <i class='fas fa-image' style='font-size: 2em; color: #ccc;'></i>
+                    <div style='text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;'>
+                        Image non disponible
+                    </div>
+                </div>
+            `;
         }
 
         // Fonction pour supprimer un restaurant
