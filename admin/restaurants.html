@@ -581,28 +581,15 @@
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 console.log('Drafts trouvés:', drafts);
                 
-                // Combiner les restaurants de GitHub et les drafts
-                const allRestaurants = [...data];
+                // Convertir les drafts en format compatible
+                const draftRestaurants = drafts.map(draft => ({
+                    ...draft,
+                    state: 'draft',
+                    date: draft.lastModified.split('T')[0]
+                }));
                 
-                // Pour chaque draft, soit ajouter un nouveau restaurant, soit remplacer un existant
-                drafts.forEach(draft => {
-                    const existingIndex = allRestaurants.findIndex(r => r.filename === draft.filename);
-                    if (existingIndex !== -1) {
-                        // Remplacer le restaurant existant par sa version modifiée
-                        allRestaurants[existingIndex] = {
-                            ...draft,
-                            state: 'draft',
-                            date: draft.lastModified.split('T')[0]
-                        };
-                    } else {
-                        // Ajouter le nouveau draft
-                        allRestaurants.push({
-                            ...draft,
-                            state: 'draft',
-                            date: draft.lastModified.split('T')[0]
-                        });
-                    }
-                });
+                // Combiner les restaurants de GitHub et les drafts
+                const allRestaurants = [...data, ...draftRestaurants];
                 
                 // Filtrer les restaurants supprimés
                 const filteredData = allRestaurants.filter(restaurant => !deletedFiles.includes(restaurant.filename));
@@ -671,60 +658,112 @@
                 card.className = 'restaurant-card';
                 card.setAttribute('data-filename', restaurant.filename);
                 
-                // Améliorer la gestion des valeurs undefined
-                const address = restaurant.address || 'Adresse non spécifiée';
-                const style = restaurant.style || 'Style non spécifié';
-                const price = restaurant.price || 'Prix non spécifié';
-                const description = restaurant.description || 'Description non spécifiée';
-                const note = restaurant.note || 'Note non spécifiée';
+                // Améliorer la gestion des erreurs d'images
+                const imageHtml = finalImageUrl 
+                    ? `<div class="restaurant-image">
+                         <img src="${finalImageUrl}" 
+                              alt="${restaurant.title}" 
+                              onerror="(function(e) {
+                                  // Tenter de charger l'image une seconde fois
+                                  if (!e.target.dataset.retried) {
+                                      console.log('Premier échec de chargement, nouvelle tentative pour:', {
+                                          url: '${finalImageUrl}',
+                                          restaurant: '${restaurant.title}'
+                                      });
+                                      e.target.dataset.retried = 'true';
+                                      e.target.src = '${finalImageUrl}' + '?t=' + new Date().getTime();
+                                      return;
+                                  }
+
+                                  console.error({
+                                      type: 'error',
+                                      message: 'Erreur de chargement de l\\'image',
+                                      url: '${finalImageUrl}',
+                                      restaurant: '${restaurant.title}',
+                                      timestamp: new Date().toISOString(),
+                                      status: 'Image non trouvée ou inaccessible après nouvelle tentative',
+                                      htmlError: e.target.error
+                                  });
+
+                                  // Vérifier si l'image existe avec un fetch
+                                  fetch('${finalImageUrl}')
+                                      .then(response => {
+                                          console.log('Vérification de l\\'image:', {
+                                              url: '${finalImageUrl}',
+                                              status: response.status,
+                                              ok: response.ok,
+                                              headers: response.headers
+                                          });
+                                      })
+                                      .catch(error => {
+                                          console.error('Erreur lors de la vérification:', {
+                                              url: '${finalImageUrl}',
+                                              error: error.message
+                                          });
+                                      });
+
+                                  // Remplacer par une icône avec un message d'erreur
+                                  e.target.parentNode.innerHTML = \`
+                                    <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
+                                      <i class='fas fa-image' style='font-size: 2em; color: #ccc;'></i>
+                                      <div style='text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;'>
+                                        Image non disponible
+                                      </div>
+                                      <div style='text-align: center; font-size: 0.7em; color: #999; margin-top: 4px;'>
+                                        Erreur: Image inaccessible
+                                      </div>
+                                    </div>
+                                  \`;
+                              })(event)"
+                              onload="(function(e) {
+                                  console.log({
+                                      type: 'success',
+                                      message: 'Image chargée avec succès',
+                                      url: '${finalImageUrl}',
+                                      restaurant: '${restaurant.title}',
+                                      timestamp: new Date().toISOString(),
+                                      dimensions: e.target.naturalWidth + 'x' + e.target.naturalHeight
+                                  });
+                              })(event)">
+                       </div>`
+                    : `<div class="restaurant-image">
+                         <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
+                           <i class="fas fa-image" style='font-size: 2em; color: #ccc;'></i>
+                           <div style="text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;">
+                             Pas d'image
+                           </div>
+                         </div>
+                       </div>`;
 
                 card.innerHTML = `
-                    <div class="restaurant-image">
-                        ${finalImageUrl 
-                            ? `<img src="${finalImageUrl}" alt="${restaurant.title}" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-image\'></i>';">` 
-                            : '<i class="fas fa-image"></i>'
-                        }
-                    </div>
+                    ${imageHtml}
                     <div class="restaurant-info">
                         <h3 class="restaurant-name">
-                            ${restaurant.title || 'Sans titre'}
+                            ${restaurant.title}
                             ${restaurant.state === 'draft' ? '<span class="draft-badge">Brouillon</span>' : ''}
                         </h3>
                         <div class="restaurant-meta">
-                            <div class="restaurant-meta-item">
+                            <span class="restaurant-meta-item">
                                 <i class="fas fa-map-marker-alt"></i>
-                                ${address}
-                            </div>
-                            <div class="restaurant-meta-item">
+                                ${restaurant.address}
+                            </span>
+                            <span class="restaurant-meta-item">
                                 <i class="fas fa-utensils"></i>
-                                ${style}
-                            </div>
-                            <div class="restaurant-meta-item">
-                                <i class="fas fa-tag"></i>
-                                ${price}
-                            </div>
-                            <div class="restaurant-meta-item">
-                                <i class="fas fa-star"></i>
-                                ${note}
-                            </div>
-                            <div class="restaurant-meta-item">
+                                ${restaurant.style}
+                            </span>
+                            <span class="restaurant-meta-item">
                                 <i class="fas fa-calendar"></i>
-                                ${restaurant.date || 'Date non spécifiée'}
-                            </div>
-                            <div class="restaurant-meta-item description">
-                                <i class="fas fa-info-circle"></i>
-                                ${description}
-                            </div>
+                                ${restaurant.date}
+                            </span>
                         </div>
                     </div>
                     <div class="restaurant-actions">
-                        <button class="action-button edit" onclick="editRestaurant('${restaurant.filename}')">
+                        <a href="edit-resto.html?filename=${restaurant.filename}" class="action-button edit-button">
                             <i class="fas fa-edit"></i>
-                            Modifier
-                        </button>
-                        <button class="action-button delete" onclick="deleteRestaurant('${restaurant.filename}', '${restaurant.title}')">
-                            <i class="fas fa-trash"></i>
-                            Supprimer
+                            <span class="button-text">Modifier</span>
+                        </a>
+                        <button class="action-button delete-button" onclick="deleteRestaurant('${restaurant.filename}')">
+                            <i class="fas fa-trash"></i> Supprimer
                         </button>
                     </div>
                 `;
@@ -735,10 +774,14 @@
         }
 
         // Fonction pour supprimer un restaurant
-        async function deleteRestaurant(filename, title) {
+        async function deleteRestaurant(filename) {
             try {
+                // Trouver le titre du restaurant
+                const restaurantElement = document.querySelector(`[data-filename="${filename}"]`);
+                const restaurantTitle = restaurantElement.querySelector('.restaurant-name').textContent.trim();
+                
                 // Afficher le modal de confirmation et attendre la réponse
-                const confirmed = await showConfirmationModal(title);
+                const confirmed = await showConfirmationModal(restaurantTitle);
                 
                 if (!confirmed) {
                     console.log('Suppression annulée');
@@ -762,7 +805,6 @@
                 window.dispatchEvent(new Event('storageUpdated'));
                 
                 // Supprimer le restaurant de la liste affichée
-                const restaurantElement = document.querySelector(`[data-filename="${filename}"]`);
                 if (restaurantElement) {
                     restaurantElement.remove();
                 }
