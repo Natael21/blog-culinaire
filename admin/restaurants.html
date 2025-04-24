@@ -728,19 +728,24 @@
                 // Si vient du localStorage, chercher l'image principale dans le tableau images
                 if (restaurant.isFromLocalStorage && Array.isArray(restaurant.images) && restaurant.images.length > 0) {
                     console.log('Contenu du tableau images pour:', restaurant.title, restaurant.images);
-                    let mainImage = restaurant.images.find(img => img.isMain);
-                    console.log('Image principale trouvée avec isMain=true:', mainImage);
-
-                    // Si non trouvée avec isMain, mais qu'il n'y a qu'une seule image, la prendre par défaut
-                    if (!mainImage && restaurant.images.length === 1) {
-                        console.log('Aucune image avec isMain=true, mais une seule image trouvée. Utilisation de celle-ci.');
-                        mainImage = restaurant.images[0];
+                    
+                    // Afficher la structure complète de la première image pour le débogage
+                    console.log('Structure de la première image:', restaurant.images[0]);
+                    
+                    // Vérifier si l'image a une propriété 'data' (contenu base64)
+                    if (restaurant.images[0].data) {
+                        console.log('-> Utilisation des données base64 de l\'image du localStorage');
+                        imageSource = `data:image/jpeg;base64,${restaurant.images[0].data}`;
                     }
-
-                    // Si on a trouvé une image, utiliser son URL
-                    if (mainImage && mainImage.url) {
-                        console.log('-> Utilisation de l\'image du localStorage:', mainImage.url);
-                        imageSource = mainImage.url;
+                    // Vérifier si l'image a une propriété 'url'
+                    else if (restaurant.images[0].url) {
+                        console.log('-> Utilisation de l\'URL de l\'image du localStorage:', restaurant.images[0].url);
+                        imageSource = restaurant.images[0].url;
+                    }
+                    // Vérifier si l'image a une propriété 'path'
+                    else if (restaurant.images[0].path) {
+                        console.log('-> Utilisation du chemin de l\'image du localStorage:', restaurant.images[0].path);
+                        imageSource = restaurant.images[0].path;
                     }
                 }
                 
