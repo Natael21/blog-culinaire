@@ -740,7 +740,14 @@ ${restaurant.description}
                     });
                 }
 
-                localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+                // Filtrer les changements invalides
+                const validChanges = pendingChanges.filter(change => 
+                    change.type && 
+                    change.filename && 
+                    (change.type === 'delete' || (change.type !== 'delete' && change.content))
+                );
+
+                localStorage.setItem('pendingChanges', JSON.stringify(validChanges));
                 
                 // Mettre à jour le titre dans l'en-tête
                 card.querySelector('.restaurant-name').textContent = restaurant.title || 'Nouveau restaurant';
