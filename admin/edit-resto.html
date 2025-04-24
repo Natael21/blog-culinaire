@@ -2358,7 +2358,7 @@ ${editorContent}`;
                 console.log('Draft local trouvé:', localDraft);
 
                 let markdown;
-                let restaurantData;
+                let restaurantData = {};
                 let content;
                 let frontMatter;
 
@@ -2371,8 +2371,24 @@ ${editorContent}`;
                     });
 
                     markdown = localDraft.content;
-                    frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
-                    content = markdown.split('---')[2].trim();
+                    // Extraire le front matter et le contenu
+                    const parts = markdown.split('---');
+                    if (parts.length >= 3) {
+                        frontMatter = parts[1].trim();
+                        content = parts[2].trim();
+                        
+                        // Parser le front matter pour les drafts locaux
+                        console.log('Parsing du front matter local');
+                        frontMatter.split('\n').forEach(line => {
+                            const [key, ...value] = line.split(':');
+                            if (key && value.length > 0) {
+                                const cleanKey = key.trim();
+                                const cleanValue = value.join(':').trim().replace(/^['"]|['"]$/g, '');
+                                restaurantData[cleanKey] = cleanValue;
+                                console.log(`Front matter - ${cleanKey}: ${cleanValue}`);
+                            }
+                        });
+                    }
 
                     if (localDraft.images && localDraft.images.length > 0) {
                         console.log('Traitement des images du localStorage');
@@ -2439,7 +2455,7 @@ ${editorContent}`;
                 }
 
                 // Remplir les champs du formulaire
-                console.log('Remplissage des champs du formulaire');
+                console.log('Remplissage des champs du formulaire avec:', restaurantData);
                 document.getElementById('state').value = restaurantData.state || 'draft';
                 document.getElementById('title').value = restaurantData.title || '';
                 document.getElementById('date').value = restaurantData.date || '';
