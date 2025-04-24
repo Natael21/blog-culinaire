@@ -804,6 +804,24 @@
                     address: card.querySelector('[data-field="address"]').value.trim()
                 };
 
+                // Validation des données
+                if (!restaurant.title) {
+                    showNotification('Le titre est requis', 'error');
+                    return;
+                }
+                if (!restaurant.style) {
+                    showNotification('Le style de cuisine est requis', 'error');
+                    return;
+                }
+                if (!restaurant.description) {
+                    showNotification('La description est requise', 'error');
+                    return;
+                }
+                if (!restaurant.address) {
+                    showNotification('L\'adresse est requise', 'error');
+                    return;
+                }
+
                 // Générer le contenu Markdown
                 const markdownContent = `---
 restaurant_type: ${restaurant.style}
@@ -852,6 +870,7 @@ location: ${restaurant.address}
                             pendingChanges[existingIndex] = {
                                 type: actionType,
                                 filename: filename,
+                                path: filename,
                                 content: markdownContent,
                                 timestamp: new Date().toISOString()
                             };
@@ -860,6 +879,7 @@ location: ${restaurant.address}
                             pendingChanges.push({
                                 type: actionType,
                                 filename: filename,
+                                path: filename,
                                 content: markdownContent,
                                 timestamp: new Date().toISOString()
                             });
@@ -905,6 +925,11 @@ location: ${restaurant.address}
                 try {
                     // Récupérer les informations du restaurant avant de le supprimer
                     const card = document.querySelector(`[data-restaurant-id="${id}"]`);
+                    if (!card) {
+                        showNotification('Restaurant non trouvé', 'error');
+                        return;
+                    }
+
                     const restaurant = {
                         id: id,
                         title: card.querySelector('[data-field="title"]').value.trim(),
@@ -912,6 +937,12 @@ location: ${restaurant.address}
                         description: card.querySelector('[data-field="description"]').value.trim(),
                         address: card.querySelector('[data-field="address"]').value.trim()
                     };
+
+                    // Validation des données
+                    if (!restaurant.title) {
+                        showNotification('Impossible de supprimer un restaurant sans titre', 'error');
+                        return;
+                    }
 
                     // Supprimer de l'interface
                     card.remove();
@@ -932,15 +963,17 @@ location: ${restaurant.address}
                         if (existingIndex !== -1) {
                             // Mettre à jour la modification existante
                             pendingChanges[existingIndex] = {
-                                type: 'delete-restaurant',
+                                type: 'delete',
                                 filename: filename,
+                                path: filename,
                                 timestamp: new Date().toISOString()
                             };
                         } else {
                             // Ajouter une nouvelle modification
                             pendingChanges.push({
-                                type: 'delete-restaurant',
+                                type: 'delete',
                                 filename: filename,
+                                path: filename,
                                 timestamp: new Date().toISOString()
                             });
                         }
@@ -1002,69 +1035,6 @@ location: ${restaurant.address}
                 // Afficher le spinner central
                 loadingOverlay = showLoadingOverlay('Publication des modifications en cours...');
 
-                // Vérifier les conflits potentiels
-                try {
-                    console.log('=== VÉRIFICATION DES CONFLITS ===');
-                    console.log('Envoi des changements pour vérification:', JSON.stringify(pendingChanges, null, 2));
-                    
-                    const response = await fetch('/.netlify/functions/check-conflicts', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ changes: pendingChanges })
-                    });
-
-                    console.log('Réponse de check-conflicts:', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: Object.fromEntries(response.headers.entries())
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        console.error('Erreur lors de la vérification des conflits:', errorData);
-                        throw new Error(errorData.error || 'Erreur lors de la vérification des conflits');
-                    }
-
-                    const conflicts = await response.json();
-                    console.log('Conflits détectés:', conflicts);
-                    
-                    if (conflicts.length > 0) {
-                        console.log('Conflits trouvés, arrêt de la publication');
-                        showNotification('Des conflits ont été détectés. Veuillez recharger la page et réessayer.', 'error');
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Erreur détaillée lors de la vérification des conflits:', {
-                        message: error.message,
-                        stack: error.stack,
-                        timestamp: new Date().toISOString()
-                    });
-                    showNotification('Erreur lors de la vérification des conflits', 'error');
-                    return;
-                }
-
-                // Préparer les changements pour la publication
-                console.log('=== PRÉPARATION DES CHANGEMENTS ===');
-                const changesToPublish = pendingChanges.map(change => {
-                    console.log('Traitement du changement:', JSON.stringify(change, null, 2));
-                    
-                    // Pour les suppressions de restaurants, s'assurer que le type est correct
-                    if (change.type === 'delete-restaurant') {
-                        const transformedChange = {
-                            ...change,
-                            type: 'delete', // Convertir en type 'delete' pour GitHub
-                            path: change.filename // Ajouter le path pour la suppression
-                        };
-                        console.log('Changement transformé (delete-restaurant):', JSON.stringify(transformedChange, null, 2));
-                        return transformedChange;
-                    }
-                    return change;
-                });
-
-                console.log('Changements préparés pour la publication:', JSON.stringify(changesToPublish, null, 2));
-
                 // Envoyer les modifications à GitHub
                 console.log('=== ENVOI DES MODIFICATIONS À GITHUB ===');
                 const response = await fetch('/.netlify/functions/publish-changes', {
@@ -1072,7 +1042,15 @@ location: ${restaurant.address}
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ changes: changesToPublish })
+                    body: JSON.stringify({ 
+                        changes: pendingChanges.map(change => ({
+                            type: change.type,
+                            filename: change.filename,
+                            path: change.path,
+                            content: change.content,
+                            timestamp: change.timestamp
+                        }))
+                    })
                 });
 
                 console.log('Réponse de publish-changes:', {
