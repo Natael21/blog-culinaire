@@ -2399,244 +2399,221 @@ ${editorContent}`;
                     markdown = localDraft.content;
                     frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
-
-                    // Parser le front matter
-                    restaurantData = {};
-                    frontMatter.split('\n').forEach(line => {
-                        const [key, ...value] = line.split(':');
-                        if (key && value) {
-                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
-                        }
+                    console.log('Contenu markdown extrait du localStorage:', { 
+                        frontMatterLength: frontMatter.length,
+                        contentLength: content.length
                     });
-                    console.log('Données du restaurant extraites:', restaurantData);
                 } else {
                     console.log('Tentative de récupération depuis GitHub');
-                    const path = `_posts/${filename}`;
-                    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-                    console.log('URL de la requête:', url);
-
-                    const response = await fetch(url);
-                    console.log('Statut de la réponse:', response.status);
+                    const response = await fetch(`https://api.github.com/repos/${repo}/contents/_posts/${filename}`);
+                    console.log('Statut de la réponse GitHub:', response.status);
                     
                     if (!response.ok) {
-                        console.error('Erreur lors de la récupération du fichier:', {
-                            status: response.status,
-                            statusText: response.statusText
-                        });
-                        throw new Error('Fichier non trouvé');
+                        throw new Error(`Erreur lors de la récupération du fichier: ${response.status}`);
                     }
-
-                    const data = await response.json();
-                    console.log('Données reçues:', {
-                        type: data.type,
-                        size: data.size,
-                        name: data.name
-                    });
-                    markdown = decodeURIComponent(escape(atob(data.content)));
-                    console.log('Contenu markdown décodé:', markdown);
                     
+                    const data = await response.json();
+                    console.log('Données GitHub reçues:', { 
+                        type: data.type, 
+                        size: data.size, 
+                        name: data.name,
+                        path: data.path
+                    });
+                    
+                    // Décoder le contenu base64
+                    const decodedContent = atob(data.content);
+                    console.log('Contenu markdown décodé:', {
+                        length: decodedContent.length,
+                        preview: decodedContent.substring(0, 100) + '...'
+                    });
+                    
+                    markdown = decodedContent;
                     frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
-
-                    // Parser le front matter
-                    restaurantData = {};
-                    frontMatter.split('\n').forEach(line => {
-                        const [key, ...value] = line.split(':');
-                        if (key && value) {
-                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
-                        }
+                    console.log('Contenu markdown extrait:', {
+                        frontMatterLength: frontMatter.length,
+                        contentLength: content.length
                     });
-                    console.log('Données du restaurant extraites:', restaurantData);
                 }
 
+                // Extraire les données du front matter
+                console.log('\n=== EXTRACTION DES DONNÉES DU FRONT MATTER ===');
+                const lines = frontMatter.split('\n');
+                restaurantData = {};
+                for (const line of lines) {
+                    const match = line.match(/^([^:]+):\s*(.+)$/);
+                    if (match) {
+                        const key = match[1].trim();
+                        let value = match[2].trim();
+                        // Nettoyer les guillemets
+                        value = value.replace(/^['"]|['"]$/g, '');
+                        restaurantData[key] = value;
+                        console.log(`Champ extrait: ${key} = ${value}`);
+                    }
+                }
+                console.log('Données du restaurant extraites:', restaurantData);
+
                 // Remplir les champs du formulaire
-                console.log('Remplissage des champs du formulaire');
-                document.getElementById('state').value = restaurantData.state || 'draft';
+                console.log('\n=== REMPLISSAGE DES CHAMPS DU FORMULAIRE ===');
                 document.getElementById('title').value = restaurantData.title || '';
                 document.getElementById('date').value = restaurantData.date || '';
                 document.getElementById('description').value = restaurantData.description || '';
                 document.getElementById('address').value = restaurantData.address || '';
                 document.getElementById('style').value = restaurantData.style || '';
+                document.getElementById('price').value = restaurantData.price || '';
+                console.log('Champs du formulaire remplis');
                 
-                // Corriger la gamme de prix
-                const priceMap = {
-                    'budget': '$ (0-20$)',
-                    'moyen': '$$ (20-40$)',
-                    'haut': '$$$ (40$ et +)'
-                };
-                const priceValue = priceMap[restaurantData.price] || restaurantData.price;
-                console.log('Gamme de prix:', { original: restaurantData.price, mapped: priceValue });
-                document.getElementById('price').value = priceValue;
-                
-                // Remplir les options alimentaires
-                const diets = (restaurantData.diet || '').split(',');
-                console.log('Options alimentaires:', diets);
-                document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
-                document.getElementById('vegan').checked = diets.includes('vegan-friendly');
+                // Gérer les options alimentaires
+                const dietOptions = (restaurantData.diet || '').split(',').map(opt => opt.trim());
+                console.log('Options alimentaires trouvées:', dietOptions);
+                document.getElementById('vegetarian').checked = dietOptions.includes('vegetarian-friendly');
+                document.getElementById('vegan').checked = dietOptions.includes('vegan-friendly');
 
-                // Extraire et remplir les notes et commentaires
-                console.log('Extraction des notes et commentaires');
-                const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
+                // Extraire les notes et commentaires
+                console.log('\n=== EXTRACTION DES NOTES ET COMMENTAIRES ===');
+                const ratingsMatch = frontMatter.match(/ratings:\n([\s\S]*?)(?=\n\w|$)/);
                 if (ratingsMatch) {
-                    const ratingsYaml = ratingsMatch[0];
+                    const ratingsYaml = ratingsMatch[1];
                     console.log('YAML des notes trouvé:', ratingsYaml);
+                    
+                    // Extraire les scores et commentaires
+                    const foodMatch = ratingsYaml.match(/food:\n\s*score:\s*(\d+)\n\s*criteria:.*?\n\s*comment:\s*"([^"]+)"/);
+                    const serviceMatch = ratingsYaml.match(/service:\n\s*score:\s*(\d+)\n\s*criteria:.*?\n\s*comment:\s*"([^"]+)"/);
+                    const ambianceMatch = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)\n\s*criteria:.*?\n\s*comment:\s*"([^"]+)"/);
+                    const valueMatch = ratingsYaml.match(/value:\n\s*score:\s*(\d+)\n\s*comment:\s*"([^"]+)"/);
+                    const originalityMatch = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)\n\s*comment:\s*"([^"]+)"/);
+                    const overallMatch = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)\n\s*criteria:.*?\n\s*comment:\s*"([^"]+)"/);
 
-                    // Extraire les scores et commentaires avec une meilleure regex
-                    const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const serviceScore = ratingsYaml.match(/service:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const ambianceScore = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const valueScore = ratingsYaml.match(/value:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
-
-                    // Améliorer l'extraction des commentaires
-                    const extractComment = (yaml, category) => {
-                        const match = yaml.match(new RegExp(`${category}:[\\s\\S]*?comment:\\s*["']([^"']*)["']`));
-                        console.log(`Extraction du commentaire ${category}:`, match);
-                        return match ? match[1] : '';
+                    const ratings = {
+                        foodScore: foodMatch ? foodMatch[1] : '0',
+                        foodComment: foodMatch ? foodMatch[2] : '',
+                        serviceScore: serviceMatch ? serviceMatch[1] : '0',
+                        serviceComment: serviceMatch ? serviceMatch[2] : '',
+                        ambianceScore: ambianceMatch ? ambianceMatch[1] : '0',
+                        ambianceComment: ambianceMatch ? ambianceMatch[2] : '',
+                        valueScore: valueMatch ? valueMatch[1] : '0',
+                        valueComment: valueMatch ? valueMatch[2] : '',
+                        originalityScore: originalityMatch ? originalityMatch[1] : '0',
+                        originalityComment: originalityMatch ? originalityMatch[2] : '',
+                        overallScore: overallMatch ? overallMatch[1] : '0',
+                        overallComment: overallMatch ? overallMatch[2] : ''
                     };
+                    console.log('Notes et commentaires extraits:', ratings);
 
-                    const foodComment = extractComment(ratingsYaml, 'food');
-                    const serviceComment = extractComment(ratingsYaml, 'service');
-                    const ambianceComment = extractComment(ratingsYaml, 'ambiance');
-                    const valueComment = extractComment(ratingsYaml, 'value');
-                    const originalityComment = extractComment(ratingsYaml, 'originality');
-                    const overallComment = extractComment(ratingsYaml, 'overall');
-
-                    console.log('Notes et commentaires extraits:', {
-                        foodScore, foodComment,
-                        serviceScore, serviceComment,
-                        ambianceScore, ambianceComment,
-                        valueScore, valueComment,
-                        originalityScore, originalityComment,
-                        overallScore, overallComment
-                    });
-
-                    // Remplir les scores
-                    document.getElementById('foodScore').value = foodScore;
-                    document.getElementById('serviceScore').value = serviceScore;
-                    document.getElementById('ambianceScore').value = ambianceScore;
-                    document.getElementById('valueScore').value = valueScore;
-                    document.getElementById('originalityScore').value = originalityScore;
-                    document.getElementById('overallExperienceScore').value = overallScore;
-
-                    // Remplir les commentaires
-                    document.getElementById('foodComment').value = foodComment;
-                    document.getElementById('serviceComment').value = serviceComment;
-                    document.getElementById('ambianceComment').value = ambianceComment;
-                    document.getElementById('valueComment').value = valueComment;
-                    document.getElementById('originalityComment').value = originalityComment;
-                    document.getElementById('overallExperienceComment').value = overallComment;
-
-                    // Mettre à jour les affichages des valeurs
-                    document.querySelectorAll('.rating-value').forEach(el => {
-                        const input = el.previousElementSibling;
-                        if (input) {
-                            el.textContent = input.value;
+                    // Remplir les champs de notes
+                    Object.entries(ratings).forEach(([key, value]) => {
+                        const element = document.getElementById(key);
+                        if (element) {
+                            element.value = value;
                         }
                     });
+                    console.log('Champs de notes remplis');
                 }
 
-                // Charger l'image principale depuis GitHub si elle existe
-                if (restaurantData.image) {
-                    const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
-                    console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
-                    console.log('Chemin original de l\'image:', imagePath);
+                // Charger l'image principale
+                console.log('\n=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
+                const mainImagePath = restaurantData.image;
+                console.log('Chemin original de l\'image:', mainImagePath);
+                
+                if (mainImagePath) {
+                    // Nettoyer le chemin de l'image
+                    const cleanPath = mainImagePath.replace(/^\/+/, '').replace(/^images\//, '');
+                    console.log('Chemin nettoyé:', cleanPath);
                     
-                    if (imagePath) {
-                        try {
-                            // Corriger le chemin de l'image en retirant le slash initial et en encodant les espaces
-                            const correctedPath = imagePath.replace(/^\//, '').replace(/ /g, '%20');
-                            console.log('Chemin corrigé:', correctedPath);
-                            
-                            // Modifier le chemin pour pointer vers le bon dossier
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${correctedPath}`;
-                            console.log('URL complète de l\'image:', imageUrl);
-                            
-                            console.log('Tentative de chargement de l\'image principale...');
-                            const response = await fetch(imageUrl);
-                            console.log('Réponse du serveur:', {
-                                status: response.status,
-                                statusText: response.statusText,
-                                ok: response.ok,
-                                headers: Object.fromEntries(response.headers.entries())
+                    // Encoder les caractères spéciaux
+                    const encodedPath = encodeURIComponent(cleanPath);
+                    console.log('Chemin encodé:', encodedPath);
+                    
+                    const imageUrl = `https://raw.githubusercontent.com/${repo}/main/images/${encodedPath}`;
+                    console.log('URL complète de l\'image:', imageUrl);
+                    
+                    console.log('Tentative de chargement de l\'image principale...');
+                    try {
+                        const imageResponse = await fetch(imageUrl);
+                        console.log('Réponse du serveur:', {
+                            status: imageResponse.status,
+                            statusText: imageResponse.statusText,
+                            headers: Object.fromEntries(imageResponse.headers.entries())
+                        });
+                        
+                        if (imageResponse.ok) {
+                            const blob = await imageResponse.blob();
+                            console.log('Blob créé:', {
+                                type: blob.type,
+                                size: blob.size
                             });
-                            
-                            if (response.ok) {
-                                console.log('Conversion de la réponse en blob...');
-                                const blob = await response.blob();
-                                console.log('Blob créé:', {
-                                    type: blob.type,
-                                    size: blob.size
-                                });
-                                
-                                const fileName = imagePath.split('/').pop();
-                                console.log('Création du fichier avec le nom:', fileName);
-                                const file = new File([blob], fileName, { type: 'image/jpeg' });
-                                mainImageFile = file;
-                                handleMainImageUpload(file);
-                                console.log('Image principale chargée avec succès');
-                            } else {
-                                console.error('Erreur lors du chargement de l\'image principale:', response.status);
-                            }
-                        } catch (error) {
-                            console.error('Erreur lors du chargement de l\'image principale:', error);
-                            console.error('Détails de l\'erreur:', {
-                                name: error.name,
-                                message: error.message,
-                                stack: error.stack
+                            const file = new File([blob], cleanPath, { type: blob.type });
+                            console.log('Fichier créé:', {
+                                name: file.name,
+                                type: file.type,
+                                size: file.size
                             });
+                            handleMainImageUpload(file);
+                            console.log('Image principale chargée avec succès');
+                        } else {
+                            console.error('Erreur lors du chargement de l\'image principale:', imageResponse.status);
                         }
+                    } catch (error) {
+                        console.error('Erreur lors du chargement de l\'image principale:', error);
+                        console.error('Détails de l\'erreur:', {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack
+                        });
                     }
                 }
 
-                // Charger les images de la galerie depuis GitHub
-                const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
-                if (galleryMatches) {
-                    console.log('=== CHARGEMENT DES IMAGES DE LA GALERIE ===');
-                    const galleryYaml = galleryMatches[0];
+                // Charger les images de la galerie
+                console.log('\n=== CHARGEMENT DES IMAGES DE LA GALERIE ===');
+                const galleryMatch = frontMatter.match(/images:\n([\s\S]*?)(?=\n\w|$)/);
+                if (galleryMatch) {
+                    const galleryYaml = galleryMatch[1];
                     console.log('YAML de la galerie:', galleryYaml);
                     
-                    const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
-                        ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
-                    console.log('Chemins des images de la galerie trouvés:', galleryPaths);
-
-                    galleryImageFiles = [];
-                    for (const imagePath of galleryPaths) {
+                    const imagePaths = galleryYaml.match(/image:\s*"([^"]+)"/g).map(match => {
+                        return match.match(/image:\s*"([^"]+)"/)[1];
+                    });
+                    console.log('Chemins des images de la galerie trouvés:', imagePaths);
+                    
+                    for (const imagePath of imagePaths) {
+                        console.log('\nTraitement de l\'image:', imagePath);
+                        
+                        // Nettoyer le chemin de l'image
+                        const cleanPath = imagePath.replace(/^\/+/, '').replace(/^images\//, '');
+                        console.log('Chemin nettoyé:', cleanPath);
+                        
+                        // Encoder les caractères spéciaux
+                        const encodedPath = encodeURIComponent(cleanPath);
+                        console.log('Chemin encodé:', encodedPath);
+                        
+                        const imageUrl = `https://raw.githubusercontent.com/${repo}/main/images/${encodedPath}`;
+                        console.log('URL complète de l\'image:', imageUrl);
+                        
+                        console.log('Tentative de chargement de l\'image...');
                         try {
-                            console.log(`\nTraitement de l'image: ${imagePath}`);
-                            // Corriger le chemin de l'image en retirant le slash initial et en encodant les espaces
-                            const correctedPath = imagePath.replace(/^\//, '').replace(/ /g, '%20');
-                            console.log('Chemin corrigé:', correctedPath);
-                            
-                            // Modifier le chemin pour pointer vers le bon dossier
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${correctedPath}`;
-                            console.log('URL complète de l\'image:', imageUrl);
-                            
-                            console.log('Tentative de chargement de l\'image...');
-                            const response = await fetch(imageUrl);
+                            const imageResponse = await fetch(imageUrl);
                             console.log('Réponse du serveur:', {
-                                status: response.status,
-                                statusText: response.statusText,
-                                ok: response.ok,
-                                headers: Object.fromEntries(response.headers.entries())
+                                status: imageResponse.status,
+                                statusText: imageResponse.statusText,
+                                headers: Object.fromEntries(imageResponse.headers.entries())
                             });
                             
-                            if (response.ok) {
-                                console.log('Conversion de la réponse en blob...');
-                                const blob = await response.blob();
+                            if (imageResponse.ok) {
+                                const blob = await imageResponse.blob();
                                 console.log('Blob créé:', {
                                     type: blob.type,
                                     size: blob.size
                                 });
-                                
-                                const fileName = imagePath.split('/').pop();
-                                console.log('Création du fichier avec le nom:', fileName);
-                                const file = new File([blob], fileName, { type: 'image/jpeg' });
-                                galleryImageFiles.push(file);
+                                const file = new File([blob], cleanPath, { type: blob.type });
+                                console.log('Fichier créé:', {
+                                    name: file.name,
+                                    type: file.type,
+                                    size: file.size
+                                });
+                                handleGalleryUpload([file]);
                                 console.log('Image ajoutée à la galerie avec succès');
                             } else {
-                                console.error('Erreur lors du chargement de l\'image:', response.status);
+                                console.error('Erreur lors du chargement de l\'image:', imageResponse.status);
                             }
                         } catch (error) {
                             console.error('Erreur lors du chargement de l\'image:', error);
@@ -2647,34 +2624,29 @@ ${editorContent}`;
                             });
                         }
                     }
-                    console.log('Mise à jour de l\'aperçu de la galerie...');
-                    updateGalleryPreview();
-                    console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
                 }
+                
+                console.log('Mise à jour de l\'aperçu de la galerie...');
+                updateGalleryPreview();
+                console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
 
                 // Remplir l'éditeur avec le contenu
-                if (editor && editor.commands) {
-                    console.log('Remplissage de l\'éditeur avec le contenu');
-                    // Convertir le markdown en HTML pour l'éditeur
-                    const htmlContent = content
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
-                        .replace(/\n\n/g, '</p><p>') // Paragraphes
-                        .replace(/\n/g, '<br>'); // Sauts de ligne
-                    editor.commands.setContent(`<p>${htmlContent}</p>`);
-                } else {
-                    console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
-                    window.pendingEditorContent = content;
-                }
-
+                console.log('\n=== REMPLISSAGE DE L\'ÉDITEUR ===');
+                editor.setHTML(content);
+                console.log('Contenu de l\'éditeur:', content);
+                
                 // Mettre à jour l'aperçu
                 console.log('Mise à jour de l\'aperçu');
                 updateMarkdownPreview();
                 console.log('=== FIN DU CHARGEMENT DU RESTAURANT ===');
-
             } catch (error) {
                 console.error('Erreur lors du chargement du restaurant:', error);
-                showNotification('Erreur lors du chargement du restaurant', 'error');
+                console.error('Détails de l\'erreur:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                });
+                showNotification('Erreur lors du chargement du restaurant: ' + error.message, 'error');
             }
         }
 
