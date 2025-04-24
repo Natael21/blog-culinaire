@@ -11,7 +11,7 @@ permalink: /a-venir/
   </div>
 
   <div class="upcoming-grid" id="sortable-grid">
-    {% assign sorted_upcoming = site.upcoming | sort: "order" %}
+    {% assign sorted_upcoming = site.upcoming | sort: "title" %}
     {% for restaurant in sorted_upcoming %}
     <div class="upcoming-card">
       <div class="card-content">
