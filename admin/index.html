@@ -897,7 +897,8 @@ title: Administration - Blog Culinaire
                 deletedImages.forEach(image => {
                     changes.push({
                         type: 'delete',
-                        filename: image
+                        filename: `images/${image}`,  // Ajouter le chemin complet de l'image
+                        isImage: true
                     });
                 });
 
