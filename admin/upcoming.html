@@ -229,60 +229,15 @@
                 let localStorageRestaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
                 console.log('Restaurants chargés depuis localStorage:', localStorageRestaurants);
                 
-                // Charger les restaurants depuis GitHub
+                // Charger les restaurants depuis GitHub via la fonction Netlify
                 let githubRestaurants = [];
                 try {
-                    // Liste des fichiers Markdown connus
-                    const markdownFiles = [
-                        'dimetutto.md',
-                        'la-rose-des-sables.md',
-                        'la-tequilaria.md',
-                        'mechant-steak.md',
-                        'pain-voyageur.md',
-                        'ranch-sherbrooke.md',
-                        'resto-amir.md',
-                        'sanglier-dore.md',
-                        'sauge-vegan.md'
-                    ];
-                    
                     console.log('Chargement des fichiers Markdown depuis GitHub...');
-                    
-                    // Charger chaque fichier Markdown
-                    githubRestaurants = await Promise.all(markdownFiles.map(async filename => {
-                        console.log(`Chargement du fichier: ${filename}`);
-                        try {
-                            const fileResponse = await fetch(`/_upcoming/${filename}`);
-                            if (!fileResponse.ok) {
-                                throw new Error(`Erreur lors du chargement de ${filename}: ${fileResponse.status}`);
-                            }
-                            const content = await fileResponse.text();
-                            
-                            // Parser le front matter
-                            const data = parseFrontMatter(content);
-                            
-                            // Vérifier que les données requises sont présentes
-                            if (!data.title) {
-                                console.warn(`Titre manquant dans ${filename}`);
-                                return null;
-                            }
-                            
-                            return {
-                                id: filename.replace('.md', ''),
-                                title: data.title,
-                                diet: data.diet || '',
-                                description: data.description || '',
-                                order: parseInt(data.order) || 0,
-                                restaurant_type: data.restaurant_type || '',
-                                location: data.location || ''
-                            };
-                        } catch (error) {
-                            console.error(`Erreur lors du chargement de ${filename}:`, error);
-                            return null;
-                        }
-                    }));
-                    
-                    // Filtrer les restaurants nuls (ceux qui n'ont pas pu être chargés)
-                    githubRestaurants = githubRestaurants.filter(restaurant => restaurant !== null);
+                    const response = await fetch('/.netlify/functions/get-upcoming-restaurants');
+                    if (!response.ok) {
+                        throw new Error(`Erreur lors du chargement des restaurants: ${response.status}`);
+                    }
+                    githubRestaurants = await response.json();
                     console.log('Restaurants chargés depuis GitHub:', githubRestaurants);
                 } catch (error) {
                     console.error('Erreur lors du chargement depuis GitHub:', error);
