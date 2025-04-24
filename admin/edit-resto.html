@@ -1860,6 +1860,7 @@
             const address = document.getElementById('address').value;
             const style = document.getElementById('style').value;
             const price = document.getElementById('price').value;
+            const state = document.getElementById('state').value;
             
             const dietOptions = [];
             if (document.getElementById('vegetarian').checked) {
@@ -1875,7 +1876,11 @@
 
             const overallRating = calculateOverallRating();
             
-            const editorContent = editor.getHTML().replace(/<p>/g, '\n\n').replace(/<\/p>/g, '').replace(/<br>/g, '\n');
+            const editorContent = editor.getHTML()
+                .replace(/<p>/g, '\n\n')
+                .replace(/<\/p>/g, '')
+                .replace(/<br>/g, '\n')
+                .trim();
 
             const ratings = {
                 food: {
@@ -1904,48 +1909,46 @@
                 }
             };
 
-            const today = new Date().toISOString().split('T')[0];
-
             return `---
 layout: restaurant
-title: '${title}'
-date: ${today}
-state: draft
+title: "${title}"
+date: ${date}
+state: ${state}
 note: ${overallRating}
-style: '${style}'
-diet: '${diet}'
-description: '${description}'
-price: '${price}'
-address: '${address}'
-image: '${mainImagePath}'
+style: "${style}"
+diet: "${diet}"
+description: "${description}"
+price: "${price}"
+address: "${address}"
+image: "${mainImagePath}"
 images:
 ${galleryPaths.join('\n')}
 
 ratings:
   food:
     score: ${ratings.food.score}
-    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: '${ratings.food.comment}'
+    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
+    comment: "${ratings.food.comment}"
   service:
     score: ${ratings.service.score}
-    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: '${ratings.service.comment}'
+    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    comment: "${ratings.service.comment}"
   ambiance:
     score: ${ratings.ambiance.score}
-    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: '${ratings.ambiance.comment}'
+    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
+    comment: "${ratings.ambiance.comment}"
   value:
     score: ${ratings.value.score}
-    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
-    comment: '${ratings.value.comment}'
+    criteria: "Rapport qualité/prix, portions, prix par rapport au marché"
+    comment: "${ratings.value.comment}"
   originality:
     score: ${ratings.originality.score}
-    criteria: 'Innovation, créativité, authenticité'
-    comment: '${ratings.originality.comment}'
+    criteria: "Innovation, créativité, authenticité"
+    comment: "${ratings.originality.comment}"
   overall:
     score: ${ratings.overallExperience.score}
-    criteria: 'Expérience globale, facteur "wow"'
-    comment: '${ratings.overallExperience.comment}'
+    criteria: "Expérience globale, facteur 'wow'"
+    comment: "${ratings.overallExperience.comment}"
 ---
 
 ${editorContent}`;
