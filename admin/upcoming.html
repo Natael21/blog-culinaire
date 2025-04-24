@@ -721,10 +721,13 @@ location: ${restaurant.address}
 ${restaurant.description}
 `;
 
+                // Déterminer le type d'action
+                const actionType = existingRestaurant ? 'update' : 'create';
+
                 if (existingIndex !== -1) {
                     // Mettre à jour la modification existante
                     pendingChanges[existingIndex] = {
-                        type: 'update',
+                        type: actionType,
                         filename: filename,
                         content: markdownContent,
                         timestamp: new Date().toISOString()
@@ -732,7 +735,7 @@ ${restaurant.description}
                 } else {
                     // Ajouter une nouvelle modification
                     pendingChanges.push({
-                        type: 'update',
+                        type: actionType,
                         filename: filename,
                         content: markdownContent,
                         timestamp: new Date().toISOString()
@@ -768,14 +771,54 @@ ${restaurant.description}
         // Fonction pour supprimer un restaurant
         function deleteRestaurant(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer ce restaurant?')) {
-                // Supprimer de l'interface
+                // Récupérer les informations du restaurant avant de le supprimer
                 const card = document.querySelector(`[data-restaurant-id="${id}"]`);
+                const restaurant = {
+                    id: id,
+                    title: card.querySelector('[data-field="title"]').value,
+                    style: card.querySelector('[data-field="style"]').value,
+                    description: card.querySelector('[data-field="description"]').value,
+                    address: card.querySelector('[data-field="address"]').value
+                };
+
+                // Supprimer de l'interface
                 card.remove();
 
                 // Supprimer du localStorage
                 let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
                 restaurants = restaurants.filter(r => r.id !== id);
                 localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+
+                // Ajouter la suppression aux modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                const filename = `_upcoming/${restaurant.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md`;
+                
+                // Vérifier si une modification pour ce fichier existe déjà
+                const existingIndex = pendingChanges.findIndex(change => change.filename === filename);
+                
+                if (existingIndex !== -1) {
+                    // Mettre à jour la modification existante
+                    pendingChanges[existingIndex] = {
+                        type: 'delete',
+                        filename: filename,
+                        timestamp: new Date().toISOString()
+                    };
+                } else {
+                    // Ajouter une nouvelle modification
+                    pendingChanges.push({
+                        type: 'delete',
+                        filename: filename,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+                
+                // Afficher une notification de succès
+                showNotification('Restaurant supprimé avec succès !', 'success');
+                
+                // Déclencher l'événement de mise à jour des boutons
+                window.dispatchEvent(new Event('storageUpdated'));
             }
         }
 

@@ -867,8 +867,10 @@ title: Administration - Blog Culinaire
                 console.log('=== Début publishChanges ===');
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                const deletedImages = JSON.parse(localStorage.getItem('deletedImages') || '[]');
+                const upcomingRestaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
                 
-                if (pendingChanges.length === 0 && drafts.length === 0) {
+                if (pendingChanges.length === 0 && drafts.length === 0 && deletedImages.length === 0 && upcomingRestaurants.length === 0) {
                     showNotification('Aucune modification en attente', 'error');
                     return;
                 }
@@ -891,6 +893,24 @@ title: Administration - Blog Culinaire
                     });
                 });
 
+                // Ajouter les images supprimées
+                deletedImages.forEach(image => {
+                    changes.push({
+                        type: 'delete',
+                        filename: image
+                    });
+                });
+
+                // Ajouter les restaurants à venir
+                upcomingRestaurants.forEach(restaurant => {
+                    changes.push({
+                        type: restaurant.action || 'create', // Utiliser l'action spécifiée ou 'create' par défaut
+                        filename: restaurant.filename,
+                        content: restaurant.content,
+                        images: restaurant.images
+                    });
+                });
+
                 console.log('Données à publier:', changes);
 
                 // Envoyer les modifications à GitHub via la fonction Netlify
@@ -910,6 +930,8 @@ title: Administration - Blog Culinaire
                 // Vider le localStorage après publication réussie
                 localStorage.removeItem('pendingChanges');
                 localStorage.removeItem('drafts');
+                localStorage.removeItem('deletedImages');
+                localStorage.removeItem('upcomingRestaurants');
                 
                 showNotification('Les modifications ont été publiées avec succès', 'success');
                 updatePendingChangesButtons();
@@ -961,11 +983,13 @@ title: Administration - Blog Culinaire
                     // Supprimer toutes les modifications en attente
                     localStorage.removeItem('pendingChanges');
                     localStorage.removeItem('drafts');
+                    localStorage.removeItem('deletedImages');
                     localStorage.removeItem('upcomingRestaurants');
                     
                     console.log('État du localStorage après suppression:');
                     console.log('- pendingChanges:', localStorage.getItem('pendingChanges'));
                     console.log('- drafts:', localStorage.getItem('drafts'));
+                    console.log('- deletedImages:', localStorage.getItem('deletedImages'));
                     console.log('- upcomingRestaurants:', localStorage.getItem('upcomingRestaurants'));
                     
                     // Déclencher l'événement personnalisé pour mettre à jour les autres pages
