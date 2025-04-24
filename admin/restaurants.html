@@ -599,43 +599,31 @@
                 const localStorageData = JSON.parse(localStorage.getItem('drafts') || '[]');
                 console.log('Données brutes du localStorage:', localStorageData);
 
-                // Créer un Map pour un accès rapide aux données du localStorage, en utilisant le titre comme clé
+                // Créer un Map pour un accès rapide aux données du localStorage
                 const localStorageMap = new Map(
-                    localStorageData.map(item => {
-                        console.log('Item du localStorage:', item);
-                        return [item.title, item]; // Utiliser le titre comme clé
-                    })
+                    localStorageData.map(item => [item.title, item])
                 );
                 
-                // Fusionner les données en privilégiant le localStorage
-                const mergedData = githubData.map(githubItem => {
+                // Traiter les restaurants
+                const restaurants = githubData.map(githubItem => {
+                    // Vérifier si le restaurant existe dans le localStorage
                     const localItem = localStorageMap.get(githubItem.title);
-                    if (localItem && localItem.content) {
-                        console.log(`Fusion des données pour ${githubItem.title}:`);
-                        console.log('Données GitHub:', githubItem);
-                        console.log('Données localStorage:', localItem);
-                        
+                    
+                    if (localItem) {
+                        console.log(`Restaurant ${githubItem.title} trouvé dans localStorage`);
                         const localParsedData = parseFrontMatter(localItem.content);
-                        console.log('Données parsées:', localParsedData);
-                        
-                        // Vérifier la structure des images
-                        console.log('Images dans localStorage:', localItem.images);
-                        const images = Array.isArray(localItem.images) ? localItem.images : [];
-                        console.log('Images après vérification:', images);
-                        
-                        const mergedItem = {
-                            ...githubItem,       
-                            ...localParsedData,  
-                            filename: localItem.filename, 
-                            images: images,     
-                            content: localItem.content,   
-                            lastModified: localItem.lastModified, 
+                        return {
+                            ...localParsedData,
+                            filename: localItem.filename,
+                            images: localItem.images || [],
+                            content: localItem.content,
+                            lastModified: localItem.lastModified,
                             isFromLocalStorage: true
                         };
-                        
-                        console.log('Données fusionnées:', mergedItem);
-                        return mergedItem;
                     }
+                    
+                    // Si pas dans localStorage, utiliser les données GitHub
+                    console.log(`Restaurant ${githubItem.title} non trouvé dans localStorage, utilisation des données GitHub`);
                     return {
                         ...githubItem,
                         isFromLocalStorage: false
@@ -644,28 +632,17 @@
 
                 // Ajouter les nouveaux brouillons qui n'existent pas dans GitHub
                 localStorageData.forEach(localItem => {
-                    if (!mergedData.some(item => item.title === localItem.title)) {
+                    if (!restaurants.some(item => item.title === localItem.title)) {
                         console.log(`Nouveau brouillon ajouté: ${localItem.title}`);
-                        if (localItem.content) {
-                            const localParsedData = parseFrontMatter(localItem.content);
-                            console.log(`Données parsées pour nouveau brouillon ${localItem.title}:`, localParsedData);
-                            mergedData.push({
-                                // Champs de base du localStorage
-                                filename: localItem.filename,
-                                title: localItem.title,
-                                content: localItem.content, 
-                                images: localItem.images,
-                                lastModified: localItem.lastModified,
-                                // Ajouter les données parsées
-                                ...localParsedData,
-                                // Ajouter flags/defaults nécessaires
-                                state: localParsedData.state || 'draft',
-                                date: localParsedData.date || localItem.lastModified.split('T')[0],
-                                isFromLocalStorage: true
-                            });
-                        } else {
-                            console.warn(`Nouveau brouillon ${localItem.title} sans contenu, ignoré.`);
-                        }
+                        const localParsedData = parseFrontMatter(localItem.content);
+                        restaurants.push({
+                            ...localParsedData,
+                            filename: localItem.filename,
+                            images: localItem.images || [],
+                            content: localItem.content,
+                            lastModified: localItem.lastModified,
+                            isFromLocalStorage: true
+                        });
                     }
                 });
                 
@@ -676,10 +653,10 @@
                     .map(change => change.filename);
                 
                 // Filtrer les restaurants supprimés
-                const filteredData = mergedData.filter(restaurant => !deletedFiles.includes(restaurant.filename));
+                const filteredData = restaurants.filter(restaurant => !deletedFiles.includes(restaurant.filename));
                 
                 // Trier les restaurants : brouillons d'abord, puis par date
-                const restaurants = filteredData.sort((a, b) => {
+                const sortedData = filteredData.sort((a, b) => {
                     if (a.state === 'draft' && b.state !== 'draft') return -1;
                     if (a.state !== 'draft' && b.state === 'draft') return 1;
                     // Si dates existent, trier par date, sinon mettre à la fin (ou autre logique)
@@ -688,7 +665,7 @@
                     return dateB - dateA; 
                 });
                 
-                displayRestaurants(restaurants);
+                displayRestaurants(sortedData);
             } catch (error) {
                 console.error('Erreur:', error);
                 showNotification('Erreur lors du chargement des restaurants', 'error');
