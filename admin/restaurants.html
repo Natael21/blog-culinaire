@@ -565,36 +565,60 @@
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des restaurants');
                 }
-                const data = await response.json();
+                const githubData = await response.json();
                 
-                if (!Array.isArray(data)) {
+                if (!Array.isArray(githubData)) {
                     throw new Error('Réponse invalide du serveur');
                 }
                 
-                // Récupérer les modifications en attente
+                // Récupérer les données du localStorage
+                const localStorageData = JSON.parse(localStorage.getItem('drafts') || '[]');
+                console.log('Données du localStorage:', localStorageData);
+                
+                // Créer un Map pour un accès rapide aux données du localStorage
+                const localStorageMap = new Map(
+                    localStorageData.map(item => [item.filename, item])
+                );
+                
+                // Fusionner les données en privilégiant le localStorage
+                const mergedData = githubData.map(githubItem => {
+                    const localItem = localStorageMap.get(githubItem.filename);
+                    if (localItem) {
+                        console.log(`Restaurant trouvé dans localStorage: ${githubItem.filename}`);
+                        return {
+                            ...githubItem,
+                            ...localItem,
+                            isFromLocalStorage: true
+                        };
+                    }
+                    return {
+                        ...githubItem,
+                        isFromLocalStorage: false
+                    };
+                });
+
+                // Ajouter les nouveaux brouillons qui n'existent pas dans GitHub
+                localStorageData.forEach(localItem => {
+                    if (!mergedData.some(item => item.filename === localItem.filename)) {
+                        console.log(`Nouveau brouillon ajouté: ${localItem.filename}`);
+                        mergedData.push({
+                            ...localItem,
+                            state: 'draft',
+                            isFromLocalStorage: true
+                        });
+                    }
+                });
+                
+                // Récupérer les suppressions en attente
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const deletedFiles = pendingChanges
                     .filter(change => change.type === 'delete')
                     .map(change => change.filename);
                 
-                // Récupérer les drafts du localStorage
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                console.log('Drafts trouvés:', drafts);
-                
-                // Convertir les drafts en format compatible
-                const draftRestaurants = drafts.map(draft => ({
-                    ...draft,
-                    state: 'draft',
-                    date: draft.lastModified.split('T')[0]
-                }));
-                
-                // Combiner les restaurants de GitHub et les drafts
-                const allRestaurants = [...data, ...draftRestaurants];
-                
                 // Filtrer les restaurants supprimés
-                const filteredData = allRestaurants.filter(restaurant => !deletedFiles.includes(restaurant.filename));
+                const filteredData = mergedData.filter(restaurant => !deletedFiles.includes(restaurant.filename));
                 
-                // Trier les restaurants : drafts d'abord, puis par date
+                // Trier les restaurants : brouillons d'abord, puis par date
                 const restaurants = filteredData.sort((a, b) => {
                     if (a.state === 'draft' && b.state !== 'draft') return -1;
                     if (a.state !== 'draft' && b.state === 'draft') return 1;
@@ -605,7 +629,6 @@
             } catch (error) {
                 console.error('Erreur:', error);
                 showNotification('Erreur lors du chargement des restaurants', 'error');
-                // Rafraîchir la page une seule fois en cas d'erreur
                 if (!sessionStorage.getItem('hasRefreshed')) {
                     sessionStorage.setItem('hasRefreshed', 'true');
                     setTimeout(() => {
@@ -637,29 +660,38 @@
             restaurants.forEach(restaurant => {
                 console.log('=== Détails du restaurant ===');
                 console.log('Titre:', restaurant.title);
-                console.log('Données complètes:', restaurant);
+                console.log('Source:', restaurant.isFromLocalStorage ? 'localStorage' : 'GitHub');
+                console.log('État:', restaurant.state);
                 
-                // Gestion des images selon le type de restaurant
-                const imageHtml = restaurant.state === 'draft' 
+                // Déterminer la source de l'image
+                let imageSource = null;
+                
+                if (restaurant.isFromLocalStorage && restaurant.imageContent) {
+                    console.log('-> Utilisation de l\'image du localStorage (base64)');
+                    imageSource = restaurant.imageContent;
+                } else if (restaurant.image && restaurant.image.startsWith('/images/')) {
+                    console.log('-> Utilisation de l\'image GitHub:', restaurant.image);
+                    imageSource = restaurant.image;
+                } else {
+                    console.log('-> Pas d\'image disponible');
+                }
+
+                const imageHtml = imageSource
                     ? `<div class="restaurant-image">
-                         <img src="${restaurant.imageContent}" 
+                         <img src="${imageSource}" 
                               alt="${restaurant.title}"
+                              onerror="handleImageError(this)"
+                              onload="console.log('Image chargée avec succès pour: ${restaurant.title}')"
                               style="object-fit: cover;">
                        </div>`
-                    : restaurant.image && restaurant.image.startsWith('/images/')
-                        ? `<div class="restaurant-image">
-                             <img src="${restaurant.image}" 
-                                  alt="${restaurant.title}"
-                                  onerror="handleImageError(this)">
-                           </div>`
-                        : `<div class="restaurant-image">
-                             <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
-                               <i class="fas fa-image" style='font-size: 2em; color: #ccc;'></i>
-                               <div style="text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;">
-                                 Pas d'image
-                               </div>
-                             </div>
-                           </div>`;
+                    : `<div class="restaurant-image">
+                         <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;'>
+                           <i class="fas fa-image" style='font-size: 2em; color: #ccc;'></i>
+                           <div style="text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;">
+                             Pas d'image
+                           </div>
+                         </div>
+                       </div>`;
 
                 const card = document.createElement('div');
                 card.className = 'restaurant-card';
@@ -698,7 +730,6 @@
                     </div>
                 `;
                 container.appendChild(card);
-                console.log('Carte créée pour:', restaurant.title);
             });
             console.log('Affichage des restaurants terminé');
         }
@@ -1016,38 +1047,24 @@
         // Fonction pour afficher une notification
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
+            notification.className = `notification notification-${type}`;
             notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.top = '10px';
+            notification.style.right = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.padding = '15px 25px';
+            notification.style.borderRadius = 'var(--border-radius)';
+            notification.style.color = 'white';
+            notification.style.fontWeight = '500';
+            notification.style.boxShadow = 'var(--box-shadow)';
+            notification.style.zIndex = '1000';
+            notification.style.animation = 'slideInTop 0.3s ease-out';
             document.body.appendChild(notification);
-            
-            // Supprimer la notification après 3 secondes
+
             setTimeout(() => {
                 notification.remove();
             }, 3000);
-        }
-
-        async function cancelChanges() {
-            let loadingOverlay = null;
-            
-            try {
-                // Afficher le spinner central
-                loadingOverlay = showLoadingOverlay('Annulation des modifications en cours...');
-
-                // Vider le stockage local
-                localStorage.removeItem('drafts');
-                localStorage.removeItem('pendingChanges');
-                
-                // Recharger la liste des restaurants
-                await loadRestaurants();
-                
-                showNotification('Les modifications ont été annulées', 'success');
-            } catch (error) {
-                console.error('Erreur lors de l\'annulation des modifications:', error);
-                showNotification('Erreur lors de l\'annulation des modifications', 'error');
-            } finally {
-                // Cacher le spinner central
-                hideLoadingOverlay(loadingOverlay);
-            }
         }
     </script>
 </body>
