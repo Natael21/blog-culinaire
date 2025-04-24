@@ -141,6 +141,73 @@
         .back-button:hover {
             background: #1a252f;
         }
+
+        /* Modal de confirmation */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .modal-message {
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .modal-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .modal-button.confirm {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+        }
+
+        .modal-button.confirm:hover {
+            background: #c0392b;
+        }
+
+        .modal-button.cancel {
+            background: white;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-button.cancel:hover {
+            background: var(--background-color);
+        }
     </style>
 </head>
 <body>
@@ -160,76 +227,192 @@
         </div>
     </div>
 
+    <!-- Modal de confirmation -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Confirmer la suppression</h3>
+            <p class="modal-message">Êtes-vous sûr de vouloir marquer cette image pour suppression ?</p>
+            <div class="modal-buttons">
+                <button class="modal-button cancel" onclick="closeModal()">Annuler</button>
+                <button class="modal-button confirm" onclick="confirmDeletion()">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let currentImageToDelete = null;
+
         // Fonction pour charger les images depuis GitHub
         async function loadImages() {
             try {
+                console.log('=== DÉBUT DU CHARGEMENT DES IMAGES ===');
                 const response = await fetch('https://api.github.com/repos/Natael21/blog-culinaire/contents/images');
                 const data = await response.json();
+                
+                console.log('Réponse de l\'API GitHub:', {
+                    status: response.status,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    dataLength: data.length
+                });
                 
                 const imageGrid = document.getElementById('imageGrid');
                 imageGrid.innerHTML = '';
 
                 data.forEach(item => {
+                    console.log('Traitement de l\'item:', {
+                        name: item.name,
+                        type: item.type,
+                        size: item.size,
+                        download_url: item.download_url,
+                        html_url: item.html_url
+                    });
+
                     if (item.type === 'file' && /\.(jpg|jpeg|png|gif)$/i.test(item.name)) {
-                        const imageUrl = `https://raw.githubusercontent.com/Natael21/blog-culinaire/main/images/${item.name}`;
+                        const imageUrl = item.download_url;
+                        console.log('URL de l\'image:', imageUrl);
                         
                         const galleryItem = document.createElement('div');
                         galleryItem.className = 'gallery-item';
                         galleryItem.dataset.filename = item.name;
                         
                         galleryItem.innerHTML = `
-                            <img src="${imageUrl}" alt="${item.name}" loading="lazy">
+                            <img src="${imageUrl}" 
+                                 alt="${item.name}" 
+                                 loading="lazy"
+                                 onerror="console.error('Erreur de chargement pour l\'image:', {
+                                     url: '${imageUrl}',
+                                     name: '${item.name}',
+                                     timestamp: new Date().toISOString()
+                                 })"
+                                 onload="console.log('Image chargée avec succès:', {
+                                     url: '${imageUrl}',
+                                     name: '${item.name}',
+                                     timestamp: new Date().toISOString()
+                                 })"
+                            >
                             <div class="actions">
-                                <button onclick="markForDeletion(this)">
+                                <button onclick="showConfirmationModal('${item.name}')">
                                     <i class="fas fa-trash"></i> Supprimer
                                 </button>
                             </div>
                         `;
                         
                         imageGrid.appendChild(galleryItem);
+                        console.log('Élément ajouté à la grille:', {
+                            filename: item.name,
+                            elementAdded: true
+                        });
+                    } else {
+                        console.log('Item ignoré:', {
+                            name: item.name,
+                            reason: !item.type === 'file' ? 'pas un fichier' : 'pas une image'
+                        });
                     }
                 });
+
+                console.log('=== RESTAURATION DES IMAGES MARQUÉES ===');
+                restoreMarkedImages();
+                console.log('=== FIN DU CHARGEMENT DES IMAGES ===');
             } catch (error) {
-                console.error('Erreur lors du chargement des images:', error);
+                console.error('Erreur lors du chargement des images:', {
+                    error: error.message,
+                    stack: error.stack,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        }
+
+        // Fonction pour afficher le modal de confirmation
+        function showConfirmationModal(filename) {
+            console.log('Ouverture du modal de confirmation pour:', filename);
+            currentImageToDelete = filename;
+            document.getElementById('confirmationModal').style.display = 'flex';
+        }
+
+        // Fonction pour fermer le modal
+        function closeModal() {
+            console.log('Fermeture du modal de confirmation');
+            document.getElementById('confirmationModal').style.display = 'none';
+            currentImageToDelete = null;
+        }
+
+        // Fonction pour confirmer la suppression
+        function confirmDeletion() {
+            console.log('Confirmation de la suppression pour:', currentImageToDelete);
+            if (currentImageToDelete) {
+                markForDeletion(currentImageToDelete);
+                closeModal();
             }
         }
 
         // Fonction pour marquer une image pour suppression
-        function markForDeletion(button) {
-            const galleryItem = button.closest('.gallery-item');
-            galleryItem.classList.toggle('marked-for-deletion');
+        function markForDeletion(filename) {
+            console.log('=== MARQUAGE POUR SUPPRESSION ===');
+            console.log('Fichier à marquer:', filename);
             
-            // Mettre à jour le localStorage avec les images marquées pour suppression
-            const markedImages = JSON.parse(localStorage.getItem('markedImages') || '[]');
-            const filename = galleryItem.dataset.filename;
-            
-            if (galleryItem.classList.contains('marked-for-deletion')) {
+            const galleryItem = document.querySelector(`.gallery-item[data-filename="${filename}"]`);
+            console.log('Élément trouvé:', !!galleryItem);
+
+            if (galleryItem) {
+                galleryItem.classList.add('marked-for-deletion');
+                
+                // Mettre à jour le localStorage avec les images marquées pour suppression
+                const markedImages = JSON.parse(localStorage.getItem('markedImages') || '[]');
+                console.log('Images déjà marquées:', markedImages);
+
                 if (!markedImages.includes(filename)) {
                     markedImages.push(filename);
+                    localStorage.setItem('markedImages', JSON.stringify(markedImages));
+                    console.log('Image ajoutée aux images marquées');
                 }
+
+                // Ajouter aux modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                console.log('Modifications en attente actuelles:', pendingChanges);
+
+                const changeExists = pendingChanges.some(change => 
+                    change.type === 'delete-image' && change.filename === filename
+                );
+
+                if (!changeExists) {
+                    const newChange = {
+                        type: 'delete-image',
+                        filename: filename,
+                        timestamp: new Date().toISOString()
+                    };
+                    pendingChanges.push(newChange);
+                    localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+                    console.log('Nouvelle modification ajoutée:', newChange);
+                }
+
+                // Déclencher un événement personnalisé pour mettre à jour les boutons dans admin/index.html
+                window.dispatchEvent(new Event('pendingChangesUpdated'));
+                console.log('Événement pendingChangesUpdated déclenché');
             } else {
-                const index = markedImages.indexOf(filename);
-                if (index > -1) {
-                    markedImages.splice(index, 1);
-                }
+                console.error('Élément non trouvé pour le fichier:', filename);
             }
-            
-            localStorage.setItem('markedImages', JSON.stringify(markedImages));
         }
 
-        // Charger les images au chargement de la page
-        document.addEventListener('DOMContentLoaded', () => {
-            loadImages();
-            
-            // Restaurer l'état des images marquées pour suppression
+        // Fonction pour restaurer l'état des images marquées pour suppression
+        function restoreMarkedImages() {
             const markedImages = JSON.parse(localStorage.getItem('markedImages') || '[]');
+            console.log('Restauration des images marquées:', markedImages);
+
             markedImages.forEach(filename => {
                 const galleryItem = document.querySelector(`.gallery-item[data-filename="${filename}"]`);
                 if (galleryItem) {
                     galleryItem.classList.add('marked-for-deletion');
+                    console.log('Image restaurée comme marquée:', filename);
+                } else {
+                    console.warn('Image marquée non trouvée dans la grille:', filename);
                 }
             });
+        }
+
+        // Charger les images au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('=== INITIALISATION DE LA PAGE ===');
+            loadImages();
         });
     </script>
 </body>
