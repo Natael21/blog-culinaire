@@ -804,17 +804,6 @@
                     address: card.querySelector('[data-field="address"]').value.trim()
                 };
 
-                // Validation des champs
-                const errors = validateRestaurant(restaurant);
-                if (errors.length > 0) {
-                    showFieldErrors(card, errors);
-                    showNotification(errors.join(', '), 'error');
-                    return false;
-                }
-
-                // Réinitialiser les états d'erreur si tout est valide
-                showFieldErrors(card, []);
-
                 // Générer le contenu Markdown
                 const markdownContent = `---
 restaurant_type: ${restaurant.style}
@@ -823,13 +812,6 @@ description: ${restaurant.description}
 location: ${restaurant.address}
 --- 
 `;
-
-                // Validation du format Markdown
-                const markdownErrors = validateMarkdownContent(markdownContent);
-                if (markdownErrors.length > 0) {
-                    showNotification(markdownErrors.join(', '), 'error');
-                    return false;
-                }
 
                 // Récupérer les restaurants existants
                 let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
@@ -883,15 +865,7 @@ location: ${restaurant.address}
                             });
                         }
 
-                        // Filtrer les changements invalides
-                        const validChanges = pendingChanges.filter(change => 
-                            change && 
-                            change.type && 
-                            change.filename && 
-                            (change.type === 'delete' || (change.type !== 'delete' && change.content))
-                        );
-
-                        localStorage.setItem('pendingChanges', JSON.stringify(validChanges));
+                        localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
                         
                         // Mettre à jour le titre dans l'en-tête
                         card.querySelector('.restaurant-name').textContent = restaurant.title;
@@ -958,14 +932,14 @@ location: ${restaurant.address}
                         if (existingIndex !== -1) {
                             // Mettre à jour la modification existante
                             pendingChanges[existingIndex] = {
-                                type: 'delete',
+                                type: 'delete-restaurant',
                                 filename: filename,
                                 timestamp: new Date().toISOString()
                             };
                         } else {
                             // Ajouter une nouvelle modification
                             pendingChanges.push({
-                                type: 'delete',
+                                type: 'delete-restaurant',
                                 filename: filename,
                                 timestamp: new Date().toISOString()
                             });
@@ -1015,10 +989,12 @@ location: ${restaurant.address}
             let loadingOverlay = null;
             
             try {
-                console.log('=== Début publishChanges ===');
+                console.log('=== DÉBUT DE LA PUBLICATION DES MODIFICATIONS ===');
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                console.log('Modifications en attente:', JSON.stringify(pendingChanges, null, 2));
                 
                 if (pendingChanges.length === 0) {
+                    console.log('Aucune modification en attente');
                     showNotification('Aucune modification en attente', 'info');
                     return;
                 }
@@ -1028,6 +1004,9 @@ location: ${restaurant.address}
 
                 // Vérifier les conflits potentiels
                 try {
+                    console.log('=== VÉRIFICATION DES CONFLITS ===');
+                    console.log('Envoi des changements pour vérification:', JSON.stringify(pendingChanges, null, 2));
+                    
                     const response = await fetch('/.netlify/functions/check-conflicts', {
                         method: 'POST',
                         headers: {
@@ -1036,37 +1015,84 @@ location: ${restaurant.address}
                         body: JSON.stringify({ changes: pendingChanges })
                     });
 
+                    console.log('Réponse de check-conflicts:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries(response.headers.entries())
+                    });
+
                     if (!response.ok) {
                         const errorData = await response.json();
+                        console.error('Erreur lors de la vérification des conflits:', errorData);
                         throw new Error(errorData.error || 'Erreur lors de la vérification des conflits');
                     }
 
                     const conflicts = await response.json();
+                    console.log('Conflits détectés:', conflicts);
+                    
                     if (conflicts.length > 0) {
+                        console.log('Conflits trouvés, arrêt de la publication');
                         showNotification('Des conflits ont été détectés. Veuillez recharger la page et réessayer.', 'error');
                         return;
                     }
                 } catch (error) {
-                    console.error('Erreur lors de la vérification des conflits:', error);
+                    console.error('Erreur détaillée lors de la vérification des conflits:', {
+                        message: error.message,
+                        stack: error.stack,
+                        timestamp: new Date().toISOString()
+                    });
                     showNotification('Erreur lors de la vérification des conflits', 'error');
                     return;
                 }
 
+                // Préparer les changements pour la publication
+                console.log('=== PRÉPARATION DES CHANGEMENTS ===');
+                const changesToPublish = pendingChanges.map(change => {
+                    console.log('Traitement du changement:', JSON.stringify(change, null, 2));
+                    
+                    // Pour les suppressions de restaurants, s'assurer que le type est correct
+                    if (change.type === 'delete-restaurant') {
+                        const transformedChange = {
+                            ...change,
+                            type: 'delete', // Convertir en type 'delete' pour GitHub
+                            path: change.filename // Ajouter le path pour la suppression
+                        };
+                        console.log('Changement transformé (delete-restaurant):', JSON.stringify(transformedChange, null, 2));
+                        return transformedChange;
+                    }
+                    return change;
+                });
+
+                console.log('Changements préparés pour la publication:', JSON.stringify(changesToPublish, null, 2));
+
                 // Envoyer les modifications à GitHub
+                console.log('=== ENVOI DES MODIFICATIONS À GITHUB ===');
                 const response = await fetch('/.netlify/functions/publish-changes', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ changes: pendingChanges })
+                    body: JSON.stringify({ changes: changesToPublish })
+                });
+
+                console.log('Réponse de publish-changes:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
+                    console.error('Erreur détaillée lors de la publication:', {
+                        status: response.status,
+                        error: errorData,
+                        timestamp: new Date().toISOString()
+                    });
                     throw new Error(errorData.error || 'Erreur lors de la publication des modifications');
                 }
 
                 // Vider le localStorage après publication réussie
+                console.log('=== NETTOYAGE DU LOCALSTORAGE ===');
                 localStorage.removeItem('pendingChanges');
                 localStorage.removeItem('upcomingRestaurants');
                 
@@ -1078,10 +1104,15 @@ location: ${restaurant.address}
                     window.location.reload();
                 }, 1500);
             } catch (error) {
-                console.error('Erreur lors de la publication:', error);
+                console.error('Erreur détaillée lors de la publication:', {
+                    message: error.message,
+                    stack: error.stack,
+                    timestamp: new Date().toISOString()
+                });
                 showNotification(error.message || 'Erreur lors de la publication des modifications', 'error');
             } finally {
                 hideLoadingOverlay(loadingOverlay);
+                console.log('=== FIN DE LA PUBLICATION DES MODIFICATIONS ===');
             }
         }
     </script>
