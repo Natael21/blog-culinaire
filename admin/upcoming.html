@@ -865,24 +865,26 @@ location: ${restaurant.address}
                         // Déterminer le type d'action
                         const actionType = existingRestaurant ? 'update' : 'create';
 
+                        // Créer le changement
+                        const change = {
+                            type: actionType,
+                            filename: filename,
+                            path: filename,
+                            content: markdownContent,
+                            timestamp: new Date().toISOString()
+                        };
+
+                        // Vérifier que le changement est valide
+                        if (!change.filename || !change.content) {
+                            throw new Error('Changement invalide: filename ou content manquant');
+                        }
+
                         if (existingIndex !== -1) {
                             // Mettre à jour la modification existante
-                            pendingChanges[existingIndex] = {
-                                type: actionType,
-                                filename: filename,
-                                path: filename,
-                                content: markdownContent,
-                                timestamp: new Date().toISOString()
-                            };
+                            pendingChanges[existingIndex] = change;
                         } else {
                             // Ajouter une nouvelle modification
-                            pendingChanges.push({
-                                type: actionType,
-                                filename: filename,
-                                path: filename,
-                                content: markdownContent,
-                                timestamp: new Date().toISOString()
-                            });
+                            pendingChanges.push(change);
                         }
 
                         localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
