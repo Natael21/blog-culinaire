@@ -2287,129 +2287,131 @@ ${editorContent}`;
         // Initialiser le formulaire une fois le DOM chargé
         document.addEventListener('DOMContentLoaded', initializeForm);
 
-        // Fonction pour charger un resto
+        // Fonction pour charger un resto (modifiée pour gérer l'initialisation de l'éditeur et robustesse images locales)
         async function loadDraft(filename) {
             try {
                 console.log('=== DÉBUT DU CHARGEMENT DU RESTAURANT ===');
                 console.log('Fichier à charger:', filename);
                 
-                // 1. Vérifier d'abord dans le localStorage
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 const localDraft = drafts.find(d => d.filename === filename);
-                
-                if (localDraft) {
-                    console.log('Restaurant trouvé dans le localStorage');
-                    await loadFromLocalStorage(localDraft);
-                    return;
-                }
+                console.log('Draft local trouvé:', localDraft);
 
-                // 2. Si pas dans localStorage, charger depuis GitHub
-                console.log('Restaurant non trouvé dans le localStorage, tentative de chargement depuis GitHub');
-                const token = getAuthToken();
-                const response = await fetch(`/.netlify/functions/get-restaurant?filename=${filename}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+                let markdown, restaurantData, content, frontMatter;
+                let localImagesData = []; // Stocker uniquement les données images du localstorage
+                let githubImageUrls = { main: null, gallery: [] }; // Stocker les URLs GitHub
+                let source = localDraft ? 'localStorage' : 'github';
+
+                // --- Étape 1: Obtenir Markdown, parser Front Matter, et préparer les sources d'images --- 
+                if (source === 'localStorage') {
+                    console.log('[loadDraft] Utilisation des données du localStorage');
+                    markdown = localDraft.content;
+                    const match = markdown.match(/^---\s*([\s\S]*?)\s*---/);
+                    frontMatter = (match && match[1]) ? match[1] : '';
+                    content = (match && match[1]) ? markdown.substring(match[0].length).trim() : markdown.trim();
+                    restaurantData = parseFrontMatterYAML(frontMatter);
+                    console.log('[loadDraft] Données extraites (local):', restaurantData);
+                    // Stocker les données images locales
+                    if (Array.isArray(localDraft.images)) {
+                        localImagesData = localDraft.images; // Contient { name, data, isMain? }
+                        console.log('[loadDraft] Données images trouvées dans localStorage:', localImagesData);
                     }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Erreur lors du chargement du restaurant depuis GitHub');
+                } else {
+                    console.log('[loadDraft] Tentative de récupération depuis GitHub');
+                    const path = `_posts/${filename}`;
+                    const url = `https://api.github.com/repos/Natael21/blog-culinaire/contents/${path}`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Fichier non trouvé sur GitHub');
+                    const githubFileData = await response.json();
+                    markdown = decodeURIComponent(escape(atob(githubFileData.content)));
+                    const match = markdown.match(/^---\s*([\s\S]*?)\s*---/);
+                    frontMatter = (match && match[1]) ? match[1] : '';
+                    content = (match && match[1]) ? markdown.substring(match[0].length).trim() : markdown.trim();
+                    restaurantData = parseFrontMatterYAML(frontMatter);
+                    console.log('[loadDraft] Données extraites (GitHub):', restaurantData);
+                    // Stocker les URLs des images GitHub
+                    if (restaurantData.image) {
+                        githubImageUrls.main = restaurantData.image;
+                    }
+                    githubImageUrls.gallery = extractGalleryPathsYAML(frontMatter);
+                    console.log('[loadDraft] URLs images extraites de GitHub:', githubImageUrls);
                 }
 
-                const githubData = await response.json();
-                await loadFromGitHub(githubData);
+                // --- Étape 2: Remplir les champs simples du formulaire --- 
+                console.log('[loadDraft] Remplissage des champs du formulaire (hors éditeur/images)');
+                fillBasicFields(restaurantData);
+                const ratingsData = parseRatingsYAML(frontMatter);
+                fillRatingsFields(ratingsData);
+
+                // --- Étape 3: Attendre l'éditeur et définir le contenu --- 
+                console.log('[loadDraft] Attente de la préparation de l\'éditeur...');
+                await ensureEditorReady();
+                console.log('[loadDraft] Éditeur prêt. Définition du contenu...');
+                const htmlContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+                const finalHtmlContent = htmlContent.trim() ? (htmlContent.startsWith('<p>') ? htmlContent : `<p>${htmlContent}</p>`) : '';
+                editor.commands.setContent(finalHtmlContent);
+                console.log('[loadDraft] Contenu de l\'éditeur défini.');
+
+                // --- Étape 4: Charger les images (maintenant que l'éditeur est prêt) --- 
+                console.log('[loadDraft] Chargement des images...');
+                mainImageFile = null;
+                galleryImageFiles = [];
+                let identifiedMainImage = null; // Pour suivre l'image principale identifiée
+
+                if (source === 'localStorage' && localImagesData.length > 0) {
+                    console.log('[loadDraft] Traitement des images depuis localStorage...');
+                    // 4a. Identifier l'image principale (robuste)
+                    identifiedMainImage = localImagesData.find(img => img.isMain === true);
+                    if (identifiedMainImage) {
+                        console.log(`[loadDraft] Image principale identifiée par isMain=true: ${identifiedMainImage.name}`);
+                    } else if (localImagesData.length === 1) {
+                        identifiedMainImage = localImagesData[0];
+                        console.warn(`[loadDraft] Pas d'image isMain=true trouvée, mais une seule image présente. Utilisation de: ${identifiedMainImage.name} comme principale.`);
+                    } else {
+                        console.warn("[loadDraft] Pas d'image isMain=true trouvée et plusieurs images présentes. Aucune image principale locale ne sera définie.");
+                    }
+
+                    // 4b. Charger l'image principale identifiée et les images de galerie
+                    for (const imgData of localImagesData) {
+                        if (imgData.data && imgData.name) {
+                            try {
+                                const blob = base64ToBlob(imgData.data, 'image/webp');
+                                const file = new File([blob], imgData.name, { type: 'image/webp' });
+                                
+                                if (imgData === identifiedMainImage) { // Comparer avec l'objet identifié
+                                    console.log(`[loadDraft] Chargement de ${file.name} comme image principale (locale).`);
+                                    mainImageFile = file;
+                                    handleMainImageUpload(file); 
+                                } else {
+                                     console.log(`[loadDraft] Chargement de ${file.name} comme image de galerie (locale).`);
+                                    galleryImageFiles.push(file);
+                                }
+                            } catch (error) { console.error('[loadDraft] Erreur conversion base64:', imgData.name, error); }
+                        }
+                    }
+
+                } else if (source === 'github') {
+                    console.log('[loadDraft] Chargement des images depuis GitHub URLs...');
+                    if (githubImageUrls.main) {
+                        await loadAndSetImageFromURL(githubImageUrls.main, true);
+                    }
+                    for (const url of githubImageUrls.gallery) {
+                        await loadAndSetImageFromURL(url, false);
+                    }
+                }
+                
+                // Mettre à jour l'aperçu de la galerie après avoir traité toutes les images
+                updateGalleryPreview(); 
+                console.log('[loadDraft] Chargement des images terminé.');
+
+                // --- Étape 5: Mettre à jour l'aperçu final --- 
+                console.log('[loadDraft] Mise à jour finale de l\'aperçu Markdown (devrait déjà être à jour).');
+                // updateMarkdownPreview(); // Normalement déjà à jour
+                console.log('=== FIN DU CHARGEMENT DU RESTAURANT ===');
 
             } catch (error) {
                 console.error('Erreur lors du chargement du restaurant:', error);
-                showNotification('Erreur lors du chargement du restaurant', 'error');
-            }
-        }
-
-        async function loadFromLocalStorage(draft) {
-            try {
-                console.log('Chargement depuis le localStorage:', draft);
-                
-                // Parser le front matter
-                const match = draft.content.match(/^---\s*([\s\S]*?)\s*---/);
-                const frontMatter = match ? match[1] : '';
-                const content = match ? draft.content.substring(match[0].length).trim() : draft.content.trim();
-                
-                // Parser les données
-                const restaurantData = parseFrontMatterYAML(frontMatter);
-                console.log('Données parsées:', restaurantData);
-
-                // Remplir les champs du formulaire
-                fillBasicFields(restaurantData);
-                fillRatingsFields(restaurantData);
-
-                // Attendre que l'éditeur soit prêt
-                await ensureEditorReady();
-                editor.setHTML(content);
-
-                // Gérer les images
-                if (Array.isArray(draft.images)) {
-                    // Charger l'image principale
-                    const mainImage = draft.images.find(img => img.isMain);
-                    if (mainImage) {
-                        const blob = base64ToBlob(mainImage.data);
-                        mainImageFile = new File([blob], mainImage.name, { type: blob.type });
-                        updateMainImagePreview();
-                    }
-
-                    // Charger les images de la galerie
-                    galleryImageFiles = [];
-                    for (const img of draft.images.filter(img => !img.isMain)) {
-                        const blob = base64ToBlob(img.data);
-                        const file = new File([blob], img.name, { type: blob.type });
-                        galleryImageFiles.push(file);
-                    }
-                    updateGalleryPreview();
-                }
-
-                showNotification('Restaurant chargé avec succès', 'success');
-            } catch (error) {
-                console.error('Erreur lors du chargement depuis le localStorage:', error);
-                showNotification('Erreur lors du chargement du restaurant', 'error');
-            }
-        }
-
-        async function loadFromGitHub(data) {
-            try {
-                console.log('Chargement depuis GitHub:', data);
-                
-                // Parser le front matter
-                const match = data.content.match(/^---\s*([\s\S]*?)\s*---/);
-                const frontMatter = match ? match[1] : '';
-                const content = match ? data.content.substring(match[0].length).trim() : data.content.trim();
-                
-                // Parser les données
-                const restaurantData = parseFrontMatterYAML(frontMatter);
-                console.log('Données parsées:', restaurantData);
-
-                // Remplir les champs du formulaire
-                fillBasicFields(restaurantData);
-                fillRatingsFields(restaurantData);
-
-                // Attendre que l'éditeur soit prêt
-                await ensureEditorReady();
-                editor.setHTML(content);
-
-                // Gérer les images
-                if (restaurantData.image) {
-                    await loadAndSetImageFromURL(restaurantData.image);
-                }
-
-                if (restaurantData.images) {
-                    const galleryPaths = extractGalleryPathsYAML(restaurantData.images);
-                    for (const path of galleryPaths) {
-                        await loadAndSetGalleryImageFromURL(path);
-                    }
-                }
-
-                showNotification('Restaurant chargé avec succès', 'success');
-            } catch (error) {
-                console.error('Erreur lors du chargement depuis GitHub:', error);
-                showNotification('Erreur lors du chargement du restaurant', 'error');
+                showNotification('Erreur lors du chargement: ' + error.message, 'error');
             }
         }
 
@@ -2448,6 +2450,128 @@ ${editorContent}`;
                 deleteDraft(filename);
                 window.location.href = 'edit-resto.html';
             }
+        }
+
+        // Fonction pour parser le front matter (simplifiée)
+        function parseFrontMatterYAML(yamlString) {
+            const data = {};
+            if (!yamlString) return data;
+            yamlString.split('\n').forEach(line => {
+                const separatorIndex = line.indexOf(':');
+                if (separatorIndex !== -1) {
+                    const key = line.substring(0, separatorIndex).trim();
+                    let value = line.substring(separatorIndex + 1).trim();
+                    value = value.replace(/^['"]|['"]$/g, ''); // Enlever guillemets
+                    if (key) {
+                        data[key] = value;
+                    }
+                }
+            });
+            return data;
+        }
+
+        // Fonction pour parser les ratings
+        function parseRatingsYAML(yamlString) {
+            const ratings = {};
+            if (!yamlString) return ratings;
+            const ratingsMatch = yamlString.match(/ratings:\s*([\s\S]*?)(?=\n\w+:|$)/);
+            if (!ratingsMatch || !ratingsMatch[1]) return ratings;
+
+            const ratingsBlock = ratingsMatch[1];
+            const categories = ['food', 'service', 'ambiance', 'value', 'originality', 'overall'];
+
+            categories.forEach(cat => {
+                const scoreMatch = ratingsBlock.match(new RegExp(`^\s*${cat}:\s*\n\s*score:\s*(\d+)`, 'm'));
+                const commentMatch = ratingsBlock.match(new RegExp(`^\s*${cat}:(?:\s|\S)*?comment:\s*['"]([\s\S]*?)['"]`, 'm'));
+                
+                const score = scoreMatch ? scoreMatch[1] : '5';
+                const comment = commentMatch ? commentMatch[1] : '';
+                
+                ratings[cat] = { score, comment };
+
+                 if (cat === 'overall') {
+                     ratings.overallExperience = ratings.overall;
+                     delete ratings.overall;
+                 }
+            });
+            return ratings;
+        }
+
+        // Fonction pour remplir les champs de rating
+        function fillRatingsFields(ratingsData) {
+            const categories = ['food', 'service', 'ambiance', 'value', 'originality', 'overallExperience'];
+            categories.forEach(cat => {
+                const scoreInput = document.getElementById(`${cat}Score`);
+                const commentInput = document.getElementById(`${cat}Comment`);
+                const scoreDisplay = scoreInput ? scoreInput.nextElementSibling : null;
+
+                if (ratingsData[cat]) {
+                    if (scoreInput) scoreInput.value = ratingsData[cat].score;
+                    if (scoreDisplay) scoreDisplay.textContent = ratingsData[cat].score;
+                    if (commentInput) commentInput.value = ratingsData[cat].comment;
+                } else {
+                    if (scoreInput) scoreInput.value = '5';
+                    if (scoreDisplay) scoreDisplay.textContent = '5';
+                    if (commentInput) commentInput.value = '';
+                }
+            });
+            calculateOverallRating();
+        }
+
+        // Fonction pour extraire les chemins des images galerie
+        function extractGalleryPathsYAML(yamlString) {
+            if (!yamlString) return [];
+            const imagesMatch = yamlString.match(/images:\s*([\s\S]*?)(?=\n\w+:|$)/);
+            if (!imagesMatch || !imagesMatch[1]) return [];
+            
+            const imageLines = imagesMatch[1].match(/- image: ['"]([^'"]+)['"]/g);
+            return imageLines ? imageLines.map(line => line.match(/['"]([^'"]+)['"]/)[1]) : [];
+        }
+        
+        // Fonction pour charger une image depuis une URL et l'ajouter
+        async function loadAndSetImageFromURL(imageUrl, isMain) {
+             try {
+                 console.log(`Chargement image depuis URL (${isMain ? 'Principale' : 'Galerie'}):`, imageUrl);
+                 const absoluteUrl = imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : imageUrl;
+                 console.log(`URL absolue utilisée: ${absoluteUrl}`);
+                 
+                 const response = await fetch(absoluteUrl);
+                 if (response.ok) {
+                     const blob = await response.blob();
+                     let fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1).split('?')[0];
+                     if (!fileName) fileName = `image_${Date.now()}`;
+                     const type = blob.type || 'image/jpeg';
+                     const fileExtension = type.split('/')[1] || 'jpg';
+                     if (!fileName.includes('.')) {
+                        fileName += `.${fileExtension}`;
+                     }
+                     const file = new File([blob], fileName, { type });
+                     
+                     if (isMain) {
+                         mainImageFile = file;
+                         handleMainImageUpload(file);
+                         console.log('Image principale chargée depuis URL:', fileName);
+                     } else {
+                         galleryImageFiles.push(file);
+                         console.log('Image galerie chargée depuis URL:', fileName);
+                     }
+                 } else {
+                     console.error(`Erreur ${response.status} lors du chargement de ${imageUrl} (URL absolue: ${absoluteUrl})`);
+                 }
+             } catch (error) {
+                 console.error(`Erreur réseau lors du chargement de ${imageUrl}:`, error);
+             }
+        }
+
+        // Fonction utilitaire pour convertir base64 en Blob
+        function base64ToBlob(base64, type = 'image/webp') {
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            return new Blob([byteArray], { type });
         }
     </script>
 </head>
