@@ -76,24 +76,44 @@
             padding: 0 1rem;
         }
 
-        .restaurant-card {
+        .restaurant-item {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            margin-bottom: 1.5rem;
-            padding: 1.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        .restaurant-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        .restaurant-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: white;
+        }
+
+        .restaurant-header:hover {
+            background: #f8f9fa;
         }
 
         .restaurant-name {
-            font-size: 1.5rem;
-            margin: 0 0 1rem;
+            font-size: 1.2rem;
+            margin: 0;
             color: var(--primary-color);
+        }
+
+        .restaurant-content {
+            padding: 0 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .restaurant-content.expanded {
+            padding: 1rem;
+            max-height: 1000px;
         }
 
         .form-group {
@@ -174,6 +194,78 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
         }
+
+        .publish-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .publish-button:hover {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+        }
+
+        .expand-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .notification.info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -210,7 +302,6 @@
                     if (separatorIndex !== -1) {
                         const key = line.substring(0, separatorIndex).trim();
                         let value = line.substring(separatorIndex + 1).trim();
-                        // Enlever les guillemets simples ou doubles autour de la valeur
                         value = value.replace(/^['"]|['"]$/g, '');
                         if (key) {
                             data[key] = value;
@@ -276,58 +367,119 @@
         // Fonction pour créer une carte de restaurant
         function createRestaurantCard(restaurant) {
             const card = document.createElement('div');
-            card.className = 'restaurant-card';
+            card.className = 'restaurant-item';
             card.setAttribute('data-restaurant-id', restaurant.id);
-            card.innerHTML = `
+
+            const header = document.createElement('div');
+            header.className = 'restaurant-header';
+            header.onclick = () => toggleRestaurantCard(card);
+
+            const content = document.createElement('div');
+            content.className = 'restaurant-content';
+
+            header.innerHTML = `
+                <h3 class="restaurant-name">${restaurant.title || 'Nouveau restaurant'}</h3>
+                <i class="fas fa-chevron-down expand-icon"></i>
+            `;
+
+            content.innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Titre</label>
                     <input type="text" class="form-control" value="${restaurant.title || ''}" data-field="title">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Type de régime</label>
-                    <input type="text" class="form-control" value="${restaurant.diet || ''}" data-field="diet">
+                    <label class="form-label">Style de cuisine</label>
+                    <input type="text" class="form-control" value="${restaurant.style || ''}" data-field="style">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Description</label>
                     <textarea class="form-control" rows="3" data-field="description">${restaurant.description || ''}</textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Ordre d'affichage</label>
-                    <input type="number" class="form-control" value="${restaurant.order || 0}" data-field="order">
+                    <label class="form-label">Adresse</label>
+                    <input type="text" class="form-control" value="${restaurant.address || ''}" data-field="address">
                 </div>
-                <button class="delete-button" onclick="deleteRestaurant('${restaurant.id}')">
-                    <i class="fas fa-trash"></i>
-                    Supprimer
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="save-button" onclick="saveRestaurant('${restaurant.id}')">
+                        <i class="fas fa-save"></i>
+                        Sauvegarder
+                    </button>
+                    <button class="delete-button" onclick="deleteRestaurant('${restaurant.id}')">
+                        <i class="fas fa-trash"></i>
+                        Supprimer
+                    </button>
+                </div>
             `;
+
+            card.appendChild(header);
+            card.appendChild(content);
             return card;
         }
 
-        // Fonction pour sauvegarder les modifications dans le localStorage
-        function saveChanges() {
-            const cards = document.querySelectorAll('.restaurant-card');
-            const restaurants = [];
+        // Fonction pour basculer l'état d'une carte de restaurant
+        function toggleRestaurantCard(card) {
+            const content = card.querySelector('.restaurant-content');
+            const icon = card.querySelector('.expand-icon');
+            content.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
 
-            cards.forEach(card => {
-                const id = card.getAttribute('data-restaurant-id');
-                restaurants.push({
-                    id: id,
-                    title: card.querySelector('[data-field="title"]').value,
-                    diet: card.querySelector('[data-field="diet"]').value,
-                    description: card.querySelector('[data-field="description"]').value,
-                    order: parseInt(card.querySelector('[data-field="order"]').value) || 0
-                });
-            });
+        // Fonction pour sauvegarder un restaurant dans le localStorage
+        function saveRestaurant(id) {
+            const card = document.querySelector(`[data-restaurant-id="${id}"]`);
+            const restaurant = {
+                id: id,
+                title: card.querySelector('[data-field="title"]').value,
+                style: card.querySelector('[data-field="style"]').value,
+                description: card.querySelector('[data-field="description"]').value,
+                address: card.querySelector('[data-field="address"]').value
+            };
 
+            // Récupérer les restaurants existants
+            let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
+            
+            // Mettre à jour ou ajouter le restaurant
+            const index = restaurants.findIndex(r => r.id === id);
+            if (index !== -1) {
+                restaurants[index] = restaurant;
+            } else {
+                restaurants.push(restaurant);
+            }
+
+            // Sauvegarder dans le localStorage
             localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+            
+            // Mettre à jour le titre dans l'en-tête
+            card.querySelector('.restaurant-name').textContent = restaurant.title || 'Nouveau restaurant';
+            
+            // Afficher une notification de succès
+            showNotification('Modifications sauvegardées avec succès !', 'success');
+        }
+
+        // Fonction pour afficher une notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
         // Fonction pour supprimer un restaurant
         function deleteRestaurant(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer ce restaurant?')) {
+                // Supprimer de l'interface
                 const card = document.querySelector(`[data-restaurant-id="${id}"]`);
                 card.remove();
-                saveChanges();
+
+                // Supprimer du localStorage
+                let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
+                restaurants = restaurants.filter(r => r.id !== id);
+                localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
             }
         }
 
@@ -337,21 +489,17 @@
             const newRestaurant = {
                 id: 'restaurant-' + Date.now(),
                 title: '',
-                diet: '',
+                style: '',
                 description: '',
+                address: '',
                 order: 0
             };
             const card = createRestaurantCard(newRestaurant);
             container.insertBefore(card, container.firstChild);
-            saveChanges();
+            
+            // Développer automatiquement la nouvelle carte
+            toggleRestaurantCard(card);
         }
-
-        // Sauvegarder les modifications lorsqu'un champ est modifié
-        document.addEventListener('input', function(e) {
-            if (e.target.closest('.restaurant-card')) {
-                saveChanges();
-            }
-        });
 
         // Charger les restaurants au chargement de la page
         document.addEventListener('DOMContentLoaded', loadUpcomingRestaurants);
