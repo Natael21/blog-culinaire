@@ -556,11 +556,26 @@
                 // Ajouter les restaurants de GitHub qui ne sont pas dans le localStorage
                 githubRestaurants.forEach(restaurant => {
                     if (!localStorageIds.has(restaurant.id)) {
-                        mergedRestaurants.push(restaurant);
+                        // Normaliser les données du restaurant
+                        const normalizedRestaurant = {
+                            id: restaurant.id,
+                            title: restaurant.title || '',
+                            style: restaurant.style || restaurant.restaurant_type || '',
+                            description: restaurant.description || '',
+                            address: restaurant.address || restaurant.location || '',
+                            order: restaurant.order || 0
+                        };
+                        mergedRestaurants.push(normalizedRestaurant);
                     }
                 });
 
-                console.log('Restaurants fusionnés:', mergedRestaurants);
+                // Normaliser les données des restaurants du localStorage
+                mergedRestaurants.forEach(restaurant => {
+                    restaurant.style = restaurant.style || restaurant.restaurant_type || '';
+                    restaurant.address = restaurant.address || restaurant.location || '';
+                });
+
+                console.log('Restaurants fusionnés et normalisés:', mergedRestaurants);
                 
                 const container = document.getElementById('restaurants-container');
                 container.innerHTML = '';
@@ -669,25 +684,34 @@
             // Récupérer les restaurants existants
             let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
             
-            // Mettre à jour ou ajouter le restaurant
-            const index = restaurants.findIndex(r => r.id === id);
-            if (index !== -1) {
-                restaurants[index] = restaurant;
-            } else {
-                restaurants.push(restaurant);
-            }
+            // Vérifier si le restaurant a été modifié
+            const existingRestaurant = restaurants.find(r => r.id === id);
+            const isModified = !existingRestaurant || 
+                existingRestaurant.title !== restaurant.title ||
+                existingRestaurant.style !== restaurant.style ||
+                existingRestaurant.description !== restaurant.description ||
+                existingRestaurant.address !== restaurant.address;
 
-            // Sauvegarder dans le localStorage
-            localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
-            
-            // Ajouter aux modifications en attente
-            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-            const filename = `_upcoming/${restaurant.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md`;
-            
-            // Vérifier si une modification pour ce fichier existe déjà
-            const existingIndex = pendingChanges.findIndex(change => change.filename === filename);
-            
-            const markdownContent = `---
+            if (isModified) {
+                // Mettre à jour ou ajouter le restaurant
+                const index = restaurants.findIndex(r => r.id === id);
+                if (index !== -1) {
+                    restaurants[index] = restaurant;
+                } else {
+                    restaurants.push(restaurant);
+                }
+
+                // Sauvegarder dans le localStorage
+                localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+                
+                // Ajouter aux modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                const filename = `_upcoming/${restaurant.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md`;
+                
+                // Vérifier si une modification pour ce fichier existe déjà
+                const existingIndex = pendingChanges.findIndex(change => change.filename === filename);
+                
+                const markdownContent = `---
 restaurant_type: ${restaurant.style}
 title: ${restaurant.title}
 description: ${restaurant.description}
@@ -697,34 +721,35 @@ location: ${restaurant.address}
 ${restaurant.description}
 `;
 
-            if (existingIndex !== -1) {
-                // Mettre à jour la modification existante
-                pendingChanges[existingIndex] = {
-                    type: 'update',
-                    filename: filename,
-                    content: markdownContent,
-                    timestamp: new Date().toISOString()
-                };
-            } else {
-                // Ajouter une nouvelle modification
-                pendingChanges.push({
-                    type: 'update',
-                    filename: filename,
-                    content: markdownContent,
-                    timestamp: new Date().toISOString()
-                });
-            }
+                if (existingIndex !== -1) {
+                    // Mettre à jour la modification existante
+                    pendingChanges[existingIndex] = {
+                        type: 'update',
+                        filename: filename,
+                        content: markdownContent,
+                        timestamp: new Date().toISOString()
+                    };
+                } else {
+                    // Ajouter une nouvelle modification
+                    pendingChanges.push({
+                        type: 'update',
+                        filename: filename,
+                        content: markdownContent,
+                        timestamp: new Date().toISOString()
+                    });
+                }
 
-            localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
-            
-            // Mettre à jour le titre dans l'en-tête
-            card.querySelector('.restaurant-name').textContent = restaurant.title || 'Nouveau restaurant';
-            
-            // Afficher une notification de succès
-            showNotification('Modifications sauvegardées avec succès !', 'success');
-            
-            // Déclencher l'événement de mise à jour des boutons
-            window.dispatchEvent(new Event('storageUpdated'));
+                localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+                
+                // Mettre à jour le titre dans l'en-tête
+                card.querySelector('.restaurant-name').textContent = restaurant.title || 'Nouveau restaurant';
+                
+                // Afficher une notification de succès
+                showNotification('Modifications sauvegardées avec succès !', 'success');
+                
+                // Déclencher l'événement de mise à jour des boutons
+                window.dispatchEvent(new Event('storageUpdated'));
+            }
         }
 
         // Fonction pour afficher une notification

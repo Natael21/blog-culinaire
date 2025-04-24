@@ -961,10 +961,12 @@ title: Administration - Blog Culinaire
                     // Supprimer toutes les modifications en attente
                     localStorage.removeItem('pendingChanges');
                     localStorage.removeItem('drafts');
+                    localStorage.removeItem('upcomingRestaurants');
                     
                     console.log('État du localStorage après suppression:');
                     console.log('- pendingChanges:', localStorage.getItem('pendingChanges'));
                     console.log('- drafts:', localStorage.getItem('drafts'));
+                    console.log('- upcomingRestaurants:', localStorage.getItem('upcomingRestaurants'));
                     
                     // Déclencher l'événement personnalisé pour mettre à jour les autres pages
                     window.dispatchEvent(new Event('pendingChangesCleared'));
