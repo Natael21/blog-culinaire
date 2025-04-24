@@ -141,6 +141,32 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        .invalid-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-control.is-invalid + .invalid-feedback {
+            display: block;
+        }
+
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
         .save-button {
             padding: 12px 24px;
             background: linear-gradient(135deg, #2ecc71, #27ae60);
@@ -676,18 +702,21 @@
         // Fonction pour valider un restaurant
         function validateRestaurant(restaurant) {
             const errors = [];
-            if (!restaurant.title || restaurant.title.trim() === '') {
-                errors.push('Le titre est requis');
+            const fields = {
+                title: 'Le titre',
+                style: 'Le style de cuisine',
+                description: 'La description',
+                address: 'L\'adresse'
+            };
+
+            // Vérifier chaque champ
+            for (const [field, label] of Object.entries(fields)) {
+                const value = restaurant[field]?.trim();
+                if (!value) {
+                    errors.push(`${label} est requis`);
+                }
             }
-            if (!restaurant.style || restaurant.style.trim() === '') {
-                errors.push('Le style de cuisine est requis');
-            }
-            if (!restaurant.description || restaurant.description.trim() === '') {
-                errors.push('La description est requise');
-            }
-            if (!restaurant.address || restaurant.address.trim() === '') {
-                errors.push('L\'adresse est requise');
-            }
+
             return errors;
         }
 
@@ -716,6 +745,53 @@
             return errors;
         }
 
+        // Fonction pour afficher les erreurs de champ
+        function showFieldErrors(card, errors) {
+            // Réinitialiser les états d'erreur
+            card.querySelectorAll('.form-control').forEach(input => {
+                input.classList.remove('is-invalid');
+                const feedback = input.parentElement.querySelector('.invalid-feedback');
+                if (feedback) feedback.style.display = 'none';
+            });
+
+            // Afficher les erreurs pour chaque champ
+            if (errors.length > 0) {
+                const fields = {
+                    title: 'Le titre',
+                    style: 'Le style de cuisine',
+                    description: 'La description',
+                    address: 'L\'adresse'
+                };
+
+                for (const [fieldName, label] of Object.entries(fields)) {
+                    if (errors.some(error => error.includes(label))) {
+                        const input = card.querySelector(`[data-field="${fieldName}"]`);
+                        if (input) {
+                            input.classList.add('is-invalid');
+                            let feedback = input.parentElement.querySelector('.invalid-feedback');
+                            if (!feedback) {
+                                feedback = document.createElement('div');
+                                feedback.className = 'invalid-feedback';
+                                input.parentElement.appendChild(feedback);
+                            }
+                            feedback.textContent = `${label} est requis`;
+                            feedback.style.display = 'block';
+                        }
+                    }
+                }
+
+                // Afficher le message d'erreur global
+                let errorMessage = card.querySelector('.error-message');
+                if (!errorMessage) {
+                    errorMessage = document.createElement('div');
+                    errorMessage.className = 'error-message';
+                    card.querySelector('.restaurant-content').insertBefore(errorMessage, card.querySelector('.d-flex.gap-2'));
+                }
+                errorMessage.textContent = errors.join(', ');
+                errorMessage.style.display = 'block';
+            }
+        }
+
         // Fonction pour sauvegarder un restaurant dans le localStorage
         function saveRestaurant(id) {
             try {
@@ -731,9 +807,13 @@
                 // Validation des champs
                 const errors = validateRestaurant(restaurant);
                 if (errors.length > 0) {
+                    showFieldErrors(card, errors);
                     showNotification(errors.join(', '), 'error');
-                    return;
+                    return false;
                 }
+
+                // Réinitialiser les états d'erreur si tout est valide
+                showFieldErrors(card, []);
 
                 // Générer le contenu Markdown
                 const markdownContent = `---
@@ -748,7 +828,7 @@ location: ${restaurant.address}
                 const markdownErrors = validateMarkdownContent(markdownContent);
                 if (markdownErrors.length > 0) {
                     showNotification(markdownErrors.join(', '), 'error');
-                    return;
+                    return false;
                 }
 
                 // Récupérer les restaurants existants
