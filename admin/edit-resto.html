@@ -1163,12 +1163,27 @@
 
         // Fonction pour initialiser l'éditeur
         function initializeEditor() {
+            console.log('=== DÉBUT INITIALISATION ÉDITEUR ===');
+            console.log('État actuel:', {
+                editorInitialized,
+                editorExists: !!editor,
+                editorElement: !!document.querySelector('#editor')
+            });
+
             return new Promise((resolve) => {
-                if (editorInitialized) {
+                if (editorInitialized && editor) {
+                    console.log('Éditeur déjà initialisé, retour immédiat');
                     resolve(editor);
                     return;
                 }
 
+                if (editor) {
+                    console.log('Instance précédente d\'éditeur trouvée, destruction...');
+                    editor.destroy();
+                    console.log('Instance précédente détruite');
+                }
+
+                console.log('Création d\'une nouvelle instance d\'éditeur');
                 editor = new Editor({
                     element: document.querySelector('#editor'),
                     extensions: [
@@ -1184,24 +1199,32 @@
                     content: '',
                     editable: true,
                     onReady: () => {
+                        console.log('Éditeur prêt');
                         editorInitialized = true;
-                        // Charger le contenu en attente s'il y en a
+                        
                         if (window.pendingEditorContent) {
+                            console.log('Contenu en attente trouvé, chargement...', {
+                                contentLength: window.pendingEditorContent.length
+                            });
                             editor.commands.setContent(window.pendingEditorContent);
                             delete window.pendingEditorContent;
+                            console.log('Contenu en attente chargé et supprimé');
                         }
+                        
                         resolve(editor);
                     },
                     onUpdate: ({ editor }) => {
+                        console.log('Mise à jour de l\'éditeur détectée');
                         updateMarkdownPreview();
                     }
                 });
 
-                // Gérer les boutons de la barre d'outils
+                console.log('Configuration des boutons de la barre d\'outils');
                 document.querySelectorAll('.editor-toolbar button').forEach(button => {
                     button.addEventListener('click', (e) => {
                         e.preventDefault();
                         const command = button.dataset.command;
+                        console.log('Clic sur bouton:', command);
                         editor.chain().focus();
                         
                         switch(command) {
@@ -1225,6 +1248,7 @@
                     const command = button.dataset.command;
                     button.classList.toggle('is-active', editor.isActive(command));
                 });
+                console.log('=== FIN INITIALISATION ÉDITEUR ===');
             });
         }
 
@@ -1494,13 +1518,44 @@
         }
 
         function handleMainImageUpload(file) {
-            if (file && file.type.startsWith('image/')) {
+            console.log('=== DÉBUT UPLOAD IMAGE PRINCIPALE ===');
+            console.log('Type de fichier reçu:', {
+                isBlob: file instanceof Blob,
+                isFile: file instanceof File,
+                isString: typeof file === 'string',
+                type: file.type || 'base64'
+            });
+
+            if (file && (file.type?.startsWith('image/') || typeof file === 'string')) {
                 mainImageFile = file;
                 const container = document.getElementById('mainImagePreview');
+                console.log('Container trouvé:', !!container);
                 container.innerHTML = '';
-                createImagePreview(file, container, true);
                 
-                // Supprimer l'état d'erreur et le message
+                if (file instanceof Blob || file instanceof File) {
+                    console.log('Traitement comme Blob/File');
+                    createImagePreview(file, container, true);
+                } else {
+                    console.log('Traitement comme base64');
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-container';
+                    div.innerHTML = `
+                        <img src="data:image/jpeg;base64,${file}" class="image-preview" alt="Image preview">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    div.querySelector('.delete-image').addEventListener('click', function() {
+                        console.log('Suppression de l\'image principale');
+                        div.remove();
+                        mainImageFile = null;
+                        updateMarkdownPreview();
+                    });
+                    
+                    container.appendChild(div);
+                }
+                
                 const mainImageZone = document.getElementById('mainImageZone');
                 mainImageZone.classList.remove('show-error');
                 const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
@@ -1508,8 +1563,12 @@
                     errorDiv.remove();
                 }
                 
+                console.log('Image principale chargée avec succès');
                 updateMarkdownPreview();
+            } else {
+                console.error('Type de fichier non valide:', file);
             }
+            console.log('=== FIN UPLOAD IMAGE PRINCIPALE ===');
         }
 
         function handleGalleryUpload(files) {
@@ -2268,20 +2327,41 @@ ${editorContent}`;
                 let frontMatter;
 
                 if (localDraft) {
-                    console.log('Utilisation des données du localStorage');
+                    console.log('=== DÉBUT CHARGEMENT DEPUIS LOCALSTORAGE ===');
+                    console.log('Contenu du draft:', {
+                        filename: localDraft.filename,
+                        hasImages: !!localDraft.images,
+                        numberOfImages: localDraft.images?.length || 0
+                    });
+
                     markdown = localDraft.content;
                     frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
 
-                    // Parser le front matter
-                    restaurantData = {};
-                    frontMatter.split('\n').forEach(line => {
-                        const [key, ...value] = line.split(':');
-                        if (key && value) {
-                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
-                        }
-                    });
-                    console.log('Données du restaurant extraites:', restaurantData);
+                    if (localDraft.images && localDraft.images.length > 0) {
+                        console.log('Traitement des images du localStorage');
+                        localDraft.images.forEach((img, index) => {
+                            console.log(`Traitement image ${index + 1}/${localDraft.images.length}:`, {
+                                name: img.name,
+                                isMain: img.isMain,
+                                dataLength: img.data.length
+                            });
+
+                            if (img.isMain) {
+                                console.log('Chargement image principale');
+                                mainImageFile = img.data;
+                                handleMainImageUpload(img.data);
+                            } else {
+                                console.log('Ajout à la galerie');
+                                galleryImageFiles.push(img.data);
+                            }
+                        });
+                        console.log('Mise à jour de la prévisualisation de la galerie');
+                        updateGalleryPreview();
+                    } else {
+                        console.log('Aucune image trouvée dans le localStorage');
+                    }
+                    console.log('=== FIN CHARGEMENT DEPUIS LOCALSTORAGE ===');
                 } else {
                     console.log('Tentative de récupération depuis GitHub');
                     const path = `_posts/${filename}`;
