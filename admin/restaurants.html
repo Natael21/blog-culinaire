@@ -552,6 +552,30 @@
             document.getElementById('loadingSpinner').style.display = 'none';
         }
 
+        // Fonction pour parser le front matter YAML d'un contenu markdown
+        function parseFrontMatter(markdownContent) {
+            const data = {};
+            if (!markdownContent) return data;
+
+            const match = markdownContent.match(/^---\s*([\s\S]*?)\s*---/);
+            if (match && match[1]) {
+                const yamlLines = match[1].trim().split('\n');
+                yamlLines.forEach(line => {
+                    const separatorIndex = line.indexOf(':');
+                    if (separatorIndex !== -1) {
+                        const key = line.substring(0, separatorIndex).trim();
+                        let value = line.substring(separatorIndex + 1).trim();
+                        // Enlever les guillemets simples ou doubles autour de la valeur
+                        value = value.replace(/^['"]|['"]$/g, '');
+                        if (key) {
+                          data[key] = value;
+                        }
+                    }
+                });
+            }
+            return data;
+        }
+
         // Fonction pour charger et afficher les restaurants
         async function loadRestaurants() {
             try {
@@ -579,36 +603,30 @@
                 const localStorageMap = new Map(
                     localStorageData.map(item => {
                         console.log('Item du localStorage:', item);
-                        console.log('Images dans l\'item:', {
-                            image: item.image,
-                            imageContent: item.imageContent ? 'Présent' : 'Absent',
-                            images: item.images
-                        });
-                        return [item.title, item];
+                        return [item.title, item]; // Utiliser le titre comme clé
                     })
                 );
                 
                 // Fusionner les données en privilégiant le localStorage
                 const mergedData = githubData.map(githubItem => {
                     const localItem = localStorageMap.get(githubItem.title);
-                    if (localItem) {
-                        console.log(`Restaurant trouvé dans localStorage par titre: ${githubItem.title}`, {
-                            github: {
-                                filename: githubItem.filename,
-                                image: githubItem.image
-                            },
-                            local: {
-                                filename: localItem.filename,
-                                image: localItem.image,
-                                imageContent: localItem.imageContent ? 'Présent' : 'Absent'
-                            }
-                        });
+                    if (localItem && localItem.content) {
+                        console.log(`Restaurant trouvé dans localStorage par titre: ${githubItem.title}`);
+                        const localParsedData = parseFrontMatter(localItem.content);
+                        console.log(`Données parsées du localStorage pour ${githubItem.title}:`, localParsedData);
+
+                        // Merge : base GitHub + overwrite par localStorage parsé + images/flags locaux
                         return {
-                            ...githubItem,
-                            ...localItem,
+                            ...githubItem,       
+                            ...localParsedData,  
+                            filename: localItem.filename, 
+                            images: localItem.images,     
+                            content: localItem.content,   
+                            lastModified: localItem.lastModified, 
                             isFromLocalStorage: true
                         };
                     }
+                    // Si pas dans localStorage, utiliser données GitHub
                     return {
                         ...githubItem,
                         isFromLocalStorage: false
@@ -618,17 +636,27 @@
                 // Ajouter les nouveaux brouillons qui n'existent pas dans GitHub
                 localStorageData.forEach(localItem => {
                     if (!mergedData.some(item => item.title === localItem.title)) {
-                        console.log(`Nouveau brouillon ajouté: ${localItem.title}`, {
-                            filename: localItem.filename,
-                            image: localItem.image,
-                            imageContent: localItem.imageContent ? 'Présent' : 'Absent',
-                            images: localItem.images
-                        });
-                        mergedData.push({
-                            ...localItem,
-                            state: 'draft',
-                            isFromLocalStorage: true
-                        });
+                        console.log(`Nouveau brouillon ajouté: ${localItem.title}`);
+                        if (localItem.content) {
+                            const localParsedData = parseFrontMatter(localItem.content);
+                            console.log(`Données parsées pour nouveau brouillon ${localItem.title}:`, localParsedData);
+                            mergedData.push({
+                                // Champs de base du localStorage
+                                filename: localItem.filename,
+                                title: localItem.title,
+                                content: localItem.content, 
+                                images: localItem.images,
+                                lastModified: localItem.lastModified,
+                                // Ajouter les données parsées
+                                ...localParsedData,
+                                // Ajouter flags/defaults nécessaires
+                                state: localParsedData.state || 'draft',
+                                date: localParsedData.date || localItem.lastModified.split('T')[0],
+                                isFromLocalStorage: true
+                            });
+                        } else {
+                            console.warn(`Nouveau brouillon ${localItem.title} sans contenu, ignoré.`);
+                        }
                     }
                 });
                 
@@ -645,7 +673,10 @@
                 const restaurants = filteredData.sort((a, b) => {
                     if (a.state === 'draft' && b.state !== 'draft') return -1;
                     if (a.state !== 'draft' && b.state === 'draft') return 1;
-                    return new Date(b.date) - new Date(a.date);
+                    // Si dates existent, trier par date, sinon mettre à la fin (ou autre logique)
+                    const dateA = a.date ? new Date(a.date) : 0;
+                    const dateB = b.date ? new Date(b.date) : 0;
+                    return dateB - dateA; 
                 });
                 
                 displayRestaurants(restaurants);
@@ -685,6 +716,11 @@
                 console.log('Titre:', restaurant.title);
                 console.log('Source:', restaurant.isFromLocalStorage ? 'localStorage' : 'GitHub');
                 console.log('État:', restaurant.state);
+                console.log('Données pour affichage:', {
+                    address: restaurant.address,
+                    style: restaurant.style,
+                    date: restaurant.date
+                });
                 
                 // Déterminer la source de l'image
                 let imageSource = null;
@@ -700,12 +736,6 @@
                         console.log('Aucune image avec isMain=true, mais une seule image trouvée. Utilisation de celle-ci.');
                         mainImage = restaurant.images[0];
                     }
-                    
-                    if (mainImage && mainImage.data) {
-                        console.log('-> Utilisation de l\'image principale du localStorage (base64)');
-                        // Ajouter le préfixe si nécessaire pour l'affichage
-                        imageSource = mainImage.data.startsWith('data:image') ? mainImage.data : `data:image/webp;base64,${mainImage.data}`;
-                    }
                 }
                 
                 // Sinon (ou si pas trouvée dans localStorage), utiliser l'image GitHub
@@ -716,13 +746,15 @@
                 
                 // Si toujours pas d'image
                 if (!imageSource) {
-                    console.log('-> Pas d\'image disponible');
+                    console.log('-> Pas d\'image disponible pour', restaurant.title);
                 }
+
+                console.log(`Source finale de l'image pour ${restaurant.title}:`, imageSource);
 
                 const imageHtml = imageSource
                     ? `<div class="restaurant-image">
                          <img src="${imageSource}" 
-                              alt="${restaurant.title}"
+                              alt="${restaurant.title || 'Restaurant'}"
                               onerror="handleImageError(this)"
                               onload="console.log('Image chargée avec succès pour: ${restaurant.title}')"
                               style="object-fit: cover;">
@@ -744,21 +776,21 @@
                     ${imageHtml}
                     <div class="restaurant-info">
                         <h3 class="restaurant-name">
-                            ${restaurant.title}
+                            ${restaurant.title || 'Titre inconnu'}
                             ${restaurant.state === 'draft' ? '<span class="draft-badge">Brouillon</span>' : ''}
                         </h3>
                         <div class="restaurant-meta">
                             <span class="restaurant-meta-item">
                                 <i class="fas fa-map-marker-alt"></i>
-                                ${restaurant.address}
+                                ${restaurant.address || 'Adresse inconnue'}
                             </span>
                             <span class="restaurant-meta-item">
                                 <i class="fas fa-utensils"></i>
-                                ${restaurant.style}
+                                ${restaurant.style || 'Style inconnu'}
                             </span>
                             <span class="restaurant-meta-item">
                                 <i class="fas fa-calendar"></i>
-                                ${restaurant.date}
+                                ${restaurant.date || 'Date inconnue'}
                             </span>
                         </div>
                     </div>
