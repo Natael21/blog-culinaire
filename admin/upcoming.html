@@ -680,11 +680,51 @@
             // Sauvegarder dans le localStorage
             localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
             
+            // Ajouter aux modifications en attente
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const filename = `_upcoming/${restaurant.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md`;
+            
+            // Vérifier si une modification pour ce fichier existe déjà
+            const existingIndex = pendingChanges.findIndex(change => change.filename === filename);
+            
+            const markdownContent = `---
+restaurant_type: ${restaurant.style}
+title: ${restaurant.title}
+description: ${restaurant.description}
+location: ${restaurant.address}
+---
+
+${restaurant.description}
+`;
+
+            if (existingIndex !== -1) {
+                // Mettre à jour la modification existante
+                pendingChanges[existingIndex] = {
+                    type: 'update',
+                    filename: filename,
+                    content: markdownContent,
+                    timestamp: new Date().toISOString()
+                };
+            } else {
+                // Ajouter une nouvelle modification
+                pendingChanges.push({
+                    type: 'update',
+                    filename: filename,
+                    content: markdownContent,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+            
             // Mettre à jour le titre dans l'en-tête
             card.querySelector('.restaurant-name').textContent = restaurant.title || 'Nouveau restaurant';
             
             // Afficher une notification de succès
             showNotification('Modifications sauvegardées avec succès !', 'success');
+            
+            // Déclencher l'événement de mise à jour des boutons
+            window.dispatchEvent(new Event('storageUpdated'));
         }
 
         // Fonction pour afficher une notification
