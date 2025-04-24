@@ -2541,91 +2541,27 @@ ${editorContent}`;
                 if (restaurantData.image) {
                     const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
                     console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
-                    console.log('Chemin original de l\'image:', imagePath);
-                    console.log('Données du restaurant:', {
-                        title: restaurantData.title,
-                        date: restaurantData.date,
-                        state: restaurantData.state
-                    });
+                    console.log('Chemin de l\'image:', imagePath);
                     
                     if (imagePath) {
                         try {
-                            // Corriger le chemin de l'image en retirant le slash initial et en encodant les espaces
-                            const correctedPath = imagePath.replace(/^\//, '').replace(/ /g, '%20');
-                            console.log('Chemin corrigé:', correctedPath);
-                            console.log('Encodage des caractères spéciaux:', {
-                                original: imagePath,
-                                corrected: correctedPath,
-                                encoded: encodeURIComponent(correctedPath)
-                            });
+                            const imageUrl = imagePath;
+                            console.log('URL de l\'image:', imageUrl);
                             
-                            // Modifier le chemin pour pointer vers le bon dossier
-                            const imageUrl = `https://raw.githubusercontent.com/Natael21/blog-culinaire/main/${correctedPath}`;
-                            console.log('URL complète de l\'image:', imageUrl);
-                            console.log('En-têtes de la requête:', {
-                                method: 'GET',
-                                mode: 'cors',
-                                cache: 'no-cache'
-                            });
-                            
-                            console.log('Tentative de chargement de l\'image principale...');
                             const response = await fetch(imageUrl);
-                            console.log('Réponse du serveur:', {
-                                status: response.status,
-                                statusText: response.statusText,
-                                ok: response.ok,
-                                headers: Object.fromEntries(response.headers.entries()),
-                                type: response.type,
-                                url: response.url
-                            });
-                            
                             if (response.ok) {
-                                console.log('Conversion de la réponse en blob...');
                                 const blob = await response.blob();
-                                console.log('Blob créé:', {
-                                    type: blob.type,
-                                    size: blob.size,
-                                    lastModified: blob.lastModified,
-                                    lastModifiedDate: blob.lastModifiedDate
-                                });
-                                
                                 const fileName = imagePath.split('/').pop();
-                                console.log('Création du fichier avec le nom:', fileName);
-                                console.log('Détails du fichier:', {
-                                    name: fileName,
-                                    type: 'image/jpeg',
-                                    size: blob.size
-                                });
-                                
                                 const file = new File([blob], fileName, { type: 'image/jpeg' });
                                 mainImageFile = file;
                                 handleMainImageUpload(file);
                                 console.log('Image principale chargée avec succès');
-                                console.log('État de l\'image principale:', {
-                                    name: mainImageFile.name,
-                                    type: mainImageFile.type,
-                                    size: mainImageFile.size,
-                                    lastModified: mainImageFile.lastModified
-                                });
                             } else {
                                 console.error('Erreur lors du chargement de l\'image principale:', response.status);
-                                console.error('Détails de l\'erreur:', {
-                                    status: response.status,
-                                    statusText: response.statusText,
-                                    url: response.url
-                                });
                             }
                         } catch (error) {
                             console.error('Erreur lors du chargement de l\'image principale:', error);
-                            console.error('Détails de l\'erreur:', {
-                                name: error.name,
-                                message: error.message,
-                                stack: error.stack,
-                                cause: error.cause
-                            });
                         }
-                    } else {
-                        console.warn('Chemin de l\'image principale vide ou invalide');
                     }
                 }
 
