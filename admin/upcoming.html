@@ -609,14 +609,14 @@
                     <label class="form-label">Style de cuisine</label>
                     <select class="form-control" data-field="style">
                         <option value="">Sélectionner un style</option>
-                        <option value="Asiatique" ${restaurant.style === 'Asiatique' ? 'selected' : ''}>Asiatique</option>
-                        <option value="Américain" ${restaurant.style === 'Américain' ? 'selected' : ''}>Américain</option>
-                        <option value="Moyen-Orient" ${restaurant.style === 'Moyen-Orient' ? 'selected' : ''}>Moyen-Orient</option>
-                        <option value="Mexicain & Latino" ${restaurant.style === 'Mexicain & Latino' ? 'selected' : ''}>Mexicain & Latino</option>
-                        <option value="Bistro & Café" ${restaurant.style === 'Bistro & Café' ? 'selected' : ''}>Bistro & Café</option>
-                        <option value="Pub & Microbrasserie" ${restaurant.style === 'Pub & Microbrasserie' ? 'selected' : ''}>Pub & Microbrasserie</option>
-                        <option value="Italien" ${restaurant.style === 'Italien' ? 'selected' : ''}>Italien</option>
-                        <option value="Indien & Épicé" ${restaurant.style === 'Indien & Épicé' ? 'selected' : ''}>Indien & Épicé</option>
+                        <option value="Asiatique" ${restaurant.style === 'Asiatique' || restaurant.restaurant_type === 'Asiatique' ? 'selected' : ''}>Asiatique</option>
+                        <option value="Américain" ${restaurant.style === 'Américain' || restaurant.restaurant_type === 'Américain' ? 'selected' : ''}>Américain</option>
+                        <option value="Moyen-Orient" ${restaurant.style === 'Moyen-Orient' || restaurant.restaurant_type === 'Moyen-Orient' ? 'selected' : ''}>Moyen-Orient</option>
+                        <option value="Mexicain & Latino" ${restaurant.style === 'Mexicain & Latino' || restaurant.restaurant_type === 'Mexicain & Latino' ? 'selected' : ''}>Mexicain & Latino</option>
+                        <option value="Bistro & Café" ${restaurant.style === 'Bistro & Café' || restaurant.restaurant_type === 'Bistro & Café' ? 'selected' : ''}>Bistro & Café</option>
+                        <option value="Pub & Microbrasserie" ${restaurant.style === 'Pub & Microbrasserie' || restaurant.restaurant_type === 'Pub & Microbrasserie' ? 'selected' : ''}>Pub & Microbrasserie</option>
+                        <option value="Italien" ${restaurant.style === 'Italien' || restaurant.restaurant_type === 'Italien' ? 'selected' : ''}>Italien</option>
+                        <option value="Indien & Épicé" ${restaurant.style === 'Indien & Épicé' || restaurant.restaurant_type === 'Indien & Épicé' ? 'selected' : ''}>Indien & Épicé</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -626,7 +626,7 @@
                 <div class="form-group">
                     <label class="form-label">Adresse</label>
                     <div class="input-wrapper">
-                        <input type="text" class="form-control" value="${restaurant.address || ''}" data-field="address" placeholder="Commencez à taper une adresse...">
+                        <input type="text" class="form-control" value="${restaurant.address || restaurant.location || ''}" data-field="address" placeholder="Commencez à taper une adresse...">
                         <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
                     </div>
                 </div>
