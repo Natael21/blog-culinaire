@@ -202,32 +202,31 @@
             console.log('Début du chargement des restaurants...');
             try {
                 // Charger les restaurants depuis le localStorage
-                let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
-                console.log('Restaurants chargés depuis localStorage:', restaurants);
+                let localStorageRestaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
+                console.log('Restaurants chargés depuis localStorage:', localStorageRestaurants);
                 
-                // Si le localStorage est vide, charger depuis les fichiers Markdown
-                if (restaurants.length === 0) {
-                    console.log('Aucun restaurant dans localStorage, tentative de chargement depuis les fichiers Markdown...');
-                    try {
-                        // Lire le contenu du dossier _upcoming
-                        const response = await fetch('/_upcoming/');
-                        if (!response.ok) {
-                            throw new Error(`Erreur HTTP: ${response.status}`);
-                        }
-                        const html = await response.text();
-                        console.log('Réponse du serveur reçue');
-                        
-                        // Parser le HTML pour extraire les liens vers les fichiers Markdown
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const links = Array.from(doc.querySelectorAll('a'))
-                            .filter(a => a.href.endsWith('.md'))
-                            .map(a => a.href.split('/').pop());
-                        console.log('Fichiers Markdown trouvés:', links);
-                        
-                        // Charger chaque fichier Markdown
-                        restaurants = await Promise.all(links.map(async filename => {
-                            console.log(`Chargement du fichier: ${filename}`);
+                // Charger les restaurants depuis GitHub
+                let githubRestaurants = [];
+                try {
+                    // Liste des fichiers Markdown connus
+                    const markdownFiles = [
+                        'dimetutto.md',
+                        'la-rose-des-sables.md',
+                        'la-tequilaria.md',
+                        'mechant-steak.md',
+                        'pain-voyageur.md',
+                        'ranch-sherbrooke.md',
+                        'resto-amir.md',
+                        'sanglier-dore.md',
+                        'sauge-vegan.md'
+                    ];
+                    
+                    console.log('Chargement des fichiers Markdown depuis GitHub...');
+                    
+                    // Charger chaque fichier Markdown
+                    githubRestaurants = await Promise.all(markdownFiles.map(async filename => {
+                        console.log(`Chargement du fichier: ${filename}`);
+                        try {
                             const fileResponse = await fetch(`/_upcoming/${filename}`);
                             if (!fileResponse.ok) {
                                 throw new Error(`Erreur lors du chargement de ${filename}: ${fileResponse.status}`);
@@ -251,44 +250,46 @@
                                 description: data.description || '',
                                 order: parseInt(data.order) || 0
                             };
-                        }));
-                        
-                        console.log('Restaurants chargés depuis les fichiers Markdown:', restaurants);
-                        
-                        // Sauvegarder dans le localStorage
-                        localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
-                        console.log('Restaurants sauvegardés dans localStorage');
-                    } catch (error) {
-                        console.error('Erreur lors du chargement depuis les fichiers Markdown:', error);
-                        restaurants = [];
-                    }
+                        } catch (error) {
+                            console.error(`Erreur lors du chargement de ${filename}:`, error);
+                            return null;
+                        }
+                    }));
+                    
+                    // Filtrer les restaurants nuls (ceux qui n'ont pas pu être chargés)
+                    githubRestaurants = githubRestaurants.filter(restaurant => restaurant !== null);
+                    console.log('Restaurants chargés depuis GitHub:', githubRestaurants);
+                } catch (error) {
+                    console.error('Erreur lors du chargement depuis GitHub:', error);
                 }
+
+                // Fusionner les restaurants en priorisant le localStorage
+                const mergedRestaurants = [...localStorageRestaurants];
+                const localStorageIds = new Set(localStorageRestaurants.map(r => r.id));
+                
+                // Ajouter les restaurants de GitHub qui ne sont pas dans le localStorage
+                githubRestaurants.forEach(restaurant => {
+                    if (!localStorageIds.has(restaurant.id)) {
+                        mergedRestaurants.push(restaurant);
+                    }
+                });
+
+                console.log('Restaurants fusionnés:', mergedRestaurants);
                 
                 const container = document.getElementById('restaurants-container');
                 container.innerHTML = '';
 
                 // Trier les restaurants par ordre
-                restaurants.sort((a, b) => a.order - b.order);
-                console.log('Restaurants triés:', restaurants);
+                mergedRestaurants.sort((a, b) => a.order - b.order);
+                console.log('Restaurants triés:', mergedRestaurants);
 
-                restaurants.forEach(restaurant => {
+                mergedRestaurants.forEach(restaurant => {
                     const card = createRestaurantCard(restaurant);
                     container.appendChild(card);
                 });
                 console.log('Affichage des restaurants terminé');
             } catch (error) {
                 console.error('Erreur lors du chargement des restaurants:', error);
-                // En cas d'erreur, utiliser les données du localStorage si disponibles
-                const fallbackData = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
-                console.log('Tentative de récupération des données de fallback:', fallbackData);
-                if (fallbackData.length > 0) {
-                    const container = document.getElementById('restaurants-container');
-                    container.innerHTML = '';
-                    fallbackData.sort((a, b) => a.order - b.order).forEach(restaurant => {
-                        const card = createRestaurantCard(restaurant);
-                        container.appendChild(card);
-                    });
-                }
             }
         }
 
