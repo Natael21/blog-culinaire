@@ -409,10 +409,58 @@
             });
         }
 
+        // Fonction pour mettre à jour l'affichage des images marquées
+        function updateMarkedImages() {
+            console.log('=== MISE À JOUR DE L\'AFFICHAGE DES IMAGES MARQUÉES ===');
+            const markedImages = JSON.parse(localStorage.getItem('markedImages') || '[]');
+            console.log('Images marquées actuelles:', markedImages);
+
+            // Réinitialiser toutes les images
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.classList.remove('marked-for-deletion');
+                console.log('Réinitialisation de l\'image:', item.dataset.filename);
+            });
+
+            // Appliquer le marquage uniquement aux images qui sont encore marquées
+            markedImages.forEach(filename => {
+                const galleryItem = document.querySelector(`.gallery-item[data-filename="${filename}"]`);
+                if (galleryItem) {
+                    galleryItem.classList.add('marked-for-deletion');
+                    console.log('Image re-marquée:', filename);
+                }
+            });
+        }
+
+        // Écouter les changements du localStorage
+        window.addEventListener('storage', (e) => {
+            console.log('Événement storage détecté:', e.key);
+            if (e.key === 'markedImages' || e.key === 'pendingChanges') {
+                console.log('Changement détecté dans:', e.key);
+                console.log('Ancienne valeur:', e.oldValue);
+                console.log('Nouvelle valeur:', e.newValue);
+                updateMarkedImages();
+            }
+        });
+
+        // Écouter l'événement personnalisé de réinitialisation
+        window.addEventListener('pendingChangesCleared', () => {
+            console.log('Événement pendingChangesCleared reçu');
+            localStorage.removeItem('markedImages');
+            updateMarkedImages();
+        });
+
         // Charger les images au chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
             console.log('=== INITIALISATION DE LA PAGE ===');
             loadImages();
+
+            // Vérifier si les modifications ont été annulées
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            if (pendingChanges.length === 0) {
+                console.log('Aucune modification en attente, nettoyage des images marquées');
+                localStorage.removeItem('markedImages');
+                updateMarkedImages();
+            }
         });
     </script>
 </body>

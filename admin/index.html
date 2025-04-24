@@ -970,6 +970,9 @@ title: Administration - Blog Culinaire
                     console.log('- pendingChanges:', localStorage.getItem('pendingChanges'));
                     console.log('- drafts:', localStorage.getItem('drafts'));
                     
+                    // Déclencher l'événement personnalisé pour mettre à jour les autres pages
+                    window.dispatchEvent(new Event('pendingChangesCleared'));
+                    
                     // Mettre à jour l'interface
                     updatePendingChangesButtons();
                     showNotification('Toutes les modifications ont été annulées', 'success');
