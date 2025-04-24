@@ -2381,7 +2381,7 @@ ${editorContent}`;
                 console.log('=== DÉBUT DU CHARGEMENT DU RESTAURANT ===');
                 console.log('Fichier à charger:', filename);
                 
-                const repo = 'Natael21/blog-culinaire'; // Définir repo au début de la fonction
+                const repo = 'Natael21/blog-culinaire';
                 
                 // D'abord vérifier dans le localStorage
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
@@ -2415,7 +2415,6 @@ ${editorContent}`;
                     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
                     console.log('URL de la requête:', url);
 
-                    // Récupérer le contenu du fichier
                     const response = await fetch(url);
                     console.log('Statut de la réponse:', response.status);
                     
@@ -2433,11 +2432,9 @@ ${editorContent}`;
                         size: data.size,
                         name: data.name
                     });
-                    // Utiliser decodeURIComponent pour gérer les caractères accentués
                     markdown = decodeURIComponent(escape(atob(data.content)));
                     console.log('Contenu markdown décodé:', markdown);
                     
-                    // Extraire le front matter et le contenu
                     frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
 
@@ -2460,10 +2457,20 @@ ${editorContent}`;
                 document.getElementById('description').value = restaurantData.description || '';
                 document.getElementById('address').value = restaurantData.address || '';
                 document.getElementById('style').value = restaurantData.style || '';
-                document.getElementById('price').value = restaurantData.price || '';
+                
+                // Corriger la gamme de prix
+                const priceMap = {
+                    'budget': '$ (0-20$)',
+                    'moyen': '$$ (20-40$)',
+                    'haut': '$$$ (40$ et +)'
+                };
+                const priceValue = priceMap[restaurantData.price] || restaurantData.price;
+                console.log('Gamme de prix:', { original: restaurantData.price, mapped: priceValue });
+                document.getElementById('price').value = priceValue;
                 
                 // Remplir les options alimentaires
                 const diets = (restaurantData.diet || '').split(',');
+                console.log('Options alimentaires:', diets);
                 document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
                 document.getElementById('vegan').checked = diets.includes('vegan-friendly');
 
@@ -2482,12 +2489,19 @@ ${editorContent}`;
                     const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
                     const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
 
-                    const foodComment = ratingsYaml.match(/food:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
-                    const serviceComment = ratingsYaml.match(/service:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
-                    const ambianceComment = ratingsYaml.match(/ambiance:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
-                    const valueComment = ratingsYaml.match(/value:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
-                    const originalityComment = ratingsYaml.match(/originality:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
-                    const overallComment = ratingsYaml.match(/overall:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
+                    // Améliorer l'extraction des commentaires
+                    const extractComment = (yaml, category) => {
+                        const match = yaml.match(new RegExp(`${category}:[\\s\\S]*?comment:\\s*["']([^"']*)["']`));
+                        console.log(`Extraction du commentaire ${category}:`, match);
+                        return match ? match[1] : '';
+                    };
+
+                    const foodComment = extractComment(ratingsYaml, 'food');
+                    const serviceComment = extractComment(ratingsYaml, 'service');
+                    const ambianceComment = extractComment(ratingsYaml, 'ambiance');
+                    const valueComment = extractComment(ratingsYaml, 'value');
+                    const originalityComment = extractComment(ratingsYaml, 'originality');
+                    const overallComment = extractComment(ratingsYaml, 'overall');
 
                     console.log('Notes et commentaires extraits:', {
                         foodScore, foodComment,
@@ -2528,7 +2542,10 @@ ${editorContent}`;
                     const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
                     if (imagePath) {
                         try {
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${imagePath}`;
+                            // Corriger le chemin de l'image
+                            const correctedPath = imagePath.replace(/ /g, '_');
+                            // Modifier le chemin pour pointer vers le bon dossier
+                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${correctedPath}`;
                             console.log('Tentative de chargement de l\'image principale:', imageUrl);
                             const response = await fetch(imageUrl);
                             if (response.ok) {
@@ -2536,6 +2553,8 @@ ${editorContent}`;
                                 const file = new File([blob], imagePath.split('/').pop(), { type: 'image/jpeg' });
                                 mainImageFile = file;
                                 handleMainImageUpload(file);
+                            } else {
+                                console.error('Erreur lors du chargement de l\'image principale:', response.status);
                             }
                         } catch (error) {
                             console.error('Erreur lors du chargement de l\'image principale:', error);
@@ -2555,13 +2574,18 @@ ${editorContent}`;
                     galleryImageFiles = [];
                     for (const imagePath of galleryPaths) {
                         try {
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${imagePath}`;
+                            // Corriger le chemin de l'image
+                            const correctedPath = imagePath.replace(/ /g, '_');
+                            // Modifier le chemin pour pointer vers le bon dossier
+                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${correctedPath}`;
                             console.log('Tentative de chargement d\'image de galerie:', imageUrl);
                             const response = await fetch(imageUrl);
                             if (response.ok) {
                                 const blob = await response.blob();
                                 const file = new File([blob], imagePath.split('/').pop(), { type: 'image/jpeg' });
                                 galleryImageFiles.push(file);
+                            } else {
+                                console.error('Erreur lors du chargement d\'une image de galerie:', response.status);
                             }
                         } catch (error) {
                             console.error('Erreur lors du chargement d\'une image de galerie:', error);
@@ -2582,7 +2606,6 @@ ${editorContent}`;
                     editor.commands.setContent(`<p>${htmlContent}</p>`);
                 } else {
                     console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
-                    // Stocker le contenu pour le charger plus tard
                     window.pendingEditorContent = content;
                 }
 
