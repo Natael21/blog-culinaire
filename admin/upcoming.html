@@ -742,6 +742,7 @@ ${restaurant.description}
 
                 // Filtrer les changements invalides
                 const validChanges = pendingChanges.filter(change => 
+                    change && 
                     change.type && 
                     change.filename && 
                     (change.type === 'delete' || (change.type !== 'delete' && change.content))
