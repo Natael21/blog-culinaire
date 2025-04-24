@@ -691,7 +691,10 @@
                 
                 // Si vient du localStorage, chercher l'image principale dans le tableau images
                 if (restaurant.isFromLocalStorage && Array.isArray(restaurant.images)) {
+                    console.log('Contenu du tableau images pour:', restaurant.title, restaurant.images);
                     const mainImage = restaurant.images.find(img => img.isMain);
+                    console.log('Image principale trouvée:', mainImage);
+                    
                     if (mainImage && mainImage.data) {
                         console.log('-> Utilisation de l\'image principale du localStorage (base64)');
                         // Ajouter le préfixe si nécessaire pour l'affichage
