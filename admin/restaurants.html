@@ -732,20 +732,12 @@
                     // Afficher la structure complète de la première image pour le débogage
                     console.log('Structure de la première image:', restaurant.images[0]);
                     
-                    // Vérifier si l'image a une propriété 'data' (contenu base64)
+                    // Vérifier si l'image a des données base64
                     if (restaurant.images[0].data) {
                         console.log('-> Utilisation des données base64 de l\'image du localStorage');
-                        imageSource = `data:image/jpeg;base64,${restaurant.images[0].data}`;
-                    }
-                    // Vérifier si l'image a une propriété 'url'
-                    else if (restaurant.images[0].url) {
-                        console.log('-> Utilisation de l\'URL de l\'image du localStorage:', restaurant.images[0].url);
-                        imageSource = restaurant.images[0].url;
-                    }
-                    // Vérifier si l'image a une propriété 'path'
-                    else if (restaurant.images[0].path) {
-                        console.log('-> Utilisation du chemin de l\'image du localStorage:', restaurant.images[0].path);
-                        imageSource = restaurant.images[0].path;
+                        // Construire l'URL data avec le bon type MIME
+                        const mimeType = restaurant.images[0].name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+                        imageSource = `data:${mimeType};base64,${restaurant.images[0].data}`;
                     }
                 }
                 
