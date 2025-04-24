@@ -848,6 +848,60 @@ ${restaurant.description}
 
         // Initialiser au chargement de la page
         document.addEventListener('DOMContentLoaded', loadUpcomingRestaurants);
+
+        async function publishChanges() {
+            try {
+                console.log('=== Début publishChanges ===');
+                
+                // Afficher le spinner
+                console.log('Tentative d\'affichage du spinner...');
+                const spinnerShown = showLoadingOverlay('Publication des modifications en cours...');
+                console.log('Spinner affiché:', spinnerShown);
+
+                // Récupérer les modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                
+                // Filtrer les changements invalides
+                const validChanges = pendingChanges.filter(change => 
+                    change && 
+                    change.type && 
+                    change.filename && 
+                    (change.type === 'delete' || (change.type !== 'delete' && change.content))
+                );
+
+                console.log('Données à publier:', validChanges);
+                
+                // Envoyer les modifications au serveur
+                const response = await fetch('/.netlify/functions/publish-changes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ changes: validChanges })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                // Vider les modifications en attente
+                localStorage.removeItem('pendingChanges');
+                
+                // Afficher une notification de succès
+                showNotification('Modifications publiées avec succès !', 'success');
+                
+                // Recharger la page pour afficher les changements
+                window.location.reload();
+            } catch (error) {
+                console.error('Erreur lors de la publication:', error);
+                showNotification('Erreur lors de la publication des modifications', 'error');
+            } finally {
+                // Masquer le spinner
+                console.log('Tentative de masquage du spinner...');
+                const spinnerHidden = hideLoadingOverlay();
+                console.log('Spinner masqué');
+            }
+        }
     </script>
 </body>
 </html> 
