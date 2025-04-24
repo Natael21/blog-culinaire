@@ -200,11 +200,49 @@
         // Fonction pour charger les restaurants à venir
         async function loadUpcomingRestaurants() {
             try {
-                const response = await fetch('/api/upcoming');
-                const restaurants = await response.json();
+                // Charger les restaurants depuis le localStorage
+                let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
                 
-                // Sauvegarder dans le localStorage
-                localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+                // Si le localStorage est vide, charger depuis les fichiers Markdown
+                if (restaurants.length === 0) {
+                    // Lire le contenu du dossier _upcoming
+                    const response = await fetch('/_upcoming/');
+                    const html = await response.text();
+                    
+                    // Parser le HTML pour extraire les liens vers les fichiers Markdown
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const links = Array.from(doc.querySelectorAll('a'))
+                        .filter(a => a.href.endsWith('.md'))
+                        .map(a => a.href.split('/').pop());
+                    
+                    // Charger chaque fichier Markdown
+                    restaurants = await Promise.all(links.map(async filename => {
+                        const fileResponse = await fetch(`/_upcoming/${filename}`);
+                        const content = await fileResponse.text();
+                        
+                        // Parser le front matter
+                        const frontMatter = content.match(/^---\n([\s\S]*?)\n---/)[1];
+                        const data = {};
+                        frontMatter.split('\n').forEach(line => {
+                            const [key, ...values] = line.split(':');
+                            if (key && values.length > 0) {
+                                data[key.trim()] = values.join(':').trim().replace(/^['"]|['"]$/g, '');
+                            }
+                        });
+                        
+                        return {
+                            id: filename.replace('.md', ''),
+                            title: data.title || '',
+                            diet: data.diet || '',
+                            description: data.description || '',
+                            order: parseInt(data.order) || 0
+                        };
+                    }));
+                    
+                    // Sauvegarder dans le localStorage
+                    localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+                }
                 
                 const container = document.getElementById('restaurants-container');
                 container.innerHTML = '';
@@ -218,6 +256,16 @@
                 });
             } catch (error) {
                 console.error('Erreur lors du chargement des restaurants:', error);
+                // En cas d'erreur, utiliser les données du localStorage si disponibles
+                const fallbackData = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
+                if (fallbackData.length > 0) {
+                    const container = document.getElementById('restaurants-container');
+                    container.innerHTML = '';
+                    fallbackData.sort((a, b) => a.order - b.order).forEach(restaurant => {
+                        const card = createRestaurantCard(restaurant);
+                        container.appendChild(card);
+                    });
+                }
             }
         }
 
