@@ -2550,7 +2550,9 @@ ${editorContent}`;
                     
                     if (imagePath) {
                         try {
-                            const imageUrl = imagePath;
+                            // Si le restaurant vient de localStorage, utiliser le chemin direct
+                            // Si le restaurant vient de GitHub, construire l'URL GitHub
+                            const imageUrl = localDraft ? imagePath : `https://raw.githubusercontent.com/Natael21/blog-culinaire/main${imagePath}`;
                             console.log('URL de l\'image:', imageUrl);
                             
                             const response = await fetch(imageUrl);
