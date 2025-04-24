@@ -2517,8 +2517,8 @@ ${editorContent}`;
                 
                 if (mainImagePath) {
                     // Nettoyer le chemin de l'image
-                    const cleanPath = mainImagePath.replace(/^\/+/, '').replace(/^images\//, '');
-                    console.log('Chemin nettoyé:', cleanPath);
+                    const cleanPath = decodeSpecialChars(mainImagePath.replace(/^\/+/, '').replace(/^images\//, ''));
+                    console.log('Chemin nettoyé et décodé:', cleanPath);
                     
                     // Encoder les caractères spéciaux
                     const encodedPath = encodeURIComponent(cleanPath);
@@ -2579,8 +2579,8 @@ ${editorContent}`;
                         console.log('\nTraitement de l\'image:', imagePath);
                         
                         // Nettoyer le chemin de l'image
-                        const cleanPath = imagePath.replace(/^\/+/, '').replace(/^images\//, '');
-                        console.log('Chemin nettoyé:', cleanPath);
+                        const cleanPath = decodeSpecialChars(imagePath.replace(/^\/+/, '').replace(/^images\//, ''));
+                        console.log('Chemin nettoyé et décodé:', cleanPath);
                         
                         // Encoder les caractères spéciaux
                         const encodedPath = encodeURIComponent(cleanPath);
@@ -2632,7 +2632,8 @@ ${editorContent}`;
 
                 // Remplir l'éditeur avec le contenu
                 console.log('\n=== REMPLISSAGE DE L\'ÉDITEUR ===');
-                editor.setHTML(content);
+                console.log('Remplissage de l\'éditeur avec le contenu');
+                editor.commands.setContent(content);
                 console.log('Contenu de l\'éditeur:', content);
                 
                 // Mettre à jour l'aperçu
@@ -2666,6 +2667,61 @@ ${editorContent}`;
                 deleteDraft(filename);
                 window.location.href = 'edit-resto.html';
             }
+        }
+
+        // Fonction pour décoder les caractères spéciaux dans les noms de fichiers
+        function decodeSpecialChars(filename) {
+            return filename
+                .replace(/%20/g, ' ')
+                .replace(/%C3%A9/g, 'é')
+                .replace(/%C3%A8/g, 'è')
+                .replace(/%C3%A0/g, 'à')
+                .replace(/%C3%A2/g, 'â')
+                .replace(/%C3%AA/g, 'ê')
+                .replace(/%C3%AE/g, 'î')
+                .replace(/%C3%B4/g, 'ô')
+                .replace(/%C3%BB/g, 'û')
+                .replace(/%C3%BC/g, 'ü')
+                .replace(/%C3%A7/g, 'ç')
+                .replace(/%C3%89/g, 'É')
+                .replace(/%C3%88/g, 'È')
+                .replace(/%C3%80/g, 'À')
+                .replace(/%C3%82/g, 'Â')
+                .replace(/%C3%8A/g, 'Ê')
+                .replace(/%C3%8E/g, 'Î')
+                .replace(/%C3%94/g, 'Ô')
+                .replace(/%C3%9B/g, 'Û')
+                .replace(/%C3%9C/g, 'Ü')
+                .replace(/%C3%87/g, 'Ç')
+                .replace(/%27/g, "'")
+                .replace(/%2C/g, ',')
+                .replace(/%2E/g, '.')
+                .replace(/%2D/g, '-')
+                .replace(/%2F/g, '/')
+                .replace(/%5F/g, '_')
+                .replace(/%28/g, '(')
+                .replace(/%29/g, ')')
+                .replace(/%26/g, '&')
+                .replace(/%23/g, '#')
+                .replace(/%24/g, '$')
+                .replace(/%25/g, '%');
+        }
+
+        function decodeSpecialChars(str) {
+            return str
+                .replace(/Ã©/g, 'é')
+                .replace(/Ã¨/g, 'è')
+                .replace(/Ãª/g, 'ê')
+                .replace(/Ã®/g, 'î')
+                .replace(/Ã´/g, 'ô')
+                .replace(/Ã¹/g, 'ù')
+                .replace(/Ã§/g, 'ç')
+                .replace(/Ã /g, 'à')
+                .replace(/Ã¯/g, 'ï')
+                .replace(/Ã¶/g, 'ö')
+                .replace(/Ã¼/g, 'ü')
+                .replace(/Ã«/g, 'ë')
+                .replace(/Ã¢/g, 'â');
         }
     </script>
 </head>

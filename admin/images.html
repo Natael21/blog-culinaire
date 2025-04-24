@@ -200,31 +200,34 @@
         // Charger les images depuis le dossier /images
         async function loadImages() {
             try {
-                const response = await fetch('/.netlify/functions/get-images');
-                if (!response.ok) throw new Error('Erreur lors du chargement des images');
-                images = await response.json();
+                const response = await fetch('/images/');
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const links = doc.querySelectorAll('a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".gif"], a[href$=".webp"]');
+                
+                images = Array.from(links).map(link => ({
+                    path: link.getAttribute('href'),
+                    name: link.textContent
+                }));
+
                 displayImages();
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur lors du chargement des images:', error);
                 showNotification('Erreur lors du chargement des images', 'error');
             }
         }
 
+        // Afficher les images dans la grille
         function displayImages() {
-            const grid = document.getElementById('imageGrid');
-            grid.innerHTML = '';
-
-            // Récupérer les images marquées pour suppression
-            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-            const imagesToDelete = pendingChanges
-                .filter(change => change.type === 'delete-image')
-                .map(change => change.path);
+            const imageGrid = document.getElementById('imageGrid');
+            imageGrid.innerHTML = '';
 
             images.forEach(image => {
                 const card = document.createElement('div');
-                card.className = `image-card ${imagesToDelete.includes(image.path) ? 'marked-for-deletion' : ''}`;
+                card.className = 'image-card';
                 card.innerHTML = `
-                    <img src="${image.path}" alt="Image">
+                    <img src="${image.path}" alt="${image.name}">
                     <div class="image-info">
                         <div class="image-path">${image.path}</div>
                         <div class="image-actions">
@@ -234,7 +237,7 @@
                         </div>
                     </div>
                 `;
-                grid.appendChild(card);
+                imageGrid.appendChild(card);
             });
         }
 
