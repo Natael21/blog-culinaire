@@ -612,21 +612,68 @@
                     if (localItem) {
                         console.log(`Restaurant ${githubItem.title} trouvé dans localStorage`);
                         const localParsedData = parseFrontMatter(localItem.content);
-                        return {
-                            ...localParsedData,
+                        
+                        // Extraire le contenu détaillé (tout ce qui est après le front matter)
+                        const contentMatch = localItem.content.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
+                        const detailedContent = contentMatch ? contentMatch[1].trim() : '';
+                        
+                        // Assurer que les champs requis existent
+                        const restaurantData = {
+                            // Champs de base
                             filename: localItem.filename,
-                            images: localItem.images || [],
+                            title: localItem.title,
                             content: localItem.content,
+                            detailedContent: detailedContent,
+                            images: localItem.images || [],
                             lastModified: localItem.lastModified,
-                            isFromLocalStorage: true
+                            isFromLocalStorage: true,
+                            
+                            // Champs du front matter avec valeurs par défaut
+                            layout: localParsedData.layout || 'restaurant',
+                            state: localParsedData.state || 'draft',
+                            date: localParsedData.date || localItem.lastModified.split('T')[0],
+                            address: localParsedData.address || '',
+                            style: localParsedData.style || '',
+                            note: localParsedData.note || '',
+                            comment: localParsedData.comment || '',
+                            image: localParsedData.image || '',
+                            // Gestion des options de régime
+                            options: localParsedData.options || [],
+                            // Assurer que les options sont toujours un tableau
+                            dietaryOptions: Array.isArray(localParsedData.options) ? localParsedData.options : 
+                                         localParsedData.options ? [localParsedData.options] : []
                         };
+                        
+                        return restaurantData;
                     }
                     
                     // Si pas dans localStorage, utiliser les données GitHub
                     console.log(`Restaurant ${githubItem.title} non trouvé dans localStorage, utilisation des données GitHub`);
+                    
+                    // Extraire le contenu détaillé de GitHub
+                    const contentMatch = githubItem.content.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
+                    const detailedContent = contentMatch ? contentMatch[1].trim() : '';
+                    
+                    // Si l'image GitHub existe, la convertir en format localStorage
+                    const images = [];
+                    if (githubItem.image && githubItem.image.startsWith('/images/')) {
+                        images.push({
+                            name: githubItem.image.split('/').pop(),
+                            path: githubItem.image,
+                            isMain: true
+                        });
+                    }
+                    
                     return {
                         ...githubItem,
-                        isFromLocalStorage: false
+                        detailedContent: detailedContent,
+                        images: images,
+                        isFromLocalStorage: false,
+                        // Gestion des options de régime pour les données GitHub
+                        options: githubItem.options || [],
+                        // Assurer que les options sont toujours un tableau
+                        dietaryOptions: Array.isArray(githubItem.options) ? githubItem.options : 
+                                     githubItem.options ? [githubItem.options] : []
                     };
                 });
 
@@ -635,14 +682,39 @@
                     if (!restaurants.some(item => item.title === localItem.title)) {
                         console.log(`Nouveau brouillon ajouté: ${localItem.title}`);
                         const localParsedData = parseFrontMatter(localItem.content);
-                        restaurants.push({
-                            ...localParsedData,
+                        
+                        // Extraire le contenu détaillé
+                        const contentMatch = localItem.content.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
+                        const detailedContent = contentMatch ? contentMatch[1].trim() : '';
+                        
+                        // Assurer que les champs requis existent
+                        const restaurantData = {
+                            // Champs de base
                             filename: localItem.filename,
-                            images: localItem.images || [],
+                            title: localItem.title,
                             content: localItem.content,
+                            detailedContent: detailedContent,
+                            images: localItem.images || [],
                             lastModified: localItem.lastModified,
-                            isFromLocalStorage: true
-                        });
+                            isFromLocalStorage: true,
+                            
+                            // Champs du front matter avec valeurs par défaut
+                            layout: localParsedData.layout || 'restaurant',
+                            state: localParsedData.state || 'draft',
+                            date: localParsedData.date || localItem.lastModified.split('T')[0],
+                            address: localParsedData.address || '',
+                            style: localParsedData.style || '',
+                            note: localParsedData.note || '',
+                            comment: localParsedData.comment || '',
+                            image: localParsedData.image || '',
+                            // Gestion des options de régime
+                            options: localParsedData.options || [],
+                            // Assurer que les options sont toujours un tableau
+                            dietaryOptions: Array.isArray(localParsedData.options) ? localParsedData.options : 
+                                         localParsedData.options ? [localParsedData.options] : []
+                        };
+                        
+                        restaurants.push(restaurantData);
                     }
                 });
                 
