@@ -690,10 +690,16 @@
                 let imageSource = null;
                 
                 // Si vient du localStorage, chercher l'image principale dans le tableau images
-                if (restaurant.isFromLocalStorage && Array.isArray(restaurant.images)) {
+                if (restaurant.isFromLocalStorage && Array.isArray(restaurant.images) && restaurant.images.length > 0) {
                     console.log('Contenu du tableau images pour:', restaurant.title, restaurant.images);
-                    const mainImage = restaurant.images.find(img => img.isMain);
-                    console.log('Image principale trouvée:', mainImage);
+                    let mainImage = restaurant.images.find(img => img.isMain);
+                    console.log('Image principale trouvée avec isMain=true:', mainImage);
+
+                    // Si non trouvée avec isMain, mais qu'il n'y a qu'une seule image, la prendre par défaut
+                    if (!mainImage && restaurant.images.length === 1) {
+                        console.log('Aucune image avec isMain=true, mais une seule image trouvée. Utilisation de celle-ci.');
+                        mainImage = restaurant.images[0];
+                    }
                     
                     if (mainImage && mainImage.data) {
                         console.log('-> Utilisation de l\'image principale du localStorage (base64)');
