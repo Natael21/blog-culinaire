@@ -101,10 +101,10 @@ exports.handler = async function(event, context) {
       // Keep files that are not being deleted
       const filePath = item.path;
       return !changes.some(change => {
-        if (change.type === 'delete') {
+        if (change.type === 'delete' || change.type === 'delete-image') {
           // Si c'est une image, utiliser le chemin tel quel
-          if (change.isImage) {
-            return filePath === change.filename;
+          if (change.type === 'delete-image' || change.isImage) {
+            return filePath === `images/${change.filename}`;
           }
           // Sinon, ajouter le préfixe _posts/
           return filePath === `_posts/${change.filename}`;
@@ -115,9 +115,9 @@ exports.handler = async function(event, context) {
 
     // Add explicit deletion entries for files to be deleted
     for (const change of changes) {
-      if (change.type === 'delete') {
+      if (change.type === 'delete' || change.type === 'delete-image') {
         newTree.push({
-          path: change.isImage ? change.filename : `_posts/${change.filename}`,
+          path: (change.type === 'delete-image' || change.isImage) ? `images/${change.filename}` : `_posts/${change.filename}`,
           mode: '100644',
           type: 'blob',
           sha: null  // This explicitly tells Git to delete the file
@@ -287,10 +287,15 @@ exports.handler = async function(event, context) {
 
     // Create a commit message that includes both additions and deletions
     const deletions = changes.filter(c => c.type === 'delete');
+    const imageDeletions = changes.filter(c => c.type === 'delete-image');
     const additions = changes.filter(c => c.type === 'create');
     let commitMessage = '';
 
-    if (deletions.length > 0 && additions.length > 0) {
+    if (imageDeletions.length > 0) {
+      commitMessage = imageDeletions.length === 1
+        ? `Suppression de l'image: ${imageDeletions[0].filename}`
+        : `Suppression de ${imageDeletions.length} images:\n${imageDeletions.map(c => `- ${c.filename}`).join('\n')}`;
+    } else if (deletions.length > 0 && additions.length > 0) {
       commitMessage = `Modifications des restaurants:\n\n`;
       if (additions.length > 0) {
         commitMessage += `Ajouts:\n${additions.map(c => `+ ${c.filename}`).join('\n')}\n\n`;
@@ -300,12 +305,12 @@ exports.handler = async function(event, context) {
       }
     } else if (deletions.length > 0) {
       commitMessage = deletions.length === 1
-        ? `Delete restaurant: ${deletions[0].filename}`
-        : `Delete ${deletions.length} restaurants:\n${deletions.map(c => `- ${c.filename}`).join('\n')}`;
+        ? `Suppression du restaurant: ${deletions[0].filename}`
+        : `Suppression de ${deletions.length} restaurants:\n${deletions.map(c => `- ${c.filename}`).join('\n')}`;
     } else if (additions.length > 0) {
       commitMessage = additions.length === 1
-        ? `Add restaurant: ${additions[0].filename}`
-        : `Add ${additions.length} restaurants:\n${additions.map(c => `+ ${c.filename}`).join('\n')}`;
+        ? `Ajout du restaurant: ${additions[0].filename}`
+        : `Ajout de ${additions.length} restaurants:\n${additions.map(c => `+ ${c.filename}`).join('\n')}`;
     }
 
     console.log('Creating commit with message:', commitMessage);
