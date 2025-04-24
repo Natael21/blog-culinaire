@@ -729,16 +729,14 @@ ${restaurant.description}
                     pendingChanges[existingIndex] = {
                         type: actionType,
                         filename: filename,
-                        content: markdownContent,
-                        timestamp: new Date().toISOString()
+                        content: markdownContent
                     };
                 } else {
                     // Ajouter une nouvelle modification
                     pendingChanges.push({
                         type: actionType,
                         filename: filename,
-                        content: markdownContent,
-                        timestamp: new Date().toISOString()
+                        content: markdownContent
                     });
                 }
 
