@@ -736,6 +736,12 @@
                         console.log('Aucune image avec isMain=true, mais une seule image trouvée. Utilisation de celle-ci.');
                         mainImage = restaurant.images[0];
                     }
+
+                    // Si on a trouvé une image, utiliser son URL
+                    if (mainImage && mainImage.url) {
+                        console.log('-> Utilisation de l\'image du localStorage:', mainImage.url);
+                        imageSource = mainImage.url;
+                    }
                 }
                 
                 // Sinon (ou si pas trouvée dans localStorage), utiliser l'image GitHub
