@@ -618,11 +618,16 @@
                         const localParsedData = parseFrontMatter(localItem.content);
                         console.log('Données parsées:', localParsedData);
                         
+                        // Vérifier la structure des images
+                        console.log('Images dans localStorage:', localItem.images);
+                        const images = Array.isArray(localItem.images) ? localItem.images : [];
+                        console.log('Images après vérification:', images);
+                        
                         const mergedItem = {
                             ...githubItem,       
                             ...localParsedData,  
                             filename: localItem.filename, 
-                            images: localItem.images || [],     
+                            images: images,     
                             content: localItem.content,   
                             lastModified: localItem.lastModified, 
                             isFromLocalStorage: true
