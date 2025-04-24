@@ -689,13 +689,24 @@
                 // Déterminer la source de l'image
                 let imageSource = null;
                 
-                if (restaurant.isFromLocalStorage && restaurant.imageContent) {
-                    console.log('-> Utilisation de l\'image du localStorage (base64)');
-                    imageSource = restaurant.imageContent;
-                } else if (restaurant.image && restaurant.image.startsWith('/images/')) {
+                // Si vient du localStorage, chercher l'image principale dans le tableau images
+                if (restaurant.isFromLocalStorage && Array.isArray(restaurant.images)) {
+                    const mainImage = restaurant.images.find(img => img.isMain);
+                    if (mainImage && mainImage.data) {
+                        console.log('-> Utilisation de l\'image principale du localStorage (base64)');
+                        // Ajouter le préfixe si nécessaire pour l'affichage
+                        imageSource = mainImage.data.startsWith('data:image') ? mainImage.data : `data:image/webp;base64,${mainImage.data}`;
+                    }
+                }
+                
+                // Sinon (ou si pas trouvée dans localStorage), utiliser l'image GitHub
+                if (!imageSource && restaurant.image && restaurant.image.startsWith('/images/')) {
                     console.log('-> Utilisation de l\'image GitHub:', restaurant.image);
                     imageSource = restaurant.image;
-                } else {
+                }
+                
+                // Si toujours pas d'image
+                if (!imageSource) {
                     console.log('-> Pas d\'image disponible');
                 }
 
