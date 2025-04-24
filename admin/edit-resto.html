@@ -2407,105 +2407,6 @@ ${editorContent}`;
                         }
                     });
                     console.log('Données du restaurant extraites:', restaurantData);
-
-                    // Remplir les notes et commentaires
-                    try {
-                        // Extraire les ratings du front matter
-                        const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
-                        if (ratingsMatch) {
-                            const ratingsYaml = ratingsMatch[0];
-                            console.log('YAML des notes trouvé:', ratingsYaml);
-
-                            // Extraire les scores et commentaires
-                            const foodScore = ratingsYaml.match(/food:\n.*score: (\d+)/)?.[1] || '5';
-                            const serviceScore = ratingsYaml.match(/service:\n.*score: (\d+)/)?.[1] || '5';
-                            const ambianceScore = ratingsYaml.match(/ambiance:\n.*score: (\d+)/)?.[1] || '5';
-                            const valueScore = ratingsYaml.match(/value:\n.*score: (\d+)/)?.[1] || '5';
-                            const originalityScore = ratingsYaml.match(/originality:\n.*score: (\d+)/)?.[1] || '5';
-                            const overallScore = ratingsYaml.match(/overall:\n.*score: (\d+)/)?.[1] || '5';
-
-                            const foodComment = ratingsYaml.match(/food:[\s\S]*?comment: '([^']*)'/)?.[ 1] || '';
-                            const serviceComment = ratingsYaml.match(/service:[\s\S]*?comment: '([^']*)'/)?.[ 1] || '';
-                            const ambianceComment = ratingsYaml.match(/ambiance:[\s\S]*?comment: '([^']*)'/)?.[ 1] || '';
-                            const valueComment = ratingsYaml.match(/value:[\s\S]*?comment: '([^']*)'/)?.[ 1] || '';
-                            const originalityComment = ratingsYaml.match(/originality:[\s\S]*?comment: '([^']*)'/)?.[ 1] || '';
-                            const overallComment = ratingsYaml.match(/overall:[\s\S]*?comment: '([^']*)'/)?.[ 1] || '';
-
-                            // Remplir les scores
-                            document.getElementById('foodScore').value = foodScore;
-                            document.getElementById('serviceScore').value = serviceScore;
-                            document.getElementById('ambianceScore').value = ambianceScore;
-                            document.getElementById('valueScore').value = valueScore;
-                            document.getElementById('originalityScore').value = originalityScore;
-                            document.getElementById('overallExperienceScore').value = overallScore;
-
-                            // Remplir les commentaires
-                            document.getElementById('foodComment').value = foodComment;
-                            document.getElementById('serviceComment').value = serviceComment;
-                            document.getElementById('ambianceComment').value = ambianceComment;
-                            document.getElementById('valueComment').value = valueComment;
-                            document.getElementById('originalityComment').value = originalityComment;
-                            document.getElementById('overallExperienceComment').value = overallComment;
-
-                            console.log('Notes et commentaires extraits:', {
-                                foodScore, foodComment,
-                                serviceScore, serviceComment,
-                                ambianceScore, ambianceComment,
-                                valueScore, valueComment,
-                                originalityScore, originalityComment,
-                                overallScore, overallComment
-                            });
-                        }
-                    } catch (e) {
-                        console.error('Erreur lors du remplissage des notes:', e);
-                    }
-
-                    // Charger l'image principale depuis GitHub si elle existe
-                    if (restaurantData.image) {
-                        const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
-                        if (imagePath) {
-                            try {
-                                const imageUrl = `https://raw.githubusercontent.com/${repo}/main${imagePath}`;
-                                console.log('Tentative de chargement de l\'image principale:', imageUrl);
-                                const response = await fetch(imageUrl);
-                                if (response.ok) {
-                                    const blob = await response.blob();
-                                    const file = new File([blob], imagePath.split('/').pop(), { type: 'image/jpeg' });
-                                    mainImageFile = file;
-                                    handleMainImageUpload(file);
-                                }
-                            } catch (error) {
-                                console.error('Erreur lors du chargement de l\'image principale:', error);
-                            }
-                        }
-                    }
-
-                    // Charger les images de la galerie depuis GitHub
-                    const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
-                    if (galleryMatches) {
-                        const galleryYaml = galleryMatches[0];
-                        const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
-                            ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
-
-                        console.log('Chemins des images de la galerie trouvés:', galleryPaths);
-
-                        galleryImageFiles = [];
-                        for (const imagePath of galleryPaths) {
-                            try {
-                                const imageUrl = `https://raw.githubusercontent.com/${repo}/main${imagePath}`;
-                                console.log('Tentative de chargement d\'image de galerie:', imageUrl);
-                                const response = await fetch(imageUrl);
-                                if (response.ok) {
-                                    const blob = await response.blob();
-                                    const file = new File([blob], imagePath.split('/').pop(), { type: 'image/jpeg' });
-                                    galleryImageFiles.push(file);
-                                }
-                            } catch (error) {
-                                console.error('Erreur lors du chargement d\'une image de galerie:', error);
-                            }
-                        }
-                        updateGalleryPreview();
-                    }
                 } else {
                     console.log('Tentative de récupération depuis GitHub');
                     const repo = 'Natael21/blog-culinaire';
@@ -2536,7 +2437,7 @@ ${editorContent}`;
                     console.log('Contenu markdown décodé:', markdown);
                     
                     // Extraire le front matter et le contenu
-                    const frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
+                    frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
 
                     // Parser le front matter
@@ -2565,8 +2466,112 @@ ${editorContent}`;
                 document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
                 document.getElementById('vegan').checked = diets.includes('vegan-friendly');
 
+                // Extraire et remplir les notes et commentaires
+                console.log('Extraction des notes et commentaires');
+                const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
+                if (ratingsMatch) {
+                    const ratingsYaml = ratingsMatch[0];
+                    console.log('YAML des notes trouvé:', ratingsYaml);
+
+                    // Extraire les scores et commentaires
+                    const foodScore = ratingsYaml.match(/food:\n.*score: (\d+)/)?.[1] || '5';
+                    const serviceScore = ratingsYaml.match(/service:\n.*score: (\d+)/)?.[1] || '5';
+                    const ambianceScore = ratingsYaml.match(/ambiance:\n.*score: (\d+)/)?.[1] || '5';
+                    const valueScore = ratingsYaml.match(/value:\n.*score: (\d+)/)?.[1] || '5';
+                    const originalityScore = ratingsYaml.match(/originality:\n.*score: (\d+)/)?.[1] || '5';
+                    const overallScore = ratingsYaml.match(/overall:\n.*score: (\d+)/)?.[1] || '5';
+
+                    const foodComment = ratingsYaml.match(/food:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
+                    const serviceComment = ratingsYaml.match(/service:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
+                    const ambianceComment = ratingsYaml.match(/ambiance:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
+                    const valueComment = ratingsYaml.match(/value:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
+                    const originalityComment = ratingsYaml.match(/originality:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
+                    const overallComment = ratingsYaml.match(/overall:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
+
+                    console.log('Notes et commentaires extraits:', {
+                        foodScore, foodComment,
+                        serviceScore, serviceComment,
+                        ambianceScore, ambianceComment,
+                        valueScore, valueComment,
+                        originalityScore, originalityComment,
+                        overallScore, overallComment
+                    });
+
+                    // Remplir les scores
+                    document.getElementById('foodScore').value = foodScore;
+                    document.getElementById('serviceScore').value = serviceScore;
+                    document.getElementById('ambianceScore').value = ambianceScore;
+                    document.getElementById('valueScore').value = valueScore;
+                    document.getElementById('originalityScore').value = originalityScore;
+                    document.getElementById('overallExperienceScore').value = overallScore;
+
+                    // Remplir les commentaires
+                    document.getElementById('foodComment').value = foodComment;
+                    document.getElementById('serviceComment').value = serviceComment;
+                    document.getElementById('ambianceComment').value = ambianceComment;
+                    document.getElementById('valueComment').value = valueComment;
+                    document.getElementById('originalityComment').value = originalityComment;
+                    document.getElementById('overallExperienceComment').value = overallComment;
+
+                    // Mettre à jour les affichages des valeurs
+                    document.querySelectorAll('.rating-value').forEach(el => {
+                        const input = el.previousElementSibling;
+                        if (input) {
+                            el.textContent = input.value;
+                        }
+                    });
+                }
+
+                // Charger l'image principale depuis GitHub si elle existe
+                if (restaurantData.image) {
+                    const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
+                    if (imagePath) {
+                        try {
+                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${imagePath}`;
+                            console.log('Tentative de chargement de l\'image principale:', imageUrl);
+                            const response = await fetch(imageUrl);
+                            if (response.ok) {
+                                const blob = await response.blob();
+                                const file = new File([blob], imagePath.split('/').pop(), { type: 'image/jpeg' });
+                                mainImageFile = file;
+                                handleMainImageUpload(file);
+                            }
+                        } catch (error) {
+                            console.error('Erreur lors du chargement de l\'image principale:', error);
+                        }
+                    }
+                }
+
+                // Charger les images de la galerie depuis GitHub
+                const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
+                if (galleryMatches) {
+                    const galleryYaml = galleryMatches[0];
+                    const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
+                        ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
+
+                    console.log('Chemins des images de la galerie trouvés:', galleryPaths);
+
+                    galleryImageFiles = [];
+                    for (const imagePath of galleryPaths) {
+                        try {
+                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${imagePath}`;
+                            console.log('Tentative de chargement d\'image de galerie:', imageUrl);
+                            const response = await fetch(imageUrl);
+                            if (response.ok) {
+                                const blob = await response.blob();
+                                const file = new File([blob], imagePath.split('/').pop(), { type: 'image/jpeg' });
+                                galleryImageFiles.push(file);
+                            }
+                        } catch (error) {
+                            console.error('Erreur lors du chargement d\'une image de galerie:', error);
+                        }
+                    }
+                    updateGalleryPreview();
+                }
+
                 // Remplir l'éditeur avec le contenu
                 if (editor && editor.commands) {
+                    console.log('Remplissage de l\'éditeur avec le contenu');
                     editor.commands.setContent(content || '');
                 } else {
                     console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
@@ -2575,6 +2580,7 @@ ${editorContent}`;
                 }
 
                 // Mettre à jour l'aperçu
+                console.log('Mise à jour de l\'aperçu');
                 updateMarkdownPreview();
                 console.log('=== FIN DU CHARGEMENT DU RESTAURANT ===');
 
