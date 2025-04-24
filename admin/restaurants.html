@@ -741,7 +741,7 @@
                     }
                 }
                 
-                // Sinon (ou si pas trouvée dans localStorage), utiliser l'image GitHub
+                // Si aucune image n'a été trouvée dans le localStorage, essayer l'image GitHub
                 if (!imageSource && restaurant.image && restaurant.image.startsWith('/images/')) {
                     console.log('-> Utilisation de l\'image GitHub:', restaurant.image);
                     imageSource = restaurant.image;
