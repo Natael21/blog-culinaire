@@ -234,7 +234,13 @@
                             const content = await fileResponse.text();
                             
                             // Parser le front matter
-                            const frontMatter = content.match(/^---\n([\s\S]*?)\n---/)[1];
+                            const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+                            if (!frontMatterMatch) {
+                                console.warn(`Aucun front matter trouvé dans ${filename}`);
+                                return null;
+                            }
+                            
+                            const frontMatter = frontMatterMatch[1];
                             const data = {};
                             frontMatter.split('\n').forEach(line => {
                                 const [key, ...values] = line.split(':');
@@ -243,12 +249,20 @@
                                 }
                             });
                             
+                            // Vérifier que les données requises sont présentes
+                            if (!data.title) {
+                                console.warn(`Titre manquant dans ${filename}`);
+                                return null;
+                            }
+                            
                             return {
                                 id: filename.replace('.md', ''),
-                                title: data.title || '',
+                                title: data.title,
                                 diet: data.diet || '',
                                 description: data.description || '',
-                                order: parseInt(data.order) || 0
+                                order: parseInt(data.order) || 0,
+                                restaurant_type: data.restaurant_type || '',
+                                location: data.location || ''
                             };
                         } catch (error) {
                             console.error(`Erreur lors du chargement de ${filename}:`, error);
