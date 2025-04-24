@@ -66,11 +66,9 @@ exports.handler = async function(event, context) {
                 return {
                     id: file.name.replace('.md', ''),
                     title: metadata.title || '',
-                    diet: metadata.diet || '',
+                    style: metadata.restaurant_type || '',
                     description: metadata.description || '',
-                    order: parseInt(metadata.order) || 0,
-                    restaurant_type: metadata.restaurant_type || '',
-                    location: metadata.location || ''
+                    address: metadata.location || ''
                 };
 
             } catch (error) {

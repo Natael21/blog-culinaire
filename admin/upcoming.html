@@ -247,6 +247,40 @@
             background: linear-gradient(135deg, #3498db, #2980b9);
         }
         
+        .address-suggestions {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border: 2px solid #eee;
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: -2px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .address-suggestion {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #eee;
+        }
+
+        .address-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .address-suggestion:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .address-suggestion.selected {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -310,6 +344,158 @@
                 });
             }
             return data;
+        }
+
+        // Variables globales pour l'autocomplétion d'adresse
+        let debounceTimer;
+        let selectedIndex = -1;
+        let suggestions = [];
+
+        // Fonction pour rechercher une adresse
+        async function searchAddress(query) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erreur lors de la recherche d\'adresse:', error);
+                return [];
+            }
+        }
+
+        // Fonction pour initialiser l'autocomplétion d'adresse
+        function initializeAddressAutocomplete() {
+            const inputs = document.querySelectorAll('[data-field="address"]');
+            inputs.forEach(input => {
+                const suggestionsContainer = document.createElement('div');
+                suggestionsContainer.className = 'address-suggestions';
+                input.parentNode.appendChild(suggestionsContainer);
+
+                input.addEventListener('input', async function() {
+                    clearTimeout(debounceTimer);
+                    const query = this.value.trim();
+
+                    if (query.length < 3) {
+                        suggestionsContainer.style.display = 'none';
+                        return;
+                    }
+
+                    debounceTimer = setTimeout(async () => {
+                        suggestions = await searchAddress(query);
+                        displaySuggestions(suggestions, suggestionsContainer);
+                    }, 300);
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (!['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
+                    
+                    const suggestionElements = suggestionsContainer.getElementsByClassName('address-suggestion');
+                    
+                    if (e.key === 'Escape') {
+                        suggestionsContainer.style.display = 'none';
+                        selectedIndex = -1;
+                        return;
+                    }
+
+                    if (e.key === 'Enter' && selectedIndex >= 0) {
+                        e.preventDefault();
+                        selectAddress(suggestions[selectedIndex], input, suggestionsContainer);
+                        return;
+                    }
+
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        selectedIndex = Math.max(selectedIndex - 1, 0);
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        selectedIndex = Math.min(selectedIndex + 1, suggestionElements.length - 1);
+                    }
+
+                    Array.from(suggestionElements).forEach((el, index) => {
+                        el.classList.toggle('selected', index === selectedIndex);
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Fonction pour afficher les suggestions d'adresse
+        function displaySuggestions(suggestions, container) {
+            if (!suggestions.length) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = '';
+            suggestions.forEach((suggestion, index) => {
+                const div = document.createElement('div');
+                div.className = 'address-suggestion';
+                div.textContent = suggestion.display_name;
+                
+                div.addEventListener('click', () => {
+                    selectAddress(suggestion, container.previousElementSibling, container);
+                });
+
+                div.addEventListener('mouseenter', () => {
+                    selectedIndex = index;
+                    Array.from(container.children).forEach((el, i) => {
+                        el.classList.toggle('selected', i === index);
+                    });
+                });
+
+                container.appendChild(div);
+            });
+
+            container.style.display = 'block';
+        }
+
+        // Fonction pour sélectionner une adresse
+        function selectAddress(suggestion, input, container) {
+            let formattedAddress = '';
+            
+            if (suggestion.address) {
+                const addr = suggestion.address;
+                const components = [];
+
+                if (addr.house_number) {
+                    components.push(addr.house_number);
+                }
+
+                if (addr.road) {
+                    components.push(addr.road);
+                }
+
+                if (addr.city || addr.town || addr.village) {
+                    components.push(addr.city || addr.town || addr.village);
+                }
+
+                if (addr.state) {
+                    components.push(addr.state);
+                }
+
+                if (addr.postcode) {
+                    components.push(addr.postcode);
+                }
+
+                if (addr.country) {
+                    components.push(addr.country);
+                }
+
+                formattedAddress = components.join(', ');
+            } else {
+                formattedAddress = suggestion.display_name.split(',').slice(0, 4).join(',');
+            }
+
+            input.value = formattedAddress;
+            container.style.display = 'none';
+            selectedIndex = -1;
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
         }
 
         // Fonction pour charger les restaurants à venir
@@ -389,7 +575,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Style de cuisine</label>
-                    <input type="text" class="form-control" value="${restaurant.style || ''}" data-field="style">
+                    <select class="form-control" data-field="style">
+                        <option value="">Sélectionner un style</option>
+                        <option value="Asiatique" ${restaurant.style === 'Asiatique' ? 'selected' : ''}>Asiatique</option>
+                        <option value="Américain" ${restaurant.style === 'Américain' ? 'selected' : ''}>Américain</option>
+                        <option value="Moyen-Orient" ${restaurant.style === 'Moyen-Orient' ? 'selected' : ''}>Moyen-Orient</option>
+                        <option value="Mexicain & Latino" ${restaurant.style === 'Mexicain & Latino' ? 'selected' : ''}>Mexicain & Latino</option>
+                        <option value="Bistro & Café" ${restaurant.style === 'Bistro & Café' ? 'selected' : ''}>Bistro & Café</option>
+                        <option value="Pub & Microbrasserie" ${restaurant.style === 'Pub & Microbrasserie' ? 'selected' : ''}>Pub & Microbrasserie</option>
+                        <option value="Italien" ${restaurant.style === 'Italien' ? 'selected' : ''}>Italien</option>
+                        <option value="Indien & Épicé" ${restaurant.style === 'Indien & Épicé' ? 'selected' : ''}>Indien & Épicé</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Description</label>
@@ -397,7 +593,10 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Adresse</label>
-                    <input type="text" class="form-control" value="${restaurant.address || ''}" data-field="address">
+                    <div class="input-wrapper">
+                        <input type="text" class="form-control" value="${restaurant.address || ''}" data-field="address" placeholder="Commencez à taper une adresse...">
+                        <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
+                    </div>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="save-button" onclick="saveRestaurant('${restaurant.id}')">
@@ -501,8 +700,11 @@
             toggleRestaurantCard(card);
         }
 
-        // Charger les restaurants au chargement de la page
-        document.addEventListener('DOMContentLoaded', loadUpcomingRestaurants);
+        // Initialiser l'autocomplétion d'adresse au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUpcomingRestaurants();
+            initializeAddressAutocomplete();
+        });
     </script>
 </body>
 </html> 
