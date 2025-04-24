@@ -575,7 +575,7 @@
                 const localStorageData = JSON.parse(localStorage.getItem('drafts') || '[]');
                 console.log('Données brutes du localStorage:', localStorageData);
 
-                // Créer un Map pour un accès rapide aux données du localStorage
+                // Créer un Map pour un accès rapide aux données du localStorage, en utilisant le titre comme clé
                 const localStorageMap = new Map(
                     localStorageData.map(item => {
                         console.log('Item du localStorage:', item);
@@ -584,23 +584,23 @@
                             imageContent: item.imageContent ? 'Présent' : 'Absent',
                             images: item.images
                         });
-                        return [item.filename, item];
+                        return [item.title, item];
                     })
                 );
                 
                 // Fusionner les données en privilégiant le localStorage
                 const mergedData = githubData.map(githubItem => {
-                    const localItem = localStorageMap.get(githubItem.filename);
+                    const localItem = localStorageMap.get(githubItem.title);
                     if (localItem) {
-                        console.log(`Fusion pour ${githubItem.filename}:`, {
+                        console.log(`Restaurant trouvé dans localStorage par titre: ${githubItem.title}`, {
                             github: {
-                                image: githubItem.image,
-                                imageContent: githubItem.imageContent ? 'Présent' : 'Absent'
+                                filename: githubItem.filename,
+                                image: githubItem.image
                             },
                             local: {
+                                filename: localItem.filename,
                                 image: localItem.image,
-                                imageContent: localItem.imageContent ? 'Présent' : 'Absent',
-                                images: localItem.images
+                                imageContent: localItem.imageContent ? 'Présent' : 'Absent'
                             }
                         });
                         return {
@@ -617,8 +617,9 @@
 
                 // Ajouter les nouveaux brouillons qui n'existent pas dans GitHub
                 localStorageData.forEach(localItem => {
-                    if (!mergedData.some(item => item.filename === localItem.filename)) {
-                        console.log(`Nouveau brouillon ajouté: ${localItem.filename}`, {
+                    if (!mergedData.some(item => item.title === localItem.title)) {
+                        console.log(`Nouveau brouillon ajouté: ${localItem.title}`, {
+                            filename: localItem.filename,
                             image: localItem.image,
                             imageContent: localItem.imageContent ? 'Présent' : 'Absent',
                             images: localItem.images
