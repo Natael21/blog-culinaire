@@ -1217,6 +1217,8 @@
 
         // Initialiser TipTap
         let editor;
+        let isEditorReady = false; // Flag pour suivre l'état de l'éditeur
+
         window.addEventListener('load', () => {
             // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
             const saveButton = document.getElementById('saveButton');
@@ -1343,6 +1345,7 @@
                 console.error('Formulaire non trouvé !');
             }
 
+            // Initialiser l'éditeur
             editor = new Editor({
                 element: document.querySelector('#editor'),
                 extensions: [
@@ -1358,14 +1361,24 @@
                 content: '',
                 editable: true,
                 onReady: () => {
-                    // Charger le contenu en attente s'il y en a
+                    console.log("Éditeur TipTap prêt.");
+                    isEditorReady = true;
+                    // Charger le contenu en attente s'il y en a (mis par loadDraft)
                     if (window.pendingEditorContent) {
+                        console.log("Chargement du contenu éditeur en attente.");
                         editor.commands.setContent(window.pendingEditorContent);
                         delete window.pendingEditorContent;
+                        // Mettre à jour l'aperçu une fois le contenu chargé
+                        updateMarkdownPreview(); 
                     }
+                    // Déclencher un événement personnalisé pour indiquer que l'éditeur est prêt
+                    window.dispatchEvent(new CustomEvent('editorReady'));
                 },
                 onUpdate: ({ editor }) => {
-                    updateMarkdownPreview();
+                    // Mettre à jour l'aperçu seulement si l'éditeur est prêt
+                    if (isEditorReady) {
+                        updateMarkdownPreview();
+                    }
                 }
             });
 
@@ -1631,16 +1644,12 @@
                 const container = document.getElementById('mainImagePreview');
                 container.innerHTML = '';
                 createImagePreview(file, container, true);
-                
-                // Supprimer l'état d'erreur et le message
                 const mainImageZone = document.getElementById('mainImageZone');
                 mainImageZone.classList.remove('show-error');
                 const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
-                if (errorDiv) {
-                    errorDiv.remove();
-                }
-                
-                updateMarkdownPreview();
+                if (errorDiv) errorDiv.remove();
+                // Mettre à jour l'aperçu seulement si l'éditeur est prêt
+                if (isEditorReady) updateMarkdownPreview();
             }
         }
 
@@ -1969,161 +1978,62 @@ ${editorContent}`;
         }
 
         function updateMarkdownPreview() {
+            if (!isEditorReady || !editor) {
+                console.warn("Tentative de mise à jour de l'aperçu avant que l'éditeur ne soit prêt.");
+                return; // Ne rien faire si l'éditeur n'est pas prêt
+            }
             const preview = document.querySelector('.restaurant-preview');
-            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
-            
-            // Récupérer les valeurs du formulaire
+            // ... (le reste de la fonction updateMarkdownPreview)
             const title = document.getElementById('title').value || 'Nom du restaurant';
             const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
             const description = document.getElementById('description').value || 'Description du restaurant';
             const address = document.getElementById('address').value || 'Adresse du restaurant';
             const style = document.getElementById('style').value || 'Style de cuisine';
             const price = document.getElementById('price').value || 'Gamme de prix';
-            
-            // Récupérer les notes
             const foodScore = document.getElementById('foodScore').value || '5';
             const serviceScore = document.getElementById('serviceScore').value || '5';
             const ambianceScore = document.getElementById('ambianceScore').value || '5';
             const valueScore = document.getElementById('valueScore').value || '5';
             const originalityScore = document.getElementById('originalityScore').value || '5';
             const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
-            
-            // Récupérer les commentaires
             const foodComment = document.getElementById('foodComment').value || '';
             const serviceComment = document.getElementById('serviceComment').value || '';
             const ambianceComment = document.getElementById('ambianceComment').value || '';
             const valueComment = document.getElementById('valueComment').value || '';
             const originalityComment = document.getElementById('originalityComment').value || '';
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+            const editorContent = editor.getHTML() || ''; // Maintenant sûr d'appeler getHTML
             
-            // Récupérer le contenu de l'éditeur
-            const editorContent = editor.getHTML() || '';
-            
-            // Créer le HTML de l'aperçu
             preview.innerHTML = `
                 <div class="restaurant-header">
                     <h1 class="restaurant-title">${title}</h1>
                     <div class="restaurant-meta">
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${address}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-star"></i>
-                            ${calculateOverallRating()}/10
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-utensils"></i>
-                            ${style}
-                        </span>
-                        ${document.getElementById('vegetarian').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-leaf"></i>
-                                Options végétariennes
-                            </span>
-                        ` : ''}
-                        ${document.getElementById('vegan').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-seedling"></i>
-                                Options végétaliennes
-                            </span>
-                        ` : ''}
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-calendar"></i>
-                            ${date}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-tag"></i>
-                            ${price}
-                        </span>
+                        <span class="restaurant-meta-item"><i class="fas fa-map-marker-alt"></i> ${address}</span>
+                        <span class="restaurant-meta-item"><i class="fas fa-star"></i> ${calculateOverallRating()}/10</span>
+                        <span class="restaurant-meta-item"><i class="fas fa-utensils"></i> ${style}</span>
+                        ${document.getElementById('vegetarian').checked ? `<span class="restaurant-meta-item"><i class="fas fa-leaf"></i> Options végétariennes</span>` : ''}
+                        ${document.getElementById('vegan').checked ? `<span class="restaurant-meta-item"><i class="fas fa-seedling"></i> Options végétaliennes</span>` : ''}
+                        <span class="restaurant-meta-item"><i class="fas fa-calendar"></i> ${date}</span>
+                        <span class="restaurant-meta-item"><i class="fas fa-tag"></i> ${price}</span>
                     </div>
                 </div>
-                
                 <div class="restaurant-image">
-                    ${mainImageFile ? 
-                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
-                        `<i class="fas fa-image"></i>`
-                    }
+                    ${mainImageFile ? `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : `<i class="fas fa-image"></i>`}
                 </div>
-                
-                <div class="restaurant-description">
-                    ${description}
-                </div>
-                
-                <div class="restaurant-content">
-                    ${editorContent}
-                </div>
-                
+                <div class="restaurant-description">${description}</div>
+                <div class="restaurant-content">${editorContent}</div>
                 <div class="restaurant-ratings">
                     <h2>Pourquoi cette note ?</h2>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Qualité de la nourriture</span>
-                            <span class="rating-score">${foodScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
-                        <div class="rating-comment">${foodComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Service</span>
-                            <span class="rating-score">${serviceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
-                        <div class="rating-comment">${serviceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Ambiance</span>
-                            <span class="rating-score">${ambianceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
-                        <div class="rating-comment">${ambianceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Rapport qualité/prix</span>
-                            <span class="rating-score">${valueScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
-                        <div class="rating-comment">${valueComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Originalité / Concept</span>
-                            <span class="rating-score">${originalityScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
-                        <div class="rating-comment">${originalityComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Expérience globale</span>
-                            <span class="rating-score">${overallExperienceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Facteur "wow"</div>
-                        <div class="rating-comment">${overallExperienceComment}</div>
-                    </div>
+                    <div class="rating-category"><div class="rating-header"><span class="rating-title">Qualité de la nourriture</span><span class="rating-score">${foodScore}/10</span></div><div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div><div class="rating-comment">${foodComment}</div></div>
+                    <div class="rating-category"><div class="rating-header"><span class="rating-title">Service</span><span class="rating-score">${serviceScore}/10</span></div><div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div><div class="rating-comment">${serviceComment}</div></div>
+                    <div class="rating-category"><div class="rating-header"><span class="rating-title">Ambiance</span><span class="rating-score">${ambianceScore}/10</span></div><div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div><div class="rating-comment">${ambianceComment}</div></div>
+                    <div class="rating-category"><div class="rating-header"><span class="rating-title">Rapport qualité/prix</span><span class="rating-score">${valueScore}/10</span></div><div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div><div class="rating-comment">${valueComment}</div></div>
+                    <div class="rating-category"><div class="rating-header"><span class="rating-title">Originalité / Concept</span><span class="rating-score">${originalityScore}/10</span></div><div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div><div class="rating-comment">${originalityComment}</div></div>
+                    <div class="rating-category"><div class="rating-header"><span class="rating-title">Expérience globale</span><span class="rating-score">${overallExperienceScore}/10</span></div><div class="rating-criteria">Facteur "wow"</div><div class="rating-comment">${overallExperienceComment}</div></div>
                 </div>
-                
                 <h2 class="gallery-title">Galerie photos</h2>
                 <div class="restaurant-gallery">
-                    ${galleryImageFiles.length > 0 ? 
-                        galleryImageFiles.map(file => `
-                            <div class="gallery-image">
-                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
-                            </div>
-                        `).join('') : 
-                        `<div class="gallery-image">
-                            <i class="fas fa-images"></i>
-                        </div>`
-                    }
+                    ${galleryImageFiles.length > 0 ? galleryImageFiles.map(file => `<div class="gallery-image"><img src="${URL.createObjectURL(file)}" alt="Galerie"></div>`).join('') : `<div class="gallery-image"><i class="fas fa-images"></i></div>`}
                 </div>
             `;
         }
@@ -2162,6 +2072,8 @@ ${editorContent}`;
             const container = document.getElementById('galleryPreview');
             container.innerHTML = '';
             galleryImageFiles.forEach(file => createImagePreview(file, container));
+            // Mettre à jour l'aperçu seulement si l'éditeur est prêt
+            if (isEditorReady) updateMarkdownPreview();
         }
 
         function showLoadingState(button) {
@@ -2382,265 +2294,130 @@ ${editorContent}`;
                 console.log('Fichier à charger:', filename);
                 
                 const repo = 'Natael21/blog-culinaire';
-                
-                // D'abord vérifier dans le localStorage
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                console.log('Drafts dans localStorage:', drafts);
                 const localDraft = drafts.find(d => d.filename === filename);
                 console.log('Draft local trouvé:', localDraft);
 
-                let markdown;
-                let restaurantData;
-                let content;
-                let frontMatter;
+                let markdown, restaurantData, content, frontMatter;
+                let imagesToLoad = []; // Stocker les images à charger (local ou URL)
+                let source = localDraft ? 'localStorage' : 'github';
 
-                if (localDraft) {
+                // --- Étape 1: Obtenir Markdown et parser Front Matter --- 
+                if (source === 'localStorage') {
                     console.log('Utilisation des données du localStorage');
                     markdown = localDraft.content;
-                    frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
-                    content = markdown.split('---')[2].trim();
-
-                    // Parser le front matter
-                    restaurantData = {};
-                    frontMatter.split('\n').forEach(line => {
-                        const [key, ...value] = line.split(':');
-                        if (key && value) {
-                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
-                        }
-                    });
-                    console.log('Données du restaurant extraites:', restaurantData);
+                    const match = markdown.match(/^---\s*([\s\S]*?)\s*---/);
+                    frontMatter = (match && match[1]) ? match[1] : '';
+                    content = (match && match[1]) ? markdown.substring(match[0].length).trim() : markdown.trim();
+                    restaurantData = parseFrontMatterYAML(frontMatter);
+                    console.log('Données extraites (local):', restaurantData);
+                    // Préparer les images locales pour chargement
+                    if (Array.isArray(localDraft.images)) {
+                        imagesToLoad = localDraft.images.map(img => ({ ...img, source: 'local' }));
+                    }
                 } else {
                     console.log('Tentative de récupération depuis GitHub');
                     const path = `_posts/${filename}`;
                     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-                    console.log('URL de la requête:', url);
-
                     const response = await fetch(url);
-                    console.log('Statut de la réponse:', response.status);
-                    
-                    if (!response.ok) {
-                        console.error('Erreur lors de la récupération du fichier:', {
-                            status: response.status,
-                            statusText: response.statusText
-                        });
-                        throw new Error('Fichier non trouvé');
-                    }
-
-                    const data = await response.json();
-                    console.log('Données reçues:', {
-                        type: data.type,
-                        size: data.size,
-                        name: data.name
-                    });
-                    markdown = decodeURIComponent(escape(atob(data.content)));
-                    console.log('Contenu markdown décodé:', markdown);
-                    
-                    frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
-                    content = markdown.split('---')[2].trim();
-
-                    // Parser le front matter
-                    restaurantData = {};
-                    frontMatter.split('\n').forEach(line => {
-                        const [key, ...value] = line.split(':');
-                        if (key && value) {
-                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
-                        }
-                    });
-                    console.log('Données du restaurant extraites:', restaurantData);
+                    if (!response.ok) throw new Error('Fichier non trouvé sur GitHub');
+                    const githubFileData = await response.json();
+                    markdown = decodeURIComponent(escape(atob(githubFileData.content)));
+                    const match = markdown.match(/^---\s*([\s\S]*?)\s*---/);
+                    frontMatter = (match && match[1]) ? match[1] : '';
+                    content = (match && match[1]) ? markdown.substring(match[0].length).trim() : markdown.trim();
+                    restaurantData = parseFrontMatterYAML(frontMatter);
+                     console.log('Données extraites (GitHub):', restaurantData);
+                     // Préparer les images GitHub pour chargement
+                     if (restaurantData.image) {
+                         imagesToLoad.push({ url: restaurantData.image, isMain: true, source: 'github' });
+                     }
+                    const galleryPaths = extractGalleryPathsYAML(frontMatter);
+                    galleryPaths.forEach(p => imagesToLoad.push({ url: p, isMain: false, source: 'github' }));
                 }
 
-                // Remplir les champs du formulaire
-                console.log('Remplissage des champs du formulaire');
-                document.getElementById('state').value = restaurantData.state || 'draft';
-                document.getElementById('title').value = restaurantData.title || '';
-                document.getElementById('date').value = restaurantData.date || '';
-                document.getElementById('description').value = restaurantData.description || '';
-                document.getElementById('address').value = restaurantData.address || '';
-                document.getElementById('style').value = restaurantData.style || '';
-                
-                // Corriger la gamme de prix
-                const priceMap = {
-                    'budget': '$ (0-20$)',
-                    'moyen': '$$ (20-40$)',
-                    'haut': '$$$ (40$ et +)'
-                };
-                const priceValue = priceMap[restaurantData.price] || restaurantData.price;
-                console.log('Gamme de prix:', { original: restaurantData.price, mapped: priceValue });
-                document.getElementById('price').value = priceValue;
-                
-                // Remplir les options alimentaires
-                const diets = (restaurantData.diet || '').split(',');
-                console.log('Options alimentaires:', diets);
-                document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
-                document.getElementById('vegan').checked = diets.includes('vegan-friendly');
+                // --- Étape 2: Remplir les champs simples du formulaire --- 
+                console.log('Remplissage des champs du formulaire (hors éditeur/images)');
+                fillBasicFields(restaurantData); // Fonction dédiée pour clarté
+                const ratingsData = parseRatingsYAML(frontMatter);
+                fillRatingsFields(ratingsData);
 
-                // Extraire et remplir les notes et commentaires
-                console.log('Extraction des notes et commentaires');
-                const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
-                if (ratingsMatch) {
-                    const ratingsYaml = ratingsMatch[0];
-                    console.log('YAML des notes trouvé:', ratingsYaml);
+                // --- Étape 3: Attendre l'éditeur et définir le contenu --- 
+                console.log('Attente de la préparation de l\'éditeur...');
+                await ensureEditorReady();
+                console.log('Éditeur prêt. Définition du contenu...');
+                 // Convertir le markdown en HTML pour l'éditeur
+                const htmlContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>');
+                const finalHtmlContent = htmlContent.trim() ? (htmlContent.startsWith('<p>') ? htmlContent : `<p>${htmlContent}</p>`) : '';
+                editor.commands.setContent(finalHtmlContent);
+                 console.log('Contenu de l\'éditeur défini.');
 
-                    // Extraire les scores et commentaires avec une meilleure regex
-                    const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const serviceScore = ratingsYaml.match(/service:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const ambianceScore = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const valueScore = ratingsYaml.match(/value:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
-                    const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
-
-                    // Améliorer l'extraction des commentaires
-                    const extractComment = (yaml, category) => {
-                        const match = yaml.match(new RegExp(`${category}:[\\s\\S]*?comment:\\s*["']([^"']*)["']`));
-                        console.log(`Extraction du commentaire ${category}:`, match);
-                        return match ? match[1] : '';
-                    };
-
-                    const foodComment = extractComment(ratingsYaml, 'food');
-                    const serviceComment = extractComment(ratingsYaml, 'service');
-                    const ambianceComment = extractComment(ratingsYaml, 'ambiance');
-                    const valueComment = extractComment(ratingsYaml, 'value');
-                    const originalityComment = extractComment(ratingsYaml, 'originality');
-                    const overallComment = extractComment(ratingsYaml, 'overall');
-
-                    console.log('Notes et commentaires extraits:', {
-                        foodScore, foodComment,
-                        serviceScore, serviceComment,
-                        ambianceScore, ambianceComment,
-                        valueScore, valueComment,
-                        originalityScore, originalityComment,
-                        overallScore, overallComment
-                    });
-
-                    // Remplir les scores
-                    document.getElementById('foodScore').value = foodScore;
-                    document.getElementById('serviceScore').value = serviceScore;
-                    document.getElementById('ambianceScore').value = ambianceScore;
-                    document.getElementById('valueScore').value = valueScore;
-                    document.getElementById('originalityScore').value = originalityScore;
-                    document.getElementById('overallExperienceScore').value = overallScore;
-
-                    // Remplir les commentaires
-                    document.getElementById('foodComment').value = foodComment;
-                    document.getElementById('serviceComment').value = serviceComment;
-                    document.getElementById('ambianceComment').value = ambianceComment;
-                    document.getElementById('valueComment').value = valueComment;
-                    document.getElementById('originalityComment').value = originalityComment;
-                    document.getElementById('overallExperienceComment').value = overallComment;
-
-                    // Mettre à jour les affichages des valeurs
-                    document.querySelectorAll('.rating-value').forEach(el => {
-                        const input = el.previousElementSibling;
-                        if (input) {
-                            el.textContent = input.value;
-                        }
-                    });
-                }
-
-                // Charger l'image principale depuis GitHub si elle existe
-                if (restaurantData.image) {
-                    const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
-                    console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
-                    console.log('Chemin de l\'image:', imagePath);
-                    
-                    if (imagePath) {
+                // --- Étape 4: Charger les images (maintenant que l'éditeur est prêt) --- 
+                console.log('Chargement des images...');
+                mainImageFile = null;
+                galleryImageFiles = [];
+                for (const imgInfo of imagesToLoad) {
+                    if (imgInfo.source === 'local' && imgInfo.data && imgInfo.name) {
+                        // Charger depuis base64 locale
                         try {
-                            const imageUrl = imagePath;
-                            console.log('URL de l\'image:', imageUrl);
-                            
-                            const response = await fetch(imageUrl);
-                            if (response.ok) {
-                                const blob = await response.blob();
-                                const fileName = imagePath.split('/').pop();
-                                const file = new File([blob], fileName, { type: 'image/jpeg' });
+                            const blob = base64ToBlob(imgInfo.data, 'image/webp');
+                            const file = new File([blob], imgInfo.name, { type: 'image/webp' });
+                            if (imgInfo.isMain) {
                                 mainImageFile = file;
-                                handleMainImageUpload(file);
-                                console.log('Image principale chargée avec succès');
+                                handleMainImageUpload(file); // Appelle updateMarkdownPreview
                             } else {
-                                console.error('Erreur lors du chargement de l\'image principale:', response.status);
-                            }
-                        } catch (error) {
-                            console.error('Erreur lors du chargement de l\'image principale:', error);
-                        }
-                    }
-                }
-
-                // Charger les images de la galerie depuis GitHub
-                const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
-                if (galleryMatches) {
-                    console.log('=== CHARGEMENT DES IMAGES DE LA GALERIE ===');
-                    const galleryYaml = galleryMatches[0];
-                    console.log('YAML de la galerie:', galleryYaml);
-                    
-                    const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
-                        ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
-                    console.log('Chemins des images de la galerie trouvés:', galleryPaths);
-                    console.log('Nombre d\'images dans la galerie:', galleryPaths.length);
-
-                    galleryImageFiles = [];
-                    for (const imagePath of galleryPaths) {
-                        try {
-                            console.log(`\nTraitement de l'image: ${imagePath}`);
-                            const imageUrl = imagePath;
-                            console.log('URL de l\'image:', imageUrl);
-                            
-                            const response = await fetch(imageUrl);
-                            if (response.ok) {
-                                const blob = await response.blob();
-                                const fileName = imagePath.split('/').pop();
-                                const file = new File([blob], fileName, { type: 'image/jpeg' });
                                 galleryImageFiles.push(file);
-                                console.log('Image ajoutée à la galerie avec succès');
-                            } else {
-                                console.error('Erreur lors du chargement de l\'image:', response.status);
                             }
-                        } catch (error) {
-                            console.error('Erreur lors du chargement de l\'image:', error);
-                        }
+                        } catch (error) { console.error('Erreur conversion base64:', imgInfo.name, error); }
+                    } else if (imgInfo.source === 'github' && imgInfo.url) {
+                        // Charger depuis URL GitHub
+                        await loadAndSetImageFromURL(imgInfo.url, imgInfo.isMain);
                     }
-                    console.log('Mise à jour de l\'aperçu de la galerie...');
-                    updateGalleryPreview();
-                    console.log('État final de la galerie:', {
-                        nombreImages: galleryImageFiles.length,
-                        nomsFichiers: galleryImageFiles.map(f => f.name)
-                    });
-                    console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
                 }
+                updateGalleryPreview(); // Met à jour la galerie et appelle updateMarkdownPreview
+                console.log('Chargement des images terminé.');
 
-                // Remplir l'éditeur avec le contenu
-                if (editor && editor.commands) {
-                    console.log('Remplissage de l\'éditeur avec le contenu');
-                    // Convertir le markdown en HTML pour l'éditeur
-                    const htmlContent = content
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
-                        .replace(/\n\n/g, '</p><p>') // Paragraphes
-                        .replace(/\n/g, '<br>'); // Sauts de ligne
-                    editor.commands.setContent(`<p>${htmlContent}</p>`);
-                } else {
-                    console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
-                    window.pendingEditorContent = content;
-                }
-
-                // Mettre à jour l'aperçu
-                console.log('Mise à jour de l\'aperçu');
-                updateMarkdownPreview();
+                // --- Étape 5: Mettre à jour l'aperçu final --- 
+                // updateMarkdownPreview(); // Normalement déjà appelé par les handlers d'image/éditeur
                 console.log('=== FIN DU CHARGEMENT DU RESTAURANT ===');
 
             } catch (error) {
                 console.error('Erreur lors du chargement du restaurant:', error);
-                showNotification('Erreur lors du chargement du restaurant', 'error');
+                showNotification('Erreur lors du chargement: ' + error.message, 'error');
             }
         }
 
-        // Fonction utilitaire pour convertir base64 en Blob
-        function base64ToBlob(base64, type) {
-            const binaryString = window.atob(base64);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return new Blob([bytes], { type });
+        // Fonction pour remplir les champs de base (hors ratings, éditeur, images)
+        function fillBasicFields(data) {
+            document.getElementById('state').value = data.state || 'draft';
+            document.getElementById('title').value = data.title || '';
+            document.getElementById('date').value = data.date || '';
+            document.getElementById('description').value = data.description || '';
+            document.getElementById('address').value = data.address || '';
+            document.getElementById('style').value = data.style || '';
+            const priceMap = { 'budget': '$ (0-20$)', 'moyen': '$$ (20-40$)', 'haut': '$$$ (40$ et +)' };
+            document.getElementById('price').value = priceMap[data.price] || data.price || '';
+            const diets = (data.diet || '').split(',');
+            document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
+            document.getElementById('vegan').checked = diets.includes('vegan-friendly');
+        }
+        
+        // ... (parseFrontMatterYAML, parseRatingsYAML, fillRatingsFields, extractGalleryPathsYAML) ...
+        // ... (loadAndSetImageFromURL, base64ToBlob, handleMainImageUpload, updateGalleryPreview) ...
+        
+        // Fonction pour attendre que l'éditeur soit prêt
+        function ensureEditorReady() {
+            return new Promise(resolve => {
+                if (isEditorReady) {
+                    resolve();
+                } else {
+                    window.addEventListener('editorReady', resolve, { once: true });
+                }
+            });
         }
 
         // Fonction pour annuler les modifications

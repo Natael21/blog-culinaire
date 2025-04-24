@@ -752,8 +752,10 @@
                 
                 // Si toujours pas d'image
                 if (!imageSource) {
-                    console.log('-> Pas d\'image disponible');
+                    console.log('-> Pas d\'image disponible pour', restaurant.title);
                 }
+
+                console.log(`Source finale de l'image pour ${restaurant.title}:`, imageSource);
 
                 const imageHtml = imageSource
                     ? `<div class="restaurant-image">
