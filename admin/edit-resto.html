@@ -2542,10 +2542,10 @@ ${editorContent}`;
                     const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
                     if (imagePath) {
                         try {
-                            // Corriger le chemin de l'image
-                            const correctedPath = imagePath.replace(/ /g, '_');
+                            // Corriger le chemin de l'image en retirant le slash initial
+                            const correctedPath = imagePath.replace(/^\//, '').replace(/ /g, '_');
                             // Modifier le chemin pour pointer vers le bon dossier
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${correctedPath}`;
+                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${correctedPath}`;
                             console.log('Tentative de chargement de l\'image principale:', imageUrl);
                             const response = await fetch(imageUrl);
                             if (response.ok) {
@@ -2574,10 +2574,10 @@ ${editorContent}`;
                     galleryImageFiles = [];
                     for (const imagePath of galleryPaths) {
                         try {
-                            // Corriger le chemin de l'image
-                            const correctedPath = imagePath.replace(/ /g, '_');
+                            // Corriger le chemin de l'image en retirant le slash initial
+                            const correctedPath = imagePath.replace(/^\//, '').replace(/ /g, '_');
                             // Modifier le chemin pour pointer vers le bon dossier
-                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main${correctedPath}`;
+                            const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${correctedPath}`;
                             console.log('Tentative de chargement d\'image de galerie:', imageUrl);
                             const response = await fetch(imageUrl);
                             if (response.ok) {
