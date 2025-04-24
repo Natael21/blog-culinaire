@@ -2381,6 +2381,8 @@ ${editorContent}`;
                 console.log('=== DÉBUT DU CHARGEMENT DU RESTAURANT ===');
                 console.log('Fichier à charger:', filename);
                 
+                const repo = 'Natael21/blog-culinaire'; // Définir repo au début de la fonction
+                
                 // D'abord vérifier dans le localStorage
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 console.log('Drafts dans localStorage:', drafts);
@@ -2409,7 +2411,6 @@ ${editorContent}`;
                     console.log('Données du restaurant extraites:', restaurantData);
                 } else {
                     console.log('Tentative de récupération depuis GitHub');
-                    const repo = 'Natael21/blog-culinaire';
                     const path = `_posts/${filename}`;
                     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
                     console.log('URL de la requête:', url);
@@ -2473,20 +2474,20 @@ ${editorContent}`;
                     const ratingsYaml = ratingsMatch[0];
                     console.log('YAML des notes trouvé:', ratingsYaml);
 
-                    // Extraire les scores et commentaires
-                    const foodScore = ratingsYaml.match(/food:\n.*score: (\d+)/)?.[1] || '5';
-                    const serviceScore = ratingsYaml.match(/service:\n.*score: (\d+)/)?.[1] || '5';
-                    const ambianceScore = ratingsYaml.match(/ambiance:\n.*score: (\d+)/)?.[1] || '5';
-                    const valueScore = ratingsYaml.match(/value:\n.*score: (\d+)/)?.[1] || '5';
-                    const originalityScore = ratingsYaml.match(/originality:\n.*score: (\d+)/)?.[1] || '5';
-                    const overallScore = ratingsYaml.match(/overall:\n.*score: (\d+)/)?.[1] || '5';
+                    // Extraire les scores et commentaires avec une meilleure regex
+                    const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const serviceScore = ratingsYaml.match(/service:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const ambianceScore = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const valueScore = ratingsYaml.match(/value:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
 
-                    const foodComment = ratingsYaml.match(/food:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
-                    const serviceComment = ratingsYaml.match(/service:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
-                    const ambianceComment = ratingsYaml.match(/ambiance:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
-                    const valueComment = ratingsYaml.match(/value:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
-                    const originalityComment = ratingsYaml.match(/originality:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
-                    const overallComment = ratingsYaml.match(/overall:[\s\S]*?comment: '([^']*)'/)?.[1] || '';
+                    const foodComment = ratingsYaml.match(/food:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
+                    const serviceComment = ratingsYaml.match(/service:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
+                    const ambianceComment = ratingsYaml.match(/ambiance:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
+                    const valueComment = ratingsYaml.match(/value:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
+                    const originalityComment = ratingsYaml.match(/originality:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
+                    const overallComment = ratingsYaml.match(/overall:[\s\S]*?comment:\s*"([^"]*)"|'([^']*)'/)?.[1] || '';
 
                     console.log('Notes et commentaires extraits:', {
                         foodScore, foodComment,
@@ -2572,7 +2573,13 @@ ${editorContent}`;
                 // Remplir l'éditeur avec le contenu
                 if (editor && editor.commands) {
                     console.log('Remplissage de l\'éditeur avec le contenu');
-                    editor.commands.setContent(content || '');
+                    // Convertir le markdown en HTML pour l'éditeur
+                    const htmlContent = content
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
+                        .replace(/\n\n/g, '</p><p>') // Paragraphes
+                        .replace(/\n/g, '<br>'); // Sauts de ligne
+                    editor.commands.setContent(`<p>${htmlContent}</p>`);
                 } else {
                     console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
                     // Stocker le contenu pour le charger plus tard
