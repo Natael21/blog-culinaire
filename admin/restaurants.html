@@ -611,22 +611,26 @@
                 const mergedData = githubData.map(githubItem => {
                     const localItem = localStorageMap.get(githubItem.title);
                     if (localItem && localItem.content) {
-                        console.log(`Restaurant trouvé dans localStorage par titre: ${githubItem.title}`);
+                        console.log(`Fusion des données pour ${githubItem.title}:`);
+                        console.log('Données GitHub:', githubItem);
+                        console.log('Données localStorage:', localItem);
+                        
                         const localParsedData = parseFrontMatter(localItem.content);
-                        console.log(`Données parsées du localStorage pour ${githubItem.title}:`, localParsedData);
-
-                        // Merge : base GitHub + overwrite par localStorage parsé + images/flags locaux
-                        return {
+                        console.log('Données parsées:', localParsedData);
+                        
+                        const mergedItem = {
                             ...githubItem,       
                             ...localParsedData,  
                             filename: localItem.filename, 
-                            images: localItem.images,     
+                            images: localItem.images || [],     
                             content: localItem.content,   
                             lastModified: localItem.lastModified, 
                             isFromLocalStorage: true
                         };
+                        
+                        console.log('Données fusionnées:', mergedItem);
+                        return mergedItem;
                     }
-                    // Si pas dans localStorage, utiliser données GitHub
                     return {
                         ...githubItem,
                         isFromLocalStorage: false
