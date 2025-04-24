@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gérer les Restaurants à Venir - Administration</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #e74c3c;
+            --accent-color: #3498db;
+            --background-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+
+        .admin-header {
+            padding: 2rem 2rem 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
+        }
+
+        .admin-title {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 700;
+            background: linear-gradient(120deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .back-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-left: auto;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .restaurants-list {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .restaurant-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        }
+
+        .restaurant-name {
+            font-size: 1.5rem;
+            margin: 0 0 1rem;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #eee;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .save-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .save-button:hover {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .delete-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .delete-button:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .add-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .add-button:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1 class="admin-title">Gérer les Restaurants à Venir</h1>
+        <a href="/admin" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Retour
+        </a>
+    </div>
+
+    <div class="restaurants-list">
+        <button class="add-button" onclick="addNewRestaurant()">
+            <i class="fas fa-plus"></i>
+            Ajouter un restaurant
+        </button>
+
+        <div id="restaurants-container">
+            <!-- Les restaurants seront chargés ici dynamiquement -->
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour charger les restaurants à venir
+        async function loadUpcomingRestaurants() {
+            try {
+                const response = await fetch('/api/upcoming');
+                const restaurants = await response.json();
+                
+                // Sauvegarder dans le localStorage
+                localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+                
+                const container = document.getElementById('restaurants-container');
+                container.innerHTML = '';
+
+                // Trier les restaurants par ordre
+                restaurants.sort((a, b) => a.order - b.order);
+
+                restaurants.forEach(restaurant => {
+                    const card = createRestaurantCard(restaurant);
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Erreur lors du chargement des restaurants:', error);
+            }
+        }
+
+        // Fonction pour créer une carte de restaurant
+        function createRestaurantCard(restaurant) {
+            const card = document.createElement('div');
+            card.className = 'restaurant-card';
+            card.setAttribute('data-restaurant-id', restaurant.id);
+            card.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Titre</label>
+                    <input type="text" class="form-control" value="${restaurant.title || ''}" data-field="title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type de régime</label>
+                    <input type="text" class="form-control" value="${restaurant.diet || ''}" data-field="diet">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" rows="3" data-field="description">${restaurant.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ordre d'affichage</label>
+                    <input type="number" class="form-control" value="${restaurant.order || 0}" data-field="order">
+                </div>
+                <button class="delete-button" onclick="deleteRestaurant('${restaurant.id}')">
+                    <i class="fas fa-trash"></i>
+                    Supprimer
+                </button>
+            `;
+            return card;
+        }
+
+        // Fonction pour sauvegarder les modifications dans le localStorage
+        function saveChanges() {
+            const cards = document.querySelectorAll('.restaurant-card');
+            const restaurants = [];
+
+            cards.forEach(card => {
+                const id = card.getAttribute('data-restaurant-id');
+                restaurants.push({
+                    id: id,
+                    title: card.querySelector('[data-field="title"]').value,
+                    diet: card.querySelector('[data-field="diet"]').value,
+                    description: card.querySelector('[data-field="description"]').value,
+                    order: parseInt(card.querySelector('[data-field="order"]').value) || 0
+                });
+            });
+
+            localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+        }
+
+        // Fonction pour supprimer un restaurant
+        function deleteRestaurant(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce restaurant?')) {
+                const card = document.querySelector(`[data-restaurant-id="${id}"]`);
+                card.remove();
+                saveChanges();
+            }
+        }
+
+        // Fonction pour ajouter un nouveau restaurant
+        function addNewRestaurant() {
+            const container = document.getElementById('restaurants-container');
+            const newRestaurant = {
+                id: 'restaurant-' + Date.now(),
+                title: '',
+                diet: '',
+                description: '',
+                order: 0
+            };
+            const card = createRestaurantCard(newRestaurant);
+            container.insertBefore(card, container.firstChild);
+            saveChanges();
+        }
+
+        // Sauvegarder les modifications lorsqu'un champ est modifié
+        document.addEventListener('input', function(e) {
+            if (e.target.closest('.restaurant-card')) {
+                saveChanges();
+            }
+        });
+
+        // Charger les restaurants au chargement de la page
+        document.addEventListener('DOMContentLoaded', loadUpcomingRestaurants);
+    </script>
+</body>
+</html> 
