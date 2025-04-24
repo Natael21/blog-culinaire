@@ -725,19 +725,31 @@
                 // Déterminer la source de l'image
                 let imageSource = null;
                 
+                console.log('=== Début de la sélection d\'image ===');
+                console.log('Restaurant:', restaurant.title);
+                console.log('Source:', restaurant.isFromLocalStorage ? 'localStorage' : 'GitHub');
+                
                 // Si vient du localStorage, chercher l'image principale dans le tableau images
-                if (restaurant.isFromLocalStorage && Array.isArray(restaurant.images) && restaurant.images.length > 0) {
-                    console.log('Contenu du tableau images pour:', restaurant.title, restaurant.images);
+                if (restaurant.isFromLocalStorage) {
+                    console.log('-> Restaurant trouvé dans localStorage');
+                    console.log('Images disponibles:', restaurant.images);
                     
-                    // Afficher la structure complète de la première image pour le débogage
-                    console.log('Structure de la première image:', restaurant.images[0]);
-                    
-                    // Vérifier si l'image a des données base64
-                    if (restaurant.images[0].data) {
-                        console.log('-> Utilisation des données base64 de l\'image du localStorage');
-                        // Construire l'URL data avec le bon type MIME
-                        const mimeType = restaurant.images[0].name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
-                        imageSource = `data:${mimeType};base64,${restaurant.images[0].data}`;
+                    if (Array.isArray(restaurant.images) && restaurant.images.length > 0) {
+                        const firstImage = restaurant.images[0];
+                        console.log('Première image:', firstImage);
+                        
+                        if (firstImage.data) {
+                            console.log('-> Données base64 trouvées');
+                            // Construire l'URL data avec le bon type MIME
+                            const mimeType = firstImage.name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+                            console.log('Type MIME détecté:', mimeType);
+                            imageSource = `data:${mimeType};base64,${firstImage.data}`;
+                            console.log('URL data construite:', imageSource.substring(0, 50) + '...');
+                        } else {
+                            console.log('-> Pas de données base64 dans l\'image');
+                        }
+                    } else {
+                        console.log('-> Pas d\'images dans le tableau');
                     }
                 }
                 
@@ -753,6 +765,7 @@
                 }
 
                 console.log(`Source finale de l'image pour ${restaurant.title}:`, imageSource);
+                console.log('=== Fin de la sélection d\'image ===');
 
                 const imageHtml = imageSource
                     ? `<div class="restaurant-image">
