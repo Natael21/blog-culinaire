@@ -2556,6 +2556,7 @@ ${editorContent}`;
                     }
                     console.log('=== FIN CHARGEMENT DEPUIS LOCALSTORAGE ===');
                 } else {
+                    // Si pas de draft local, charger depuis GitHub
                     console.log('Tentative de récupération depuis GitHub');
                     const path = `_posts/${filename}`;
                     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
@@ -2593,6 +2594,76 @@ ${editorContent}`;
                         }
                     });
                     console.log('Données du restaurant extraites:', restaurantData);
+
+                    // Charger l'image principale depuis GitHub si elle existe
+                    if (restaurantData.image) {
+                        const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
+                        console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
+                        console.log('Chemin de l\'image:', imagePath);
+                        
+                        if (imagePath) {
+                            try {
+                                const imageUrl = imagePath;
+                                console.log('URL de l\'image:', imageUrl);
+                                
+                                const response = await fetch(imageUrl);
+                                if (response.ok) {
+                                    const blob = await response.blob();
+                                    const fileName = imagePath.split('/').pop();
+                                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                                    mainImageFile = file;
+                                    handleMainImageUpload(file);
+                                    console.log('Image principale chargée avec succès');
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image principale:', response.status);
+                                }
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image principale:', error);
+                            }
+                        }
+                    }
+
+                    // Charger les images de la galerie depuis GitHub
+                    const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
+                    if (galleryMatches) {
+                        console.log('=== CHARGEMENT DES IMAGES DE LA GALERIE ===');
+                        const galleryYaml = galleryMatches[0];
+                        console.log('YAML de la galerie:', galleryYaml);
+                        
+                        const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
+                            ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
+                        console.log('Chemins des images de la galerie trouvés:', galleryPaths);
+                        console.log('Nombre d\'images dans la galerie:', galleryPaths.length);
+
+                        galleryImageFiles = [];
+                        for (const imagePath of galleryPaths) {
+                            try {
+                                console.log(`\nTraitement de l'image: ${imagePath}`);
+                                const imageUrl = imagePath;
+                                console.log('URL de l\'image:', imageUrl);
+                                
+                                const response = await fetch(imageUrl);
+                                if (response.ok) {
+                                    const blob = await response.blob();
+                                    const fileName = imagePath.split('/').pop();
+                                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                                    galleryImageFiles.push(file);
+                                    console.log('Image ajoutée à la galerie avec succès');
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image:', response.status);
+                                }
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image:', error);
+                            }
+                        }
+                        console.log('Mise à jour de l\'aperçu de la galerie...');
+                        updateGalleryPreview();
+                        console.log('État final de la galerie:', {
+                            nombreImages: galleryImageFiles.length,
+                            nomsFichiers: galleryImageFiles.map(f => f.name)
+                        });
+                        console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
+                    }
                 }
 
                 // Remplir les champs du formulaire
@@ -2681,76 +2752,6 @@ ${editorContent}`;
                             el.textContent = input.value;
                         }
                     });
-                }
-
-                // Charger l'image principale depuis GitHub si elle existe
-                if (restaurantData.image) {
-                    const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
-                    console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
-                    console.log('Chemin de l\'image:', imagePath);
-                    
-                    if (imagePath) {
-                        try {
-                            const imageUrl = imagePath;
-                            console.log('URL de l\'image:', imageUrl);
-                            
-                            const response = await fetch(imageUrl);
-                            if (response.ok) {
-                                const blob = await response.blob();
-                                const fileName = imagePath.split('/').pop();
-                                const file = new File([blob], fileName, { type: 'image/jpeg' });
-                                mainImageFile = file;
-                                handleMainImageUpload(file);
-                                console.log('Image principale chargée avec succès');
-                            } else {
-                                console.error('Erreur lors du chargement de l\'image principale:', response.status);
-                            }
-                        } catch (error) {
-                            console.error('Erreur lors du chargement de l\'image principale:', error);
-                        }
-                    }
-                }
-
-                // Charger les images de la galerie depuis GitHub
-                const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
-                if (galleryMatches) {
-                    console.log('=== CHARGEMENT DES IMAGES DE LA GALERIE ===');
-                    const galleryYaml = galleryMatches[0];
-                    console.log('YAML de la galerie:', galleryYaml);
-                    
-                    const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
-                        ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
-                    console.log('Chemins des images de la galerie trouvés:', galleryPaths);
-                    console.log('Nombre d\'images dans la galerie:', galleryPaths.length);
-
-                    galleryImageFiles = [];
-                    for (const imagePath of galleryPaths) {
-                        try {
-                            console.log(`\nTraitement de l'image: ${imagePath}`);
-                            const imageUrl = imagePath;
-                            console.log('URL de l\'image:', imageUrl);
-                            
-                            const response = await fetch(imageUrl);
-                            if (response.ok) {
-                                const blob = await response.blob();
-                                const fileName = imagePath.split('/').pop();
-                                const file = new File([blob], fileName, { type: 'image/jpeg' });
-                                galleryImageFiles.push(file);
-                                console.log('Image ajoutée à la galerie avec succès');
-                            } else {
-                                console.error('Erreur lors du chargement de l\'image:', response.status);
-                            }
-                        } catch (error) {
-                            console.error('Erreur lors du chargement de l\'image:', error);
-                        }
-                    }
-                    console.log('Mise à jour de l\'aperçu de la galerie...');
-                    updateGalleryPreview();
-                    console.log('État final de la galerie:', {
-                        nombreImages: galleryImageFiles.length,
-                        nomsFichiers: galleryImageFiles.map(f => f.name)
-                    });
-                    console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
                 }
 
                 // Avant d'initialiser l'éditeur, extraire le contenu
