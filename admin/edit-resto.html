@@ -1477,11 +1477,39 @@
         }
 
         function initializeDropZones() {
+            console.log('=== INITIALISATION DES ZONES DE DROP ===');
             const zones = ['mainImageZone', 'galleryZone'];
             
             zones.forEach(zoneId => {
                 const zone = document.getElementById(zoneId);
+                console.log(`Zone ${zoneId} trouvée:`, !!zone);
                 const input = zone.querySelector('input[type="file"]');
+                console.log(`Input pour ${zoneId} trouvé:`, !!input);
+
+                // Ajouter un événement de clic sur la zone
+                zone.addEventListener('click', (e) => {
+                    console.log(`Clic sur la zone ${zoneId}`);
+                    // Empêcher la propagation pour ne pas déclencher le clic sur l'input
+                    e.stopPropagation();
+                });
+
+                // Ajouter un événement de changement sur l'input
+                input.addEventListener('change', (e) => {
+                    console.log(`Changement détecté dans ${zoneId}:`, {
+                        nombreFichiers: e.target.files.length,
+                        fichiers: Array.from(e.target.files).map(f => ({
+                            name: f.name,
+                            type: f.type,
+                            size: f.size
+                        }))
+                    });
+
+                    if (zoneId === 'mainImageZone' && e.target.files.length > 0) {
+                        handleMainImageUpload(e.target.files[0]);
+                    } else if (zoneId === 'galleryZone') {
+                        handleGalleryUpload(e.target.files);
+                    }
+                });
 
                 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                     zone.addEventListener(eventName, preventDefaults, false);
@@ -1505,8 +1533,17 @@
                 });
 
                 zone.addEventListener('drop', (e) => {
+                    console.log(`Drop détecté dans ${zoneId}`);
                     const dt = e.dataTransfer;
                     const files = dt.files;
+                    console.log('Fichiers dropés:', {
+                        nombre: files.length,
+                        fichiers: Array.from(files).map(f => ({
+                            name: f.name,
+                            type: f.type,
+                            size: f.size
+                        }))
+                    });
 
                     if (zoneId === 'mainImageZone' && files.length > 0) {
                         input.files = files;
@@ -1517,6 +1554,7 @@
                     }
                 });
             });
+            console.log('=== FIN INITIALISATION DES ZONES DE DROP ===');
         }
 
         function handleMainImageUpload(file) {
