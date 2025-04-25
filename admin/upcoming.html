@@ -864,15 +864,22 @@ location: ${restaurant.address}
                     timestamp: new Date().toISOString()
                 };
 
+                // Mettre à jour ou ajouter le changement
                 if (existingIndex !== -1) {
-                    // Mettre à jour la modification existante
                     pendingChanges[existingIndex] = change;
                 } else {
-                    // Ajouter une nouvelle modification
                     pendingChanges.push(change);
                 }
 
-                localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+                // Filtrer les changements invalides (sans filename ou content)
+                const validChanges = pendingChanges.filter(change => 
+                    change.filename && 
+                    change.content && 
+                    change.type && 
+                    change.path
+                );
+
+                localStorage.setItem('pendingChanges', JSON.stringify(validChanges));
                 
                 // Mettre à jour le titre dans l'en-tête
                 card.querySelector('.restaurant-name').textContent = restaurant.title;
