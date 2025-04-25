@@ -106,6 +106,10 @@ exports.handler = async function(event, context) {
           if (change.type === 'delete-image' || change.isImage) {
             return filePath === `images/${change.filename}`;
           }
+          // Si c'est un fichier dans _upcoming, utiliser le chemin tel quel
+          if (change.filename.startsWith('_upcoming/')) {
+            return filePath === change.filename;
+          }
           // Sinon, ajouter le préfixe _posts/
           return filePath === `_posts/${change.filename}`;
         }
@@ -116,8 +120,16 @@ exports.handler = async function(event, context) {
     // Add explicit deletion entries for files to be deleted
     for (const change of changes) {
       if (change.type === 'delete' || change.type === 'delete-image') {
+        let path;
+        if (change.type === 'delete-image' || change.isImage) {
+          path = `images/${change.filename}`;
+        } else if (change.filename.startsWith('_upcoming/')) {
+          path = change.filename;
+        } else {
+          path = `_posts/${change.filename}`;
+        }
         newTree.push({
-          path: (change.type === 'delete-image' || change.isImage) ? `images/${change.filename}` : `_posts/${change.filename}`,
+          path: path,
           mode: '100644',
           type: 'blob',
           sha: null  // This explicitly tells Git to delete the file
@@ -171,9 +183,17 @@ exports.handler = async function(event, context) {
         const blobData = await createBlobResponse.json();
         console.log('Blob created successfully:', blobData.sha);
         
+        // Déterminer le chemin correct pour le fichier
+        let path;
+        if (change.filename.startsWith('_upcoming/')) {
+          path = change.filename;
+        } else {
+          path = `_posts/${change.filename}`;
+        }
+        
         // Add the new file to the tree
         newTree.push({
-          path: `_posts/${change.filename}`,
+          path: path,
           mode: '100644',
           type: 'blob',
           sha: blobData.sha
