@@ -871,15 +871,7 @@ location: ${restaurant.address}
                     pendingChanges.push(change);
                 }
 
-                // Filtrer les changements invalides (sans filename ou content)
-                const validChanges = pendingChanges.filter(change => 
-                    change.filename && 
-                    change.content && 
-                    change.type && 
-                    change.path
-                );
-
-                localStorage.setItem('pendingChanges', JSON.stringify(validChanges));
+                localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
                 
                 // Mettre à jour le titre dans l'en-tête
                 card.querySelector('.restaurant-name').textContent = restaurant.title;
