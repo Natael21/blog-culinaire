@@ -2527,25 +2527,26 @@ ${editorContent}`;
 
                     if (localDraft.images && localDraft.images.length > 0) {
                         console.log('Traitement des images du localStorage');
-                        localDraft.images.forEach((img, index) => {
-                            console.log(`Traitement image ${index + 1}/${localDraft.images.length}:`, {
-                                name: img.name,
-                                isMain: img.isMain,
-                                dataLength: img.data.length
-                            });
+                        
+                        // Trouver d'abord l'image principale
+                        const mainImg = localDraft.images.find(img => img.name === restaurantData.image.replace('/images/', ''));
+                        if (mainImg) {
+                            console.log('Image principale trouvée:', mainImg.name);
+                            const imageData = mainImg.data.startsWith('data:image') ? mainImg.data : `data:image/jpeg;base64,${mainImg.data}`;
+                            mainImageFile = imageData;
+                            handleMainImageUpload(imageData);
+                        }
 
-                            // Utiliser directement la chaîne base64 pour les images
-                            const imageData = img.data.startsWith('data:image') ? img.data : `data:image/jpeg;base64,${img.data}`;
-
-                            if (img.isMain) {
-                                console.log('Chargement image principale');
-                                mainImageFile = imageData;
-                                handleMainImageUpload(imageData);
-                            } else {
-                                console.log('Ajout à la galerie');
+                        // Traiter ensuite les images de la galerie
+                        localDraft.images.forEach((img) => {
+                            // Ne pas ajouter l'image principale à la galerie
+                            if (img.name !== restaurantData.image.replace('/images/', '')) {
+                                console.log('Ajout image à la galerie:', img.name);
+                                const imageData = img.data.startsWith('data:image') ? img.data : `data:image/jpeg;base64,${img.data}`;
                                 galleryImageFiles.push(imageData);
                             }
                         });
+
                         console.log('Mise à jour de la prévisualisation de la galerie');
                         updateGalleryPreview();
                     } else {
