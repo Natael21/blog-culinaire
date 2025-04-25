@@ -2612,6 +2612,10 @@ ${editorContent}`;
                     console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
                 }
 
+                // Avant d'initialiser l'éditeur, extraire le contenu
+                const contentMatch = markdown.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
+                const detailedContent = contentMatch ? contentMatch[1].trim() : '';
+
                 // Attendre que l'éditeur soit initialisé
                 await initializeEditor();
 
@@ -2619,7 +2623,7 @@ ${editorContent}`;
                 if (editor && editor.commands) {
                     console.log('Remplissage de l\'éditeur avec le contenu');
                     // Convertir le markdown en HTML pour l'éditeur
-                    const htmlContent = content
+                    const htmlContent = detailedContent
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
                         .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
                         .replace(/\n\n/g, '</p><p>') // Paragraphes
@@ -2627,7 +2631,7 @@ ${editorContent}`;
                     editor.commands.setContent(`<p>${htmlContent}</p>`);
                 } else {
                     console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
-                    window.pendingEditorContent = content;
+                    window.pendingEditorContent = detailedContent;
                 }
 
                 // Mettre à jour l'aperçu
