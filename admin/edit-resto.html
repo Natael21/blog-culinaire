@@ -2417,13 +2417,15 @@ ${editorContent}`;
                                 dataLength: img.data.length
                             });
 
+                            const imageData = img.data.startsWith('data:image') ? img.data : `data:image/jpeg;base64,${img.data}`;
+
                             if (img.isMain) {
                                 console.log('Chargement image principale');
-                                mainImageFile = img.data;
-                                handleMainImageUpload(img.data);
+                                mainImageFile = imageData;
+                                handleMainImageUpload(imageData);
                             } else {
                                 console.log('Ajout à la galerie');
-                                galleryImageFiles.push(img.data);
+                                galleryImageFiles.push(imageData);
                             }
                         });
                         console.log('Mise à jour de la prévisualisation de la galerie');
