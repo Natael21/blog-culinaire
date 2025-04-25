@@ -1477,24 +1477,11 @@
         }
 
         function initializeDropZones() {
-            console.log('=== INITIALISATION DES ZONES DE DÉPÔT ===');
             const zones = ['mainImageZone', 'galleryZone'];
             
             zones.forEach(zoneId => {
                 const zone = document.getElementById(zoneId);
                 const input = zone.querySelector('input[type="file"]');
-                
-                console.log(`Zone ${zoneId}:`, {
-                    zoneExists: !!zone,
-                    inputExists: !!input,
-                    eventListeners: {
-                        change: input.hasAttribute('onchange'),
-                        dragenter: zone.hasAttribute('ondragenter'),
-                        dragover: zone.hasAttribute('ondragover'),
-                        dragleave: zone.hasAttribute('ondragleave'),
-                        drop: zone.hasAttribute('ondrop')
-                    }
-                });
 
                 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                     zone.addEventListener(eventName, preventDefaults, false);
@@ -1534,6 +1521,17 @@
 
         function handleMainImageUpload(file) {
             console.log('=== DÉBUT UPLOAD IMAGE PRINCIPALE ===');
+            console.log('État initial:', {
+                mainImageFile: mainImageFile ? {
+                    type: typeof mainImageFile,
+                    isBlob: mainImageFile instanceof Blob,
+                    isFile: mainImageFile instanceof File,
+                    isString: typeof mainImageFile === 'string',
+                    name: mainImageFile.name || 'N/A',
+                    size: mainImageFile.size || 'N/A'
+                } : null
+            });
+
             console.log('Fichier reçu:', {
                 type: typeof file,
                 isBlob: file instanceof Blob,
@@ -1555,126 +1553,182 @@
                 let imageSrc;
                 if (typeof file === 'string') {
                     console.log('Traitement comme base64/URL');
-                    imageSrc = file;
+                    if (file.startsWith('data:image')) {
+                        console.log('Format base64 déjà correct');
+                        imageSrc = file;
+                    } else if (file.startsWith('http')) {
+                        console.log('URL GitHub détectée');
+                        imageSrc = file;
+                    } else {
+                        console.log('Conversion en base64');
+                        imageSrc = `data:image/jpeg;base64,${file}`;
+                    }
                 } else if (file instanceof File) {
-                    console.log('Traitement comme File');
-                    const objectUrl = URL.createObjectURL(file);
-                    console.log('URL créée pour l\'image principale:', {
-                        url: objectUrl,
-                        fileType: file.type,
-                        fileSize: file.size
-                    });
-                    imageSrc = objectUrl;
+                    console.log('Traitement comme nouveau fichier');
+                    imageSrc = URL.createObjectURL(file);
+                    console.log('URL créée:', imageSrc);
+                } else {
+                    console.error('Type de fichier non supporté:', file);
+                    return;
                 }
 
-                console.log('Création du preview avec src:', imageSrc?.substring(0, 50) + '...');
-                const preview = document.createElement('div');
-                preview.className = 'image-preview';
-                preview.innerHTML = `
-                    <img src="${imageSrc}" alt="Preview">
-                    <button class="delete-image" onclick="deleteMainImage()">×</button>
-                `;
-                container.appendChild(preview);
-
-                console.log('État du DOM après création du preview:', {
-                    containerExists: !!container,
-                    containerChildren: container?.children.length || 0,
-                    previewExists: !!container?.querySelector('.image-preview'),
-                    imageSrc: container?.querySelector('.image-preview img')?.src?.substring(0, 50) + '...'
+                console.log('Création du preview avec source:', {
+                    type: typeof imageSrc,
+                    length: imageSrc.length,
+                    preview: imageSrc.substring(0, 50) + '...'
                 });
 
-                verifyDOMState();
+                const div = document.createElement('div');
+                div.className = 'image-preview-container';
+                div.innerHTML = `
+                    <img src="${imageSrc}" class="image-preview" alt="Image preview">
+                    <button type="button" class="delete-image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                div.querySelector('.delete-image').addEventListener('click', function() {
+                    console.log('Suppression de l\'image principale');
+                    if (file instanceof File) {
+                        console.log('Libération de l\'URL:', imageSrc);
+                        URL.revokeObjectURL(imageSrc);
+                    }
+                    div.remove();
+                    mainImageFile = null;
+                    updateMarkdownPreview();
+                });
+                
+                container.appendChild(div);
+                console.log('Preview de l\'image principale créé avec succès');
+                
+                const mainImageZone = document.getElementById('mainImageZone');
+                mainImageZone.classList.remove('show-error');
+                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                
+                console.log('Image principale chargée avec succès');
+                updateMarkdownPreview();
+            } else {
+                console.error('Type de fichier non valide:', file);
             }
+            console.log('=== FIN UPLOAD IMAGE PRINCIPALE ===');
         }
 
         function handleGalleryUpload(files) {
             console.log('=== DÉBUT UPLOAD GALERIE ===');
-            console.log('Fichiers reçus:', {
-                count: files.length,
-                files: Array.from(files).map(file => ({
-                    name: file.name,
-                    type: file.type,
-                    size: file.size
+            console.log('État initial de la galerie:', {
+                nombreImages: galleryImageFiles.length,
+                types: galleryImageFiles.map(f => ({
+                    type: typeof f,
+                    isBlob: f instanceof Blob,
+                    isFile: f instanceof File,
+                    isString: typeof f === 'string',
+                    name: f.name || 'N/A',
+                    size: f.size || 'N/A'
                 }))
             });
 
-            const container = document.getElementById('galleryPreview');
-            console.log('Container trouvé:', !!container);
-
-            Array.from(files).forEach(file => {
-                console.log('Traitement du fichier:', {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size
-                });
-
-                let imageSrc;
-                if (typeof file === 'string') {
-                    console.log('Traitement comme base64/URL');
-                    imageSrc = file;
-                } else if (file instanceof File) {
-                    console.log('Traitement comme File');
-                    const objectUrl = URL.createObjectURL(file);
-                    console.log('URL créée pour l\'image de galerie:', {
-                        url: objectUrl,
-                        fileType: file.type,
-                        fileSize: file.size
-                    });
-                    imageSrc = objectUrl;
-                }
-
-                console.log('Création du preview avec src:', imageSrc?.substring(0, 50) + '...');
-                const preview = document.createElement('div');
-                preview.className = 'image-preview';
-                preview.innerHTML = `
-                    <img src="${imageSrc}" alt="Preview">
-                    <button class="delete-image" onclick="deleteGalleryImage(this)">×</button>
-                `;
-                container.appendChild(preview);
-
-                console.log('État du DOM après création du preview:', {
-                    containerExists: !!container,
-                    containerChildren: container?.children.length || 0,
-                    previewExists: !!container?.querySelector('.image-preview'),
-                    imageSrc: container?.querySelector('.image-preview:last-child img')?.src?.substring(0, 50) + '...'
-                });
-
-                galleryImageFiles.push(file);
-            });
-
-            verifyDOMState();
-        }
-
-        function verifyDOMState() {
-            console.log('=== VÉRIFICATION DU DOM ===');
-            console.log('Image principale:', {
-                previewExists: !!document.querySelector('#mainImagePreview .image-preview'),
-                src: document.querySelector('#mainImagePreview .image-preview')?.src?.substring(0, 50) + '...'
+            console.log('Fichiers reçus:', {
+                nombre: files.length,
+                details: Array.from(files).map(f => ({
+                    name: f.name,
+                    type: f.type,
+                    size: f.size
+                }))
             });
             
-            console.log('Galerie:', {
-                previews: document.querySelectorAll('#galleryPreview .image-preview').length,
-                srcs: Array.from(document.querySelectorAll('#galleryPreview .image-preview')).map(img => img.src.substring(0, 50) + '...')
-            });
-        }
+            Array.from(files).forEach((file, index) => {
+                console.log(`\nTraitement du fichier ${index + 1}:`, {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    isBlob: file instanceof Blob,
+                    isFile: file instanceof File,
+                    isString: typeof file === 'string'
+                });
+                
+                if (file.type.startsWith('image/')) {
+                    console.log('Fichier image valide, ajout à la galerie...');
+                    galleryImageFiles.push(file);
+                    const container = document.getElementById('galleryPreview');
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-container';
+                    
+                    let imageSrc;
+                    if (typeof file === 'string') {
+                        console.log('Traitement comme base64/URL');
+                        if (file.startsWith('data:image')) {
+                            console.log('Format base64 déjà correct');
+                            imageSrc = file;
+                        } else if (file.startsWith('http')) {
+                            console.log('URL GitHub détectée');
+                            imageSrc = file;
+                        } else {
+                            console.log('Conversion en base64');
+                            imageSrc = `data:image/jpeg;base64,${file}`;
+                        }
+                    } else if (file instanceof File) {
+                        console.log('Traitement comme nouveau fichier');
+                        imageSrc = URL.createObjectURL(file);
+                        console.log('URL créée:', imageSrc);
+                    } else {
+                        console.error('Type de fichier non supporté:', file);
+                        return;
+                    }
 
-        function updateMarkdownPreview() {
-            console.log('=== MISE À JOUR DE L\'APERÇU MARKDOWN ===');
-            console.log('État des images dans updateMarkdownPreview:', {
-                mainImage: {
-                    exists: !!mainImageFile,
-                    type: mainImageFile ? typeof mainImageFile : 'none',
-                    previewExists: !!document.querySelector('.restaurant-image img'),
-                    previewSrc: document.querySelector('.restaurant-image img')?.src?.substring(0, 50) + '...'
-                },
-                gallery: {
-                    count: galleryImageFiles.length,
-                    previews: document.querySelectorAll('.gallery-image img').length,
-                    previewsSrc: Array.from(document.querySelectorAll('.gallery-image img')).map(img => img.src.substring(0, 50) + '...')
+                    console.log('Création du preview avec source:', {
+                        type: typeof imageSrc,
+                        length: imageSrc.length,
+                        preview: imageSrc.substring(0, 50) + '...'
+                    });
+                    
+                    div.innerHTML = `
+                        <img src="${imageSrc}" class="image-preview" alt="Image preview">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    div.querySelector('.delete-image').addEventListener('click', function() {
+                        console.log('Suppression de l\'image de la galerie');
+                        if (file instanceof File) {
+                            console.log('Libération de l\'URL:', imageSrc);
+                            URL.revokeObjectURL(imageSrc);
+                        }
+                        const index = galleryImageFiles.findIndex(item => item === file);
+                        if (index > -1) {
+                            galleryImageFiles.splice(index, 1);
+                            console.log('Image supprimée de la galerie, nouvel état:', {
+                                nombreImages: galleryImageFiles.length,
+                                types: galleryImageFiles.map(f => typeof f)
+                            });
+                        }
+                        div.remove();
+                        updateMarkdownPreview();
+                    });
+                    
+                    container.appendChild(div);
+                    console.log(`Preview de l'image ${index + 1} créé avec succès`);
+                } else {
+                    console.log('Fichier ignoré (pas une image)');
                 }
             });
-
-            // ... existing code ...
+            
+            console.log('État final de la galerie:', {
+                nombreImages: galleryImageFiles.length,
+                types: galleryImageFiles.map(f => ({
+                    type: typeof f,
+                    isBlob: f instanceof Blob,
+                    isFile: f instanceof File,
+                    isString: typeof f === 'string',
+                    name: f.name || 'N/A',
+                    size: f.size || 'N/A'
+                }))
+            });
+            console.log('=== FIN UPLOAD GALERIE ===');
+            updateMarkdownPreview();
         }
 
         function revokeObjectURLs() {
