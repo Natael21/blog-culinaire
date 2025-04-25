@@ -794,36 +794,30 @@
 
         // Fonction pour sauvegarder un restaurant dans le localStorage
         function saveRestaurant(id) {
-            try {
-                const card = document.querySelector(`[data-restaurant-id="${id}"]`);
-                const restaurant = {
-                    id: id,
-                    title: card.querySelector('[data-field="title"]').value.trim(),
-                    style: card.querySelector('[data-field="style"]').value.trim(),
-                    description: card.querySelector('[data-field="description"]').value.trim(),
-                    address: card.querySelector('[data-field="address"]').value.trim()
-                };
+            const card = document.querySelector(`[data-restaurant-id="${id}"]`);
+            if (!card) {
+                showNotification('Restaurant non trouvé', 'error');
+                return;
+            }
 
-                // Validation des données
-                if (!restaurant.title) {
-                    showNotification('Le titre est requis', 'error');
-                    return;
-                }
-                if (!restaurant.style) {
-                    showNotification('Le style de cuisine est requis', 'error');
-                    return;
-                }
-                if (!restaurant.description) {
-                    showNotification('La description est requise', 'error');
-                    return;
-                }
-                if (!restaurant.address) {
-                    showNotification('L\'adresse est requise', 'error');
-                    return;
-                }
+            const restaurant = {
+                id: id,
+                title: card.querySelector('[data-field="title"]').value.trim(),
+                style: card.querySelector('[data-field="style"]').value.trim(),
+                description: card.querySelector('[data-field="description"]').value.trim(),
+                address: card.querySelector('[data-field="address"]').value.trim()
+            };
 
-                // Générer le contenu Markdown
-                const markdownContent = `---
+            // Validation des données
+            const errors = validateRestaurant(restaurant);
+            if (errors.length > 0) {
+                showFieldErrors(card, errors);
+                showNotification(errors.join(', '), 'error');
+                return;
+            }
+
+            // Générer le contenu Markdown
+            const markdownContent = `---
 restaurant_type: ${restaurant.style}
 title: ${restaurant.title}
 description: ${restaurant.description}
@@ -831,80 +825,63 @@ location: ${restaurant.address}
 --- 
 `;
 
-                // Récupérer les restaurants existants
-                let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
-                
-                // Vérifier si le restaurant a été modifié
-                const existingRestaurant = restaurants.find(r => r.id === id);
-                const isModified = !existingRestaurant || 
-                    existingRestaurant.title !== restaurant.title ||
-                    existingRestaurant.style !== restaurant.style ||
-                    existingRestaurant.description !== restaurant.description ||
-                    existingRestaurant.address !== restaurant.address;
+            // Récupérer les restaurants existants
+            let restaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
+            
+            // Vérifier si le restaurant a été modifié
+            const existingRestaurant = restaurants.find(r => r.id === id);
+            const isModified = !existingRestaurant || 
+                existingRestaurant.title !== restaurant.title ||
+                existingRestaurant.style !== restaurant.style ||
+                existingRestaurant.description !== restaurant.description ||
+                existingRestaurant.address !== restaurant.address;
 
-                if (isModified) {
-                    // Mettre à jour ou ajouter le restaurant
-                    const index = restaurants.findIndex(r => r.id === id);
-                    if (index !== -1) {
-                        restaurants[index] = restaurant;
-                    } else {
-                        restaurants.push(restaurant);
-                    }
-
-                    try {
-                        // Sauvegarder dans le localStorage
-                        localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
-                        
-                        // Ajouter aux modifications en attente
-                        const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-                        const filename = `_upcoming/${restaurant.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md`;
-                        
-                        // Vérifier si une modification pour ce fichier existe déjà
-                        const existingIndex = pendingChanges.findIndex(change => change.filename === filename);
-                        
-                        // Déterminer le type d'action
-                        const actionType = existingRestaurant ? 'update' : 'create';
-
-                        // Créer le changement
-                        const change = {
-                            type: actionType,
-                            filename: filename,
-                            path: filename,
-                            content: markdownContent,
-                            timestamp: new Date().toISOString()
-                        };
-
-                        // Vérifier que le changement est valide
-                        if (!change.filename || !change.content) {
-                            throw new Error('Changement invalide: filename ou content manquant');
-                        }
-
-                        if (existingIndex !== -1) {
-                            // Mettre à jour la modification existante
-                            pendingChanges[existingIndex] = change;
-                        } else {
-                            // Ajouter une nouvelle modification
-                            pendingChanges.push(change);
-                        }
-
-                        localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
-                        
-                        // Mettre à jour le titre dans l'en-tête
-                        card.querySelector('.restaurant-name').textContent = restaurant.title;
-                        
-                        // Afficher une notification de succès
-                        showNotification('Modifications sauvegardées avec succès !', 'success');
-                        
-                        // Déclencher l'événement de mise à jour des boutons
-                        window.dispatchEvent(new Event('storageUpdated'));
-                    } catch (error) {
-                        console.error('Erreur lors de la sauvegarde:', error);
-                        showNotification('Erreur lors de la sauvegarde des modifications', 'error');
-                    }
+            if (isModified) {
+                // Mettre à jour ou ajouter le restaurant
+                const index = restaurants.findIndex(r => r.id === id);
+                if (index !== -1) {
+                    restaurants[index] = restaurant;
+                } else {
+                    restaurants.push(restaurant);
                 }
-            } catch (error) {
-                console.error('Erreur lors de la sauvegarde du restaurant:', error);
-                showNotification('Une erreur est survenue lors de la sauvegarde', 'error');
+
+                // Sauvegarder dans le localStorage
+                localStorage.setItem('upcomingRestaurants', JSON.stringify(restaurants));
+                
+                // Ajouter aux modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+                const filename = `_upcoming/${restaurant.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md`;
+                
+                // Vérifier si une modification pour ce fichier existe déjà
+                const existingIndex = pendingChanges.findIndex(change => change.filename === filename);
+                
+                // Créer le changement
+                const change = {
+                    type: existingRestaurant ? 'update' : 'create',
+                    filename: filename,
+                    path: filename,
+                    content: markdownContent,
+                    timestamp: new Date().toISOString()
+                };
+
+                if (existingIndex !== -1) {
+                    // Mettre à jour la modification existante
+                    pendingChanges[existingIndex] = change;
+                } else {
+                    // Ajouter une nouvelle modification
+                    pendingChanges.push(change);
+                }
+
+                localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+                
+                // Mettre à jour le titre dans l'en-tête
+                card.querySelector('.restaurant-name').textContent = restaurant.title;
+                
+                // Afficher une notification de succès
+                showNotification('Modifications sauvegardées avec succès !', 'success');
+                
+                // Déclencher l'événement de mise à jour des boutons
+                window.dispatchEvent(new Event('storageUpdated'));
             }
         }
 
