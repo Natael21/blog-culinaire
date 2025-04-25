@@ -792,8 +792,19 @@
             }
         }
 
+        // Variable globale pour suivre le dernier appel
+        let lastSaveCall = {};
+
         // Fonction pour sauvegarder un restaurant dans le localStorage
         function saveRestaurant(id) {
+            // Vérifier si un appel est déjà en cours pour cet ID
+            const now = Date.now();
+            if (lastSaveCall[id] && (now - lastSaveCall[id]) < 1000) {
+                console.log('Appel ignoré - trop rapide après le dernier appel pour:', id);
+                return;
+            }
+            lastSaveCall[id] = now;
+
             const card = document.querySelector(`[data-restaurant-id="${id}"]`);
             if (!card) {
                 showNotification('Restaurant non trouvé', 'error');
@@ -1013,6 +1024,20 @@ location: ${restaurant.address}
                 // Afficher le spinner central
                 loadingOverlay = showLoadingOverlay('Publication des modifications en cours...');
 
+                // Filtrer les changements invalides
+                const validChanges = pendingChanges.filter(change => {
+                    const isValid = change.type && change.filename && change.path && 
+                                  (change.type === 'delete' || (change.content && change.timestamp));
+                    if (!isValid) {
+                        console.warn('Changement invalide ignoré:', change);
+                    }
+                    return isValid;
+                });
+
+                if (validChanges.length === 0) {
+                    throw new Error('Aucun changement valide à publier');
+                }
+
                 // Envoyer les modifications à GitHub
                 console.log('=== ENVOI DES MODIFICATIONS À GITHUB ===');
                 const response = await fetch('/.netlify/functions/publish-changes', {
@@ -1021,13 +1046,7 @@ location: ${restaurant.address}
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ 
-                        changes: pendingChanges.map(change => ({
-                            type: change.type,
-                            filename: change.filename,
-                            path: change.path,
-                            content: change.content,
-                            timestamp: change.timestamp
-                        }))
+                        changes: validChanges
                     })
                 });
 
