@@ -567,25 +567,15 @@
 
         // Fonction pour charger les restaurants à venir
         async function loadUpcomingRestaurants() {
-            console.log('Début du chargement des restaurants...');
             try {
-                // Charger les restaurants depuis le localStorage
-                let localStorageRestaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
-                console.log('Restaurants chargés depuis localStorage:', localStorageRestaurants);
-                
-                // Normaliser les restaurants du localStorage
-                localStorageRestaurants = localStorageRestaurants.map(normalizeRestaurant);
-                
                 // Charger les restaurants depuis GitHub via la fonction Netlify
                 let githubRestaurants = [];
                 try {
-                    console.log('Chargement des fichiers Markdown depuis GitHub...');
                     const response = await fetch('/.netlify/functions/get-upcoming-restaurants');
                     if (!response.ok) {
                         throw new Error(`Erreur lors du chargement des restaurants: ${response.status}`);
                     }
                     githubRestaurants = await response.json();
-                    console.log('Restaurants chargés depuis GitHub:', githubRestaurants);
                 } catch (error) {
                     console.error('Erreur lors du chargement depuis GitHub:', error);
                 }
@@ -593,31 +583,73 @@
                 // Normaliser les restaurants de GitHub
                 githubRestaurants = githubRestaurants.map(normalizeRestaurant);
 
-                // Fusionner les restaurants en priorisant le localStorage
-                const mergedRestaurants = [...localStorageRestaurants];
-                const localStorageIds = new Set(localStorageRestaurants.map(r => r.id));
+                // Récupérer les modifications en attente
+                const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 
-                // Ajouter les restaurants de GitHub qui ne sont pas dans le localStorage
-                githubRestaurants.forEach(restaurant => {
-                    if (!localStorageIds.has(restaurant.id)) {
-                        mergedRestaurants.push(restaurant);
+                // Créer un objet pour suivre les restaurants modifiés
+                const modifiedRestaurants = new Map();
+                
+                // Traiter les modifications en attente
+                pendingChanges.forEach(change => {
+                    if (change.type === 'delete') return;
+                    
+                    const content = change.content;
+                    const match = content.match(/^---\s*([\s\S]*?)\s*---/);
+                    if (match && match[1]) {
+                        const yamlLines = match[1].trim().split('\n');
+                        const restaurant = {};
+                        yamlLines.forEach(line => {
+                            const separatorIndex = line.indexOf(':');
+                            if (separatorIndex !== -1) {
+                                let key = line.substring(0, separatorIndex).trim();
+                                let value = line.substring(separatorIndex + 1).trim();
+                                value = value.replace(/^['"]|['"]$/g, '');
+                                
+                                if (key === 'restaurant_type') {
+                                    key = 'style';
+                                } else if (key === 'location') {
+                                    key = 'address';
+                                }
+                                
+                                if (key) {
+                                    restaurant[key] = value;
+                                }
+                            }
+                        });
+                        
+                        if (restaurant.title) {
+                            restaurant.id = `restaurant-${Date.now()}`;
+                            modifiedRestaurants.set(change.filename, restaurant);
+                        }
                     }
                 });
 
-                console.log('Restaurants fusionnés et normalisés:', mergedRestaurants);
+                // Fusionner les restaurants
+                const mergedRestaurants = [...githubRestaurants];
+                
+                // Ajouter ou mettre à jour les restaurants modifiés
+                modifiedRestaurants.forEach((restaurant, filename) => {
+                    const existingIndex = mergedRestaurants.findIndex(r => 
+                        `_upcoming/${r.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md` === filename
+                    );
+                    
+                    if (existingIndex !== -1) {
+                        mergedRestaurants[existingIndex] = restaurant;
+                    } else {
+                        mergedRestaurants.push(restaurant);
+                    }
+                });
                 
                 const container = document.getElementById('restaurants-container');
                 container.innerHTML = '';
 
                 // Trier les restaurants par ordre
                 mergedRestaurants.sort((a, b) => a.order - b.order);
-                console.log('Restaurants triés:', mergedRestaurants);
 
                 mergedRestaurants.forEach(restaurant => {
                     const card = createRestaurantCard(restaurant);
                     container.appendChild(card);
                 });
-                console.log('Affichage des restaurants terminé');
 
                 // Initialiser l'autocomplétion après avoir créé toutes les cartes
                 initializeAddressAutocomplete();
