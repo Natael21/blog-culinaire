@@ -1256,42 +1256,10 @@
 
         // Initialiser TipTap
         window.addEventListener('load', async () => {
+            console.log('=== DÉBUT INITIALISATION DE LA PAGE ===');
             // Initialiser l'éditeur
             await initializeEditor();
-
-            // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
-            const saveButton = document.getElementById('saveButton');
             
-            if (saveButton) {
-                // Ajouter le spinner au bouton
-                const spinnerDiv = document.createElement('div');
-                spinnerDiv.className = 'spinner';
-                const textSpan = document.createElement('span');
-                textSpan.className = 'button-text';
-                textSpan.innerHTML = saveButton.innerHTML;
-                saveButton.innerHTML = '';
-                saveButton.appendChild(spinnerDiv);
-                saveButton.appendChild(textSpan);
-                
-                saveButton.addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    
-                    // Afficher l'état de chargement
-                    showLoadingState(this);
-                    
-                    const form = document.getElementById('restaurantForm');
-                    if (form) {
-                        form.dispatchEvent(new Event('submit'));
-                    }
-                    
-                    // Simuler un délai minimum pour le spinner (au moins 500ms)
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    
-                    // Cacher l'état de chargement
-                    hideLoadingState(this);
-                });
-            }
-
             // Initialiser les autres fonctionnalités
             initializeAddressAutocomplete();
             initializeDropZones();
@@ -1316,22 +1284,9 @@
                 checkbox.addEventListener('change', updateMarkdownPreview);
             });
 
-            // Écouter les changements d'image principale
-            document.getElementById('mainImage').addEventListener('change', function(e) {
-                if (this.files && this.files[0]) {
-                    handleMainImageUpload(this.files[0]);
-                }
-            });
-
-            // Écouter les changements d'images de galerie
-            document.getElementById('galleryImages').addEventListener('change', function(e) {
-                if (this.files) {
-                    handleGalleryUpload(this.files);
-                }
-            });
-
             // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
+            console.log('=== FIN INITIALISATION DE LA PAGE ===');
         });
 
         async function searchAddress(query) {
