@@ -1256,13 +1256,28 @@
 
         // Initialiser TipTap
         window.addEventListener('load', async () => {
-            console.log('=== DÉBUT INITIALISATION DE LA PAGE ===');
+            console.log('=== CHARGEMENT DE LA PAGE ===');
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('filename');
+            console.log('Paramètres URL:', { filename });
+
+            if (!filename) {
+                console.error('Aucun fichier spécifié');
+                return;
+            }
+
+            console.log('Tentative de chargement du restaurant:', filename);
+            await loadRestaurant(filename);
+            
+            // Initialiser les zones de drop après le chargement des données
+            console.log('=== INITIALISATION DES ZONES DE DROP ===');
+            initializeDropZones();
+            
             // Initialiser l'éditeur
             await initializeEditor();
             
             // Initialiser les autres fonctionnalités
             initializeAddressAutocomplete();
-            initializeDropZones();
             
             // Écouter les changements dans les champs de notation
             document.querySelectorAll('.form-range').forEach(input => {
@@ -1286,7 +1301,7 @@
 
             // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
-            console.log('=== FIN INITIALISATION DE LA PAGE ===');
+            console.log('=== FIN CHARGEMENT DE LA PAGE ===');
         });
 
         async function searchAddress(query) {
