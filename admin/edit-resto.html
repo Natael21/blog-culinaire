@@ -1163,16 +1163,29 @@
 
         // Fonction pour initialiser l'éditeur
         function initializeEditor() {
+            console.log('=== DÉBUT INITIALISATION ÉDITEUR ===');
+            console.log('État avant initialisation:', {
+                editorInitialized,
+                editorExists: !!editor,
+                editorElement: !!document.querySelector('#editor'),
+                mainImageFile: !!mainImageFile,
+                galleryImagesCount: galleryImageFiles.length
+            });
+
             return new Promise((resolve) => {
                 if (editorInitialized && editor) {
+                    console.log('Éditeur déjà initialisé, retour immédiat');
                     resolve(editor);
                     return;
                 }
 
                 if (editor) {
+                    console.log('Instance précédente d\'éditeur trouvée, destruction...');
                     editor.destroy();
+                    console.log('Instance précédente détruite');
                 }
 
+                console.log('Création d\'une nouvelle instance d\'éditeur');
                 editor = new Editor({
                     element: document.querySelector('#editor'),
                     extensions: [
@@ -1188,24 +1201,32 @@
                     content: '',
                     editable: true,
                     onReady: () => {
+                        console.log('Éditeur prêt');
                         editorInitialized = true;
                         
                         if (window.pendingEditorContent) {
+                            console.log('Contenu en attente trouvé, chargement...', {
+                                contentLength: window.pendingEditorContent.length
+                            });
                             editor.commands.setContent(window.pendingEditorContent);
                             delete window.pendingEditorContent;
+                            console.log('Contenu en attente chargé et supprimé');
                         }
                         
                         resolve(editor);
                     },
                     onUpdate: ({ editor }) => {
+                        console.log('Mise à jour de l\'éditeur détectée');
                         updateMarkdownPreview();
                     }
                 });
 
+                console.log('Configuration des boutons de la barre d\'outils');
                 document.querySelectorAll('.editor-toolbar button').forEach(button => {
                     button.addEventListener('click', (e) => {
                         e.preventDefault();
                         const command = button.dataset.command;
+                        console.log('Clic sur bouton:', command);
                         editor.chain().focus();
                         
                         switch(command) {
@@ -1229,16 +1250,20 @@
                     const command = button.dataset.command;
                     button.classList.toggle('is-active', editor.isActive(command));
                 });
+                console.log('=== FIN INITIALISATION ÉDITEUR ===');
             });
         }
 
         // Initialiser TipTap
         window.addEventListener('load', async () => {
+            // Initialiser l'éditeur
             await initializeEditor();
 
+            // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
             const saveButton = document.getElementById('saveButton');
             
             if (saveButton) {
+                // Ajouter le spinner au bouton
                 const spinnerDiv = document.createElement('div');
                 spinnerDiv.className = 'spinner';
                 const textSpan = document.createElement('span');
@@ -1250,6 +1275,8 @@
                 
                 saveButton.addEventListener('click', async function(e) {
                     e.preventDefault();
+                    
+                    // Afficher l'état de chargement
                     showLoadingState(this);
                     
                     const form = document.getElementById('restaurantForm');
@@ -1257,14 +1284,19 @@
                         form.dispatchEvent(new Event('submit'));
                     }
                     
+                    // Simuler un délai minimum pour le spinner (au moins 500ms)
                     await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Cacher l'état de chargement
                     hideLoadingState(this);
                 });
             }
 
+            // Initialiser les autres fonctionnalités
             initializeAddressAutocomplete();
             initializeDropZones();
             
+            // Écouter les changements dans les champs de notation
             document.querySelectorAll('.form-range').forEach(input => {
                 input.addEventListener('input', function() {
                     const valueDisplay = this.nextElementSibling;
@@ -1274,26 +1306,31 @@
                 });
             });
 
+            // Écouter les changements dans tous les champs du formulaire
             document.querySelectorAll('input, textarea, select').forEach(element => {
                 element.addEventListener('input', updateMarkdownPreview);
             });
 
+            // Écouter les changements dans les checkboxes
             document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', updateMarkdownPreview);
             });
 
+            // Écouter les changements d'image principale
             document.getElementById('mainImage').addEventListener('change', function(e) {
                 if (this.files && this.files[0]) {
                     handleMainImageUpload(this.files[0]);
                 }
             });
 
+            // Écouter les changements d'images de galerie
             document.getElementById('galleryImages').addEventListener('change', function(e) {
                 if (this.files) {
                     handleGalleryUpload(this.files);
                 }
             });
 
+            // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
         });
 
@@ -1303,6 +1340,7 @@
                 const data = await response.json();
                 return data;
             } catch (error) {
+                console.error('Erreur lors de la recherche d\'adresse:', error);
                 return [];
             }
         }
@@ -1482,281 +1520,182 @@
         }
 
         function handleMainImageUpload(file) {
-            if (!file) return;
+            console.log('=== DÉBUT UPLOAD IMAGE PRINCIPALE ===');
+            console.log('Type de fichier reçu:', {
+                type: typeof file,
+                isBlob: file instanceof Blob,
+                isFile: file instanceof File,
+                isString: typeof file === 'string',
+                fileType: file.type || 'base64',
+                fileSize: file.size || 'N/A',
+                fileName: file.name || 'N/A'
+            });
 
-            const mainImagePreview = document.getElementById('mainImagePreview');
-            mainImagePreview.innerHTML = '';
-
-            if (typeof file === 'string' && file.startsWith('data:image')) {
-                const img = document.createElement('img');
-                img.src = file;
-                img.style.maxWidth = '200px';
-                mainImagePreview.appendChild(img);
-
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Supprimer';
-                deleteButton.onclick = () => {
-                    mainImageFile = null;
-                    mainImagePreview.innerHTML = '';
-                    updateMarkdownPreview();
-                };
-                mainImagePreview.appendChild(deleteButton);
-
+            if (file) {
+                console.log('Fichier valide, traitement en cours...');
                 mainImageFile = file;
-                updateMarkdownPreview();
-            } else if (file instanceof Blob || file instanceof File) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.maxWidth = '200px';
-                    mainImagePreview.appendChild(img);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Supprimer';
-                    deleteButton.onclick = () => {
-                        mainImageFile = null;
-                        mainImagePreview.innerHTML = '';
-                        updateMarkdownPreview();
+                const container = document.getElementById('mainImagePreview');
+                console.log('Container trouvé:', !!container);
+                container.innerHTML = '';
+                
+                if (file instanceof Blob || file instanceof File) {
+                    console.log('Traitement comme Blob/File');
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        console.log('FileReader terminé, création du preview...');
+                        const div = document.createElement('div');
+                        div.className = 'image-preview-container';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                            <button type="button" class="delete-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        
+                        div.querySelector('.delete-image').addEventListener('click', function() {
+                            console.log('Suppression de l\'image principale');
+                            div.remove();
+                            mainImageFile = null;
+                            updateMarkdownPreview();
+                        });
+                        
+                        container.appendChild(div);
+                        console.log('Preview de l\'image principale créé avec succès');
                     };
-                    mainImagePreview.appendChild(deleteButton);
-
-                    mainImageFile = file;
-                    updateMarkdownPreview();
-                };
-                reader.readAsDataURL(file);
+                    reader.onerror = function(error) {
+                        console.error('Erreur lors de la lecture du fichier:', error);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (typeof file === 'string') {
+                    console.log('Traitement comme base64');
+                    console.log('Format de la chaîne base64:', {
+                        startsWithDataImage: file.startsWith('data:image'),
+                        length: file.length
+                    });
+                    
+                    const imgSrc = file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`;
+                    console.log('Source de l\'image finale:', {
+                        length: imgSrc.length,
+                        startsWith: imgSrc.substring(0, 20) + '...'
+                    });
+                    
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-container';
+                    div.innerHTML = `
+                        <img src="${imgSrc}" class="image-preview" alt="Image preview">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    div.querySelector('.delete-image').addEventListener('click', function() {
+                        console.log('Suppression de l\'image principale');
+                        div.remove();
+                        mainImageFile = null;
+                        updateMarkdownPreview();
+                    });
+                    
+                    container.appendChild(div);
+                    console.log('Preview de l\'image principale (base64) créé avec succès');
+                }
+                
+                const mainImageZone = document.getElementById('mainImageZone');
+                mainImageZone.classList.remove('show-error');
+                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                
+                console.log('Image principale chargée avec succès');
+                updateMarkdownPreview();
+            } else {
+                console.error('Type de fichier non valide:', file);
             }
+            console.log('=== FIN UPLOAD IMAGE PRINCIPALE ===');
         }
 
         function handleGalleryUpload(files) {
-            if (!files || files.length === 0) return;
-
-            const galleryPreview = document.getElementById('galleryPreview');
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
+            console.log('=== DÉBUT UPLOAD GALERIE ===');
+            console.log('Nombre de fichiers reçus:', files.length);
+            console.log('État actuel de la galerie:', {
+                nombreImages: galleryImageFiles.length,
+                types: galleryImageFiles.map(f => typeof f)
+            });
+            
+            Array.from(files).forEach((file, index) => {
+                console.log(`\nTraitement du fichier ${index + 1}/${files.length}:`, {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
                 
-                if (typeof file === 'string' && file.startsWith('data:image')) {
-                    const container = document.createElement('div');
-                    container.className = 'gallery-image-container';
-
-                    const img = document.createElement('img');
-                    img.src = file;
-                    img.style.maxWidth = '200px';
-                    container.appendChild(img);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Supprimer';
-                    deleteButton.onclick = () => {
-                        const index = galleryImageFiles.indexOf(file);
-                        if (index > -1) {
-                            galleryImageFiles.splice(index, 1);
-                            container.remove();
-                            updateMarkdownPreview();
-                        }
-                    };
-                    container.appendChild(deleteButton);
-
-                    galleryPreview.appendChild(container);
-                    if (!galleryImageFiles.includes(file)) {
-                        galleryImageFiles.push(file);
-                    }
-                } else if (file instanceof Blob || file instanceof File) {
+                if (file.type.startsWith('image/')) {
+                    console.log('Fichier image valide, ajout à la galerie...');
+                    galleryImageFiles.push(file);
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        const container = document.createElement('div');
-                        container.className = 'gallery-image-container';
-
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.maxWidth = '200px';
-                        container.appendChild(img);
-
-                        const deleteButton = document.createElement('button');
-                        deleteButton.textContent = 'Supprimer';
-                        deleteButton.onclick = () => {
-                            const index = galleryImageFiles.indexOf(file);
+                        console.log(`FileReader terminé pour l'image ${index + 1}, création du preview...`);
+                        const container = document.getElementById('galleryPreview');
+                        const div = document.createElement('div');
+                        div.className = 'image-preview-container';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                            <button type="button" class="delete-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        
+                        div.querySelector('.delete-image').addEventListener('click', function() {
+                            console.log('Suppression de l\'image de la galerie');
+                            const index = galleryImageFiles.findIndex(item => item === file);
                             if (index > -1) {
                                 galleryImageFiles.splice(index, 1);
-                                container.remove();
-                                updateMarkdownPreview();
+                                console.log('Image supprimée de la galerie, nouvel état:', {
+                                    nombreImages: galleryImageFiles.length
+                                });
                             }
-                        };
-                        container.appendChild(deleteButton);
-
-                        galleryPreview.appendChild(container);
-                        if (!galleryImageFiles.includes(file)) {
-                            galleryImageFiles.push(file);
-                        }
+                            div.remove();
+                            updateMarkdownPreview();
+                        });
+                        
+                        container.appendChild(div);
+                        console.log(`Preview de l'image ${index + 1} créé avec succès`);
+                    };
+                    reader.onerror = function(error) {
+                        console.error(`Erreur lors de la lecture du fichier ${index + 1}:`, error);
                     };
                     reader.readAsDataURL(file);
+                } else {
+                    console.log('Fichier ignoré (pas une image)');
                 }
-            }
-
+            });
+            
+            console.log('État final de la galerie:', {
+                nombreImages: galleryImageFiles.length,
+                types: galleryImageFiles.map(f => typeof f)
+            });
+            console.log('=== FIN UPLOAD GALERIE ===');
             updateMarkdownPreview();
         }
 
-        function updateGalleryPreview() {
-            const galleryPreview = document.getElementById('galleryPreview');
-            galleryPreview.innerHTML = '';
-
-            galleryImageFiles.forEach((file, index) => {
-                const container = document.createElement('div');
-                container.className = 'gallery-image-container';
-
-                if (typeof file === 'string' && file.startsWith('data:image')) {
-                    const img = document.createElement('img');
-                    img.src = file;
-                    img.style.maxWidth = '200px';
-                    container.appendChild(img);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Supprimer';
-                    deleteButton.onclick = () => {
-                        galleryImageFiles.splice(index, 1);
-                        container.remove();
-                        updateMarkdownPreview();
-                    };
-                    container.appendChild(deleteButton);
-                } else if (file instanceof Blob || file instanceof File) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.maxWidth = '200px';
-                        container.appendChild(img);
-
-                        const deleteButton = document.createElement('button');
-                        deleteButton.textContent = 'Supprimer';
-                        deleteButton.onclick = () => {
-                            galleryImageFiles.splice(index, 1);
-                            container.remove();
-                            updateMarkdownPreview();
-                        };
-                        container.appendChild(deleteButton);
-                    };
-                    reader.readAsDataURL(file);
-                }
-
-                galleryPreview.appendChild(container);
-            });
-        }
-
-        function updateMarkdownPreview() {
-            const title = document.getElementById('title').value || 'Titre du restaurant';
-            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
-            const description = document.getElementById('description').value || 'Description du restaurant';
-            const address = document.getElementById('address').value || 'Adresse du restaurant';
-            const style = document.getElementById('style').value || 'Style de cuisine';
-            const price = document.getElementById('price').value || '$ (0-20$)';
-
-            const foodScore = document.getElementById('foodScore').value || '5';
-            const serviceScore = document.getElementById('serviceScore').value || '5';
-            const ambianceScore = document.getElementById('ambianceScore').value || '5';
-            const valueScore = document.getElementById('valueScore').value || '5';
-            const originalityScore = document.getElementById('originalityScore').value || '5';
-            const overallScore = document.getElementById('overallExperienceScore').value || '5';
-
-            const foodComment = document.getElementById('foodComment').value || '';
-            const serviceComment = document.getElementById('serviceComment').value || '';
-            const ambianceComment = document.getElementById('ambianceComment').value || '';
-            const valueComment = document.getElementById('valueComment').value || '';
-            const originalityComment = document.getElementById('originalityComment').value || '';
-            const overallComment = document.getElementById('overallExperienceComment').value || '';
-
-            let mainImageHtml = '';
-            if (mainImageFile) {
-                if (typeof mainImageFile === 'string' && mainImageFile.startsWith('data:image')) {
-                    mainImageHtml = `<img src="${mainImageFile}" alt="${title}" style="max-width: 100%;">`;
-                } else if (mainImageFile instanceof Blob || mainImageFile instanceof File) {
-                    mainImageHtml = `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}" style="max-width: 100%;">`;
-                }
-            }
-
-            let galleryHtml = '';
-            if (galleryImageFiles.length > 0) {
-                galleryHtml = '<div class="gallery">';
-                galleryImageFiles.forEach(file => {
-                    if (typeof file === 'string' && file.startsWith('data:image')) {
-                        galleryHtml += `<img src="${file}" alt="Image de la galerie" style="max-width: 200px;">`;
-                    } else if (file instanceof Blob || file instanceof File) {
-                        galleryHtml += `<img src="${URL.createObjectURL(file)}" alt="Image de la galerie" style="max-width: 200px;">`;
-                    }
-                });
-                galleryHtml += '</div>';
-            }
-
-            const editorContent = editor ? editor.getHTML() : '';
-            const detailedDescription = editorContent
-                .replace(/<p>/g, '')
-                .replace(/<\/p>/g, '\n\n')
-                .replace(/<br>/g, '\n')
-                .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
-                .replace(/<em>(.*?)<\/em>/g, '*$1*')
-                .trim();
-
-            const preview = `
-                <h1>${title}</h1>
-                <p><strong>Date de visite:</strong> ${date}</p>
-                <p><strong>Description:</strong> ${description}</p>
-                <p><strong>Adresse:</strong> ${address}</p>
-                <p><strong>Style de cuisine:</strong> ${style}</p>
-                <p><strong>Gamme de prix:</strong> ${price}</p>
-
-                <h2>Notes et commentaires</h2>
-                <div class="ratings">
-                    <div class="rating">
-                        <h3>Nourriture: ${foodScore}/10</h3>
-                        <p>${foodComment}</p>
-                    </div>
-                    <div class="rating">
-                        <h3>Service: ${serviceScore}/10</h3>
-                        <p>${serviceComment}</p>
-                    </div>
-                    <div class="rating">
-                        <h3>Ambiance: ${ambianceScore}/10</h3>
-                        <p>${ambianceComment}</p>
-                    </div>
-                    <div class="rating">
-                        <h3>Rapport qualité/prix: ${valueScore}/10</h3>
-                        <p>${valueComment}</p>
-                    </div>
-                    <div class="rating">
-                        <h3>Originalité: ${originalityScore}/10</h3>
-                        <p>${originalityComment}</p>
-                    </div>
-                    <div class="rating">
-                        <h3>Note globale: ${overallScore}/10</h3>
-                        <p>${overallComment}</p>
-                    </div>
-                </div>
-
-                <h2>Image principale</h2>
-                ${mainImageHtml}
-
-                <h2>Galerie d'images</h2>
-                ${galleryHtml}
-
-                <h2>Description détaillée</h2>
-                <div class="detailed-description">
-                    ${detailedDescription}
-                </div>
-            `;
-
-            document.getElementById('preview').innerHTML = preview;
-        }
-
         function validateForm() {
+            console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
             let isValid = true;
             let errorFields = [];
 
+            // Fonction pour valider un champ individuel et collecter les erreurs
             function validateField(fieldId, fieldName, isRequired = true) {
                 const field = document.getElementById(fieldId);
                 const value = field ? field.value.trim() : '';
                 const wrapper = field ? field.closest('.input-wrapper') : null;
                 const errorDiv = wrapper ? wrapper.querySelector('.invalid-feedback') : null;
 
+                console.log(`\nValidation du champ ${fieldName}:`);
+                console.log(`- valeur: ${value}`);
+                console.log(`- requis: ${isRequired}`);
+
                 if (isRequired && !value) {
+                    console.log(`⚠️ Champ ${fieldName} vide - ajout de l'état d'erreur`);
                     if (field) {
                         field.classList.add('is-invalid');
                         field.classList.add('show-error');
@@ -1767,6 +1706,7 @@
                     }
                     isValid = false;
                 } else {
+                    console.log(`✓ Champ ${fieldName} valide`);
                     if (field) {
                         field.classList.remove('is-invalid');
                         field.classList.remove('show-error');
@@ -1777,6 +1717,7 @@
                 }
             }
 
+            // Valider tous les champs dans l'ordre
             validateField('title', 'Nom du restaurant');
             validateField('date', 'Date de visite');
             validateField('description', 'Résumé');
@@ -1784,9 +1725,13 @@
             validateField('style', 'Style de cuisine');
             validateField('price', 'Gamme de prix');
 
+            // Valider l'image principale
+            console.log('\n=== VALIDATION DE L\'IMAGE PRINCIPALE ===');
             const mainImageZone = document.getElementById('mainImageZone');
+            console.log('Image principale présente:', !!mainImageFile);
             
             if (!mainImageFile) {
+                console.log('⚠️ Pas d\'image principale - ajout de l\'état d\'erreur');
                 mainImageZone.classList.add('show-error');
                 let errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
                 if (!errorDiv) {
@@ -1799,6 +1744,7 @@
                 errorFields.push(mainImageZone);
                 isValid = false;
             } else {
+                console.log('✓ Image principale présente');
                 mainImageZone.classList.remove('show-error');
                 const existingError = mainImageZone.parentNode.querySelector('.invalid-feedback');
                 if (existingError) {
@@ -1806,11 +1752,17 @@
                 }
             }
 
+            // Valider l'éditeur
+            console.log('\n=== VALIDATION DE L\'ÉDITEUR ===');
             const editorContent = editor.getHTML();
-            const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
-            const editorElement = document.querySelector('.ProseMirror');
+            console.log('Contenu HTML de l\'éditeur:', editorContent);
             
+            const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
+            console.log('L\'éditeur est vide:', isEmpty);
+            
+            const editorElement = document.querySelector('.ProseMirror');
             if (isEmpty) {
+                console.log('⚠️ L\'éditeur est vide - ajout de l\'état d\'erreur');
                 editorElement.classList.add('editor-invalid');
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'invalid-feedback';
@@ -1819,6 +1771,7 @@
                 errorFields.push(editorElement);
                 isValid = false;
             } else {
+                console.log('✓ L\'éditeur contient du contenu');
                 editorElement.classList.remove('editor-invalid');
                 const existingError = editorElement.parentNode.querySelector('.invalid-feedback');
                 if (existingError) {
@@ -1826,6 +1779,7 @@
                 }
             }
 
+            // Valider les critères détaillés
             validateField('foodScore', 'Note nourriture');
             validateField('foodComment', 'Commentaire nourriture');
             validateField('serviceScore', 'Note service');
@@ -1839,7 +1793,9 @@
             validateField('overallExperienceScore', 'Note expérience globale');
             validateField('overallExperienceComment', 'Commentaire expérience globale');
 
+            // Trouver le premier champ en erreur dans l'ordre du DOM
             if (errorFields.length > 0) {
+                console.log('Recherche du premier champ en erreur dans l\'ordre du DOM');
                 const allElements = document.querySelectorAll('*');
                 let firstErrorInDOM = null;
                 
@@ -1851,10 +1807,12 @@
                 }
 
                 if (firstErrorInDOM) {
+                    console.log('Défilement vers le premier champ en erreur');
                     firstErrorInDOM.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
 
+            console.log(`\n=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
             return isValid;
         }
 
@@ -2035,7 +1993,9 @@ ${editorContent}`;
         }
 
         function updateMarkdownPreview() {
+            console.log('=== DÉBUT MISE À JOUR DE L\'APERÇU ===');
             const preview = document.querySelector('.restaurant-preview');
+            console.log('Élément preview trouvé:', !!preview);
             
             // Récupérer les valeurs du formulaire
             const title = document.getElementById('title').value || 'Titre du restaurant';
@@ -2220,19 +2180,24 @@ ${editorContent}`;
                     }
                 </div>
             `;
+            
+            console.log('=== FIN MISE À JOUR DE L\'APERÇU ===');
         }
 
         function createImagePreview(file, container, isMainImage = false) {
+            console.log('=== DÉBUT CREATE IMAGE PREVIEW ===', { isMainImage, type: typeof file });
             const div = document.createElement('div');
             div.className = 'image-preview-container';
 
             const deleteButtonHandler = function() {
+                console.log(`Suppression image: ${isMainImage ? 'Principale' : 'Galerie'}`);
                 div.remove();
                 if (isMainImage) {
                     mainImageFile = null;
                 } else {
                     const index = galleryImageFiles.findIndex(item => item === file);
                     if (index > -1) {
+                        console.log(`Suppression de l'index ${index} dans la galerie`);
                         galleryImageFiles.splice(index, 1);
                     }
                 }
@@ -2240,6 +2205,7 @@ ${editorContent}`;
             };
 
             if (file instanceof Blob || file instanceof File) {
+                console.log('createImagePreview: Traitement comme Blob/File');
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     div.innerHTML = `
@@ -2256,6 +2222,7 @@ ${editorContent}`;
                 }
                 reader.readAsDataURL(file);
             } else if (typeof file === 'string') {
+                console.log('createImagePreview: Traitement comme base64');
                 const imgSrc = file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`;
                 div.innerHTML = `
                     <img src="${imgSrc}" class="image-preview" alt="Image preview">
@@ -2268,15 +2235,26 @@ ${editorContent}`;
             } else {
                 console.error("Type de fichier non supporté dans createImagePreview", file);
             }
+            console.log('=== FIN CREATE IMAGE PREVIEW ===');
         }
 
         function updateGalleryPreview() {
+            console.log('=== DÉBUT UPDATE GALLERY PREVIEW ===');
+            console.log('Nombre d\'images dans la galerie:', galleryImageFiles.length);
+            
             const container = document.getElementById('galleryPreview');
             container.innerHTML = '';
             
             galleryImageFiles.forEach((file, index) => {
+                console.log(`Traitement image ${index + 1}:`, {
+                    type: typeof file,
+                    isBlob: file instanceof Blob,
+                    isFile: file instanceof File
+                });
                 createImagePreview(file, container);
             });
+            
+            console.log('=== FIN UPDATE GALLERY PREVIEW ===');
         }
 
         function showLoadingState(button) {
@@ -2505,10 +2483,16 @@ ${editorContent}`;
         // Fonction pour charger un resto
         async function loadDraft(filename) {
             try {
+                console.log('=== DÉBUT DU CHARGEMENT DU RESTAURANT ===');
+                console.log('Fichier à charger:', filename);
+                
                 const repo = 'Natael21/blog-culinaire';
                 
+                // D'abord vérifier dans le localStorage
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                console.log('Drafts dans localStorage:', drafts);
                 const localDraft = drafts.find(d => d.filename === filename);
+                console.log('Draft local trouvé:', localDraft);
 
                 let markdown;
                 let restaurantData = {};
@@ -2516,55 +2500,92 @@ ${editorContent}`;
                 let frontMatter;
 
                 if (localDraft) {
+                    console.log('=== DÉBUT CHARGEMENT DEPUIS LOCALSTORAGE ===');
+                    console.log('Contenu du draft:', {
+                        filename: localDraft.filename,
+                        hasImages: !!localDraft.images,
+                        numberOfImages: localDraft.images?.length || 0
+                    });
+
                     markdown = localDraft.content;
+                    // Extraire le front matter et le contenu
                     const parts = markdown.split('---');
                     if (parts.length >= 3) {
                         frontMatter = parts[1].trim();
                         content = parts[2].trim();
                         
+                        // Parser le front matter pour les drafts locaux
+                        console.log('Parsing du front matter local');
                         frontMatter.split('\n').forEach(line => {
                             const [key, ...value] = line.split(':');
                             if (key && value.length > 0) {
                                 const cleanKey = key.trim();
                                 const cleanValue = value.join(':').trim().replace(/^['"]|['"]$/g, '');
                                 restaurantData[cleanKey] = cleanValue;
+                                console.log(`Front matter - ${cleanKey}: ${cleanValue}`);
                             }
                         });
                     }
 
                     if (localDraft.images && localDraft.images.length > 0) {
+                        console.log('Traitement des images du localStorage');
+                        
+                        // Trouver d'abord l'image principale
                         const mainImg = localDraft.images.find(img => img.name === restaurantData.image.replace('/images/', ''));
                         if (mainImg) {
+                            console.log('Image principale trouvée:', mainImg.name);
                             const imageData = mainImg.data.startsWith('data:image') ? mainImg.data : `data:image/jpeg;base64,${mainImg.data}`;
                             mainImageFile = imageData;
                             handleMainImageUpload(imageData);
                         }
 
+                        // Traiter ensuite les images de la galerie
                         localDraft.images.forEach((img) => {
+                            // Ne pas ajouter l'image principale à la galerie
                             if (img.name !== restaurantData.image.replace('/images/', '')) {
+                                console.log('Ajout image à la galerie:', img.name);
                                 const imageData = img.data.startsWith('data:image') ? img.data : `data:image/jpeg;base64,${img.data}`;
                                 galleryImageFiles.push(imageData);
                             }
                         });
 
+                        console.log('Mise à jour de la prévisualisation de la galerie');
                         updateGalleryPreview();
+                    } else {
+                        console.log('Aucune image trouvée dans le localStorage');
                     }
+                    console.log('=== FIN CHARGEMENT DEPUIS LOCALSTORAGE ===');
                 } else {
+                    // Si pas de draft local, charger depuis GitHub
+                    console.log('Tentative de récupération depuis GitHub');
                     const path = `_posts/${filename}`;
                     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+                    console.log('URL de la requête:', url);
 
                     const response = await fetch(url);
+                    console.log('Statut de la réponse:', response.status);
                     
                     if (!response.ok) {
+                        console.error('Erreur lors de la récupération du fichier:', {
+                            status: response.status,
+                            statusText: response.statusText
+                        });
                         throw new Error('Fichier non trouvé');
                     }
 
                     const data = await response.json();
+                    console.log('Données reçues:', {
+                        type: data.type,
+                        size: data.size,
+                        name: data.name
+                    });
                     markdown = decodeURIComponent(escape(atob(data.content)));
+                    console.log('Contenu markdown décodé:', markdown);
                     
                     frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
 
+                    // Parser le front matter
                     restaurantData = {};
                     frontMatter.split('\n').forEach(line => {
                         const [key, ...value] = line.split(':');
@@ -2572,13 +2593,19 @@ ${editorContent}`;
                             restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
                         }
                     });
+                    console.log('Données du restaurant extraites:', restaurantData);
 
+                    // Charger l'image principale depuis GitHub si elle existe
                     if (restaurantData.image) {
                         const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
+                        console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
+                        console.log('Chemin de l\'image:', imagePath);
                         
                         if (imagePath) {
                             try {
                                 const imageUrl = imagePath;
+                                console.log('URL de l\'image:', imageUrl);
+                                
                                 const response = await fetch(imageUrl);
                                 if (response.ok) {
                                     const blob = await response.blob();
@@ -2586,38 +2613,61 @@ ${editorContent}`;
                                     const file = new File([blob], fileName, { type: 'image/jpeg' });
                                     mainImageFile = file;
                                     handleMainImageUpload(file);
+                                    console.log('Image principale chargée avec succès');
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image principale:', response.status);
                                 }
                             } catch (error) {
-                                // Gérer silencieusement l'erreur
+                                console.error('Erreur lors du chargement de l\'image principale:', error);
                             }
                         }
                     }
 
+                    // Charger les images de la galerie depuis GitHub
                     const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
                     if (galleryMatches) {
+                        console.log('=== CHARGEMENT DES IMAGES DE LA GALERIE ===');
                         const galleryYaml = galleryMatches[0];
+                        console.log('YAML de la galerie:', galleryYaml);
+                        
                         const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
                             ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
+                        console.log('Chemins des images de la galerie trouvés:', galleryPaths);
+                        console.log('Nombre d\'images dans la galerie:', galleryPaths.length);
 
                         galleryImageFiles = [];
                         for (const imagePath of galleryPaths) {
                             try {
+                                console.log(`\nTraitement de l'image: ${imagePath}`);
                                 const imageUrl = imagePath;
+                                console.log('URL de l\'image:', imageUrl);
+                                
                                 const response = await fetch(imageUrl);
                                 if (response.ok) {
                                     const blob = await response.blob();
                                     const fileName = imagePath.split('/').pop();
                                     const file = new File([blob], fileName, { type: 'image/jpeg' });
                                     galleryImageFiles.push(file);
+                                    console.log('Image ajoutée à la galerie avec succès');
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image:', response.status);
                                 }
                             } catch (error) {
-                                // Gérer silencieusement l'erreur
+                                console.error('Erreur lors du chargement de l\'image:', error);
                             }
                         }
+                        console.log('Mise à jour de l\'aperçu de la galerie...');
                         updateGalleryPreview();
+                        console.log('État final de la galerie:', {
+                            nombreImages: galleryImageFiles.length,
+                            nomsFichiers: galleryImageFiles.map(f => f.name)
+                        });
+                        console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
                     }
                 }
 
+                // Remplir les champs du formulaire
+                console.log('Remplissage des champs du formulaire avec:', restaurantData);
                 document.getElementById('state').value = restaurantData.state || 'draft';
                 document.getElementById('title').value = restaurantData.title || '';
                 document.getElementById('date').value = restaurantData.date || '';
@@ -2625,22 +2675,30 @@ ${editorContent}`;
                 document.getElementById('address').value = restaurantData.address || '';
                 document.getElementById('style').value = restaurantData.style || '';
                 
+                // Corriger la gamme de prix
                 const priceMap = {
                     'budget': '$ (0-20$)',
                     'moyen': '$$ (20-40$)',
                     'haut': '$$$ (40$ et +)'
                 };
                 const priceValue = priceMap[restaurantData.price] || restaurantData.price;
+                console.log('Gamme de prix:', { original: restaurantData.price, mapped: priceValue });
                 document.getElementById('price').value = priceValue;
                 
+                // Remplir les options alimentaires
                 const diets = (restaurantData.diet || '').split(',');
+                console.log('Options alimentaires:', diets);
                 document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
                 document.getElementById('vegan').checked = diets.includes('vegan-friendly');
 
+                // Extraire et remplir les notes et commentaires
+                console.log('Extraction des notes et commentaires');
                 const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
                 if (ratingsMatch) {
                     const ratingsYaml = ratingsMatch[0];
+                    console.log('YAML des notes trouvé:', ratingsYaml);
 
+                    // Extraire les scores et commentaires avec une meilleure regex
                     const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
                     const serviceScore = ratingsYaml.match(/service:\n\s*score:\s*(\d+)/)?.[1] || '5';
                     const ambianceScore = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)/)?.[1] || '5';
@@ -2648,8 +2706,10 @@ ${editorContent}`;
                     const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
                     const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
 
+                    // Améliorer l'extraction des commentaires
                     const extractComment = (yaml, category) => {
                         const match = yaml.match(new RegExp(`${category}:[\\s\\S]*?comment:\\s*["']([^"']*)["']`));
+                        console.log(`Extraction du commentaire ${category}:`, match);
                         return match ? match[1] : '';
                     };
 
@@ -2660,6 +2720,16 @@ ${editorContent}`;
                     const originalityComment = extractComment(ratingsYaml, 'originality');
                     const overallComment = extractComment(ratingsYaml, 'overall');
 
+                    console.log('Notes et commentaires extraits:', {
+                        foodScore, foodComment,
+                        serviceScore, serviceComment,
+                        ambianceScore, ambianceComment,
+                        valueScore, valueComment,
+                        originalityScore, originalityComment,
+                        overallScore, overallComment
+                    });
+
+                    // Remplir les scores
                     document.getElementById('foodScore').value = foodScore;
                     document.getElementById('serviceScore').value = serviceScore;
                     document.getElementById('ambianceScore').value = ambianceScore;
@@ -2667,6 +2737,7 @@ ${editorContent}`;
                     document.getElementById('originalityScore').value = originalityScore;
                     document.getElementById('overallExperienceScore').value = overallScore;
 
+                    // Remplir les commentaires
                     document.getElementById('foodComment').value = foodComment;
                     document.getElementById('serviceComment').value = serviceComment;
                     document.getElementById('ambianceComment').value = ambianceComment;
@@ -2674,6 +2745,7 @@ ${editorContent}`;
                     document.getElementById('originalityComment').value = originalityComment;
                     document.getElementById('overallExperienceComment').value = overallComment;
 
+                    // Mettre à jour les affichages des valeurs
                     document.querySelectorAll('.rating-value').forEach(el => {
                         const input = el.previousElementSibling;
                         if (input) {
@@ -2682,44 +2754,37 @@ ${editorContent}`;
                     });
                 }
 
+                // Avant d'initialiser l'éditeur, extraire le contenu
                 const contentMatch = markdown.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
                 const detailedContent = contentMatch ? contentMatch[1].trim() : '';
 
+                // Attendre que l'éditeur soit initialisé
                 await initializeEditor();
 
+                // Remplir l'éditeur avec le contenu
                 if (editor && editor.commands) {
+                    console.log('Remplissage de l\'éditeur avec le contenu');
+                    // Convertir le markdown en HTML pour l'éditeur
                     const htmlContent = detailedContent
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/\n\n/g, '</p><p>')
-                        .replace(/\n/g, '<br>');
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
+                        .replace(/\n\n/g, '</p><p>') // Paragraphes
+                        .replace(/\n/g, '<br>'); // Sauts de ligne
                     editor.commands.setContent(`<p>${htmlContent}</p>`);
                 } else {
+                    console.warn('Éditeur non initialisé, contenu sera chargé plus tard');
                     window.pendingEditorContent = detailedContent;
                 }
 
+                // Mettre à jour l'aperçu
+                console.log('Mise à jour de l\'aperçu');
                 updateMarkdownPreview();
+                console.log('=== FIN DU CHARGEMENT DU RESTAURANT ===');
 
             } catch (error) {
+                console.error('Erreur lors du chargement du restaurant:', error);
                 showNotification('Erreur lors du chargement du restaurant', 'error');
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const filename = urlParams.get('filename');
-            
-            if (filename) {
-                loadDraft(filename);
-            }
-            
-            updatePendingChangesButtons();
-        });
-
-        function updatePendingChangesButtons() {
-            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            const totalChanges = pendingChanges.length + drafts.length;
         }
 
         // Fonction utilitaire pour convertir base64 en Blob
