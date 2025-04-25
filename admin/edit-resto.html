@@ -1973,7 +1973,9 @@ ${editorContent}`;
                 
                 <div class="restaurant-image">
                     ${mainImageFile ? 
-                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
+                        typeof mainImageFile === 'string' ?
+                            `<img src="data:image/jpeg;base64,${mainImageFile}" alt="${title}">` :
+                            `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` :
                         `<i class="fas fa-image"></i>`
                     }
                 </div>
@@ -2049,7 +2051,10 @@ ${editorContent}`;
                     ${galleryImageFiles.length > 0 ? 
                         galleryImageFiles.map(file => `
                             <div class="gallery-image">
-                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
+                                ${typeof file === 'string' ?
+                                    `<img src="data:image/jpeg;base64,${file}" alt="Galerie">` :
+                                    `<img src="${URL.createObjectURL(file)}" alt="Galerie">`
+                                }
                             </div>
                         `).join('') : 
                         `<div class="gallery-image">
