@@ -1011,26 +1011,19 @@ location: ${restaurant.address}
             let loadingOverlay = null;
             
             try {
-                console.log('=== DÉBUT DE LA PUBLICATION DES MODIFICATIONS ===');
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
-                console.log('Modifications en attente:', JSON.stringify(pendingChanges, null, 2));
                 
                 if (pendingChanges.length === 0) {
-                    console.log('Aucune modification en attente');
                     showNotification('Aucune modification en attente', 'info');
                     return;
                 }
 
-                // Afficher le spinner central
                 loadingOverlay = showLoadingOverlay('Publication des modifications en cours...');
 
                 // Filtrer les changements invalides
                 const validChanges = pendingChanges.filter(change => {
                     const isValid = change.type && change.filename && change.path && 
                                   (change.type === 'delete' || (change.content && change.timestamp));
-                    if (!isValid) {
-                        console.warn('Changement invalide ignoré:', change);
-                    }
                     return isValid;
                 });
 
@@ -1038,8 +1031,6 @@ location: ${restaurant.address}
                     throw new Error('Aucun changement valide à publier');
                 }
 
-                // Envoyer les modifications à GitHub
-                console.log('=== ENVOI DES MODIFICATIONS À GITHUB ===');
                 const response = await fetch('/.netlify/functions/publish-changes', {
                     method: 'POST',
                     headers: {
@@ -1050,44 +1041,60 @@ location: ${restaurant.address}
                     })
                 });
 
-                console.log('Réponse de publish-changes:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: Object.fromEntries(response.headers.entries())
-                });
-
                 if (!response.ok) {
                     const errorData = await response.json();
-                    console.error('Erreur détaillée lors de la publication:', {
-                        status: response.status,
-                        error: errorData,
-                        timestamp: new Date().toISOString()
-                    });
                     throw new Error(errorData.error || 'Erreur lors de la publication des modifications');
                 }
 
-                // Vider le localStorage après publication réussie
-                console.log('=== NETTOYAGE DU LOCALSTORAGE ===');
                 localStorage.removeItem('pendingChanges');
                 localStorage.removeItem('upcomingRestaurants');
                 
                 showNotification('Les modifications ont été publiées avec succès', 'success');
                 updatePendingChangesButtons();
                 
-                // Rafraîchir la page après 1.5 secondes
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
             } catch (error) {
-                console.error('Erreur détaillée lors de la publication:', {
-                    message: error.message,
-                    stack: error.stack,
-                    timestamp: new Date().toISOString()
-                });
                 showNotification(error.message || 'Erreur lors de la publication des modifications', 'error');
             } finally {
                 hideLoadingOverlay(loadingOverlay);
-                console.log('=== FIN DE LA PUBLICATION DES MODIFICATIONS ===');
+            }
+        }
+
+        function showLoadingOverlay(message = 'Chargement...') {
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-content">
+                    <div class="loading-icon"></div>
+                    <div class="loading-message">${message}</div>
+                    <div class="loading-submessage">Veuillez patienter pendant le traitement...</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+
+        function hideLoadingOverlay(overlay) {
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        function updatePendingChangesButtons() {
+            const buttons = document.getElementById('pendingChangesButtons');
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+            
+            const hasChanges = (pendingChanges && pendingChanges.length > 0) || 
+                             (drafts && drafts.length > 0);
+            
+            if (buttons) {
+                buttons.style.display = hasChanges ? 'flex' : 'none';
             }
         }
     </script>
