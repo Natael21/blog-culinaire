@@ -1995,6 +1995,41 @@ ${editorContent}`;
             const preview = document.querySelector('.restaurant-preview');
             console.log('Élément preview trouvé:', !!preview);
             
+            // Récupérer les valeurs du formulaire
+            const title = document.getElementById('title').value || 'Titre du restaurant';
+            const date = document.getElementById('date').value || 'Date de visite';
+            const description = document.getElementById('description').value || 'Description du restaurant';
+            const address = document.getElementById('address').value || 'Adresse du restaurant';
+            const style = document.getElementById('style').value || 'Style de cuisine';
+            const price = document.getElementById('price').value || 'Gamme de prix';
+            
+            // Récupérer les scores et commentaires
+            const foodScore = document.getElementById('foodScore').value || '5';
+            const foodComment = document.getElementById('foodComment').value || '';
+            const serviceScore = document.getElementById('serviceScore').value || '5';
+            const serviceComment = document.getElementById('serviceComment').value || '';
+            const ambianceScore = document.getElementById('ambianceScore').value || '5';
+            const ambianceComment = document.getElementById('ambianceComment').value || '';
+            const valueScore = document.getElementById('valueScore').value || '5';
+            const valueComment = document.getElementById('valueComment').value || '';
+            const originalityScore = document.getElementById('originalityScore').value || '5';
+            const originalityComment = document.getElementById('originalityComment').value || '';
+            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+            
+            // Récupérer le contenu de l'éditeur
+            let editorContent = '';
+            if (editor && editor.getHTML) {
+                editorContent = editor.getHTML()
+                    .replace(/<p>/g, '\n\n')
+                    .replace(/<\/p>/g, '')
+                    .replace(/<br>/g, '\n')
+                    .replace(/<strong>/g, '**')
+                    .replace(/<\/strong>/g, '**')
+                    .replace(/<em>/g, '*')
+                    .replace(/<\/em>/g, '*');
+            }
+            
             // Log de l'état des images
             console.log('État des images:', {
                 mainImage: {
@@ -2010,8 +2045,6 @@ ${editorContent}`;
                     base64Count: galleryImageFiles.filter(f => typeof f === 'string').length
                 }
             });
-            
-            // ... reste du code de récupération des valeurs du formulaire ...
             
             // Créer le HTML de l'aperçu
             preview.innerHTML = `
