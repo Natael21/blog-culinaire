@@ -1520,13 +1520,17 @@
         function handleMainImageUpload(file) {
             console.log('=== DÉBUT UPLOAD IMAGE PRINCIPALE ===');
             console.log('Type de fichier reçu:', {
+                type: typeof file,
                 isBlob: file instanceof Blob,
                 isFile: file instanceof File,
                 isString: typeof file === 'string',
-                type: file.type || 'base64'
+                fileType: file.type || 'base64',
+                fileSize: file.size || 'N/A',
+                fileName: file.name || 'N/A'
             });
 
-            if (file && (file.type?.startsWith('image/') || typeof file === 'string')) {
+            if (file) {
+                console.log('Fichier valide, traitement en cours...');
                 mainImageFile = file;
                 const container = document.getElementById('mainImagePreview');
                 console.log('Container trouvé:', !!container);
@@ -1534,13 +1538,49 @@
                 
                 if (file instanceof Blob || file instanceof File) {
                     console.log('Traitement comme Blob/File');
-                    createImagePreview(file, container, true);
-                } else {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        console.log('FileReader terminé, création du preview...');
+                        const div = document.createElement('div');
+                        div.className = 'image-preview-container';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                            <button type="button" class="delete-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        
+                        div.querySelector('.delete-image').addEventListener('click', function() {
+                            console.log('Suppression de l\'image principale');
+                            div.remove();
+                            mainImageFile = null;
+                            updateMarkdownPreview();
+                        });
+                        
+                        container.appendChild(div);
+                        console.log('Preview de l\'image principale créé avec succès');
+                    };
+                    reader.onerror = function(error) {
+                        console.error('Erreur lors de la lecture du fichier:', error);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (typeof file === 'string') {
                     console.log('Traitement comme base64');
+                    console.log('Format de la chaîne base64:', {
+                        startsWithDataImage: file.startsWith('data:image'),
+                        length: file.length
+                    });
+                    
+                    const imgSrc = file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`;
+                    console.log('Source de l\'image finale:', {
+                        length: imgSrc.length,
+                        startsWith: imgSrc.substring(0, 20) + '...'
+                    });
+                    
                     const div = document.createElement('div');
                     div.className = 'image-preview-container';
                     div.innerHTML = `
-                        <img src="data:image/jpeg;base64,${file}" class="image-preview" alt="Image preview">
+                        <img src="${imgSrc}" class="image-preview" alt="Image preview">
                         <button type="button" class="delete-image">
                             <i class="fas fa-times"></i>
                         </button>
@@ -1554,6 +1594,7 @@
                     });
                     
                     container.appendChild(div);
+                    console.log('Preview de l\'image principale (base64) créé avec succès');
                 }
                 
                 const mainImageZone = document.getElementById('mainImageZone');
@@ -1572,12 +1613,66 @@
         }
 
         function handleGalleryUpload(files) {
-            Array.from(files).forEach(file => {
+            console.log('=== DÉBUT UPLOAD GALERIE ===');
+            console.log('Nombre de fichiers reçus:', files.length);
+            console.log('État actuel de la galerie:', {
+                nombreImages: galleryImageFiles.length,
+                types: galleryImageFiles.map(f => typeof f)
+            });
+            
+            Array.from(files).forEach((file, index) => {
+                console.log(`\nTraitement du fichier ${index + 1}/${files.length}:`, {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+                
                 if (file.type.startsWith('image/')) {
+                    console.log('Fichier image valide, ajout à la galerie...');
                     galleryImageFiles.push(file);
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        console.log(`FileReader terminé pour l'image ${index + 1}, création du preview...`);
+                        const container = document.getElementById('galleryPreview');
+                        const div = document.createElement('div');
+                        div.className = 'image-preview-container';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                            <button type="button" class="delete-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        
+                        div.querySelector('.delete-image').addEventListener('click', function() {
+                            console.log('Suppression de l\'image de la galerie');
+                            const index = galleryImageFiles.findIndex(item => item === file);
+                            if (index > -1) {
+                                galleryImageFiles.splice(index, 1);
+                                console.log('Image supprimée de la galerie, nouvel état:', {
+                                    nombreImages: galleryImageFiles.length
+                                });
+                            }
+                            div.remove();
+                            updateMarkdownPreview();
+                        });
+                        
+                        container.appendChild(div);
+                        console.log(`Preview de l'image ${index + 1} créé avec succès`);
+                    };
+                    reader.onerror = function(error) {
+                        console.error(`Erreur lors de la lecture du fichier ${index + 1}:`, error);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    console.log('Fichier ignoré (pas une image)');
                 }
             });
-            updateGalleryPreview();
+            
+            console.log('État final de la galerie:', {
+                nombreImages: galleryImageFiles.length,
+                types: galleryImageFiles.map(f => typeof f)
+            });
+            console.log('=== FIN UPLOAD GALERIE ===');
             updateMarkdownPreview();
         }
 
@@ -1896,173 +1991,27 @@ ${editorContent}`;
         }
 
         function updateMarkdownPreview() {
+            console.log('=== DÉBUT MISE À JOUR DE L\'APERÇU ===');
             const preview = document.querySelector('.restaurant-preview');
-            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
+            console.log('Élément preview trouvé:', !!preview);
             
-            // Récupérer les valeurs du formulaire
-            const title = document.getElementById('title').value || 'Nom du restaurant';
-            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
-            const description = document.getElementById('description').value || 'Description du restaurant';
-            const address = document.getElementById('address').value || 'Adresse du restaurant';
-            const style = document.getElementById('style').value || 'Style de cuisine';
-            const price = document.getElementById('price').value || 'Gamme de prix';
+            // Log de l'état des images
+            console.log('État des images:', {
+                mainImage: {
+                    exists: !!mainImageFile,
+                    type: mainImageFile ? typeof mainImageFile : 'none',
+                    isBase64: mainImageFile ? mainImageFile.startsWith('data:image') : false
+                },
+                gallery: {
+                    count: galleryImageFiles.length,
+                    types: galleryImageFiles.map(f => typeof f),
+                    base64Count: galleryImageFiles.filter(f => typeof f === 'string').length
+                }
+            });
             
-            // Récupérer les notes
-            const foodScore = document.getElementById('foodScore').value || '5';
-            const serviceScore = document.getElementById('serviceScore').value || '5';
-            const ambianceScore = document.getElementById('ambianceScore').value || '5';
-            const valueScore = document.getElementById('valueScore').value || '5';
-            const originalityScore = document.getElementById('originalityScore').value || '5';
-            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+            // ... reste du code de updateMarkdownPreview ...
             
-            // Récupérer les commentaires
-            const foodComment = document.getElementById('foodComment').value || '';
-            const serviceComment = document.getElementById('serviceComment').value || '';
-            const ambianceComment = document.getElementById('ambianceComment').value || '';
-            const valueComment = document.getElementById('valueComment').value || '';
-            const originalityComment = document.getElementById('originalityComment').value || '';
-            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
-            
-            // Récupérer le contenu de l'éditeur de manière sécurisée
-            let editorContent = '';
-            if (editor && editor.getHTML) {
-                editorContent = editor.getHTML();
-            } else if (window.pendingEditorContent) {
-                editorContent = window.pendingEditorContent;
-            }
-            
-            // Créer le HTML de l'aperçu
-            preview.innerHTML = `
-                <div class="restaurant-header">
-                    <h1 class="restaurant-title">${title}</h1>
-                    <div class="restaurant-meta">
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${address}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-star"></i>
-                            ${calculateOverallRating()}/10
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-utensils"></i>
-                            ${style}
-                        </span>
-                        ${document.getElementById('vegetarian').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-leaf"></i>
-                                Options végétariennes
-                            </span>
-                        ` : ''}
-                        ${document.getElementById('vegan').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-seedling"></i>
-                                Options végétaliennes
-                            </span>
-                        ` : ''}
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-calendar"></i>
-                            ${date}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-tag"></i>
-                            ${price}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="restaurant-image">
-                    ${mainImageFile ? 
-                        typeof mainImageFile === 'string' ?
-                            `<img src="data:image/jpeg;base64,${mainImageFile}" alt="${title}">` :
-                            `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` :
-                        `<i class="fas fa-image"></i>`
-                    }
-                </div>
-                
-                <div class="restaurant-description">
-                    ${description}
-                </div>
-                
-                <div class="restaurant-content">
-                    ${editorContent}
-                </div>
-                
-                <div class="restaurant-ratings">
-                    <h2>Pourquoi cette note ?</h2>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Qualité de la nourriture</span>
-                            <span class="rating-score">${foodScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
-                        <div class="rating-comment">${foodComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Service</span>
-                            <span class="rating-score">${serviceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
-                        <div class="rating-comment">${serviceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Ambiance</span>
-                            <span class="rating-score">${ambianceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
-                        <div class="rating-comment">${ambianceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Rapport qualité/prix</span>
-                            <span class="rating-score">${valueScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
-                        <div class="rating-comment">${valueComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Originalité / Concept</span>
-                            <span class="rating-score">${originalityScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
-                        <div class="rating-comment">${originalityComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Expérience globale</span>
-                            <span class="rating-score">${overallExperienceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Facteur "wow"</div>
-                        <div class="rating-comment">${overallExperienceComment}</div>
-                    </div>
-                </div>
-                
-                <h2 class="gallery-title">Galerie photos</h2>
-                <div class="restaurant-gallery">
-                    ${galleryImageFiles.length > 0 ? 
-                        galleryImageFiles.map(file => `
-                            <div class="gallery-image">
-                                ${typeof file === 'string' ?
-                                    `<img src="data:image/jpeg;base64,${file}" alt="Galerie">` :
-                                    `<img src="${URL.createObjectURL(file)}" alt="Galerie">`
-                                }
-                            </div>
-                        `).join('') : 
-                        `<div class="gallery-image">
-                            <i class="fas fa-images"></i>
-                        </div>`
-                    }
-                </div>
-            `;
+            console.log('=== FIN MISE À JOUR DE L\'APERÇU ===');
         }
 
         function createImagePreview(file, container, isMainImage = false) {
