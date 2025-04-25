@@ -2534,6 +2534,7 @@ ${editorContent}`;
                                 dataLength: img.data.length
                             });
 
+                            // Utiliser directement la chaîne base64 pour les images
                             const imageData = img.data.startsWith('data:image') ? img.data : `data:image/jpeg;base64,${img.data}`;
 
                             if (img.isMain) {
