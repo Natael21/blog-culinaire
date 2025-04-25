@@ -868,9 +868,8 @@ title: Administration - Blog Culinaire
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 const deletedImages = JSON.parse(localStorage.getItem('deletedImages') || '[]');
-                const upcomingRestaurants = JSON.parse(localStorage.getItem('upcomingRestaurants') || '[]');
                 
-                if (pendingChanges.length === 0 && drafts.length === 0 && deletedImages.length === 0 && upcomingRestaurants.length === 0) {
+                if (pendingChanges.length === 0 && drafts.length === 0 && deletedImages.length === 0) {
                     showNotification('Aucune modification en attente', 'error');
                     return;
                 }
@@ -900,16 +899,6 @@ title: Administration - Blog Culinaire
                         filename: `images/${image}`,
                         path: `images/${image}`,
                         isImage: true
-                    });
-                });
-
-                // Ajouter les restaurants à venir
-                upcomingRestaurants.forEach(restaurant => {
-                    changes.push({
-                        type: restaurant.action || 'create', // Utiliser l'action spécifiée ou 'create' par défaut
-                        filename: restaurant.filename,
-                        content: restaurant.content,
-                        images: restaurant.images
                     });
                 });
 
