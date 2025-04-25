@@ -1521,14 +1521,26 @@
 
         function handleMainImageUpload(file) {
             console.log('=== DÉBUT UPLOAD IMAGE PRINCIPALE ===');
-            console.log('Type de fichier reçu:', {
+            console.log('État initial:', {
+                mainImageFile: mainImageFile ? {
+                    type: typeof mainImageFile,
+                    isBlob: mainImageFile instanceof Blob,
+                    isFile: mainImageFile instanceof File,
+                    isString: typeof mainImageFile === 'string',
+                    name: mainImageFile.name || 'N/A',
+                    size: mainImageFile.size || 'N/A'
+                } : null
+            });
+
+            console.log('Fichier reçu:', {
                 type: typeof file,
                 isBlob: file instanceof Blob,
                 isFile: file instanceof File,
                 isString: typeof file === 'string',
                 fileType: file.type || 'base64',
                 fileSize: file.size || 'N/A',
-                fileName: file.name || 'N/A'
+                fileName: file.name || 'N/A',
+                startsWithDataImage: typeof file === 'string' ? file.startsWith('data:image') : 'N/A'
             });
 
             if (file) {
@@ -1538,66 +1550,56 @@
                 console.log('Container trouvé:', !!container);
                 container.innerHTML = '';
                 
-                if (file instanceof Blob || file instanceof File) {
-                    console.log('Traitement comme Blob/File');
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        console.log('FileReader terminé, création du preview...');
-                        const div = document.createElement('div');
-                        div.className = 'image-preview-container';
-                        div.innerHTML = `
-                            <img src="${e.target.result}" class="image-preview" alt="Image preview">
-                            <button type="button" class="delete-image">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-                        
-                        div.querySelector('.delete-image').addEventListener('click', function() {
-                            console.log('Suppression de l\'image principale');
-                            div.remove();
-                            mainImageFile = null;
-                            updateMarkdownPreview();
-                        });
-                        
-                        container.appendChild(div);
-                        console.log('Preview de l\'image principale créé avec succès');
-                    };
-                    reader.onerror = function(error) {
-                        console.error('Erreur lors de la lecture du fichier:', error);
-                    };
-                    reader.readAsDataURL(file);
-                } else if (typeof file === 'string') {
-                    console.log('Traitement comme base64');
-                    console.log('Format de la chaîne base64:', {
-                        startsWithDataImage: file.startsWith('data:image'),
-                        length: file.length
-                    });
-                    
-                    const imgSrc = file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`;
-                    console.log('Source de l\'image finale:', {
-                        length: imgSrc.length,
-                        startsWith: imgSrc.substring(0, 20) + '...'
-                    });
-                    
-                    const div = document.createElement('div');
-                    div.className = 'image-preview-container';
-                    div.innerHTML = `
-                        <img src="${imgSrc}" class="image-preview" alt="Image preview">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    
-                    div.querySelector('.delete-image').addEventListener('click', function() {
-                        console.log('Suppression de l\'image principale');
-                        div.remove();
-                        mainImageFile = null;
-                        updateMarkdownPreview();
-                    });
-                    
-                    container.appendChild(div);
-                    console.log('Preview de l\'image principale (base64) créé avec succès');
+                let imageSrc;
+                if (typeof file === 'string') {
+                    console.log('Traitement comme base64/URL');
+                    if (file.startsWith('data:image')) {
+                        console.log('Format base64 déjà correct');
+                        imageSrc = file;
+                    } else if (file.startsWith('http')) {
+                        console.log('URL GitHub détectée');
+                        imageSrc = file;
+                    } else {
+                        console.log('Conversion en base64');
+                        imageSrc = `data:image/jpeg;base64,${file}`;
+                    }
+                } else if (file instanceof File) {
+                    console.log('Traitement comme nouveau fichier');
+                    imageSrc = URL.createObjectURL(file);
+                    console.log('URL créée:', imageSrc);
+                } else {
+                    console.error('Type de fichier non supporté:', file);
+                    return;
                 }
+
+                console.log('Création du preview avec source:', {
+                    type: typeof imageSrc,
+                    length: imageSrc.length,
+                    preview: imageSrc.substring(0, 50) + '...'
+                });
+
+                const div = document.createElement('div');
+                div.className = 'image-preview-container';
+                div.innerHTML = `
+                    <img src="${imageSrc}" class="image-preview" alt="Image preview">
+                    <button type="button" class="delete-image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                div.querySelector('.delete-image').addEventListener('click', function() {
+                    console.log('Suppression de l\'image principale');
+                    if (file instanceof File) {
+                        console.log('Libération de l\'URL:', imageSrc);
+                        URL.revokeObjectURL(imageSrc);
+                    }
+                    div.remove();
+                    mainImageFile = null;
+                    updateMarkdownPreview();
+                });
+                
+                container.appendChild(div);
+                console.log('Preview de l\'image principale créé avec succès');
                 
                 const mainImageZone = document.getElementById('mainImageZone');
                 mainImageZone.classList.remove('show-error');
@@ -1616,55 +1618,99 @@
 
         function handleGalleryUpload(files) {
             console.log('=== DÉBUT UPLOAD GALERIE ===');
-            console.log('Nombre de fichiers reçus:', files.length);
-            console.log('État actuel de la galerie:', {
+            console.log('État initial de la galerie:', {
                 nombreImages: galleryImageFiles.length,
-                types: galleryImageFiles.map(f => typeof f)
+                types: galleryImageFiles.map(f => ({
+                    type: typeof f,
+                    isBlob: f instanceof Blob,
+                    isFile: f instanceof File,
+                    isString: typeof f === 'string',
+                    name: f.name || 'N/A',
+                    size: f.size || 'N/A'
+                }))
+            });
+
+            console.log('Fichiers reçus:', {
+                nombre: files.length,
+                details: Array.from(files).map(f => ({
+                    name: f.name,
+                    type: f.type,
+                    size: f.size
+                }))
             });
             
             Array.from(files).forEach((file, index) => {
-                console.log(`\nTraitement du fichier ${index + 1}/${files.length}:`, {
+                console.log(`\nTraitement du fichier ${index + 1}:`, {
                     name: file.name,
                     type: file.type,
-                    size: file.size
+                    size: file.size,
+                    isBlob: file instanceof Blob,
+                    isFile: file instanceof File,
+                    isString: typeof file === 'string'
                 });
                 
                 if (file.type.startsWith('image/')) {
                     console.log('Fichier image valide, ajout à la galerie...');
                     galleryImageFiles.push(file);
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        console.log(`FileReader terminé pour l'image ${index + 1}, création du preview...`);
-                        const container = document.getElementById('galleryPreview');
-                        const div = document.createElement('div');
-                        div.className = 'image-preview-container';
-                        div.innerHTML = `
-                            <img src="${e.target.result}" class="image-preview" alt="Image preview">
-                            <button type="button" class="delete-image">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-                        
-                        div.querySelector('.delete-image').addEventListener('click', function() {
-                            console.log('Suppression de l\'image de la galerie');
-                            const index = galleryImageFiles.findIndex(item => item === file);
-                            if (index > -1) {
-                                galleryImageFiles.splice(index, 1);
-                                console.log('Image supprimée de la galerie, nouvel état:', {
-                                    nombreImages: galleryImageFiles.length
-                                });
-                            }
-                            div.remove();
-                            updateMarkdownPreview();
-                        });
-                        
-                        container.appendChild(div);
-                        console.log(`Preview de l'image ${index + 1} créé avec succès`);
-                    };
-                    reader.onerror = function(error) {
-                        console.error(`Erreur lors de la lecture du fichier ${index + 1}:`, error);
-                    };
-                    reader.readAsDataURL(file);
+                    const container = document.getElementById('galleryPreview');
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-container';
+                    
+                    let imageSrc;
+                    if (typeof file === 'string') {
+                        console.log('Traitement comme base64/URL');
+                        if (file.startsWith('data:image')) {
+                            console.log('Format base64 déjà correct');
+                            imageSrc = file;
+                        } else if (file.startsWith('http')) {
+                            console.log('URL GitHub détectée');
+                            imageSrc = file;
+                        } else {
+                            console.log('Conversion en base64');
+                            imageSrc = `data:image/jpeg;base64,${file}`;
+                        }
+                    } else if (file instanceof File) {
+                        console.log('Traitement comme nouveau fichier');
+                        imageSrc = URL.createObjectURL(file);
+                        console.log('URL créée:', imageSrc);
+                    } else {
+                        console.error('Type de fichier non supporté:', file);
+                        return;
+                    }
+
+                    console.log('Création du preview avec source:', {
+                        type: typeof imageSrc,
+                        length: imageSrc.length,
+                        preview: imageSrc.substring(0, 50) + '...'
+                    });
+                    
+                    div.innerHTML = `
+                        <img src="${imageSrc}" class="image-preview" alt="Image preview">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    div.querySelector('.delete-image').addEventListener('click', function() {
+                        console.log('Suppression de l\'image de la galerie');
+                        if (file instanceof File) {
+                            console.log('Libération de l\'URL:', imageSrc);
+                            URL.revokeObjectURL(imageSrc);
+                        }
+                        const index = galleryImageFiles.findIndex(item => item === file);
+                        if (index > -1) {
+                            galleryImageFiles.splice(index, 1);
+                            console.log('Image supprimée de la galerie, nouvel état:', {
+                                nombreImages: galleryImageFiles.length,
+                                types: galleryImageFiles.map(f => typeof f)
+                            });
+                        }
+                        div.remove();
+                        updateMarkdownPreview();
+                    });
+                    
+                    container.appendChild(div);
+                    console.log(`Preview de l'image ${index + 1} créé avec succès`);
                 } else {
                     console.log('Fichier ignoré (pas une image)');
                 }
@@ -1672,11 +1718,49 @@
             
             console.log('État final de la galerie:', {
                 nombreImages: galleryImageFiles.length,
-                types: galleryImageFiles.map(f => typeof f)
+                types: galleryImageFiles.map(f => ({
+                    type: typeof f,
+                    isBlob: f instanceof Blob,
+                    isFile: f instanceof File,
+                    isString: typeof f === 'string',
+                    name: f.name || 'N/A',
+                    size: f.size || 'N/A'
+                }))
             });
             console.log('=== FIN UPLOAD GALERIE ===');
             updateMarkdownPreview();
         }
+
+        function revokeObjectURLs() {
+            console.log('=== DÉBUT NETTOYAGE DES URLs ===');
+            console.log('État avant nettoyage:', {
+                mainImage: mainImageFile ? {
+                    type: typeof mainImageFile,
+                    isFile: mainImageFile instanceof File
+                } : null,
+                gallery: {
+                    count: galleryImageFiles.length,
+                    files: galleryImageFiles.filter(f => f instanceof File).length
+                }
+            });
+
+            if (mainImageFile && mainImageFile instanceof File) {
+                console.log('Libération de l\'URL de l\'image principale');
+                URL.revokeObjectURL(mainImageFile);
+            }
+
+            galleryImageFiles.forEach((file, index) => {
+                if (file instanceof File) {
+                    console.log(`Libération de l\'URL de l\'image ${index + 1} de la galerie`);
+                    URL.revokeObjectURL(file);
+                }
+            });
+
+            console.log('=== FIN NETTOYAGE DES URLs ===');
+        }
+
+        // Appeler revokeObjectURLs lors du chargement d'une nouvelle page
+        window.addEventListener('beforeunload', revokeObjectURLs);
 
         function validateForm() {
             console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
@@ -2146,7 +2230,7 @@ ${editorContent}`;
                     
                     <div class="rating-category">
                         <div class="rating-header">
-                            <span class="rating-title">Originalité / Concept</span>
+                            <span class="rating-title">Originalité</span>
                             <span class="rating-score">${originalityScore}/10</span>
                         </div>
                         <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
