@@ -1164,10 +1164,12 @@
         // Fonction pour initialiser l'éditeur
         function initializeEditor() {
             console.log('=== DÉBUT INITIALISATION ÉDITEUR ===');
-            console.log('État actuel:', {
+            console.log('État avant initialisation:', {
                 editorInitialized,
                 editorExists: !!editor,
-                editorElement: !!document.querySelector('#editor')
+                editorElement: !!document.querySelector('#editor'),
+                mainImageFile: !!mainImageFile,
+                galleryImagesCount: galleryImageFiles.length
             });
 
             return new Promise((resolve) => {
