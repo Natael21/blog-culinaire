@@ -1437,6 +1437,91 @@
             updateMarkdownPreview();
         });
 
+        // Fonction pour initialiser l'éditeur
+        function initializeEditor(initialContent = '') {
+            console.log('=== DÉBUT INITIALISATION ÉDITEUR ===');
+            console.log('État avant initialisation:', {
+                editorInitialized,
+                editorExists: !!editor,
+                editorElement: !!document.querySelector('#editor'),
+                hasInitialContent: !!initialContent
+            });
+
+            return new Promise((resolve) => {
+                if (editorInitialized && editor) {
+                    console.log('Éditeur déjà initialisé, mise à jour du contenu si nécessaire');
+                    if (initialContent) {
+                        editor.commands.setContent(initialContent);
+                    }
+                    resolve(editor);
+                    return;
+                }
+
+                if (editor) {
+                    console.log('Instance précédente d\'éditeur trouvée, destruction...');
+                    editor.destroy();
+                    console.log('Instance précédente détruite');
+                }
+
+                console.log('Création d\'une nouvelle instance d\'éditeur');
+                editor = new Editor({
+                    element: document.querySelector('#editor'),
+                    extensions: [
+                        Document,
+                        Paragraph,
+                        Text,
+                        Bold,
+                        Italic,
+                        BulletList,
+                        OrderedList,
+                        ListItem
+                    ],
+                    content: initialContent,
+                    editable: true,
+                    onReady: () => {
+                        console.log('Éditeur prêt');
+                        editorInitialized = true;
+                        resolve(editor);
+                    },
+                    onUpdate: ({ editor }) => {
+                        console.log('Mise à jour de l\'éditeur détectée');
+                        updateMarkdownPreview();
+                    }
+                });
+
+                console.log('Configuration des boutons de la barre d\'outils');
+                document.querySelectorAll('.editor-toolbar button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const command = button.dataset.command;
+                        console.log('Clic sur bouton:', command);
+                        editor.chain().focus();
+                        
+                        switch(command) {
+                            case 'bold':
+                                editor.chain().toggleBold().run();
+                                break;
+                            case 'italic':
+                                editor.chain().toggleItalic().run();
+                                break;
+                            case 'bulletList':
+                                editor.chain().toggleBulletList().run();
+                                break;
+                            case 'orderedList':
+                                editor.chain().toggleOrderedList().run();
+                                break;
+                        }
+                        
+                        button.classList.toggle('is-active', editor.isActive(command));
+                    });
+
+                    const command = button.dataset.command;
+                    button.classList.toggle('is-active', editor.isActive(command));
+                });
+                console.log('=== FIN INITIALISATION ÉDITEUR ===');
+            });
+        }
+
         async function searchAddress(query) {
             try {
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
