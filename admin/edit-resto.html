@@ -2367,7 +2367,6 @@ ${editorContent}`;
                             const cleanKey = key.trim();
                             const cleanValue = value.join(':').trim().replace(/^['"]|['"]$/g, '');
                             restaurantData[cleanKey] = cleanValue;
-                            console.log(`Front matter - ${cleanKey}: ${cleanValue}`);
                         }
                     });
                 }
@@ -2522,6 +2521,17 @@ ${editorContent}`;
                 <!-- Informations de base -->
                 <div class="form-section">
                     <h2 class="form-section-title">Informations de base</h2>
+                    <div class="form-group">
+                        <label for="state" class="form-label">État du restaurant</label>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="state" name="state" required>
+                                <option value="draft">Draft</option>
+                                <option value="ready">Ready</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner l'état du restaurant</div>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="title" class="form-label">Nom du restaurant</label>
                         <div class="input-wrapper">
