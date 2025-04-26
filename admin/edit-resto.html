@@ -1347,53 +1347,53 @@
                 console.error('Formulaire non trouvé !');
             }
 
-            editor = new Editor({
-                element: document.querySelector('#editor'),
-                extensions: [
-                    Document,
-                    Paragraph,
-                    Text,
-                    Bold,
-                    Italic,
-                    BulletList,
-                    OrderedList,
-                    ListItem
-                ],
-                content: '',
-                editable: true,
-                onUpdate: ({ editor }) => {
-                    updateMarkdownPreview();
-                }
-            });
+            //editor = new Editor({
+            //    element: document.querySelector('#editor'),
+            //    extensions: [
+            //        Document,
+            //        Paragraph,
+            //        Text,
+            //        Bold,
+            //        Italic,
+            //        BulletList,
+            //        OrderedList,
+            //        ListItem
+            //    ],
+            //    content: '',
+            //    editable: true,
+            //    onUpdate: ({ editor }) => {
+            //        updateMarkdownPreview();
+            //    }
+            //});
 
-            // Gérer les boutons de la barre d'outils
-            document.querySelectorAll('.editor-toolbar button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const command = button.dataset.command;
-                    editor.chain().focus();
-                    
-                    switch(command) {
-                        case 'bold':
-                            editor.chain().toggleBold().run();
-                            break;
-                        case 'italic':
-                            editor.chain().toggleItalic().run();
-                            break;
-                        case 'bulletList':
-                            editor.chain().toggleBulletList().run();
-                            break;
-                        case 'orderedList':
-                            editor.chain().toggleOrderedList().run();
-                            break;
-                    }
-                    
-                    button.classList.toggle('is-active', editor.isActive(command));
-                });
-
-                const command = button.dataset.command;
-                button.classList.toggle('is-active', editor.isActive(command));
-            });
+            //// Gérer les boutons de la barre d'outils
+            //document.querySelectorAll('.editor-toolbar button').forEach(button => {
+            //    button.addEventListener('click', (e) => {
+            //        e.preventDefault();
+            //        const command = button.dataset.command;
+            //        editor.chain().focus();
+            //        
+            //        switch(command) {
+            //            case 'bold':
+            //                editor.chain().toggleBold().run();
+            //                break;
+            //            case 'italic':
+            //                editor.chain().toggleItalic().run();
+            //                break;
+            //            case 'bulletList':
+            //                editor.chain().toggleBulletList().run();
+            //                break;
+            //            case 'orderedList':
+            //                editor.chain().toggleOrderedList().run();
+            //                break;
+            //        }
+            //        
+            //        button.classList.toggle('is-active', editor.isActive(command));
+            //    });
+//
+            //    const command = button.dataset.command;
+            //    button.classList.toggle('is-active', editor.isActive(command));
+            //});
 
             // Initialiser les autres fonctionnalités
             initializeAddressAutocomplete();
