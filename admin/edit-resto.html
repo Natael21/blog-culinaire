@@ -2475,11 +2475,12 @@ ${editorContent}`;
         document.addEventListener('DOMContentLoaded', () => {
             // Vérifier si on charge un brouillon existant
             const urlParams = new URLSearchParams(window.location.search);
-            const draftFilename = urlParams.get('draft');
+            const filename = urlParams.get('filename');
             
-            if (draftFilename) {
-                filename = draftFilename;
-                loadDraft(draftFilename);
+            if (filename) {
+                loadDraft(filename);
+            } else {
+                console.log('Aucun fichier spécifié, création d\'un nouveau restaurant');
             }
             
             // Mettre à jour les boutons
