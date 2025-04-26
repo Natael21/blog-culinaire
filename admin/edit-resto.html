@@ -2033,196 +2033,121 @@ ${editorContent}`;
             return average;
         }
 
-        function updateMarkdownPreview() {
-            console.log('=== DÉBUT MISE À JOUR DE L\'APERÇU ===');
-            const preview = document.querySelector('.restaurant-preview');
-            console.log('Élément preview trouvé:', !!preview);
-            
-            // Récupérer les valeurs du formulaire
-            const title = document.getElementById('title').value || 'Titre du restaurant';
-            const date = document.getElementById('date').value || 'Date de visite';
-            const description = document.getElementById('description').value || 'Description du restaurant';
-            const address = document.getElementById('address').value || 'Adresse du restaurant';
-            const style = document.getElementById('style').value || 'Style de cuisine';
-            const price = document.getElementById('price').value || 'Gamme de prix';
-            
-            // Récupérer les scores et commentaires
-            const foodScore = document.getElementById('foodScore').value || '5';
-            const foodComment = document.getElementById('foodComment').value || '';
-            const serviceScore = document.getElementById('serviceScore').value || '5';
-            const serviceComment = document.getElementById('serviceComment').value || '';
-            const ambianceScore = document.getElementById('ambianceScore').value || '5';
-            const ambianceComment = document.getElementById('ambianceComment').value || '';
-            const valueScore = document.getElementById('valueScore').value || '5';
-            const valueComment = document.getElementById('valueComment').value || '';
-            const originalityScore = document.getElementById('originalityScore').value || '5';
-            const originalityComment = document.getElementById('originalityComment').value || '';
-            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
-            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
-            
-            // Récupérer le contenu de l'éditeur
-            let editorContent = '';
-            if (editor && editor.getHTML) {
-                editorContent = editor.getHTML()
-                    .replace(/<p>/g, '\n\n')
-                    .replace(/<\/p>/g, '')
-                    .replace(/<br>/g, '\n')
-                    .replace(/<strong>/g, '**')
-                    .replace(/<\/strong>/g, '**')
-                    .replace(/<em>/g, '*')
-                    .replace(/<\/em>/g, '*');
-            }
-            
-            // Log de l'état des images
+        async function updateMarkdownPreview() {
+            console.log('=== DÉBUT UPDATE MARKDOWN PREVIEW ===');
             console.log('État des images:', {
-                mainImage: {
-                    exists: !!mainImageFile,
-                    type: mainImageFile ? typeof mainImageFile : 'none',
-                    isFile: mainImageFile instanceof File,
-                    isBlob: mainImageFile instanceof Blob,
-                    isString: typeof mainImageFile === 'string'
-                },
-                gallery: {
-                    count: galleryImageFiles.length,
-                    types: galleryImageFiles.map(f => typeof f),
-                    base64Count: galleryImageFiles.filter(f => typeof f === 'string').length
-                }
+                mainImage: mainImageFile ? {
+                    type: typeof mainImageFile,
+                    isString: typeof mainImageFile === 'string',
+                    startsWithDataImage: typeof mainImageFile === 'string' ? mainImageFile.startsWith('data:image') : false
+                } : null,
+                galleryImages: galleryImageFiles.map(img => ({
+                    type: typeof img,
+                    isString: typeof img === 'string',
+                    startsWithDataImage: typeof img === 'string' ? img.startsWith('data:image') : false
+                }))
             });
-            
-            // Créer le HTML de l'aperçu
-            preview.innerHTML = `
-                <div class="restaurant-header">
-                    <h1 class="restaurant-title">${title}</h1>
-                    <div class="restaurant-meta">
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${address}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-star"></i>
-                            ${calculateOverallRating()}/10
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-utensils"></i>
-                            ${style}
-                        </span>
-                        ${document.getElementById('vegetarian').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-leaf"></i>
-                                Options végétariennes
-                            </span>
-                        ` : ''}
-                        ${document.getElementById('vegan').checked ? `
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-seedling"></i>
-                                Options végétaliennes
-                            </span>
-                        ` : ''}
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-calendar"></i>
-                            ${date}
-                        </span>
-                        <span class="restaurant-meta-item">
-                            <i class="fas fa-tag"></i>
-                            ${price}
-                        </span>
-                    </div>
-                </div>
+
+            const preview = document.getElementById('markdownPreview');
+            if (!preview) {
+                console.error('Élément markdownPreview non trouvé');
+                return;
+            }
+
+            try {
+                // Récupérer les données du formulaire
+                const formData = getFormData();
+                console.log('Données du formulaire:', formData);
+
+                // Construire le front matter
+                let frontMatter = '---\n';
+                frontMatter += `layout: ${formData.layout}\n`;
+                frontMatter += `title: '${formData.title}'\n`;
+                frontMatter += `date: ${formData.date}\n`;
+                frontMatter += `state: ${formData.state}\n`;
+                frontMatter += `note: ${formData.note}\n`;
+                frontMatter += `style: ${formData.style}\n`;
                 
-                <div class="restaurant-image">
-                    ${mainImageFile ? 
-                        (typeof mainImageFile === 'string' ? 
-                            `<img src="${mainImageFile.startsWith('data:image') ? mainImageFile : `data:image/jpeg;base64,${mainImageFile}`}" alt="${title}">` :
-                            `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">`) :
-                        `<i class="fas fa-image"></i>`
+                // Gérer les options alimentaires
+                const diets = [];
+                if (formData.vegetarian) diets.push('vegetarian-friendly');
+                if (formData.vegan) diets.push('vegan-friendly');
+                if (diets.length > 0) {
+                    frontMatter += `diet: ${diets.join(', ')}\n`;
+                }
+                
+                frontMatter += `description: ${formData.description}\n`;
+                frontMatter += `price: ${formData.price}\n`;
+                frontMatter += `address: ${formData.address}\n`;
+
+                // Ajouter l'image principale si elle existe
+                if (mainImageFile) {
+                    console.log('Ajout de l\'image principale au front matter');
+                    frontMatter += `image: /images/${formData.filename.replace('.md', '')}-main.jpg\n`;
+                }
+
+                // Ajouter les images de la galerie
+                if (galleryImageFiles.length > 0) {
+                    console.log('Ajout des images de la galerie au front matter');
+                    frontMatter += 'images:\n';
+                    galleryImageFiles.forEach((_, index) => {
+                        frontMatter += `  - image: /images/${formData.filename.replace('.md', '')}-${index + 1}.jpg\n`;
+                    });
+                }
+
+                // Ajouter les notes et commentaires
+                frontMatter += 'ratings:\n';
+                const categories = ['food', 'service', 'ambiance', 'value', 'originality', 'overall'];
+                categories.forEach(category => {
+                    const score = formData[`${category}Score`];
+                    const comment = formData[`${category}Comment`];
+                    if (score || comment) {
+                        frontMatter += `  ${category}:\n`;
+                        if (score) frontMatter += `    score: ${score}\n`;
+                        if (comment) frontMatter += `    comment: '${comment}'\n`;
                     }
-                </div>
+                });
+
+                frontMatter += '---\n\n';
+
+                // Ajouter le contenu de l'éditeur
+                const content = editor ? editor.getHTML() : '';
+                console.log('Contenu de l\'éditeur:', content);
+
+                // Construire le HTML de prévisualisation
+                let html = '<div class="markdown-preview">';
                 
-                <div class="restaurant-description">
-                    ${description}
-                </div>
-                
-                <div class="restaurant-content">
-                    ${editorContent}
-                </div>
-                
-                <div class="restaurant-ratings">
-                    <h2>Pourquoi cette note ?</h2>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Qualité de la nourriture</span>
-                            <span class="rating-score">${foodScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
-                        <div class="rating-comment">${foodComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Service</span>
-                            <span class="rating-score">${serviceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
-                        <div class="rating-comment">${serviceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Ambiance</span>
-                            <span class="rating-score">${ambianceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
-                        <div class="rating-comment">${ambianceComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Rapport qualité/prix</span>
-                            <span class="rating-score">${valueScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
-                        <div class="rating-comment">${valueComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Originalité</span>
-                            <span class="rating-score">${originalityScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
-                        <div class="rating-comment">${originalityComment}</div>
-                    </div>
-                    
-                    <div class="rating-category">
-                        <div class="rating-header">
-                            <span class="rating-title">Expérience globale</span>
-                            <span class="rating-score">${overallExperienceScore}/10</span>
-                        </div>
-                        <div class="rating-criteria">Facteur "wow"</div>
-                        <div class="rating-comment">${overallExperienceComment}</div>
-                    </div>
-                </div>
-                
-                <h2 class="gallery-title">Galerie photos</h2>
-                <div class="restaurant-gallery">
-                    ${galleryImageFiles.length > 0 ? 
-                        galleryImageFiles.map(file => `
-                            <div class="gallery-image">
-                                ${typeof file === 'string' ?
-                                    `<img src="${file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`}" alt="Galerie">` :
-                                    `<img src="${URL.createObjectURL(file)}" alt="Galerie">`
-                                }
-                            </div>
-                        `).join('') : 
-                        `<div class="gallery-image">
-                            <i class="fas fa-images"></i>
-                        </div>`
-                    }
-                </div>
-            `;
-            
-            console.log('=== FIN MISE À JOUR DE L\'APERÇU ===');
+                // Ajouter l'image principale si elle existe
+                if (mainImageFile) {
+                    console.log('Ajout de l\'image principale à la prévisualisation');
+                    html += `<div class="main-image-preview-container">`;
+                    html += `<img src="${mainImageFile}" class="main-image-preview" alt="Image principale">`;
+                    html += `</div>`;
+                }
+
+                // Ajouter les images de la galerie
+                if (galleryImageFiles.length > 0) {
+                    console.log('Ajout des images de la galerie à la prévisualisation');
+                    html += `<div class="gallery-preview">`;
+                    galleryImageFiles.forEach((image, index) => {
+                        html += `<div class="gallery-image-container">`;
+                        html += `<img src="${image}" class="gallery-image-preview" alt="Image de galerie ${index + 1}">`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // Ajouter le contenu
+                html += `<div class="content-preview">${content}</div>`;
+                html += '</div>';
+
+                // Mettre à jour la prévisualisation
+                preview.innerHTML = html;
+                console.log('=== FIN UPDATE MARKDOWN PREVIEW ===');
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour de l\'aperçu:', error);
+                preview.innerHTML = `<div class="alert alert-danger">Erreur lors de la mise à jour de l\'aperçu: ${error.message}</div>`;
+            }
         }
 
         function createImagePreview(file, container, isMainImage = false) {
@@ -2607,6 +2532,10 @@ ${editorContent}`;
                         
                         // Mettre à jour la prévisualisation de la galerie
                         updateGalleryPreview();
+                        
+                        // Mettre à jour l'aperçu markdown
+                        console.log('Mise à jour de l\'aperçu markdown après chargement des images');
+                        await updateMarkdownPreview();
                     } else {
                         console.log('Aucune image trouvée dans le localStorage');
                     }
