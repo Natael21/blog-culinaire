@@ -2662,6 +2662,30 @@ ${editorContent}`;
             // Mettre à jour les boutons
             updatePendingChangesButtons();
         });
+
+        // Fonction pour parser le front matter YAML d'un contenu markdown
+        function parseFrontMatter(markdownContent) {
+            const data = {};
+            if (!markdownContent) return data;
+
+            const match = markdownContent.match(/^---\s*([\s\S]*?)\s*---/);
+            if (match && match[1]) {
+                const yamlLines = match[1].trim().split('\n');
+                yamlLines.forEach(line => {
+                    const separatorIndex = line.indexOf(':');
+                    if (separatorIndex !== -1) {
+                        const key = line.substring(0, separatorIndex).trim();
+                        let value = line.substring(separatorIndex + 1).trim();
+                        // Enlever les guillemets simples ou doubles autour de la valeur
+                        value = value.replace(/^['"]|['"]$/g, '');
+                        if (key) {
+                          data[key] = value;
+                        }
+                    }
+                });
+            }
+            return data;
+        }
     </script>
 </head>
 <body>
