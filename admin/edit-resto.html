@@ -2352,7 +2352,131 @@ ${editorContent}`;
                 let frontMatter;
 
                 markdown = localDraft.content;
-                console.log('Contenu du draft:', markdown);
+
+                // Extraire le front matter et le contenu
+                const parts = markdown.split('---');
+                if (parts.length >= 3) {
+                    frontMatter = parts[1].trim();
+                    content = parts[2].trim();
+                    
+                    // Parser le front matter pour les drafts locaux
+                    console.log('Parsing du front matter local');
+                    frontMatter.split('\n').forEach(line => {
+                        const [key, ...value] = line.split(':');
+                        if (key && value.length > 0) {
+                            const cleanKey = key.trim();
+                            const cleanValue = value.join(':').trim().replace(/^['"]|['"]$/g, '');
+                            restaurantData[cleanKey] = cleanValue;
+                            console.log(`Front matter - ${cleanKey}: ${cleanValue}`);
+                        }
+                    });
+                }
+
+                document.getElementById('state').value = restaurantData.state || 'draft';
+                document.getElementById('title').value = restaurantData.title || '';
+                document.getElementById('date').value = restaurantData.date || '';
+                document.getElementById('description').value = restaurantData.description || '';
+                document.getElementById('address').value = restaurantData.address || '';
+                document.getElementById('style').value = restaurantData.style || '';
+                
+                // Corriger la gamme de prix
+                const priceMap = {
+                    'budget': '$ (0-20$)',
+                    'moyen': '$$ (20-40$)',
+                    'haut': '$$$ (40$ et +)'
+                };
+                const priceValue = priceMap[restaurantData.price] || restaurantData.price;
+                document.getElementById('price').value = priceValue;
+
+                // Remplir les options alimentaires
+                const dietString = (restaurantData.diet || '').trim();
+                console.log('Options alimentaires brutes:', dietString);
+                const diets = dietString.split(',').map(d => d.trim().toLowerCase());
+                console.log('Options alimentaires traitées:', diets);
+                document.getElementById('vegetarian').checked = diets.some(d => d === 'vegetarian-friendly' || d === 'vegetarian');
+                document.getElementById('vegan').checked = diets.some(d => d === 'vegan-friendly' || d === 'vegan');
+
+                // Extraire et remplir les notes et commentaires
+                console.log('Extraction des notes et commentaires');
+                const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
+                if (ratingsMatch) {
+                    const ratingsYaml = ratingsMatch[0];
+                    console.log('YAML des notes trouvé:', ratingsYaml);
+
+                    // Extraire les scores et commentaires avec une meilleure regex
+                    const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const serviceScore = ratingsYaml.match(/service:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const ambianceScore = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const valueScore = ratingsYaml.match(/value:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
+
+                    // Améliorer l'extraction des commentaires
+                    const extractComment = (yaml, category) => {
+                        const match = yaml.match(new RegExp(`${category}:[\\s\\S]*?comment:\\s*["']([^"']*)["']`));
+                        return match ? match[1] : '';
+                    };
+
+                    const foodComment = extractComment(ratingsYaml, 'food');
+                    const serviceComment = extractComment(ratingsYaml, 'service');
+                    const ambianceComment = extractComment(ratingsYaml, 'ambiance');
+                    const valueComment = extractComment(ratingsYaml, 'value');
+                    const originalityComment = extractComment(ratingsYaml, 'originality');
+                    const overallComment = extractComment(ratingsYaml, 'overall');
+
+                    // Remplir les scores
+                    document.getElementById('foodScore').value = foodScore;
+                    document.getElementById('serviceScore').value = serviceScore;
+                    document.getElementById('ambianceScore').value = ambianceScore;
+                    document.getElementById('valueScore').value = valueScore;
+                    document.getElementById('originalityScore').value = originalityScore;
+                    document.getElementById('overallExperienceScore').value = overallScore;
+
+                    // Remplir les commentaires
+                    document.getElementById('foodComment').value = foodComment;
+                    document.getElementById('serviceComment').value = serviceComment;
+                    document.getElementById('ambianceComment').value = ambianceComment;
+                    document.getElementById('valueComment').value = valueComment;
+                    document.getElementById('originalityComment').value = originalityComment;
+                    document.getElementById('overallExperienceComment').value = overallComment;
+
+                    // Mettre à jour les affichages des valeurs
+                    document.querySelectorAll('.rating-value').forEach(el => {
+                        const input = el.previousElementSibling;
+                        if (input) {
+                            el.textContent = input.value;
+                        }
+                    });
+
+                    // Calculer et mettre à jour la note globale
+                    const scores = [
+                        parseFloat(foodScore),
+                        parseFloat(serviceScore),
+                        parseFloat(ambianceScore),
+                        parseFloat(valueScore),
+                        parseFloat(originalityScore),
+                        parseFloat(overallScore)
+                    ];
+                    const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                    document.getElementById('overallRating').value = average;
+                }
+
+                // Convertir le markdown en HTML
+                let htmlContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
+                    .replace(/\n/g, '<br>') // Saut de ligne
+                    .replace(/- (.*?)(?:\n|$)/g, '<ul><li>$1</li></ul>') // Liste à puces
+                    .replace(/\d+\. (.*?)(?:\n|$)/g, '<ol><li>$1</li></ol>'); // Liste numérotée
+
+                // Initialiser l'éditeur avec le contenu converti
+                initializeEditor(htmlContent);
+
+                // Mettre à jour le nom du fichier
+                document.getElementById('filename').value = filename;
+
+                // Mettre à jour l'aperçu
+                updateMarkdownPreview();
             } 
             catch (error){
                 console.error('Erreur lors du chargement du restaurant:', error);
