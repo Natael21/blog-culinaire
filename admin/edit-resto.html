@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouveau Restaurant - Administration</title>
+    <title>Modifications de restaurants - Administration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script type="module">
@@ -1222,7 +1222,8 @@
             // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
             const saveButton = document.getElementById('saveButton');
             
-            if (saveButton) {                
+            if (saveButton) {
+                
                 // Ajouter le spinner au bouton
                 const spinnerDiv = document.createElement('div');
                 spinnerDiv.className = 'spinner';
@@ -1263,6 +1264,7 @@
                         return;
                     }
                     
+
                     try {
                         // Générer le nom du fichier à partir du titre
                         const title = document.getElementById('title').value;
@@ -1276,7 +1278,7 @@
                         const date = new Date().toISOString().split('T')[0];
                         const filePath = `${date}-${filename}.md`;
 
-                        // Créer un objet pour stocker les données du brouillon
+                        // Créer un objet pour stocker les données du restaurant
                         const draftData = {
                             filename: filePath,
                             title: title,
@@ -1302,21 +1304,21 @@
                             });
                         }
 
-                        // Récupérer les brouillons existants
+                        // Récupérer les restaurants existants
                         const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                         
-                        // Vérifier si un brouillon avec le même nom existe déjà
+                        // Vérifier si un restaurant avec le même nom existe déjà
                         const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
                         
                         if (existingIndex !== -1) {
-                            // Mettre à jour le brouillon existant
+                            // Mettre à jour le restaurant existant
                             drafts[existingIndex] = {
                                 ...drafts[existingIndex],
                                 ...draftData,
                                 lastModified: new Date().toISOString()
                             };
                         } else {
-                            // Ajouter un nouveau brouillon
+                            // Ajouter un nouveau restaurant
                             drafts.push({
                                 ...draftData,
                                 lastModified: new Date().toISOString()
@@ -1326,14 +1328,15 @@
                         // Sauvegarder dans localStorage
                         localStorage.setItem('drafts', JSON.stringify(drafts));
 
-                        showNotification('Brouillon enregistré avec succès !', 'success');
+                        showNotification('Restaurant enregistré avec succès !', 'success');
                         
                         setTimeout(() => {
                             window.location.href = 'restaurants.html';
                         }, 1500);
 
                     } catch (error) {
-                        showNotification(error.message || 'Erreur lors de la sauvegarde du brouillon', 'error');
+                        console.error('Erreur:', error);
+                        showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
                         
                         // En cas d'erreur, on cache le spinner
                         const saveButton = document.getElementById('saveButton');
@@ -1619,112 +1622,33 @@
             });
         }
 
-        async function handleMainImageUpload(file) {
-
-            // Vérifier si c'est une chaîne base64
-            if (typeof file === 'string' && file.startsWith('data:image')) {
-                mainImageFile = {
-                    name: 'main-image.jpg',
-                    type: 'image/jpeg'
-                };
-                document.getElementById('mainImagePreview').innerHTML = `
-                    <img src="${file}" class="image-preview" alt="Image principale">
-                    <button type="button" class="delete-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                await updateMarkdownPreview();
-                return;
-            }
-
-            // Vérifier si c'est une URL
-            if (typeof file === 'string' && file.startsWith('http')) {
-                try {
-                    const response = await fetch(file);
-                    const blob = await response.blob();
-                    mainImageFile = new File([blob], 'main-image.jpg', { type: blob.type });
-                    document.getElementById('mainImagePreview').innerHTML = `
-                        <img src="${file}" class="image-preview" alt="Image principale">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    await updateMarkdownPreview();
-                    return;
-                } catch (error) {
-                    return;
-                }
-            }
-
-            // Vérifier si c'est un objet File
-            if (file instanceof File) {
-                console.log('Nouveau fichier image');
+        function handleMainImageUpload(file) {
+            if (file && file.type.startsWith('image/')) {
                 mainImageFile = file;
-                createImagePreview(file, document.getElementById('mainImagePreview'), true);
-                await updateMarkdownPreview();
-                return;
+                const container = document.getElementById('mainImagePreview');
+                container.innerHTML = '';
+                createImagePreview(file, container, true);
+                
+                // Supprimer l'état d'erreur et le message
+                const mainImageZone = document.getElementById('mainImageZone');
+                mainImageZone.classList.remove('show-error');
+                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                
+                updateMarkdownPreview();
             }
-
-            console.error('Type de fichier non supporté:', typeof file);
         }
 
-        async function handleGalleryUpload(files) {
-            
-            // Vérifier si c'est un tableau de chaînes base64
-            if (Array.isArray(files) && files.length > 0 && typeof files[0] === 'string' && files[0].startsWith('data:image')) {
-                galleryImageFiles = files.map((base64, index) => ({
-                    name: `gallery-image-${index}.jpg`,
-                    type: 'image/jpeg',
-                    data: base64
-                }));
-                document.getElementById('galleryPreview').innerHTML = files.map((base64, index) => `
-                    <div class="image-preview-container">
-                        <img src="${base64}" class="image-preview" alt="Image de galerie">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `).join('');
-                await updateMarkdownPreview();
-                return;
-            }
-
-            // Vérifier si c'est un tableau d'URLs
-            if (Array.isArray(files) && files.length > 0 && typeof files[0] === 'string' && files[0].startsWith('http')) {
-                console.log('Images depuis URLs');
-                try {
-                    const imagePromises = files.map(async (url, index) => {
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        return new File([blob], `gallery-image-${index}.jpg`, { type: blob.type });
-                    });
-                    galleryImageFiles = await Promise.all(imagePromises);
-                    document.getElementById('galleryPreview').innerHTML = files.map((url, index) => `
-                        <div class="image-preview-container">
-                            <img src="${url}" class="image-preview" alt="Image de galerie">
-                            <button type="button" class="delete-image">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `).join('');
-                    await updateMarkdownPreview();
-                    return;
-                } catch (error) {
-                    console.error('Erreur lors du chargement des images depuis les URLs:', error);
-                    return;
+        function handleGalleryUpload(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    galleryImageFiles.push(file);
                 }
-            }
-
-            // Vérifier si c'est un tableau d'objets File
-            if (Array.isArray(files) && files.length > 0 && files[0] instanceof File) {
-                console.log('Nouveaux fichiers images');
-                galleryImageFiles = files;
-                updateGalleryPreview();
-                await updateMarkdownPreview();
-                return;
-            }
-
-            console.error('Type de fichiers non supporté:', typeof files);
+            });
+            updateGalleryPreview();
+            updateMarkdownPreview();
         }
 
         function validateForm() {
@@ -2166,9 +2090,9 @@ ${editorContent}`;
             `;
         }
 
-        async function createImagePreview(file, container, isMainImage = false) {
+        function createImagePreview(file, container, isMainImage = false) {
             const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = function(e) {
                 const div = document.createElement('div');
                 div.className = 'image-preview-container';
                 div.innerHTML = `
@@ -2178,7 +2102,7 @@ ${editorContent}`;
                     </button>
                 `;
                 
-                div.querySelector('.delete-image').addEventListener('click', async function() {
+                div.querySelector('.delete-image').addEventListener('click', function() {
                     div.remove();
                     if (isMainImage) {
                         mainImageFile = null;
@@ -2188,11 +2112,10 @@ ${editorContent}`;
                             galleryImageFiles.splice(index, 1);
                         }
                     }
-                    await updateMarkdownPreview();
+                    updateMarkdownPreview();
                 });
                 
                 container.appendChild(div);
-                await updateMarkdownPreview();
             };
             reader.readAsDataURL(file);
         }
@@ -2302,7 +2225,7 @@ ${editorContent}`;
             }
         }
 
-        // Fonction pour sauvegarder le brouillon
+        // Fonction pour sauvegarder le restaurant
         async function saveDraft() {
             try {
                 const formData = new FormData(document.getElementById('restaurantForm'));
@@ -2319,7 +2242,7 @@ ${editorContent}`;
                 const date = new Date().toISOString().split('T')[0];
                 const filePath = `${date}-${filename}.md`;
 
-                // Créer l'objet du brouillon avec le contenu initial
+                // Créer l'objet du restaurant avec le contenu initial
                 let markdownContent = generateMarkdown();
                 const draftData = {
                     filename: filePath,
@@ -2350,24 +2273,24 @@ ${editorContent}`;
                     });
                 }
 
-                // Récupérer les brouillons existants
+                // Récupérer les restaurants existants
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 
-                // Vérifier si un brouillon avec le même nom existe déjà
+                // Vérifier si un restaurant avec le même nom existe déjà
                 const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
                 
                 if (existingIndex !== -1) {
-                    // Mettre à jour le brouillon existant
+                    // Mettre à jour le restaurant existant
                     drafts[existingIndex] = draftData;
                 } else {
-                    // Ajouter un nouveau brouillon
+                    // Ajouter un nouveau restaurant
                     drafts.push(draftData);
                 }
 
                 try {
                     // Sauvegarder dans localStorage
                     localStorage.setItem('drafts', JSON.stringify(drafts));
-                    showNotification('Brouillon enregistré avec succès', 'success');
+                    showNotification('Restaurant enregistré avec succès', 'success');
                     
                     // Mettre à jour l'interface
                     updatePendingChangesButtons();
@@ -2377,16 +2300,16 @@ ${editorContent}`;
                     }, 1500);
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
-                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des brouillons existants.', 'error');
+                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des restaurants existants.', 'error');
                     } else {
-                        showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+                        showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
                     }
                     console.error('Erreur de stockage:', storageError);
                 }
 
             } catch (error) {
                 console.error('Erreur:', error);
-                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+                showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
             }
         }
 
@@ -2414,7 +2337,7 @@ ${editorContent}`;
         // Initialiser le formulaire une fois le DOM chargé
         document.addEventListener('DOMContentLoaded', initializeForm);
 
-        // Fonction pour charger un brouillon
+        // Fonction pour charger un restaurant
         function loadDraft(filename) {
             try {
                 const repo = 'Natael21/blog-culinaire';
@@ -2446,14 +2369,13 @@ ${editorContent}`;
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
-            // Vérifier si on charge un brouillon existant
+            // Vérifier si on charge un restaurant existant
             const urlParams = new URLSearchParams(window.location.search);
-            const filename = urlParams.get('filename');
+            const draftFilename = urlParams.get('draft');
             
-            if (filename) {
-                loadDraft(filename);
-            } else {
-                console.log('Aucun fichier spécifié, création d\'un nouveau restaurant');
+            if (draftFilename) {
+                filename = draftFilename;
+                loadDraft(draftFilename);
             }
             
             // Mettre à jour les boutons
