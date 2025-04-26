@@ -1437,6 +1437,9 @@
             updateMarkdownPreview();
         });
 
+        // Variable pour stocker l'éditeur
+        let editorInitialized = false;
+
         // Fonction pour initialiser l'éditeur
         function initializeEditor(initialContent = '') {
             console.log('=== DÉBUT INITIALISATION ÉDITEUR ===');
