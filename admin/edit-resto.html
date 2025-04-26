@@ -1475,191 +1475,131 @@
             console.log('=== FIN INITIALISATION DES ZONES DE DROP ===');
         }
 
-        function handleMainImageUpload(file) {
+        async function handleMainImageUpload(file) {
             console.log('=== DÉBUT UPLOAD IMAGE PRINCIPALE ===');
-            console.log('État initial:', {
-                mainImageFile: mainImageFile ? {
-                    type: typeof mainImageFile,
-                    isBlob: mainImageFile instanceof Blob,
-                    isFile: mainImageFile instanceof File,
-                    isString: typeof mainImageFile === 'string',
-                    name: mainImageFile.name || 'N/A',
-                    size: mainImageFile.size || 'N/A'
-                } : null
-            });
+            console.log('Type de fichier:', typeof file);
+            console.log('Fichier:', file);
+            
+            if (!file) {
+                console.log('Aucun fichier fourni');
+                return;
+            }
 
-            console.log('Fichier reçu:', {
-                type: typeof file,
-                isBlob: file instanceof Blob,
-                isFile: file instanceof File,
-                isString: typeof file === 'string',
-                fileType: file.type || 'base64',
-                fileSize: file.size || 'N/A',
-                fileName: file.name || 'N/A',
-                startsWithDataImage: typeof file === 'string' ? file.startsWith('data:image') : 'N/A'
-            });
-
-            if (file) {
-                console.log('Fichier valide, traitement en cours...');
-                mainImageFile = file;
-                const container = document.getElementById('mainImagePreview');
-                console.log('Container trouvé:', !!container);
-                container.innerHTML = '';
-                
-                let imageSrc;
+            try {
+                let imageUrl;
                 if (typeof file === 'string') {
-                    console.log('Traitement comme base64/URL');
-                    if (file.startsWith('data:image')) {
-                        console.log('Format base64 déjà correct');
-                        imageSrc = file;
-                    } else if (file.startsWith('http')) {
-                        console.log('URL GitHub détectée');
-                        imageSrc = file;
-                    } else {
-                        console.log('Conversion en base64');
-                        imageSrc = `data:image/jpeg;base64,${file}`;
-                    }
+                    // Si c'est une URL ou une chaîne base64
+                    imageUrl = file;
+                    console.log('Image principale chargée depuis URL/base64');
                 } else if (file instanceof File) {
-                    console.log('Traitement comme nouveau fichier');
-                    imageSrc = URL.createObjectURL(file);
-                    console.log('URL créée:', imageSrc);
-                } else {
-                    console.error('Type de fichier non supporté:', file);
-                    return;
+                    // Si c'est un objet File
+                    imageUrl = URL.createObjectURL(file);
+                    console.log('Image principale chargée depuis File');
+                } else if (file instanceof Blob) {
+                    // Si c'est un Blob
+                    imageUrl = URL.createObjectURL(file);
+                    console.log('Image principale chargée depuis Blob');
                 }
 
-                console.log('Création du preview avec source:', {
-                    type: typeof imageSrc,
-                    length: imageSrc.length,
-                    preview: imageSrc.substring(0, 50) + '...'
-                });
+                if (!imageUrl) {
+                    throw new Error('Format d\'image non supporté');
+                }
 
-                const div = document.createElement('div');
-                div.className = 'image-preview-container';
-                div.innerHTML = `
-                    <img src="${imageSrc}" class="image-preview" alt="Image preview">
-                    <button type="button" class="delete-image">
-                        <i class="fas fa-times"></i>
-                    </button>
+                // Mettre à jour l'image principale
+                mainImageFile = file;
+                const preview = document.getElementById('mainImagePreview');
+                preview.innerHTML = `
+                    <div class="position-relative">
+                        <img src="${imageUrl}" class="img-fluid rounded" alt="Image principale">
+                        <button class="btn btn-danger position-absolute top-0 end-0 m-2" onclick="deleteMainImage()">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                 `;
-                
-                div.querySelector('.delete-image').addEventListener('click', function() {
-                    console.log('Suppression de l\'image principale');
-                    if (file instanceof File) {
-                        console.log('Libération de l\'URL:', imageSrc);
-                        URL.revokeObjectURL(imageSrc);
-                    }
-                    div.remove();
-                    mainImageFile = null;
-                    updateMarkdownPreview();
-                });
-                
-                container.appendChild(div);
-                console.log('Preview de l\'image principale créé avec succès');
-                
-                const mainImageZone = document.getElementById('mainImageZone');
-                mainImageZone.classList.remove('show-error');
-                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+
+                // Supprimer le message d'erreur s'il existe
+                const errorDiv = document.getElementById('mainImageError');
                 if (errorDiv) {
                     errorDiv.remove();
                 }
-                
-                console.log('Image principale chargée avec succès');
-                updateMarkdownPreview();
-            } else {
-                console.error('Type de fichier non valide:', file);
+
+                // Mettre à jour la prévisualisation
+                await updateMarkdownPreview();
+                console.log('=== FIN UPLOAD IMAGE PRINCIPALE ===');
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'image principale:', error);
+                const preview = document.getElementById('mainImagePreview');
+                preview.innerHTML = `
+                    <div class="alert alert-danger" id="mainImageError">
+                        Erreur lors du chargement de l\'image: ${error.message}
+                    </div>
+                `;
             }
-            console.log('=== FIN UPLOAD IMAGE PRINCIPALE ===');
         }
 
-        function handleGalleryUpload(files) {
+        async function handleGalleryUpload(file) {
             console.log('=== DÉBUT UPLOAD GALERIE ===');
-            console.log('État initial de la galerie:', {
-                nombreImages: galleryImageFiles.length,
-                types: galleryImageFiles.map(f => ({
-                    type: typeof f,
-                    isBlob: f instanceof Blob,
-                    isFile: f instanceof File,
-                    isString: typeof f === 'string',
-                    name: f.name || 'N/A',
-                    size: f.size || 'N/A'
-                }))
-            });
+            console.log('Type de fichier:', typeof file);
+            console.log('Fichier:', file);
+            
+            if (!file) {
+                console.log('Aucun fichier fourni');
+                return;
+            }
 
-            console.log('Fichiers reçus:', {
-                nombre: files.length,
-                details: Array.from(files).map(f => ({
-                    name: f.name,
-                    type: f.type,
-                    size: f.size
-                }))
-            });
-            
-            Array.from(files).forEach((file, index) => {
-                console.log(`\nTraitement du fichier ${index + 1}:`, {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    isBlob: file instanceof Blob,
-                    isFile: file instanceof File,
-                    isString: typeof file === 'string'
-                });
-                
-                // Vérifier si ce n'est pas l'image principale
-                if (file.type.startsWith('image/') && (!mainImageFile || file !== mainImageFile)) {
-                    console.log('Fichier image valide, ajout à la galerie...');
-                    galleryImageFiles.push(file);
-                    const container = document.getElementById('galleryPreview');
-                    console.log('Container trouvé:', !!container);
-                    
-                    const div = document.createElement('div');
-                    div.className = 'image-preview-container';
-                    const imageSrc = URL.createObjectURL(file);
-                    console.log('URL créée pour l\'image:', imageSrc);
-                    
-                    div.innerHTML = `
-                        <img src="${imageSrc}" class="image-preview" alt="Image preview">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    
-                    div.querySelector('.delete-image').addEventListener('click', function() {
-                        console.log('Suppression de l\'image de la galerie');
-                        URL.revokeObjectURL(imageSrc);
-                        const index = galleryImageFiles.findIndex(item => item === file);
-                        if (index > -1) {
-                            galleryImageFiles.splice(index, 1);
-                            console.log('Image supprimée de la galerie, nouvel état:', {
-                                nombreImages: galleryImageFiles.length,
-                                types: galleryImageFiles.map(f => typeof f)
-                            });
-                        }
-                        div.remove();
-                        updateMarkdownPreview();
-                    });
-                    
-                    container.appendChild(div);
-                    console.log(`Preview de l'image ${index + 1} créé avec succès`);
-                } else {
-                    console.log('Fichier ignoré (pas une image ou image principale)');
+            // Vérifier si c'est l'image principale
+            if (file === mainImageFile) {
+                console.log('Image principale détectée, ignorée pour la galerie');
+                return;
+            }
+
+            try {
+                let imageUrl;
+                if (typeof file === 'string') {
+                    // Si c'est une URL ou une chaîne base64
+                    imageUrl = file;
+                    console.log('Image de galerie chargée depuis URL/base64');
+                } else if (file instanceof File) {
+                    // Si c'est un objet File
+                    imageUrl = URL.createObjectURL(file);
+                    console.log('Image de galerie chargée depuis File');
+                } else if (file instanceof Blob) {
+                    // Si c'est un Blob
+                    imageUrl = URL.createObjectURL(file);
+                    console.log('Image de galerie chargée depuis Blob');
                 }
-            });
-            
-            console.log('État final de la galerie:', {
-                nombreImages: galleryImageFiles.length,
-                types: galleryImageFiles.map(f => ({
-                    type: typeof f,
-                    isBlob: f instanceof Blob,
-                    isFile: f instanceof File,
-                    isString: typeof f === 'string',
-                    name: f.name || 'N/A',
-                    size: f.size || 'N/A'
-                }))
-            });
-            
-            console.log('=== FIN UPLOAD GALERIE ===');
-            updateMarkdownPreview();
+
+                if (!imageUrl) {
+                    throw new Error('Format d\'image non supporté');
+                }
+
+                // Ajouter l'image à la galerie
+                galleryImageFiles.push(file);
+                const preview = document.getElementById('galleryPreview');
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'col-md-4 mb-3';
+                imageDiv.innerHTML = `
+                    <div class="position-relative">
+                        <img src="${imageUrl}" class="img-fluid rounded" alt="Image de galerie">
+                        <button class="btn btn-danger position-absolute top-0 end-0 m-2" onclick="deleteGalleryImage(${galleryImageFiles.length - 1})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+                preview.appendChild(imageDiv);
+
+                // Mettre à jour la prévisualisation
+                await updateMarkdownPreview();
+                console.log('=== FIN UPLOAD GALERIE ===');
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'image de galerie:', error);
+                const preview = document.getElementById('galleryPreview');
+                preview.innerHTML += `
+                    <div class="alert alert-danger">
+                        Erreur lors du chargement de l\'image: ${error.message}
+                    </div>
+                `;
+            }
         }
 
         // Ajouter les événements pour les sliders
