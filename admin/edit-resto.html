@@ -2337,6 +2337,22 @@ ${editorContent}`;
         // Initialiser le formulaire une fois le DOM chargé
         document.addEventListener('DOMContentLoaded', initializeForm);
 
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Vérifier si on charge un restaurant existant
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('filename');
+            
+            if (filename) {
+                loadDraft(filename);
+            } else {
+                console.log('Aucun fichier spécifié, création d\'un nouveau restaurant');
+            }
+            
+            // Mettre à jour les boutons
+            updatePendingChangesButtons();
+        });
+
         // Fonction pour charger un restaurant
         async function loadDraft(filename) {
             try {
@@ -2488,22 +2504,6 @@ ${editorContent}`;
                 window.location.href = 'restaurants.html';
             }
         }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            // Vérifier si on charge un restaurant existant
-            const urlParams = new URLSearchParams(window.location.search);
-            const filename = urlParams.get('filename');
-            
-            if (filename) {
-                loadDraft(filename);
-            } else {
-                console.log('Aucun fichier spécifié, création d\'un nouveau restaurant');
-            }
-            
-            // Mettre à jour les boutons
-            updatePendingChangesButtons();
-        });
     </script>
 </head>
 <body>
