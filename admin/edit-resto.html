@@ -1417,6 +1417,9 @@
                     });
 
                     if (zoneId === 'mainImageZone' && e.target.files.length > 0) {
+                        // Vider la galerie si l'image principale est changée
+                        galleryImageFiles = [];
+                        document.getElementById('galleryPreview').innerHTML = '';
                         handleMainImageUpload(e.target.files[0]);
                     } else if (zoneId === 'galleryZone') {
                         handleGalleryUpload(e.target.files);
@@ -1458,6 +1461,9 @@
                     });
 
                     if (zoneId === 'mainImageZone' && files.length > 0) {
+                        // Vider la galerie si l'image principale est changée
+                        galleryImageFiles = [];
+                        document.getElementById('galleryPreview').innerHTML = '';
                         input.files = files;
                         handleMainImageUpload(files[0]);
                     } else if (zoneId === 'galleryZone') {
@@ -1599,7 +1605,8 @@
                     isString: typeof file === 'string'
                 });
                 
-                if (file.type.startsWith('image/')) {
+                // Vérifier si ce n'est pas l'image principale
+                if (file.type.startsWith('image/') && (!mainImageFile || file !== mainImageFile)) {
                     console.log('Fichier image valide, ajout à la galerie...');
                     galleryImageFiles.push(file);
                     const container = document.getElementById('galleryPreview');
@@ -1635,7 +1642,7 @@
                     container.appendChild(div);
                     console.log(`Preview de l'image ${index + 1} créé avec succès`);
                 } else {
-                    console.log('Fichier ignoré (pas une image)');
+                    console.log('Fichier ignoré (pas une image ou image principale)');
                 }
             });
             
@@ -1654,6 +1661,30 @@
             console.log('=== FIN UPLOAD GALERIE ===');
             updateMarkdownPreview();
         }
+
+        // Ajouter les événements pour les sliders
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sélectionner tous les sliders
+            const sliders = document.querySelectorAll('.form-range');
+            
+            sliders.forEach(slider => {
+                // Trouver l'élément span qui affiche la valeur
+                const valueDisplay = slider.nextElementSibling;
+                
+                // Mettre à jour la valeur affichée lors du changement
+                slider.addEventListener('input', function() {
+                    if (valueDisplay) {
+                        valueDisplay.textContent = this.value;
+                        calculateOverallRating();
+                    }
+                });
+                
+                // Initialiser la valeur affichée
+                if (valueDisplay) {
+                    valueDisplay.textContent = slider.value;
+                }
+            });
+        });
 
         function revokeObjectURLs() {
             console.log('=== DÉBUT NETTOYAGE DES URLs ===');
@@ -2537,6 +2568,10 @@ ${editorContent}`;
 
                     if (localDraft.images && localDraft.images.length > 0) {
                         console.log('Traitement des images du localStorage');
+                        
+                        // Réinitialiser les tableaux d'images
+                        mainImageFile = null;
+                        galleryImageFiles = [];
                         
                         // Trouver d'abord l'image principale
                         const mainImg = localDraft.images.find(img => img.isMain);
