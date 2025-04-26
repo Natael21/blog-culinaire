@@ -1442,17 +1442,9 @@
 
         // Fonction pour initialiser l'éditeur
         function initializeEditor(initialContent = '') {
-            console.log('=== DÉBUT INITIALISATION ÉDITEUR ===');
-            console.log('État avant initialisation:', {
-                editorInitialized,
-                editorExists: !!editor,
-                editorElement: !!document.querySelector('#editor'),
-                hasInitialContent: !!initialContent
-            });
 
             return new Promise((resolve) => {
                 if (editorInitialized && editor) {
-                    console.log('Éditeur déjà initialisé, mise à jour du contenu si nécessaire');
                     if (initialContent) {
                         editor.commands.setContent(initialContent);
                     }
@@ -1461,12 +1453,9 @@
                 }
 
                 if (editor) {
-                    console.log('Instance précédente d\'éditeur trouvée, destruction...');
                     editor.destroy();
-                    console.log('Instance précédente détruite');
                 }
 
-                console.log('Création d\'une nouvelle instance d\'éditeur');
                 editor = new Editor({
                     element: document.querySelector('#editor'),
                     extensions: [
@@ -1482,22 +1471,18 @@
                     content: initialContent,
                     editable: true,
                     onReady: () => {
-                        console.log('Éditeur prêt');
                         editorInitialized = true;
                         resolve(editor);
                     },
                     onUpdate: ({ editor }) => {
-                        console.log('Mise à jour de l\'éditeur détectée');
                         updateMarkdownPreview();
                     }
                 });
 
-                console.log('Configuration des boutons de la barre d\'outils');
                 document.querySelectorAll('.editor-toolbar button').forEach(button => {
                     button.addEventListener('click', (e) => {
                         e.preventDefault();
                         const command = button.dataset.command;
-                        console.log('Clic sur bouton:', command);
                         editor.chain().focus();
                         
                         switch(command) {
@@ -1521,7 +1506,6 @@
                     const command = button.dataset.command;
                     button.classList.toggle('is-active', editor.isActive(command));
                 });
-                console.log('=== FIN INITIALISATION ÉDITEUR ===');
             });
         }
 
@@ -2565,11 +2549,13 @@ ${editorContent}`;
 
                 // Convertir le markdown en HTML
                 let htmlContent = content
+                    .replace(/^- (.*?)(?:\n|$)/gm, '<ul><li>$1</li></ul>') // Liste à puces
+                    .replace(/^\d+\. (.*?)(?:\n|$)/gm, '<ol><li>$1</li></ol>') // Liste numérotée
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
                     .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
-                    .replace(/\n/g, '<br>') // Saut de ligne
-                    .replace(/- (.*?)(?:\n|$)/g, '<ul><li>$1</li></ul>') // Liste à puces
-                    .replace(/\d+\. (.*?)(?:\n|$)/g, '<ol><li>$1</li></ol>'); // Liste numérotée
+                    .split(/\n\n+/) // split par double retour
+                    .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`) // remplacer \n simple par <br>
+                    .join('');
 
                 // Initialiser l'éditeur avec le contenu converti
                 await initializeEditor(htmlContent);
