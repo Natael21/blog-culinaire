@@ -1159,6 +1159,42 @@
             max-height: 200px;
             object-fit: contain;
         }
+
+        /* Style pour le bouton de suppression */
+        .delete-image-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(220, 53, 69, 0.9);
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .image-container:hover .delete-image-btn {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .delete-image-btn:hover {
+            background-color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .delete-image-btn i {
+            margin: 0;
+        }
     </style>
 
     <script>
@@ -1529,10 +1565,10 @@
                 mainImageFile = file;
                 const preview = document.getElementById('mainImagePreview');
                 preview.innerHTML = `
-                    <div class="position-relative">
+                    <div class="position-relative image-container">
                         <img src="${imageUrl}" class="img-fluid rounded main-image-preview" alt="Image principale">
-                        <button class="btn btn-danger position-absolute top-0 end-0 m-2" onclick="deleteMainImage()">
-                            <i class="bi bi-trash"></i>
+                        <button class="delete-image-btn" onclick="deleteMainImage()">
+                            <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                 `;
@@ -1605,10 +1641,10 @@
                 const imageDiv = document.createElement('div');
                 imageDiv.className = 'col-md-4 mb-3';
                 imageDiv.innerHTML = `
-                    <div class="position-relative">
+                    <div class="position-relative image-container">
                         <img src="${imageUrl}" class="img-fluid rounded gallery-image-preview" alt="Image de galerie">
-                        <button class="btn btn-danger position-absolute top-0 end-0 m-2" onclick="deleteGalleryImage(${galleryImageFiles.length - 1})">
-                            <i class="bi bi-trash"></i>
+                        <button class="delete-image-btn" onclick="deleteGalleryImage(${galleryImageFiles.length - 1})">
+                            <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                 `;
