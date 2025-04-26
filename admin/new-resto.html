@@ -1634,121 +1634,33 @@
             });
         }
 
-        async function handleMainImageUpload(file) {
-            console.log('=== handleMainImageUpload ===');
-            console.log('Type de fichier:', typeof file);
-            console.log('Fichier:', file);
-
-            // Vérifier si c'est une chaîne base64
-            if (typeof file === 'string' && file.startsWith('data:image')) {
-                console.log('Image déjà en base64');
-                mainImageFile = {
-                    name: 'main-image.jpg',
-                    type: 'image/jpeg'
-                };
-                document.getElementById('mainImagePreview').innerHTML = `
-                    <img src="${file}" class="image-preview" alt="Image principale">
-                    <button type="button" class="delete-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                await updateMarkdownPreview();
-                return;
-            }
-
-            // Vérifier si c'est une URL
-            if (typeof file === 'string' && file.startsWith('http')) {
-                console.log('Image depuis URL');
-                try {
-                    const response = await fetch(file);
-                    const blob = await response.blob();
-                    mainImageFile = new File([blob], 'main-image.jpg', { type: blob.type });
-                    document.getElementById('mainImagePreview').innerHTML = `
-                        <img src="${file}" class="image-preview" alt="Image principale">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    await updateMarkdownPreview();
-                    return;
-                } catch (error) {
-                    console.error('Erreur lors du chargement de l\'image depuis l\'URL:', error);
-                    return;
-                }
-            }
-
-            // Vérifier si c'est un objet File
-            if (file instanceof File) {
-                console.log('Nouveau fichier image');
+        function handleMainImageUpload(file) {
+            if (file && file.type.startsWith('image/')) {
                 mainImageFile = file;
-                createImagePreview(file, document.getElementById('mainImagePreview'), true);
-                await updateMarkdownPreview();
-                return;
+                const container = document.getElementById('mainImagePreview');
+                container.innerHTML = '';
+                createImagePreview(file, container, true);
+                
+                // Supprimer l'état d'erreur et le message
+                const mainImageZone = document.getElementById('mainImageZone');
+                mainImageZone.classList.remove('show-error');
+                const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+                
+                updateMarkdownPreview();
             }
-
-            console.error('Type de fichier non supporté:', typeof file);
         }
 
-        async function handleGalleryUpload(files) {
-            console.log('=== handleGalleryUpload ===');
-            console.log('Nombre de fichiers:', files.length);
-            
-            // Vérifier si c'est un tableau de chaînes base64
-            if (Array.isArray(files) && files.length > 0 && typeof files[0] === 'string' && files[0].startsWith('data:image')) {
-                console.log('Images déjà en base64');
-                galleryImageFiles = files.map((base64, index) => ({
-                    name: `gallery-image-${index}.jpg`,
-                    type: 'image/jpeg',
-                    data: base64
-                }));
-                document.getElementById('galleryPreview').innerHTML = files.map((base64, index) => `
-                    <div class="image-preview-container">
-                        <img src="${base64}" class="image-preview" alt="Image de galerie">
-                        <button type="button" class="delete-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `).join('');
-                await updateMarkdownPreview();
-                return;
-            }
-
-            // Vérifier si c'est un tableau d'URLs
-            if (Array.isArray(files) && files.length > 0 && typeof files[0] === 'string' && files[0].startsWith('http')) {
-                console.log('Images depuis URLs');
-                try {
-                    const imagePromises = files.map(async (url, index) => {
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        return new File([blob], `gallery-image-${index}.jpg`, { type: blob.type });
-                    });
-                    galleryImageFiles = await Promise.all(imagePromises);
-                    document.getElementById('galleryPreview').innerHTML = files.map((url, index) => `
-                        <div class="image-preview-container">
-                            <img src="${url}" class="image-preview" alt="Image de galerie">
-                            <button type="button" class="delete-image">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `).join('');
-                    await updateMarkdownPreview();
-                    return;
-                } catch (error) {
-                    console.error('Erreur lors du chargement des images depuis les URLs:', error);
-                    return;
+        function handleGalleryUpload(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    galleryImageFiles.push(file);
                 }
-            }
-
-            // Vérifier si c'est un tableau d'objets File
-            if (Array.isArray(files) && files.length > 0 && files[0] instanceof File) {
-                console.log('Nouveaux fichiers images');
-                galleryImageFiles = files;
-                updateGalleryPreview();
-                await updateMarkdownPreview();
-                return;
-            }
-
-            console.error('Type de fichiers non supporté:', typeof files);
+            });
+            updateGalleryPreview();
+            updateMarkdownPreview();
         }
 
         function validateForm() {
@@ -2210,9 +2122,9 @@ ${editorContent}`;
             `;
         }
 
-        async function createImagePreview(file, container, isMainImage = false) {
+        function createImagePreview(file, container, isMainImage = false) {
             const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = function(e) {
                 const div = document.createElement('div');
                 div.className = 'image-preview-container';
                 div.innerHTML = `
@@ -2222,7 +2134,7 @@ ${editorContent}`;
                     </button>
                 `;
                 
-                div.querySelector('.delete-image').addEventListener('click', async function() {
+                div.querySelector('.delete-image').addEventListener('click', function() {
                     div.remove();
                     if (isMainImage) {
                         mainImageFile = null;
@@ -2232,11 +2144,10 @@ ${editorContent}`;
                             galleryImageFiles.splice(index, 1);
                         }
                     }
-                    await updateMarkdownPreview();
+                    updateMarkdownPreview();
                 });
                 
                 container.appendChild(div);
-                await updateMarkdownPreview();
             };
             reader.readAsDataURL(file);
         }
