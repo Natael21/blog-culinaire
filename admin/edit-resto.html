@@ -1145,6 +1145,20 @@
             font-size: 1.5rem;
             font-weight: 600;
         }
+
+        /* Ajouter le style CSS pour l'image principale */
+        .main-image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+
+        /* Ajouter le style CSS pour les images de la galerie */
+        .gallery-image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+        }
     </style>
 
     <script>
@@ -1489,7 +1503,13 @@
                 let imageUrl;
                 if (typeof file === 'string') {
                     // Si c'est une URL ou une chaîne base64
-                    imageUrl = file;
+                    if (file.startsWith('data:image')) {
+                        imageUrl = file;
+                    } else if (file.startsWith('http')) {
+                        imageUrl = file;
+                    } else {
+                        imageUrl = `data:image/jpeg;base64,${file}`;
+                    }
                     console.log('Image principale chargée depuis URL/base64');
                 } else if (file instanceof File) {
                     // Si c'est un objet File
@@ -1510,7 +1530,7 @@
                 const preview = document.getElementById('mainImagePreview');
                 preview.innerHTML = `
                     <div class="position-relative">
-                        <img src="${imageUrl}" class="img-fluid rounded" alt="Image principale">
+                        <img src="${imageUrl}" class="img-fluid rounded main-image-preview" alt="Image principale">
                         <button class="btn btn-danger position-absolute top-0 end-0 m-2" onclick="deleteMainImage()">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -1557,7 +1577,13 @@
                 let imageUrl;
                 if (typeof file === 'string') {
                     // Si c'est une URL ou une chaîne base64
-                    imageUrl = file;
+                    if (file.startsWith('data:image')) {
+                        imageUrl = file;
+                    } else if (file.startsWith('http')) {
+                        imageUrl = file;
+                    } else {
+                        imageUrl = `data:image/jpeg;base64,${file}`;
+                    }
                     console.log('Image de galerie chargée depuis URL/base64');
                 } else if (file instanceof File) {
                     // Si c'est un objet File
@@ -1580,7 +1606,7 @@
                 imageDiv.className = 'col-md-4 mb-3';
                 imageDiv.innerHTML = `
                     <div class="position-relative">
-                        <img src="${imageUrl}" class="img-fluid rounded" alt="Image de galerie">
+                        <img src="${imageUrl}" class="img-fluid rounded gallery-image-preview" alt="Image de galerie">
                         <button class="btn btn-danger position-absolute top-0 end-0 m-2" onclick="deleteGalleryImage(${galleryImageFiles.length - 1})">
                             <i class="bi bi-trash"></i>
                         </button>
