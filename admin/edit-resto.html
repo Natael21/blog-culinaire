@@ -1227,6 +1227,7 @@
                     if (initialContent) {
                         editor.commands.setContent(initialContent);
                     }
+                    updateMarkdownPreview();
                     resolve(editor);
                     return;
                 }
@@ -1255,6 +1256,7 @@
                     onReady: () => {
                         console.log('Éditeur prêt');
                         editorInitialized = true;
+                        updateMarkdownPreview();
                         resolve(editor);
                     },
                     onUpdate: ({ editor }) => {
@@ -2793,6 +2795,36 @@ ${editorContent}`;
                 deleteDraft(filename);
                 window.location.href = 'edit-resto.html';
             }
+        }
+
+        // Fonction pour récupérer les données du formulaire
+        function getFormData() {
+            return {
+                layout: 'restaurant',
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                state: document.getElementById('state').value,
+                note: document.getElementById('overallRating').value,
+                style: document.getElementById('style').value,
+                description: document.getElementById('description').value,
+                price: document.getElementById('price').value,
+                address: document.getElementById('address').value,
+                filename: document.getElementById('filename')?.value || '',
+                vegetarian: document.getElementById('vegetarian').checked,
+                vegan: document.getElementById('vegan').checked,
+                foodScore: document.getElementById('foodScore').value,
+                foodComment: document.getElementById('foodComment').value,
+                serviceScore: document.getElementById('serviceScore').value,
+                serviceComment: document.getElementById('serviceComment').value,
+                ambianceScore: document.getElementById('ambianceScore').value,
+                ambianceComment: document.getElementById('ambianceComment').value,
+                valueScore: document.getElementById('valueScore').value,
+                valueComment: document.getElementById('valueComment').value,
+                originalityScore: document.getElementById('originalityScore').value,
+                originalityComment: document.getElementById('originalityComment').value,
+                overallExperienceScore: document.getElementById('overallExperienceScore').value,
+                overallExperienceComment: document.getElementById('overallExperienceComment').value
+            };
         }
     </script>
 </head>
