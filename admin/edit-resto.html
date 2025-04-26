@@ -1538,58 +1538,38 @@
             try {
                 let imageUrl;
                 if (typeof file === 'string') {
-                    // Si c'est une URL ou une chaîne base64
-                    if (file.startsWith('data:image')) {
-                        imageUrl = file;
-                    } else if (file.startsWith('http')) {
-                        imageUrl = file;
-                    } else {
-                        imageUrl = `data:image/jpeg;base64,${file}`;
-                    }
-                    console.log('Image principale chargée depuis URL/base64');
+                    imageUrl = file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`;
+                    console.log('Image principale chargée depuis base64');
+                    mainImageFile = {
+                        name: 'main-image.jpg',
+                        type: 'image/jpeg',
+                        data: imageUrl
+                    };
                 } else if (file instanceof File) {
-                    // Si c'est un objet File
                     imageUrl = URL.createObjectURL(file);
+                    mainImageFile = file;
                     console.log('Image principale chargée depuis File');
-                } else if (file instanceof Blob) {
-                    // Si c'est un Blob
-                    imageUrl = URL.createObjectURL(file);
-                    console.log('Image principale chargée depuis Blob');
                 }
 
-                if (!imageUrl) {
-                    throw new Error('Format d\'image non supporté');
-                }
-
-                // Mettre à jour l'image principale
-                mainImageFile = file;
                 const preview = document.getElementById('mainImagePreview');
                 preview.innerHTML = `
-                    <div class="position-relative image-container">
-                        <img src="${imageUrl}" class="img-fluid rounded main-image-preview" alt="Image principale">
-                        <button class="delete-image-btn" onclick="deleteMainImage()">
-                            <i class="bi bi-x-lg"></i>
+                    <div class="image-preview-container">
+                        <img src="${imageUrl}" class="image-preview" alt="Image principale">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
                 `;
 
-                // Supprimer le message d'erreur s'il existe
-                const errorDiv = document.getElementById('mainImageError');
-                if (errorDiv) {
-                    errorDiv.remove();
-                }
+                preview.querySelector('.delete-image').addEventListener('click', async () => {
+                    preview.innerHTML = '';
+                    mainImageFile = null;
+                    await updateMarkdownPreview();
+                });
 
-                // Mettre à jour la prévisualisation
                 await updateMarkdownPreview();
-                console.log('=== FIN UPLOAD IMAGE PRINCIPALE ===');
             } catch (error) {
                 console.error('Erreur lors du chargement de l\'image principale:', error);
-                const preview = document.getElementById('mainImagePreview');
-                preview.innerHTML = `
-                    <div class="alert alert-danger" id="mainImageError">
-                        Erreur lors du chargement de l\'image: ${error.message}
-                    </div>
-                `;
             }
         }
 
@@ -1894,8 +1874,32 @@
         }
 
         // Initialiser les boutons au chargement de la page
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log('=== CHARGEMENT DE LA PAGE ===');
+            
+            // Initialiser l'éditeur d'abord
+            await initializeEditor();
+            
+            // Initialiser les zones de drop
+            initializeDropZones();
+            
+            // Initialiser l'autocomplétion d'adresse
+            initializeAddressAutocomplete();
+            
+            // Initialiser les sliders
+            document.querySelectorAll('.form-range').forEach(slider => {
+                const valueDisplay = slider.nextElementSibling;
+                slider.addEventListener('input', function() {
+                    if (valueDisplay) {
+                        valueDisplay.textContent = this.value;
+                        calculateOverallRating();
+                        updateMarkdownPreview();
+                    }
+                });
+                if (valueDisplay) {
+                    valueDisplay.textContent = slider.value;
+                }
+            });
             
             // Vérifier si on charge un resto existant
             const urlParams = new URLSearchParams(window.location.search);
@@ -1904,7 +1908,7 @@
             
             if (filename) {
                 console.log('Tentative de chargement du restaurant:', filename);
-                loadDraft(filename);
+                await loadDraft(filename);
             } else {
                 console.log('Aucun fichier spécifié, création d\'un nouveau restaurant');
             }
@@ -2036,14 +2040,6 @@ ${editorContent}`;
         async function updateMarkdownPreview() {
             console.log('=== DÉBUT UPDATE MARKDOWN PREVIEW ===');
             
-            // Attendre que le DOM soit chargé
-            if (document.readyState !== 'complete') {
-                console.log('DOM pas encore chargé, attente...');
-                await new Promise(resolve => {
-                    document.addEventListener('DOMContentLoaded', resolve);
-                });
-            }
-            
             const preview = document.querySelector('.restaurant-preview');
             if (!preview) {
                 console.error('Élément preview non trouvé');
@@ -2051,7 +2047,11 @@ ${editorContent}`;
             }
             
             console.log('État des images:', {
-                mainImageFile,
+                mainImageFile: mainImageFile ? {
+                    type: typeof mainImageFile,
+                    isString: typeof mainImageFile === 'string',
+                    name: mainImageFile instanceof File ? mainImageFile.name : 'base64'
+                } : null,
                 galleryImageFiles: galleryImageFiles.length
             });
             
