@@ -1227,7 +1227,6 @@
                     if (initialContent) {
                         editor.commands.setContent(initialContent);
                     }
-                    updateMarkdownPreview();
                     resolve(editor);
                     return;
                 }
@@ -1256,7 +1255,6 @@
                     onReady: () => {
                         console.log('Éditeur prêt');
                         editorInitialized = true;
-                        updateMarkdownPreview();
                         resolve(editor);
                     },
                     onUpdate: ({ editor }) => {
@@ -2037,10 +2035,22 @@ ${editorContent}`;
 
         async function updateMarkdownPreview() {
             console.log('=== DÉBUT UPDATE MARKDOWN PREVIEW ===');
-            
-            const preview = document.querySelector('.restaurant-preview');
+            console.log('État des images:', {
+                mainImage: mainImageFile ? {
+                    type: typeof mainImageFile,
+                    isString: typeof mainImageFile === 'string',
+                    startsWithDataImage: typeof mainImageFile === 'string' ? mainImageFile.startsWith('data:image') : false
+                } : null,
+                galleryImages: galleryImageFiles.map(img => ({
+                    type: typeof img,
+                    isString: typeof img === 'string',
+                    startsWithDataImage: typeof img === 'string' ? img.startsWith('data:image') : false
+                }))
+            });
+
+            const preview = document.getElementById('markdownPreview');
             if (!preview) {
-                console.error('Élément restaurant-preview non trouvé');
+                console.error('Élément markdownPreview non trouvé');
                 return;
             }
 
@@ -2049,214 +2059,1011 @@ ${editorContent}`;
                 const formData = getFormData();
                 console.log('Données du formulaire:', formData);
 
-                // Construire le HTML de prévisualisation
-                let html = `
-                    <div class="restaurant-header">
-                        <h1 class="restaurant-title">${formData.title || 'Sans titre'}</h1>
-                        <div class="restaurant-meta">
-                            <div class="restaurant-meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>${formData.address || 'Adresse non spécifiée'}</span>
-                            </div>
-                            <div class="restaurant-meta-item">
-                                <i class="fas fa-utensils"></i>
-                                <span>${formData.style || 'Style non spécifié'}</span>
-                            </div>
-                            <div class="restaurant-meta-item">
-                                <i class="fas fa-dollar-sign"></i>
-                                <span>${formData.price || 'Prix non spécifié'}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Gérer l'image principale
-                if (mainImageFile) {
-                    const imageUrl = typeof mainImageFile === 'string' 
-                        ? mainImageFile 
-                        : URL.createObjectURL(mainImageFile);
-                    html += `
-                        <div class="restaurant-image">
-                            <img src="${imageUrl}" alt="${formData.title || 'Image principale'}" 
-                                 onerror="this.src='assets/images/placeholder.jpg'">
-                        </div>
-                    `;
-                }
-
-                // Ajouter la description
-                html += `
-                    <div class="restaurant-description">
-                        ${formData.description || 'Aucune description'}
-                    </div>
-                `;
-
-                // Ajouter le contenu de l'éditeur
-                if (formData.editorContent) {
-                    html += `
-                        <div class="restaurant-content">
-                            ${formData.editorContent}
-                        </div>
-                    `;
-                }
-
-                // Ajouter les notes
-                html += `
-                    <div class="restaurant-ratings">
-                        <h3>Notes</h3>
-                        <div class="rating-categories">
-                            <div class="rating-category">
-                                <span>Qualité</span>
-                                <div class="rating-stars">
-                                    ${generateStars(formData.qualityRating || 0)}
-                                </div>
-                            </div>
-                            <div class="rating-category">
-                                <span>Service</span>
-                                <div class="rating-stars">
-                                    ${generateStars(formData.serviceRating || 0)}
-                                </div>
-                            </div>
-                            <div class="rating-category">
-                                <span>Ambiance</span>
-                                <div class="rating-stars">
-                                    ${generateStars(formData.ambianceRating || 0)}
-                                </div>
-                            </div>
-                            <div class="rating-category">
-                                <span>Rapport qualité/prix</span>
-                                <div class="rating-stars">
-                                    ${generateStars(formData.valueRating || 0)}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Ajouter la galerie d'images si elle existe
-                if (galleryImageFiles && galleryImageFiles.length > 0) {
-                    html += `
-                        <div class="restaurant-gallery">
-                            <h3>Galerie photos</h3>
-                            <div class="gallery-grid">
-                    `;
-                    
-                    galleryImageFiles.forEach((image, index) => {
-                        const imageUrl = typeof image === 'string' 
-                            ? image 
-                            : URL.createObjectURL(image);
-                        html += `
-                            <div class="gallery-item">
-                                <img src="${imageUrl}" alt="Photo ${index + 1}" 
-                                     onerror="this.src='assets/images/placeholder.jpg'">
-                            </div>
-                        `;
-                    });
-                    
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Mettre à jour le contenu de la prévisualisation
-                preview.innerHTML = html;
+                // Construire le front matter
+                let frontMatter = '---\n';
+                frontMatter += `layout: ${formData.layout}\n`;
+                frontMatter += `title: '${formData.title}'\n`;
+                frontMatter += `date: ${formData.date}\n`;
+                frontMatter += `state: ${formData.state}\n`;
+                frontMatter += `note: ${formData.note}\n`;
+                frontMatter += `style: ${formData.style}\n`;
                 
-                // Nettoyer les URLs créées pour les images
-                if (mainImageFile && typeof mainImageFile !== 'string') {
-                    URL.revokeObjectURL(mainImageFile);
+                // Gérer les options alimentaires
+                const diets = [];
+                if (formData.vegetarian) diets.push('vegetarian-friendly');
+                if (formData.vegan) diets.push('vegan-friendly');
+                if (diets.length > 0) {
+                    frontMatter += `diet: ${diets.join(', ')}\n`;
                 }
-                galleryImageFiles.forEach(image => {
-                    if (image && typeof image !== 'string') {
-                        URL.revokeObjectURL(image);
+                
+                frontMatter += `description: ${formData.description}\n`;
+                frontMatter += `price: ${formData.price}\n`;
+                frontMatter += `address: ${formData.address}\n`;
+
+                // Ajouter l'image principale si elle existe
+                if (mainImageFile) {
+                    console.log('Ajout de l\'image principale au front matter');
+                    frontMatter += `image: /images/${formData.filename.replace('.md', '')}-main.jpg\n`;
+                }
+
+                // Ajouter les images de la galerie
+                if (galleryImageFiles.length > 0) {
+                    console.log('Ajout des images de la galerie au front matter');
+                    frontMatter += 'images:\n';
+                    galleryImageFiles.forEach((_, index) => {
+                        frontMatter += `  - image: /images/${formData.filename.replace('.md', '')}-${index + 1}.jpg\n`;
+                    });
+                }
+
+                // Ajouter les notes et commentaires
+                frontMatter += 'ratings:\n';
+                const categories = ['food', 'service', 'ambiance', 'value', 'originality', 'overall'];
+                categories.forEach(category => {
+                    const score = formData[`${category}Score`];
+                    const comment = formData[`${category}Comment`];
+                    if (score || comment) {
+                        frontMatter += `  ${category}:\n`;
+                        if (score) frontMatter += `    score: ${score}\n`;
+                        if (comment) frontMatter += `    comment: '${comment}'\n`;
                     }
                 });
 
+                frontMatter += '---\n\n';
+
+                // Ajouter le contenu de l'éditeur
+                const content = editor ? editor.getHTML() : '';
+                console.log('Contenu de l\'éditeur:', content);
+
+                // Construire le HTML de prévisualisation
+                let html = '<div class="markdown-preview">';
+                
+                // Ajouter l'image principale si elle existe
+                if (mainImageFile) {
+                    console.log('Ajout de l\'image principale à la prévisualisation');
+                    html += `<div class="main-image-preview-container">`;
+                    html += `<img src="${mainImageFile}" class="main-image-preview" alt="Image principale">`;
+                    html += `</div>`;
+                }
+
+                // Ajouter les images de la galerie
+                if (galleryImageFiles.length > 0) {
+                    console.log('Ajout des images de la galerie à la prévisualisation');
+                    html += `<div class="gallery-preview">`;
+                    galleryImageFiles.forEach((image, index) => {
+                        html += `<div class="gallery-image-container">`;
+                        html += `<img src="${image}" class="gallery-image-preview" alt="Image de galerie ${index + 1}">`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // Ajouter le contenu
+                html += `<div class="content-preview">${content}</div>`;
+                html += '</div>';
+
+                // Mettre à jour la prévisualisation
+                preview.innerHTML = html;
+                console.log('=== FIN UPDATE MARKDOWN PREVIEW ===');
             } catch (error) {
-                console.error('Erreur lors de la mise à jour de la prévisualisation:', error);
-                preview.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Une erreur est survenue lors de la génération de la prévisualisation.</p>
-                    </div>
-                `;
+                console.error('Erreur lors de la mise à jour de l\'aperçu:', error);
+                preview.innerHTML = `<div class="alert alert-danger">Erreur lors de la mise à jour de l\'aperçu: ${error.message}</div>`;
             }
         }
 
-        // Fonction utilitaire pour générer les étoiles de notation
-        function generateStars(rating) {
-            let stars = '';
-            for (let i = 1; i <= 5; i++) {
-                stars += `<i class="fas fa-star${i <= rating ? '' : '-o'}"></i>`;
+        function createImagePreview(file, container, isMainImage = false) {
+            console.log('=== DÉBUT CREATE IMAGE PREVIEW ===', { isMainImage, type: typeof file });
+            const div = document.createElement('div');
+            div.className = 'image-preview-container';
+
+            const deleteButtonHandler = function() {
+                console.log(`Suppression image: ${isMainImage ? 'Principale' : 'Galerie'}`);
+                div.remove();
+                if (isMainImage) {
+                    mainImageFile = null;
+                } else {
+                    const index = galleryImageFiles.findIndex(item => item === file);
+                    if (index > -1) {
+                        console.log(`Suppression de l'index ${index} dans la galerie`);
+                        galleryImageFiles.splice(index, 1);
+                    }
+                }
+                updateMarkdownPreview();
+            };
+
+            if (file instanceof Blob || file instanceof File) {
+                console.log('createImagePreview: Traitement comme Blob/File');
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    div.innerHTML = `
+                        <img src="${e.target.result}" class="image-preview" alt="Image preview">
+                        <button type="button" class="delete-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    div.querySelector('.delete-image').addEventListener('click', deleteButtonHandler);
+                    container.appendChild(div);
+                };
+                reader.onerror = (e) => {
+                    console.error("FileReader error:", e);
+                }
+                reader.readAsDataURL(file);
+            } else if (typeof file === 'string') {
+                console.log('createImagePreview: Traitement comme base64');
+                const imgSrc = file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`;
+                div.innerHTML = `
+                    <img src="${imgSrc}" class="image-preview" alt="Image preview">
+                    <button type="button" class="delete-image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                div.querySelector('.delete-image').addEventListener('click', deleteButtonHandler);
+                container.appendChild(div);
+            } else {
+                console.error("Type de fichier non supporté dans createImagePreview", file);
             }
-            return stars;
+            console.log('=== FIN CREATE IMAGE PREVIEW ===');
+        }
+
+        function updateGalleryPreview() {
+            console.log('=== DÉBUT UPDATE GALLERY PREVIEW ===');
+            console.log('Nombre d\'images dans la galerie:', galleryImageFiles.length);
+            
+            const container = document.getElementById('galleryPreview');
+            container.innerHTML = '';
+            
+            galleryImageFiles.forEach((file, index) => {
+                console.log(`Traitement image ${index + 1}:`, {
+                    type: typeof file,
+                    isBlob: file instanceof Blob,
+                    isFile: file instanceof File
+                });
+                createImagePreview(file, container);
+            });
+            
+            console.log('=== FIN UPDATE GALLERY PREVIEW ===');
+        }
+
+        function showLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.add('loading');
+            button.disabled = true;
+            if (spinner) spinner.style.display = 'inline-block';
+            if (buttonText) buttonText.style.opacity = '0.7';
+        }
+
+        function hideLoadingState(button) {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            
+            button.classList.remove('loading');
+            button.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+            if (buttonText) buttonText.style.opacity = '1';
+        }
+
+        function showConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <h3 class="confirmation-title">Confirmer l'annulation</h3>
+                        <p class="confirmation-message">Cette action est irréversible. Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="confirmation-buttons">
+                            <button class="confirmation-button confirm">Confirmer</button>
+                            <button class="confirmation-button cancel">Annuler</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        function showFormConfirmationModal() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'form-confirmation-modal';
+                modal.innerHTML = `
+                    <div class="form-confirmation-content">
+                        <h3 class="form-confirmation-title">Annuler le formulaire</h3>
+                        <p class="form-confirmation-message">Êtes-vous sûr de vouloir annuler ? Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="form-confirmation-buttons">
+                            <button class="form-confirmation-button confirm">Oui, annuler</button>
+                            <button class="form-confirmation-button cancel">Non, continuer</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.form-confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.form-confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Modifier la fonction d'annulation existante
+        async function cancelForm() {
+            // Afficher le modal de confirmation
+            const confirmed = await showFormConfirmationModal();
+            
+            if (confirmed) {
+                // Vider le localStorage
+                localStorage.removeItem('currentDraft');
+                localStorage.removeItem('pendingChanges');
+                
+                // Rediriger vers la page d'administration
+                window.location.href = 'restaurants.html';
+            }
+        }
+
+        // Fonction pour sauvegarder le resto
+        async function saveDraft() {
+            try {
+                const formData = new FormData(document.getElementById('restaurantForm'));
+                const title = formData.get('title');
+                
+                // Générer le nom du fichier à partir du titre
+                const filename = title.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                
+                const date = new Date().toISOString().split('T')[0];
+                const filePath = `${date}-${filename}.md`;
+
+                // Créer l'objet du resto avec le contenu initial
+                let markdownContent = generateMarkdown();
+                const draftData = {
+                    filename: filePath,
+                    title: title,
+                    content: markdownContent,
+                    images: [],
+                    lastModified: new Date().toISOString()
+                };
+
+                // Traiter l'image principale
+                if (mainImageFile) {
+                    // Vérifier si c'est une base64 (déjà chargée) ou un fichier (nouveau)
+                    let mainImageBase64;
+                    if (typeof mainImageFile === 'string') {
+                        mainImageBase64 = mainImageFile;
+                    } else {
+                        mainImageBase64 = await fileToBase64(mainImageFile);
+                    }
+                    draftData.images.push({
+                        name: mainImageFile.name || 'main_image.webp', // Utiliser un nom par défaut si c'est une base64
+                        data: mainImageBase64,
+                        isMain: true // <<< AJOUT DE isMain: true
+                    });
+                }
+
+                // Traiter les images de la galerie
+                for (let i = 0; i < galleryImageFiles.length; i++) {
+                    const file = galleryImageFiles[i];
+                    let galleryBase64;
+                    // Vérifier si c'est une base64 (déjà chargée) ou un fichier (nouveau)
+                    if (typeof file === 'string') {
+                        galleryBase64 = file;
+                    } else {
+                        galleryBase64 = await fileToBase64(file);
+                    }
+                    draftData.images.push({
+                        name: file.name || `gallery_${i}.webp`, // Utiliser un nom par défaut si c'est une base64
+                        data: galleryBase64,
+                        isMain: false
+                    });
+                }
+
+                // Récupérer les resto existants
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                
+                // Vérifier si un resto avec le même nom existe déjà
+                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+                
+                if (existingIndex !== -1) {
+                    // Mettre à jour le resto existant
+                    drafts[existingIndex] = draftData;
+                } else {
+                    // Ajouter un nouveau resto
+                    drafts.push(draftData);
+                }
+
+                try {
+                    // Sauvegarder dans localStorage
+                    localStorage.setItem('drafts', JSON.stringify(drafts));
+                    showNotification('Restaurant enregistré avec succès', 'success');
+                    
+                    // Mettre à jour l'interface
+                    updatePendingChangesButtons();
+                    
+                    setTimeout(() => {
+                        window.location.href = 'restaurants.html';
+                    }, 1500);
+                } catch (storageError) {
+                    if (storageError.name === 'QuotaExceededError') {
+                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des restos existants.', 'error');
+                    } else {
+                        showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
+                    }
+                    console.error('Erreur de stockage:', storageError);
+                }
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
+            }
+        }
+
+        // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Gestionnaire de soumission du formulaire
+        function initializeForm() {
+            const form = document.getElementById('restaurantForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    if (!validateForm()) {
+                        return;
+                    }
+                    await saveDraft();
+                });
+            } else {
+                console.error('Formulaire non trouvé');
+            }
+        }
+
+        // Initialiser le formulaire une fois le DOM chargé
+        document.addEventListener('DOMContentLoaded', initializeForm);
+        
+        // Fonction pour charger un resto
+        async function loadDraft(filename) {
+            try {
+                console.log('=== DÉBUT CHARGEMENT BROUILLON ===');
+                console.log('Fichier à charger:', filename);
+
+                const repo = 'Natael21/blog-culinaire';
+                
+                // D'abord vérifier dans le localStorage
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                console.log('Drafts dans localStorage:', drafts);
+                const localDraft = drafts.find(d => d.filename === filename);
+                console.log('Draft local trouvé:', localDraft);
+
+                let markdown;
+                let restaurantData = {};
+                let content;
+                let frontMatter;
+
+                if (localDraft) {
+                    console.log('=== DÉBUT CHARGEMENT DEPUIS LOCALSTORAGE ===');
+                    console.log('Contenu du draft:', {
+                        filename: localDraft.filename,
+                        hasImages: !!localDraft.images,
+                        numberOfImages: localDraft.images?.length || 0
+                    });
+
+                    markdown = localDraft.content;
+                    // Extraire le front matter et le contenu
+                    const parts = markdown.split('---');
+                    if (parts.length >= 3) {
+                        frontMatter = parts[1].trim();
+                        content = parts[2].trim();
+                        
+                        // Parser le front matter pour les drafts locaux
+                        console.log('Parsing du front matter local');
+                        frontMatter.split('\n').forEach(line => {
+                            const [key, ...value] = line.split(':');
+                            if (key && value.length > 0) {
+                                const cleanKey = key.trim();
+                                const cleanValue = value.join(':').trim().replace(/^['"]|['"]$/g, '');
+                                restaurantData[cleanKey] = cleanValue;
+                                console.log(`Front matter - ${cleanKey}: ${cleanValue}`);
+                            }
+                        });
+                    }
+
+                    if (localDraft.images && localDraft.images.length > 0) {
+                        console.log('Traitement des images du localStorage');
+                        
+                        // Réinitialiser les tableaux d'images
+                        mainImageFile = null;
+                        galleryImageFiles = [];
+                        
+                        // Utiliser la première image comme image principale
+                        const mainImage = localDraft.images[0];
+                        const galleryImages = localDraft.images.slice(1); // Toutes les autres images vont dans la galerie
+                        
+                        console.log('Image principale trouvée:', mainImage);
+                        console.log('Images de la galerie trouvées:', galleryImages);
+                        
+                        // Charger l'image principale si elle existe
+                        if (mainImage) {
+                            try {
+                                const imageData = mainImage.data.startsWith('data:image') ? mainImage.data : `data:image/jpeg;base64,${mainImage.data}`;
+                                mainImageFile = imageData;
+                                console.log('Image principale chargée:', mainImageFile);
+                                await handleMainImageUpload(imageData);
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image principale:', error);
+                            }
+                        }
+                        
+                        // Charger les images de la galerie
+                        for (const image of galleryImages) {
+                            try {
+                                const imageData = image.data.startsWith('data:image') ? image.data : `data:image/jpeg;base64,${image.data}`;
+                                galleryImageFiles.push(imageData);
+                                console.log('Image de la galerie ajoutée:', image.name);
+                            } catch (error) {
+                                console.error('Erreur lors du chargement d\'une image de la galerie:', error);
+                            }
+                        }
+                        
+                        // Mettre à jour la prévisualisation de la galerie
+                        updateGalleryPreview();
+                        
+                        // Mettre à jour l'aperçu markdown
+                        console.log('Mise à jour de l\'aperçu markdown après chargement des images');
+                        await updateMarkdownPreview();
+                    } else {
+                        console.log('Aucune image trouvée dans le localStorage');
+                    }
+                    console.log('=== FIN CHARGEMENT DEPUIS LOCALSTORAGE ===');
+                } else {
+                    // Si pas de draft local, charger depuis GitHub
+                    console.log('Tentative de récupération depuis GitHub');
+                    const path = `_posts/${filename}`;
+                    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+                    console.log('URL de la requête:', url);
+
+                    const response = await fetch(url);
+                    console.log('Statut de la réponse:', response.status);
+                    
+                    if (!response.ok) {
+                        console.error('Erreur lors de la récupération du fichier:', {
+                            status: response.status,
+                            statusText: response.statusText
+                        });
+                        throw new Error('Fichier non trouvé');
+                    }
+
+                    const data = await response.json();
+                    console.log('Données reçues:', {
+                        type: data.type,
+                        size: data.size,
+                        name: data.name
+                    });
+                    markdown = decodeURIComponent(escape(atob(data.content)));
+                    console.log('Contenu markdown décodé:', markdown);
+                    
+                    frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
+                    content = markdown.split('---')[2].trim();
+
+                    // Parser le front matter
+                    restaurantData = {};
+                    frontMatter.split('\n').forEach(line => {
+                        const [key, ...value] = line.split(':');
+                        if (key && value) {
+                            restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
+                        }
+                    });
+                    console.log('Données du restaurant extraites:', restaurantData);
+
+                    // Charger l'image principale depuis GitHub si elle existe
+                    if (restaurantData.image) {
+                        const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
+                        console.log('=== CHARGEMENT DE L\'IMAGE PRINCIPALE ===');
+                        console.log('Chemin de l\'image:', imagePath);
+                        
+                        if (imagePath) {
+                            try {
+                                const imageUrl = imagePath;
+                                console.log('URL de l\'image:', imageUrl);
+                                
+                                const response = await fetch(imageUrl);
+                                if (response.ok) {
+                                    const blob = await response.blob();
+                                    const fileName = imagePath.split('/').pop();
+                                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                                    mainImageFile = file;
+                                    handleMainImageUpload(file);
+                                    console.log('Image principale chargée avec succès');
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image principale:', response.status);
+                                }
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image principale:', error);
+                            }
+                        }
+                    }
+
+                    // Charger les images de la galerie depuis GitHub
+                    const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
+                    if (galleryMatches) {
+                        console.log('=== CHARGEMENT DES IMAGES DE LA GALERIE ===');
+                        const galleryYaml = galleryMatches[0];
+                        console.log('YAML de la galerie:', galleryYaml);
+                        
+                        const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
+                            ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
+                        console.log('Chemins des images de la galerie trouvés:', galleryPaths);
+                        console.log('Nombre d\'images dans la galerie:', galleryPaths.length);
+
+                        galleryImageFiles = [];
+                        for (const imagePath of galleryPaths) {
+                            try {
+                                console.log(`\nTraitement de l'image: ${imagePath}`);
+                                const imageUrl = imagePath;
+                                console.log('URL de l\'image:', imageUrl);
+                                
+                                const response = await fetch(imageUrl);
+                                if (response.ok) {
+                                    const blob = await response.blob();
+                                    const fileName = imagePath.split('/').pop();
+                                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                                    galleryImageFiles.push(file);
+                                    console.log('Image ajoutée à la galerie avec succès');
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image:', response.status);
+                                }
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image:', error);
+                            }
+                        }
+                        console.log('Mise à jour de l\'aperçu de la galerie...');
+                        updateGalleryPreview();
+                        console.log('État final de la galerie:', {
+                            nombreImages: galleryImageFiles.length,
+                            nomsFichiers: galleryImageFiles.map(f => f.name)
+                        });
+                        console.log('=== FIN DU CHARGEMENT DES IMAGES DE LA GALERIE ===');
+                    }
+                }
+
+                // Remplir les champs du formulaire
+                console.log('Remplissage des champs du formulaire avec:', restaurantData);
+                document.getElementById('state').value = restaurantData.state || 'draft';
+                document.getElementById('title').value = restaurantData.title || '';
+                document.getElementById('date').value = restaurantData.date || '';
+                document.getElementById('description').value = restaurantData.description || '';
+                document.getElementById('address').value = restaurantData.address || '';
+                document.getElementById('style').value = restaurantData.style || '';
+                
+                // Corriger la gamme de prix
+                const priceMap = {
+                    'budget': '$ (0-20$)',
+                    'moyen': '$$ (20-40$)',
+                    'haut': '$$$ (40$ et +)'
+                };
+                const priceValue = priceMap[restaurantData.price] || restaurantData.price;
+                console.log('Gamme de prix:', { original: restaurantData.price, mapped: priceValue });
+                document.getElementById('price').value = priceValue;
+                
+                // Remplir les options alimentaires
+                const dietString = (restaurantData.diet || '').trim();
+                console.log('Options alimentaires brutes:', dietString);
+                const diets = dietString.split(',').map(d => d.trim().toLowerCase());
+                console.log('Options alimentaires traitées:', diets);
+                document.getElementById('vegetarian').checked = diets.some(d => d === 'vegetarian-friendly' || d === 'vegetarian');
+                document.getElementById('vegan').checked = diets.some(d => d === 'vegan-friendly' || d === 'vegan');
+
+                // Extraire et remplir les notes et commentaires
+                console.log('Extraction des notes et commentaires');
+                const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
+                if (ratingsMatch) {
+                    const ratingsYaml = ratingsMatch[0];
+                    console.log('YAML des notes trouvé:', ratingsYaml);
+
+                    // Extraire les scores et commentaires avec une meilleure regex
+                    const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const serviceScore = ratingsYaml.match(/service:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const ambianceScore = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const valueScore = ratingsYaml.match(/value:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
+
+                    // Améliorer l'extraction des commentaires
+                    const extractComment = (yaml, category) => {
+                        const match = yaml.match(new RegExp(`${category}:[\\s\\S]*?comment:\\s*["']([^"']*)["']`));
+                        console.log(`Extraction du commentaire ${category}:`, match);
+                        return match ? match[1] : '';
+                    };
+
+                    const foodComment = extractComment(ratingsYaml, 'food');
+                    const serviceComment = extractComment(ratingsYaml, 'service');
+                    const ambianceComment = extractComment(ratingsYaml, 'ambiance');
+                    const valueComment = extractComment(ratingsYaml, 'value');
+                    const originalityComment = extractComment(ratingsYaml, 'originality');
+                    const overallComment = extractComment(ratingsYaml, 'overall');
+
+                    console.log('Notes et commentaires extraits:', {
+                        foodScore, foodComment,
+                        serviceScore, serviceComment,
+                        ambianceScore, ambianceComment,
+                        valueScore, valueComment,
+                        originalityScore, originalityComment,
+                        overallScore, overallComment
+                    });
+
+                    // Remplir les scores
+                    document.getElementById('foodScore').value = foodScore;
+                    document.getElementById('serviceScore').value = serviceScore;
+                    document.getElementById('ambianceScore').value = ambianceScore;
+                    document.getElementById('valueScore').value = valueScore;
+                    document.getElementById('originalityScore').value = originalityScore;
+                    document.getElementById('overallExperienceScore').value = overallScore;
+
+                    // Remplir les commentaires
+                    document.getElementById('foodComment').value = foodComment;
+                    document.getElementById('serviceComment').value = serviceComment;
+                    document.getElementById('ambianceComment').value = ambianceComment;
+                    document.getElementById('valueComment').value = valueComment;
+                    document.getElementById('originalityComment').value = originalityComment;
+                    document.getElementById('overallExperienceComment').value = overallComment;
+
+                    // Mettre à jour les affichages des valeurs
+                    document.querySelectorAll('.rating-value').forEach(el => {
+                        const input = el.previousElementSibling;
+                        if (input) {
+                            el.textContent = input.value;
+                        }
+                    });
+
+                    // Calculer et mettre à jour la note globale
+                    const scores = [
+                        parseFloat(foodScore),
+                        parseFloat(serviceScore),
+                        parseFloat(ambianceScore),
+                        parseFloat(valueScore),
+                        parseFloat(originalityScore),
+                        parseFloat(overallScore)
+                    ];
+                    const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                    document.getElementById('overallRating').value = average;
+                }
+
+                // Convertir le markdown en HTML
+                let htmlContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
+                    .replace(/\n/g, '<br>') // Saut de ligne
+                    .replace(/- (.*?)(?:\n|$)/g, '<ul><li>$1</li></ul>') // Liste à puces
+                    .replace(/\d+\. (.*?)(?:\n|$)/g, '<ol><li>$1</li></ol>'); // Liste numérotée
+
+                // Initialiser l'éditeur avec le contenu converti
+                await initializeEditor(htmlContent);
+
+                // Mettre à jour le nom du fichier
+                document.getElementById('filename').value = filename;
+
+                // Mettre à jour l'aperçu
+                updateMarkdownPreview();
+
+                console.log('=== FIN CHARGEMENT BROUILLON ===');
+            } catch (error) {
+                console.error('Erreur lors du chargement du brouillon:', error);
+                alert('Erreur lors du chargement du brouillon: ' + error.message);
+            }
+        }
+
+        // Fonction utilitaire pour convertir base64 en Blob
+        function base64ToBlob(base64, type) {
+            const binaryString = window.atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return new Blob([bytes], { type });
+        }
+
+        // Fonction pour annuler les modifications
+        function cancelChanges() {
+            if (confirm('Êtes-vous sûr de vouloir annuler les modifications ?')) {
+                deleteDraft(filename);
+                window.location.href = 'edit-resto.html';
+            }
         }
     </script>
 </head>
 <body>
+    <header class="admin-header">
+        <h1 class="admin-title">Modifier un restaurant</h1>
+        <a href="restaurants.html" class="action-button">
+            <i class="fas fa-arrow-left"></i> Retour à au Gestionnaire
+        </a>
+    </header>
+
     <div class="page-container">
         <div class="form-column">
-            <h1 class="admin-title">Modifier un restaurant</h1>
-            <form id="restaurantForm">
-                <div class="form-group">
-                    <label for="title" class="form-label">Nom du restaurant</label>
-                    <input type="text" class="form-control" id="title" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="date" class="form-label">Date de visite</label>
-                    <input type="date" class="form-control" id="date" name="date" required>
-                </div>
-                <div class="form-group">
-                    <label for="description" class="form-label">Résumé</label>
-                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="address" class="form-label">Adresse</label>
-                    <input type="text" class="form-control" id="address" name="address" required>
-                </div>
-                <div class="form-group">
-                    <label for="style" class="form-label">Style de cuisine</label>
-                    <input type="text" class="form-control" id="style" name="style" required>
-                </div>
-                <div class="form-group">
-                    <label for="price" class="form-label">Gamme de prix</label>
-                    <input type="text" class="form-control" id="price" name="price" required>
-                </div>
-                <div class="form-group">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
-                        <label class="form-check-label" for="vegetarian">Options végétaliennes</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
-                        <label class="form-check-label" for="vegan">Options véganes</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="mainImage" class="form-label">Image principale</label>
-                    <div class="upload-zone" id="mainImageZone">
-                        <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
-                        <div class="upload-icon">
-                            <i class="fas fa-cloud-upload-alt"></i>
+            <form id="restaurantForm" class="form-card">
+                <!-- Informations de base -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Informations de base</h2>
+                    <div class="form-group">
+                        <label for="state" class="form-label">État du restaurant</label>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="state" name="state" required>
+                                <option value="draft">Draft</option>
+                                <option value="ready">Ready</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner l'état du restaurant</div>
                         </div>
-                        <div class="upload-text">Glissez et déposez votre image principale ici</div>
-                        <div class="upload-subtext">ou cliquez pour sélectionner un fichier</div>
                     </div>
-                    <div id="mainImagePreview" class="image-preview-container mt-3"></div>
-                </div>
-                <div class="form-group">
-                    <label for="galleryImages" class="form-label">Images de la galerie</label>
-                    <div class="upload-zone" id="galleryZone">
-                        <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
-                        <div class="upload-icon">
-                            <i class="fas fa-images"></i>
+
+                    <div class="form-group">
+                        <label for="title" class="form-label">Nom du restaurant</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="title" name="title" class="form-control" required>
+                            <div class="invalid-feedback">Veuillez entrer le nom du restaurant</div>
                         </div>
-                        <div class="upload-text">Glissez et déposez vos images ici</div>
-                        <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
                     </div>
-                    <div id="galleryPreview" class="gallery-preview"></div>
+
+                    <div class="form-group">
+                        <label for="date" class="form-label">Date de visite</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="date" name="date" class="form-control" required>
+                            <div class="invalid-feedback">Veuillez sélectionner la date de visite</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">Résumé</label>
+                        <div class="input-wrapper">
+                            <textarea id="description" name="description" class="form-control" maxlength="150" required></textarea>
+                            <div class="invalid-feedback">Veuillez entrer un résumé</div>
+                        </div>
+                        <small class="text-muted">Maximum 150 caractères</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address" class="form-label">Adresse</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="address" name="address" class="form-control" required placeholder="Commencez à taper une adresse...">
+                            <div class="invalid-feedback">Veuillez entrer une adresse valide</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="style" class="form-label">Style de cuisine</label>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="style" name="style" required>
+                                <option value="">Sélectionner un style</option>
+                                <option value="Asiatique">Asiatique</option>
+                                <option value="Américain">Américain</option>
+                                <option value="Moyen-Orient">Moyen-Orient</option>
+                                <option value="Mexicain & Latino">Mexicain & Latino</option>
+                                <option value="Bistro & Café">Bistro & Café</option>
+                                <option value="Pub & Microbrasserie">Pub & Microbrasserie</option>
+                                <option value="Italien">Italien</option>
+                                <option value="Indien & Épicé">Indien & Épicé</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner un style de cuisine</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price" class="form-label">Gamme de prix</label>
+                        <div class="input-wrapper">
+                            <select class="form-control" id="price" name="price" required>
+                                <option value="">Sélectionner une gamme de prix</option>
+                                <option value="$ (0-20$)">$ (0-20$)</option>
+                                <option value="$$ (20-40$)">$$ (20-40$)</option>
+                                <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner une gamme de prix</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label d-block">Options alimentaires disponibles</label>
+                        <div class="form-check-container">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vegetarian" name="diet" value="vegetarian-friendly">
+                                <label class="form-check-label" for="vegetarian">Options végétariennes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vegan" name="diet" value="vegan-friendly">
+                                <label class="form-check-label" for="vegan">Options végétaliennes</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mainImage" class="form-label">Image principale</label>
+                        <div class="upload-zone" id="mainImageZone">
+                            <input type="file" id="mainImage" name="mainImage" accept="image/*" required>
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">Glissez et déposez votre image principale ici</div>
+                            <div class="upload-subtext">ou cliquez pour sélectionner un fichier</div>
+                        </div>
+                        <div id="mainImagePreview" class="image-preview-container mt-3"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="galleryImages" class="form-label">Images de la galerie</label>
+                        <div class="upload-zone" id="galleryZone">
+                            <input type="file" id="galleryImages" name="galleryImages" accept="image/*" multiple>
+                            <div class="upload-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="upload-text">Glissez et déposez vos images ici</div>
+                            <div class="upload-subtext">ou cliquez pour sélectionner des fichiers</div>
+                        </div>
+                        <div id="galleryPreview" class="gallery-preview"></div>
+                    </div>
                 </div>
+
+                <!-- Évaluations -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Évaluations</h2>
+                    <div class="mb-3">
+                        <label for="overallRating" class="form-label">Note globale (sur 10)</label>
+                        <input type="number" class="form-control rating-input" id="overallRating" readonly style="background-color: #e9ecef;">
+                        <small class="text-muted">Calculée automatiquement à partir des critères détaillés</small>
+                    </div>
+                    
+                    <!-- Critères d'évaluation -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Critères détaillés</h3>
+                        
+                        <!-- Nourriture -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Nourriture</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="foodScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="foodScore" name="foodScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="foodComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="foodComment" name="foodComment" rows="2" placeholder="Commentaire sur la nourriture" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Service</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="serviceScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="serviceScore" name="serviceScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="serviceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="serviceComment" name="serviceComment" rows="2" placeholder="Commentaire sur le service" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ambiance -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Ambiance</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="ambianceScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="ambianceScore" name="ambianceScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="ambianceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="ambianceComment" name="ambianceComment" rows="2" placeholder="Commentaire sur l'ambiance" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rapport qualité/prix -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Rapport qualité/prix</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="valueScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="valueScore" name="valueScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="valueComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="valueComment" name="valueComment" rows="2" placeholder="Commentaire sur le rapport qualité/prix" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Originalité -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Originalité</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="originalityScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="originalityScore" name="originalityScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="originalityComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="originalityComment" name="originalityComment" rows="2" placeholder="Commentaire sur l'originalité" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expérience globale -->
+                        <div class="card mb-3 p-3">
+                            <h4 class="h6">Expérience globale</h4>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="overallExperienceScore" class="form-label">Note</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="overallExperienceScore" name="overallExperienceScore" min="1" max="10" step="1" value="5" required>
+                                        <span class="rating-value">5</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <label for="overallExperienceComment" class="form-label">Commentaire</label>
+                                    <textarea class="form-control" id="overallExperienceComment" name="overallExperienceComment" rows="2" placeholder="Commentaire sur l'expérience globale" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commentaires -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Description détaillée</h2>
+                    <div class="mb-3">
+                        <label for="editor" class="form-label">Description complète du restaurant</label>
+                        <div class="editor-toolbar">
+                            <button type="button" data-command="bold" title="Gras"><i class="fas fa-bold"></i></button>
+                            <button type="button" data-command="italic" title="Italique"><i class="fas fa-italic"></i></button>
+                            <button type="button" data-command="bulletList" title="Liste à puces"><i class="fas fa-list-ul"></i></button>
+                            <button type="button" data-command="orderedList" title="Liste numérotée"><i class="fas fa-list-ol"></i></button>
+                        </div>
+                        <div id="editor"></div>
+                    </div>
+                </div>
+
                 <div class="form-actions">
                     <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: flex-end;">
                         <button type="submit" class="action-button" id="saveButton">
@@ -2276,5 +3083,4 @@ ${editorContent}`;
         </div>
     </div>
 </body>
-</html>
 </html>
