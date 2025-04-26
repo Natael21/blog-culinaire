@@ -2338,7 +2338,7 @@ ${editorContent}`;
         document.addEventListener('DOMContentLoaded', initializeForm);
 
         // Fonction pour charger un restaurant
-        function loadDraft(filename) {
+        async function loadDraft(filename) {
             try {
                 const repo = 'Natael21/blog-culinaire';
                 
@@ -2396,7 +2396,6 @@ ${editorContent}`;
                 document.getElementById('vegan').checked = diets.some(d => d === 'vegan-friendly' || d === 'vegan');
 
                 // Extraire et remplir les notes et commentaires
-                console.log('Extraction des notes et commentaires');
                 const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
                 if (ratingsMatch) {
                     const ratingsYaml = ratingsMatch[0];
@@ -2469,7 +2468,7 @@ ${editorContent}`;
                     .replace(/\d+\. (.*?)(?:\n|$)/g, '<ol><li>$1</li></ol>'); // Liste numérotée
 
                 // Initialiser l'éditeur avec le contenu converti
-                initializeEditor(htmlContent);
+                await initializeEditor(htmlContent);
 
                 // Mettre à jour le nom du fichier
                 document.getElementById('filename').value = filename;
@@ -2531,7 +2530,7 @@ ${editorContent}`;
                             <div class="invalid-feedback">Veuillez sélectionner l'état du restaurant</div>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="title" class="form-label">Nom du restaurant</label>
                         <div class="input-wrapper">
