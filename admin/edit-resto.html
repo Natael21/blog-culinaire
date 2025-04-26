@@ -2729,10 +2729,12 @@ ${editorContent}`;
                 document.getElementById('price').value = priceValue;
                 
                 // Remplir les options alimentaires
-                const diets = (restaurantData.diet || '').split(',');
-                console.log('Options alimentaires:', diets);
-                document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
-                document.getElementById('vegan').checked = diets.includes('vegan-friendly');
+                const dietString = (restaurantData.diet || '').trim();
+                console.log('Options alimentaires brutes:', dietString);
+                const diets = dietString.split(',').map(d => d.trim().toLowerCase());
+                console.log('Options alimentaires traitées:', diets);
+                document.getElementById('vegetarian').checked = diets.some(d => d === 'vegetarian-friendly' || d === 'vegetarian');
+                document.getElementById('vegan').checked = diets.some(d => d === 'vegan-friendly' || d === 'vegan');
 
                 // Extraire et remplir les notes et commentaires
                 console.log('Extraction des notes et commentaires');
