@@ -2494,19 +2494,96 @@ ${editorContent}`;
                 console.log('=== DÉBUT CHARGEMENT BROUILLON ===');
                 console.log('Fichier à charger:', filename);
 
-                const response = await fetch(`/api/drafts/${filename}`);
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
+                // Charger depuis le localStorage
+                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+                console.log('Drafts dans localStorage:', drafts);
+                
+                const draft = drafts.find(d => d.filename === filename);
+                if (!draft) {
+                    throw new Error('Brouillon non trouvé');
                 }
 
-                const draft = await response.json();
-                console.log('Brouillon chargé:', {
+                console.log('Brouillon trouvé:', {
                     filename: draft.filename,
                     contentLength: draft.content.length
                 });
 
+                // Extraire le front matter et le contenu
+                const parts = draft.content.split('---');
+                if (parts.length < 3) {
+                    throw new Error('Format de brouillon invalide');
+                }
+
+                const frontMatter = parts[1].trim();
+                const content = parts[2].trim();
+
+                // Parser le front matter
+                const restaurantData = {};
+                frontMatter.split('\n').forEach(line => {
+                    const [key, ...value] = line.split(':');
+                    if (key && value.length > 0) {
+                        const cleanKey = key.trim();
+                        const cleanValue = value.join(':').trim().replace(/^['"]|['"]$/g, '');
+                        restaurantData[cleanKey] = cleanValue;
+                        console.log(`Front matter - ${cleanKey}: ${cleanValue}`);
+                    }
+                });
+
+                // Remplir les champs du formulaire
+                document.getElementById('state').value = restaurantData.state || 'draft';
+                document.getElementById('title').value = restaurantData.title || '';
+                document.getElementById('date').value = restaurantData.date || '';
+                document.getElementById('description').value = restaurantData.description || '';
+                document.getElementById('address').value = restaurantData.address || '';
+                document.getElementById('style').value = restaurantData.style || '';
+                document.getElementById('price').value = restaurantData.price || '';
+
+                // Remplir les options alimentaires
+                const diets = (restaurantData.diet || '').split(',');
+                document.getElementById('vegetarian').checked = diets.includes('vegetarian-friendly');
+                document.getElementById('vegan').checked = diets.includes('vegan-friendly');
+
+                // Extraire et remplir les notes et commentaires
+                const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
+                if (ratingsMatch) {
+                    const ratingsYaml = ratingsMatch[0];
+                    const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const serviceScore = ratingsYaml.match(/service:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const ambianceScore = ratingsYaml.match(/ambiance:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const valueScore = ratingsYaml.match(/value:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const originalityScore = ratingsYaml.match(/originality:\n\s*score:\s*(\d+)/)?.[1] || '5';
+                    const overallScore = ratingsYaml.match(/overall:\n\s*score:\s*(\d+)/)?.[1] || '5';
+
+                    const extractComment = (yaml, category) => {
+                        const match = yaml.match(new RegExp(`${category}:[\\s\\S]*?comment:\\s*["']([^"']*)["']`));
+                        return match ? match[1] : '';
+                    };
+
+                    document.getElementById('foodScore').value = foodScore;
+                    document.getElementById('serviceScore').value = serviceScore;
+                    document.getElementById('ambianceScore').value = ambianceScore;
+                    document.getElementById('valueScore').value = valueScore;
+                    document.getElementById('originalityScore').value = originalityScore;
+                    document.getElementById('overallExperienceScore').value = overallScore;
+
+                    document.getElementById('foodComment').value = extractComment(ratingsYaml, 'food');
+                    document.getElementById('serviceComment').value = extractComment(ratingsYaml, 'service');
+                    document.getElementById('ambianceComment').value = extractComment(ratingsYaml, 'ambiance');
+                    document.getElementById('valueComment').value = extractComment(ratingsYaml, 'value');
+                    document.getElementById('originalityComment').value = extractComment(ratingsYaml, 'originality');
+                    document.getElementById('overallExperienceComment').value = extractComment(ratingsYaml, 'overall');
+
+                    // Mettre à jour les affichages des valeurs
+                    document.querySelectorAll('.rating-value').forEach(el => {
+                        const input = el.previousElementSibling;
+                        if (input) {
+                            el.textContent = input.value;
+                        }
+                    });
+                }
+
                 // Convertir le markdown en HTML
-                let htmlContent = draft.content
+                let htmlContent = content
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
                     .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italique
                     .replace(/\n/g, '<br>') // Saut de ligne
@@ -2514,7 +2591,7 @@ ${editorContent}`;
                     .replace(/\d+\. (.*?)(?:\n|$)/g, '<ol><li>$1</li></ol>'); // Liste numérotée
 
                 console.log('Contenu converti en HTML:', {
-                    originalLength: draft.content.length,
+                    originalLength: content.length,
                     convertedLength: htmlContent.length
                 });
 
@@ -2525,6 +2602,21 @@ ${editorContent}`;
                 // Mettre à jour le nom du fichier
                 document.getElementById('filename').value = draft.filename;
                 console.log('Nom de fichier mis à jour:', draft.filename);
+
+                // Charger les images si elles existent
+                if (draft.images && draft.images.length > 0) {
+                    console.log('Chargement des images du brouillon');
+                    const mainImage = draft.images.find(img => img.isMain);
+                    if (mainImage) {
+                        mainImageFile = mainImage.data;
+                        handleMainImageUpload(mainImage.data);
+                    }
+
+                    draft.images.filter(img => !img.isMain).forEach(img => {
+                        galleryImageFiles.push(img.data);
+                    });
+                    updateGalleryPreview();
+                }
 
                 console.log('=== FIN CHARGEMENT BROUILLON ===');
             } catch (error) {
