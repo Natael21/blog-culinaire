@@ -2513,26 +2513,35 @@ ${editorContent}`;
                         mainImageFile = null;
                         galleryImageFiles = [];
                         
-                        // Trouver d'abord l'image principale
-                        const mainImg = localDraft.images.find(img => img.isMain);
-                        if (mainImg) {
-                            console.log('Image principale trouvée:', mainImg.name);
-                            const imageData = mainImg.data.startsWith('data:image') ? mainImg.data : `data:image/jpeg;base64,${mainImg.data}`;
-                            mainImageFile = imageData;
-                            handleMainImageUpload(imageData);
-                        }
-
-                        // Traiter ensuite les images de la galerie
-                        localDraft.images.forEach((img) => {
-                            // Ne pas ajouter l'image principale à la galerie
-                            if (!img.isMain) {
-                                console.log('Ajout image à la galerie:', img.name);
-                                const imageData = img.data.startsWith('data:image') ? img.data : `data:image/jpeg;base64,${img.data}`;
-                                galleryImageFiles.push(imageData);
+                        // Séparer l'image principale des images de la galerie
+                        const mainImage = localDraft.images.find(img => img.isMain);
+                        const galleryImages = localDraft.images.filter(img => img.filename !== localDraft.image);
+                        
+                        console.log('Image principale trouvée:', mainImage);
+                        console.log('Images de la galerie trouvées:', galleryImages);
+                        
+                        // Charger l'image principale si elle existe
+                        if (mainImage) {
+                            try {
+                                mainImageFile = mainImage.data;
+                                console.log('Image principale chargée:', mainImageFile);
+                                await handleMainImageUpload(mainImageFile);
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image principale:', error);
                             }
-                        });
-
-                        console.log('Mise à jour de la prévisualisation de la galerie');
+                        }
+                        
+                        // Charger les images de la galerie
+                        for (const image of galleryImages) {
+                            try {
+                                galleryImageFiles.push(image.data);
+                                console.log('Image de la galerie ajoutée:', image.filename);
+                            } catch (error) {
+                                console.error('Erreur lors du chargement d\'une image de la galerie:', error);
+                            }
+                        }
+                        
+                        // Mettre à jour la prévisualisation de la galerie
                         updateGalleryPreview();
                     } else {
                         console.log('Aucune image trouvée dans le localStorage');
