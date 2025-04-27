@@ -2366,7 +2366,7 @@ ${editorContent}`;
 
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    console.log(isBase64(mainImageFile));
+                    console.log(mainImageFile.name);
                     if (isBase64(mainImageFile)) {
                         console.log('mainImageFile is base64');
                         draftData.images.push({
@@ -2396,12 +2396,13 @@ ${editorContent}`;
                 // Traiter les images de la galerie
                 for (let i = 0; i < galleryImageFiles.length; i++) {
                     const file = galleryImageFiles[i];
-                    
-                    if (isBase64(file.data)) {
+
+                    console.log(file);
+                    if (isBase64(file)) {
                         console.log('file.data is base64');
                         draftData.images.push({
                             name: file.name,
-                            data: file.data,  // Ajouter directement la chaîne Base64
+                            data: file,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
                     } else if (file instanceof File) {
