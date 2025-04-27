@@ -2386,10 +2386,18 @@ ${editorContent}`;
                     return /^data:image\/[a-zA-Z]+;base64,/.test(str);
                 };
 
-                const { mainImage, galleryImages } = extractImageNames(markdownContent);
+                const drafts2 = JSON.parse(localStorage.getItem('drafts') || '[]');
+                const localDraft2 = drafts2.find(d => d.filename === filename);
 
-                console.log(mainImage);
-                console.log(galleryImages);
+                if(localDraft2){
+                    const mainImage = localDraft2.images[0];
+                    const galleryImages = localDraft2.images.slice(1); // Toutes les autres images vont dans la galerie
+                }
+
+                //const { mainImage, galleryImages } = extractImageNames(markdownContent);
+
+                console.log(mainImage.name);
+                console.log(galleryImages.name);
 
                 // Traiter l'image principale
                 if (mainImageFile) {
@@ -2461,7 +2469,7 @@ ${editorContent}`;
                     drafts.push(draftData);
                 }
 
-                await sleep(3000);
+                await sleep(3000); //TODO: Supprimer
 
                 try {
                     // Sauvegarder dans localStorage
