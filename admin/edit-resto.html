@@ -2376,13 +2376,11 @@ ${editorContent}`;
 
                 const { mainImageName, galleryImageNames } = extractImageNames(markdownContent);
 
-                console.log(mainImageFile.name);
-
                 // Traiter l'image principale
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
                         draftData.images.push({
-                            name: "to find",
+                            name: "to find", //TODO: Remplacer par le nom de l'image
                             data: mainImageFile,  // Ajouter directement la chaîne Base64
                             isMain: true
                         });
@@ -2411,7 +2409,7 @@ ${editorContent}`;
 
                     if (isBase64(file)) {
                         draftData.images.push({
-                            name: "to find",
+                            name: "to find",//TODO: Remplacer par le nom de l'image
                             data: file,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
@@ -2619,6 +2617,30 @@ ${editorContent}`;
                             restaurantData[key.trim()] = value.join(':').trim().replace(/^['"]|['"]$/g, '');
                         }
                     });
+
+                    // Charger l'image principale depuis GitHub si elle existe
+                    if (restaurantData.image) {
+                        const imagePath = restaurantData.image.replace(/^['"]|['"]$/g, '').trim();
+                        
+                        if (imagePath) {
+                            try {
+                                const imageUrl = imagePath;
+                                
+                                const response = await fetch(imageUrl);
+                                if (response.ok) {
+                                    const blob = await response.blob();
+                                    const fileName = imagePath.split('/').pop();
+                                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                                    mainImageFile = file;
+                                    await handleMainImageUpload(file);
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image principale:', response.status);
+                                }
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image principale:', error);
+                            }
+                        }
+                    }
                 }
 
                 // Remplir les champs du formulaire
