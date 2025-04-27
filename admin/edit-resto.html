@@ -1298,7 +1298,6 @@
                         const localDraft3 = drafts3.find(d => d.filename === filename);
 
                         // Sauvegarder l'image principale
-                        console.log(localDraft3.images[0].name)
                         if (mainImageFile) {
                             // Si l'image est déjà en URL ou en Base64
                             console.log(mainImageFile)
@@ -2396,7 +2395,6 @@ ${editorContent}`;
                 //const { mainImage, galleryImages } = extractImageNames(markdownContent);
 
                 // Traiter l'image principale
-                console.log(localDraft2.images[0].name)
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
                         draftData.images.push({
@@ -2465,8 +2463,6 @@ ${editorContent}`;
                     // Ajouter un nouveau restaurant
                     drafts.push(draftData);
                 }
-
-                await sleep(3000); //TODO: Supprimer
 
                 try {
                     // Sauvegarder dans localStorage
