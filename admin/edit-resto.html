@@ -1297,11 +1297,11 @@
                         // Sauvegarder l'image principale
                         if (mainImageFile) {
                             // Si l'image est déjà en URL ou en Base64
-                            const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
-                            if (isBase64(mainImageSrc)) {
+                            
+                            if (isBase64(mainImageFile)) {
                                 draftData.images.push({
                                     name: mainImageFile.name,
-                                    data: mainImageSrc  // Ajoute directement la chaîne Base64
+                                    data: mainImageFile  // Ajoute directement la chaîne Base64
                                 });
                             } else if (mainImageFile instanceof File) {
                                 // Convertir l'image en base64 si c'est un fichier
@@ -1312,6 +1312,7 @@
                                 });
                             } else {
                                 // Si l'image est juste une URL, on l'ajoute directement
+                                const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
                                 draftData.images.push({
                                     name: mainImageFile.name,
                                     data: mainImageSrc
@@ -1322,11 +1323,12 @@
                         // Sauvegarder les images de la galerie
                         for (let i = 0; i < galleryImageFiles.length; i++) {
                             const file = galleryImageFiles[i];
-                            const galleryImageSrc = document.getElementById(`galleryImage${i}`).src; // Si l'image a un attribut src
-                            if (isBase64(galleryImageSrc)) {
+                            
+                            
+                            if (isBase64(file)) {
                                 draftData.images.push({
                                     name: file.name,
-                                    data: galleryImageSrc  // Ajoute directement la chaîne Base64
+                                    data: galleryImageFiles[i]  // Ajoute directement la chaîne Base64
                                 });
                             } else if (file instanceof File) {
                                 // Convertir l'image en base64 si c'est un fichier
@@ -1337,6 +1339,7 @@
                                 });
                             } else {
                                 // Si l'image est juste une URL, on l'ajoute directement
+                                const galleryImageSrc = document.getElementById(`galleryImage${i}`).src; // Si l'image a un attribut src
                                 draftData.images.push({
                                     name: file.name,
                                     data: galleryImageSrc
