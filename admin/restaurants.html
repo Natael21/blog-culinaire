@@ -768,6 +768,8 @@
                 
                 // Si vient du localStorage, chercher l'image principale dans le tableau images
                 if (restaurant.isFromLocalStorage) {
+
+                    return; //TODO: Supprimer
                     
                     if (Array.isArray(restaurant.images) && restaurant.images.length > 0) {
                         const firstImage = restaurant.images[0];
