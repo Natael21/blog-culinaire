@@ -237,16 +237,6 @@
             background: #c0392b;
         }
 
-        .gallery-item .actions button:first-child {
-            margin-right: 0.5rem; /* Espace entre les deux boutons */
-        }
-
-        .gallery-item .actions button:last-child {
-            background: #3498db; /* Bleu */
-            margin-left: 0.5rem; /* Espace entre les deux boutons */
-        }
-
-
         .modal-button.cancel:hover {
             background: var(--background-color);
         }
@@ -286,19 +276,6 @@
     <script>
         let currentImageToDelete = null;
 
-        // Fonction pour télécharger l'image à partir de GitHub
-        function downloadImageFromGitHub(imageUrl) {
-            const a = document.createElement('a');
-            a.href = imageUrl;  // Lien direct vers l'image brute
-            a.download = imageUrl.substring(imageUrl.lastIndexOf('/') + 1); // Extraire le nom du fichier
-            a.style.display = 'none'; // Masque le lien
-            document.body.appendChild(a);
-            a.click();  // Simule un clic pour démarrer le téléchargement
-            document.body.removeChild(a);  // Nettoie l'élément après le téléchargement
-        }
-
-
-
         // Fonction pour charger les images depuis GitHub
         async function loadImages() {
             try {
@@ -332,10 +309,6 @@
                                 <!-- Bouton Suppression -->
                                 <button onclick="showConfirmationModal('${item.name}')">
                                     <i class="fas fa-trash"></i> Supprimer
-                                </button>
-                                <!-- Bouton Téléchargement -->
-                                <button onclick="downloadImageFromGitHub('${imageUrl}')">
-                                    <i class="fas fa-download"></i>
                                 </button>
                             </div>
                         `;
