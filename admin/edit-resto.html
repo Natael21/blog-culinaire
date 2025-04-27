@@ -2395,13 +2395,15 @@ ${editorContent}`;
                 for (let i = 0; i < galleryImageFiles.length; i++) {
                     const file = galleryImageFiles[i];
                     
-                    if (isBase64(file)) {
+                    if (isBase64(file.data)) {
+                        console.log('file.data is base64');
                         draftData.images.push({
                             name: file.name,
                             data: file.data,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
                     } else if (file instanceof File) {
+                        console.log('file is a file');
                         // Convertir l'image en base64 si c'est un fichier
                         const galleryBase64 = await fileToBase64(file);
                         draftData.images.push({
@@ -2410,6 +2412,7 @@ ${editorContent}`;
                             isMain: false
                         });
                     } else {
+                        console.log('file is a url');
                         // Si c'est une URL, l'ajouter directement
                         const galleryImageSrc = document.getElementById(`galleryImage${i}`).src;  // Si l'image a un attribut src
                         draftData.images.push({
@@ -2448,8 +2451,10 @@ ${editorContent}`;
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
                         showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des restaurants existants.', 'error');
+                        return;
                     } else {
                         showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
+                        return;
                     }
                     console.error('Erreur de stockage:', storageError);
                 }
