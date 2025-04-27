@@ -1216,7 +1216,7 @@
         }
 
         // Initialiser TipTap
-        let editor;
+        let editor = null;
         window.addEventListener('load', () => {
             
             // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
@@ -1981,7 +1981,6 @@ ${editorContent}`;
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
             
             // Récupérer le contenu de l'éditeur
-            console.log(editor);
             const editorContent = editor.getHTML() || '';
             
             // Créer le HTML de l'aperçu
