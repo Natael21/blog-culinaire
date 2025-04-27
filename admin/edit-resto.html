@@ -1720,7 +1720,7 @@
                 errorDiv.remove();
             }
 
-            console.log(mainImageFile);
+            await sleep(500);
             
             await updateMarkdownPreview();
         }
@@ -2039,6 +2039,8 @@ ${editorContent}`;
             const valueComment = document.getElementById('valueComment').value || '';
             const originalityComment = document.getElementById('originalityComment').value || '';
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+            
+            await sleep(500);
             
             // Récupérer le contenu de l'éditeur
             const editorContent = editor.getHTML() || '';
