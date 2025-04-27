@@ -1646,63 +1646,11 @@
             });
         }
 
-        async function handleMainImageUpload(file) {
-            
-            if (!file) {
-                return;
-            }
+        function handleMainImageUpload(file) {
+            const container = document.getElementById('mainImagePreview');
 
-            try {
-                let imageUrl;
-                if (typeof file === 'string') {
-                    // Si c'est une URL ou une chaîne base64
-                    if (file.startsWith('data:image')) {
-                        imageUrl = file;
-                    } else if (file.startsWith('http')) {
-                        imageUrl = file;
-                    } else {
-                        imageUrl = `data:image/jpeg;base64,${file}`;
-                    }
-                } else if (file instanceof File) {
-                    // Si c'est un objet File
-                    imageUrl = URL.createObjectURL(file);
-                } else if (file instanceof Blob) {
-                    // Si c'est un Blob
-                    imageUrl = URL.createObjectURL(file);
-                }
-
-                if (!imageUrl) {
-                    throw new Error('Format d\'image non supporté');
-                }
-
-                // Mettre à jour l'image principale
-                mainImageFile = file;
-                const preview = document.getElementById('mainImagePreview');
-                preview.innerHTML = `
-                    <div class="position-relative image-container">
-                        <img src="${imageUrl}" class="img-fluid rounded main-image-preview" alt="Image principale">
-                        <button class="delete-image-btn" onclick="deleteMainImage()">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-                `;
-
-                // Supprimer le message d'erreur s'il existe
-                const errorDiv = document.getElementById('mainImageError');
-                if (errorDiv) {
-                    errorDiv.remove();
-                }
-
-                // Mettre à jour la prévisualisation
-                await updateMarkdownPreview();
-            } catch (error) {
-                const preview = document.getElementById('mainImagePreview');
-                preview.innerHTML = `
-                    <div class="alert alert-danger" id="mainImageError">
-                        Erreur lors du chargement de l\'image: ${error.message}
-                    </div>
-                `;
-            }
+            createImagePreview(file, container);
+            updateMarkdownPreview();
         }
 
         function handleGalleryUpload(files) {
