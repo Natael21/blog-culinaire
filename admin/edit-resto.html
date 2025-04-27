@@ -2482,23 +2482,22 @@ ${editorContent}`;
                     if (localDraft.images && localDraft.images.length > 0) {
                         
                         // Réinitialiser les tableaux d'images
-                        mainImageFile = null;
                         galleryImageFiles = [];
                         
                         // Utiliser la première image comme image principale
-                        const mainImage = localDraft.images[0];
+                        const mainImage_local = localDraft.images[0];
                         const galleryImages = localDraft.images.slice(1); // Toutes les autres images vont dans la galerie
                                                 
-                        //// Charger l'image principale si elle existe
-                        //if (mainImage) {
-                        //    try {
-                        //        const imageData = mainImage.data.startsWith('data:image') ? mainImage.data : `data:image/jpeg;base64,${mainImage.data}`;
-                        //        mainImageFile = imageData;
-                        //        await handleMainImageUpload(imageData);
-                        //    } catch (error) {
-                        //        console.error('Erreur lors du chargement de l\'image principale:', error);
-                        //    }
-                        //}
+                        // Charger l'image principale si elle existe
+                        if (mainImage) {
+                            try {
+                                const imageData = mainImage.data.startsWith('data:image') ? mainImage.data : `data:image/jpeg;base64,${mainImage.data}`;
+                                mainImageFile = imageData;
+                                //await handleMainImageUpload(imageData);
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image principale:', error);
+                            }
+                        }
                         
                         // Charger les images de la galerie
                         for (const image of galleryImages) {
