@@ -284,26 +284,17 @@
     <script>
         let currentImageToDelete = null;
 
-        // Fonction pour télécharger l'image en simulant "Save Image As"
-        function downloadImage(imageUrl) {
-            // Crée un élément <a> temporaire
+        // Fonction pour télécharger l'image à partir de GitHub
+        function downloadImageFromGitHub(imageUrl) {
             const a = document.createElement('a');
-            
-            // Définit l'URL de l'image
-            a.href = imageUrl;
-            
-            // Définit le nom du fichier en fonction du nom dans l'URL (la dernière partie de l'URL)
-            a.download = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-            
-            // Ajoute le lien au DOM (il doit être dans le DOM pour fonctionner)
+            a.href = imageUrl;  // Lien direct vers l'image brute
+            a.download = imageUrl.substring(imageUrl.lastIndexOf('/') + 1); // Extraire le nom du fichier
+            a.style.display = 'none'; // Masque le lien
             document.body.appendChild(a);
-            
-            // Simule un clic sur le lien pour démarrer le téléchargement
-            a.click();
-            
-            // Supprime le lien après avoir cliqué pour garder l'interface propre
-            document.body.removeChild(a);
+            a.click();  // Simule un clic pour démarrer le téléchargement
+            document.body.removeChild(a);  // Nettoie l'élément après le téléchargement
         }
+
 
 
         // Fonction pour charger les images depuis GitHub
