@@ -2440,6 +2440,8 @@ ${editorContent}`;
                     drafts.push(draftData);
                 }
 
+                return;
+
                 try {
                     // Sauvegarder dans localStorage
                     localStorage.setItem('drafts', JSON.stringify(drafts));
