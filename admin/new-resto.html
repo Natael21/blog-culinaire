@@ -2271,7 +2271,7 @@ ${editorContent}`;
                     .replace(/-+/g, '-')
                     .replace(/^-|-$/g, '');
                 
-                const date = new Date().toISOString().split('T')[0];
+                const date = formData.get('date').toISOString().split('T')[0];
                 const filePath = `${date}-${filename}.md`;
 
                 // Créer l'objet du brouillon avec le contenu initial
