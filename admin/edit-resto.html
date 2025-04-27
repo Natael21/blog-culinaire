@@ -2548,6 +2548,9 @@ ${editorContent}`;
                 }
 
                 function markdownToHtml(content) {
+                    // Fusionner les lignes numérotées cassées
+                    content = content.replace(/^(\d+\.)\n(?!\d+\.)/gm, '$1 ');
+
                     // D'abord, traiter les listes groupées
                     content = content
                         // Groupes de puces
