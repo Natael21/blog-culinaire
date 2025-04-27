@@ -1647,11 +1647,19 @@
         }
 
         function handleMainImageUpload(file) {
-            const container = document.getElementById('mainImagePreview');
-            
             mainImageFile = file;
+            const container = document.getElementById('mainImagePreview');
+            container.innerHTML = '';
+            createImagePreview(file, container, true);
             
-            createImagePreview(file, container);
+            // Supprimer l'état d'erreur et le message
+            const mainImageZone = document.getElementById('mainImageZone');
+            mainImageZone.classList.remove('show-error');
+            const errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+            
             updateMarkdownPreview();
         }
 
