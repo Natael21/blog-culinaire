@@ -2366,7 +2366,7 @@ ${editorContent}`;
 
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    console.log(mainImagePath)
+                    console.log(isBase64(mainImageFile));
                     if (isBase64(mainImageFile)) {
                         console.log('mainImageFile is base64');
                         draftData.images.push({
