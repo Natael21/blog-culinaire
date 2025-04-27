@@ -396,6 +396,131 @@ title: Administration - Blog Culinaire
             margin-bottom: 1rem;
         }
 
+        /* Style général pour la popup */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .confirmation-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animation fade-in pour le modal */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Style pour chaque élément de changement */
+        .changes-ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .change-item {
+            opacity: 0;
+            animation: fadeInItem 0.6s ease-in-out forwards;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Délai pour chaque élément pour une animation en cascade */
+        .change-item:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+        .change-item:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+        .change-item:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        .change-item:nth-child(4) {
+            animation-delay: 0.8s;
+        }
+        .change-item:nth-child(5) {
+            animation-delay: 1s;
+        }
+
+        /* Animation spécifique pour les items */
+        @keyframes fadeInItem {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Couleurs par type */
+        .change-item.create {
+            color: #28a745; /* Vert pour création */
+        }
+
+        .change-item.modify {
+            color: #007bff; /* Bleu pour modification */
+        }
+
+        .change-item.delete,
+        .change-item.delete-image {
+            color: #dc3545; /* Rouge pour suppression */
+        }
+
+        /* Style pour le texte du compteur */
+        #changes-count {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        /* Style pour le bouton "Ok" */
+        .confirmation-button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .confirmation-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Animation fade-out pour fermer */
+        .confirmation-modal.fade-out {
+            animation: fadeOut 0.4s ease-in-out;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -979,7 +1104,7 @@ title: Administration - Blog Culinaire
             });
         }
 
-        // Fonction pour voir les modifications
+        // Fonction pour voir les modifications (version améliorée avec couleurs et animations)
         async function viewChanges() {
             // Créer le modal
             const modal = document.createElement('div');
@@ -1024,26 +1149,26 @@ title: Administration - Blog Culinaire
                 // --- Traiter les pendingChanges ---
                 for (const change of pendingChanges) {
                     if (change.type === 'delete') {
-                        elements.push(`<li><strong>Suppression</strong> : ${change.filename}</li>`);
+                        elements.push(`<li class="change-item delete">Suppression : ${change.filename}</li>`);
                     } else if (change.type === 'create') {
-                        elements.push(`<li><strong>Création</strong> : ${change.filename}</li>`);
+                        elements.push(`<li class="change-item create">Création : ${change.filename}</li>`);
                     } else if (change.type === 'delete-image') {
-                        elements.push(`<li><strong>Suppression d'image</strong> : ${change.filename}</li>`);
+                        elements.push(`<li class="change-item delete-image">Suppression d'image : ${change.filename}</li>`);
                     }
                 }
 
                 // --- Traiter les drafts ---
                 for (const draft of drafts) {
                     if (existingFilenames.has(draft.filename)) {
-                        elements.push(`<li><strong>Modification</strong> : ${draft.filename}</li>`);
+                        elements.push(`<li class="change-item modify">Modification : ${draft.filename}</li>`);
                     } else {
-                        elements.push(`<li><strong>Création</strong> : ${draft.filename}</li>`);
+                        elements.push(`<li class="change-item create">Création : ${draft.filename}</li>`);
                     }
                 }
 
                 // Mettre à jour la liste et le compteur
                 if (elements.length > 0) {
-                    listContainer.innerHTML = `<ul>${elements.join('')}</ul>`;
+                    listContainer.innerHTML = `<ul class="changes-ul">${elements.join('')}</ul>`;
                     countContainer.textContent = `${elements.length} modification${elements.length > 1 ? 's' : ''} détectée${elements.length > 1 ? 's' : ''}.`;
                 } else {
                     listContainer.innerHTML = `<p>Aucune modification en attente.</p>`;
@@ -1065,6 +1190,7 @@ title: Administration - Blog Culinaire
                 modal.remove();
             };
         }
+
 
 
         // Fonction pour sauvegarder un brouillon
