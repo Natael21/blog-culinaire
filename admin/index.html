@@ -378,6 +378,24 @@ title: Administration - Blog Culinaire
             animation: progress 2s ease-in-out infinite;
         }
 
+        .changes-loading {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        #changes-count {
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .changes-list i {
+            margin-right: 0.5rem;
+        }
+
+        .confirmation-modal .confirmation-title {
+            margin-bottom: 1rem;
+        }
+
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -965,9 +983,93 @@ title: Administration - Blog Culinaire
             });
         }
 
-        function viewChanges() {
-            window.location.href = 'changes.html';
+        // Fonction pour voir les modifications
+        async function viewChanges() {
+            // Créer le modal
+            const modal = document.createElement('div');
+            modal.className = 'confirmation-modal';
+            modal.innerHTML = `
+                <div class="confirmation-content">
+                    <h3 class="confirmation-title">Modifications en attente</h3>
+                    <div id="changes-count" style="margin-bottom: 1rem; font-weight: bold;"></div>
+                    <div id="changes-loading" class="changes-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                        <p>Chargement des modifications...</p>
+                    </div>
+                    <div id="changes-list" class="changes-list" style="display: none;"></div>
+                    <div class="confirmation-buttons">
+                        <button class="confirmation-button confirm">Ok</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const loading = modal.querySelector('#changes-loading');
+            const listContainer = modal.querySelector('#changes-list');
+            const countContainer = modal.querySelector('#changes-count');
+
+            // Charger les données du localStorage
+            const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
+            const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+
+            try {
+                // 1. Charger la liste des fichiers existants sur GitHub (_posts/)
+                const repo = 'Natael21/blog-culinaire';
+                const url = `https://api.github.com/repos/${repo}/contents/_posts`;
+                const response = await fetch(url);
+                const posts = await response.json();
+                const existingFilenames = new Set(posts.map(post => post.name));
+
+                // 2. Construire l'affichage
+                const elements = [];
+
+                // --- Traiter les pendingChanges ---
+                for (const change of pendingChanges) {
+                    if (change.type === 'delete') {
+                        elements.push(`<li><strong>Suppression</strong> : ${change.filename}</li>`);
+                    } else if (change.type === 'create') {
+                        elements.push(`<li><strong>Création</strong> : ${change.filename}</li>`);
+                    } else if (change.type === 'delete-image') {
+                        elements.push(`<li><strong>Suppression d'image</strong> : ${change.filename}</li>`);
+                    }
+                }
+
+                // --- Traiter les drafts ---
+                for (const draft of drafts) {
+                    if (existingFilenames.has(draft.filename)) {
+                        elements.push(`<li><strong>Modification</strong> : ${draft.filename}</li>`);
+                    } else {
+                        elements.push(`<li><strong>Création</strong> : ${draft.filename}</li>`);
+                    }
+                }
+
+                // Mettre à jour la liste et le compteur
+                if (elements.length > 0) {
+                    listContainer.innerHTML = `<ul>${elements.join('')}</ul>`;
+                    countContainer.textContent = `${elements.length} modification${elements.length > 1 ? 's' : ''} détectée${elements.length > 1 ? 's' : ''}.`;
+                } else {
+                    listContainer.innerHTML = `<p>Aucune modification en attente.</p>`;
+                    countContainer.textContent = `0 modification détectée.`;
+                }
+            } catch (error) {
+                listContainer.innerHTML = `<p>Erreur lors du chargement des modifications.</p>`;
+                countContainer.textContent = `Erreur`;
+                console.error('Erreur lors de la récupération des fichiers GitHub :', error);
+            } finally {
+                // Masquer le loading et afficher la liste
+                loading.style.display = 'none';
+                listContainer.style.display = 'block';
+            }
+
+            // Bouton pour fermer
+            const confirmButton = modal.querySelector('.confirmation-button.confirm');
+            confirmButton.onclick = () => {
+                modal.remove();
+            };
         }
+
 
         // Fonction pour sauvegarder un brouillon
         function saveDraft(draftData) {
