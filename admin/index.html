@@ -740,24 +740,6 @@ title: Administration - Blog Culinaire
                 pendingChangesButtons.style.display = 'none'; // Cache l'élément
             }
 
-            // Quand le tutoriel commence, rendre les boutons visibles
-            intro.onbeforestart(function() {
-                console.log("Avant le début du tutoriel, les boutons vont être affichés");
-                showButtons(); // Affiche les boutons dès le début du tutoriel
-            });
-
-            // Quand le tutoriel est complet, cacher les boutons
-            intro.oncomplete(function() {
-                console.log("Le tutoriel est terminé, les boutons vont être cachés");
-                hideButtons(); // Cache les boutons après la fin du tutoriel
-            });
-
-            // Quand le tutoriel est complet, cacher les boutons
-            intro.onexit(function() {
-                console.log("Le tutoriel est terminé, les boutons vont être cachés");
-                hideButtons(); // Cache les boutons après la fin du tutoriel
-            });
-
             setTimeout(function() {
                 intro.setOptions({
                     steps: [
@@ -811,6 +793,28 @@ title: Administration - Blog Culinaire
                     showStepNumbers: false,
                     exitOnEsc: true,
                     exitOnOverlayClick: false,
+                });
+
+                // Quand le tutoriel est complet, cacher les boutons
+                intro.oncomplete(function() {
+                    console.log("Le tutoriel est terminé, les boutons vont être cachés");
+                    hideButtons(); // Cache les boutons après la fin du tutoriel
+                });
+
+                // Quand le tutoriel est complet, cacher les boutons
+                intro.onexit(function() {
+                    console.log("Le tutoriel est terminé, les boutons vont être cachés");
+                    hideButtons(); // Cache les boutons après la fin du tutoriel
+                });
+
+                // Utilisation de `onchange` pour gérer l'affichage des boutons à chaque changement d'étape
+                intro.onchange(function (stepIndex) {
+                    // Par exemple, rendre les boutons visibles dès qu'on arrive à une étape spécifique
+                    if (stepIndex >= 7 && stepIndex < 10) {  // À partir d'une certaine étape
+                        showButtons();
+                    } else {
+                        hideButtons();
+                    }
                 });
 
                 console.log("Démarrer le tutoriel");
