@@ -2235,12 +2235,12 @@ ${editorContent}`;
             }
         }
 
-        function updateGalleryPreview() {            
+        async function updateGalleryPreview() {            
             const container = document.getElementById('galleryPreview');
             container.innerHTML = '';
             
-            galleryImageFiles.forEach((file, index) => {
-                createImagePreview(file, container);
+            galleryImageFiles.forEach(async (file, index) => {
+                await createImagePreview(file, container);
             });            
         }
 
@@ -2654,6 +2654,35 @@ ${editorContent}`;
                                 console.error('Erreur lors du chargement de l\'image principale:', error);
                             }
                         }
+                    }
+
+                    // Charger les images de la galerie depuis GitHub
+                    const galleryMatches = frontMatter.match(/images:[\s\S]*?(?=\n\w|$)/);
+                    if (galleryMatches) {
+                        const galleryYaml = galleryMatches[0];
+                        
+                        const galleryPaths = galleryYaml.match(/image: ["']([^"']+)["']/g)
+                            ?.map(match => match.match(/["']([^"']+)["']/)[1]) || [];
+
+                        galleryImageFiles = [];
+                        for (const imagePath of galleryPaths) {
+                            try {
+                                const imageUrl = imagePath;
+                                
+                                const response = await fetch(imageUrl);
+                                if (response.ok) {
+                                    const blob = await response.blob();
+                                    const fileName = imagePath.split('/').pop();
+                                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                                    galleryImageFiles.push(file);
+                                } else {
+                                    console.error('Erreur lors du chargement de l\'image:', response.status);
+                                }
+                            } catch (error) {
+                                console.error('Erreur lors du chargement de l\'image:', error);
+                            }
+                        }
+                        await updateGalleryPreview();
                     }
                 }
 
