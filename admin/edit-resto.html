@@ -1263,7 +1263,6 @@
                     if (!validateForm()) {
                         return;
                     }
-                    
 
                     try {
                         // Générer le nom du fichier à partir du titre
@@ -1286,22 +1285,59 @@
                             images: []
                         };
 
-                        // Sauvegarder les images localement en base64
+                        // Fonction pour vérifier si une image est en base64 ou en URL
+                        const isBase64 = (str) => {
+                            return /^data:image\/[a-zA-Z]+;base64,/.test(str);
+                        };
+
+                        // Sauvegarder l'image principale
                         if (mainImageFile) {
-                            const mainImageBase64 = await fileToBase64(mainImageFile);
-                            draftData.images.push({
-                                name: mainImageFile.name,
-                                data: mainImageBase64
-                            });
+                            // Si l'image est déjà en URL ou en Base64
+                            const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
+                            if (isBase64(mainImageSrc)) {
+                                draftData.images.push({
+                                    name: mainImageFile.name,
+                                    data: mainImageSrc  // Ajoute directement la chaîne Base64
+                                });
+                            } else if (mainImageFile instanceof File) {
+                                // Convertir l'image en base64 si c'est un fichier
+                                const mainImageBase64 = await fileToBase64(mainImageFile);
+                                draftData.images.push({
+                                    name: mainImageFile.name,
+                                    data: mainImageBase64
+                                });
+                            } else {
+                                // Si l'image est juste une URL, on l'ajoute directement
+                                draftData.images.push({
+                                    name: mainImageFile.name,
+                                    data: mainImageSrc
+                                });
+                            }
                         }
 
+                        // Sauvegarder les images de la galerie
                         for (let i = 0; i < galleryImageFiles.length; i++) {
                             const file = galleryImageFiles[i];
-                            const galleryBase64 = await fileToBase64(file);
-                            draftData.images.push({
-                                name: file.name,
-                                data: galleryBase64
-                            });
+                            const galleryImageSrc = document.getElementById(`galleryImage${i}`).src; // Si l'image a un attribut src
+                            if (isBase64(galleryImageSrc)) {
+                                draftData.images.push({
+                                    name: file.name,
+                                    data: galleryImageSrc  // Ajoute directement la chaîne Base64
+                                });
+                            } else if (file instanceof File) {
+                                // Convertir l'image en base64 si c'est un fichier
+                                const galleryBase64 = await fileToBase64(file);
+                                draftData.images.push({
+                                    name: file.name,
+                                    data: galleryBase64
+                                });
+                            } else {
+                                // Si l'image est juste une URL, on l'ajoute directement
+                                draftData.images.push({
+                                    name: file.name,
+                                    data: galleryImageSrc
+                                });
+                            }
                         }
 
                         // Récupérer les restaurants existants
@@ -1647,7 +1683,7 @@
         }
 
         function handleMainImageUpload(file) {
-            
+
             if (typeof file === 'string') {
                 // Si c'est une URL ou une chaîne base64
                 if (file.startsWith('data:image')) {
