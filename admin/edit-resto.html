@@ -1824,7 +1824,6 @@
 
             // Trouver le premier champ en erreur dans l'ordre du DOM
             if (errorFields.length > 0) {
-                console.log('Recherche du premier champ en erreur dans l\'ordre du DOM');
                 const allElements = document.querySelectorAll('*');
                 let firstErrorInDOM = null;
                 
@@ -1836,7 +1835,6 @@
                 }
 
                 if (firstErrorInDOM) {
-                    console.log('Défilement vers le premier champ en erreur');
                     firstErrorInDOM.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
@@ -2417,8 +2415,6 @@ ${editorContent}`;
             
             if (filename) {
                 loadDraft(filename);
-            } else {
-                console.log('Aucun fichier spécifié, création d\'un nouveau restaurant');
             }
             
             // Mettre à jour les boutons
@@ -2448,7 +2444,6 @@ ${editorContent}`;
                     content = parts[2].trim();
                     
                     // Parser le front matter pour les drafts locaux
-                    console.log('Parsing du front matter local');
                     frontMatter.split('\n').forEach(line => {
                         const [key, ...value] = line.split(':');
                         if (key && value.length > 0) {
@@ -2477,9 +2472,7 @@ ${editorContent}`;
 
                 // Remplir les options alimentaires
                 const dietString = (restaurantData.diet || '').trim();
-                console.log('Options alimentaires brutes:', dietString);
                 const diets = dietString.split(',').map(d => d.trim().toLowerCase());
-                console.log('Options alimentaires traitées:', diets);
                 document.getElementById('vegetarian').checked = diets.some(d => d === 'vegetarian-friendly' || d === 'vegetarian');
                 document.getElementById('vegan').checked = diets.some(d => d === 'vegan-friendly' || d === 'vegan');
 
@@ -2487,7 +2480,6 @@ ${editorContent}`;
                 const ratingsMatch = frontMatter.match(/ratings:[\s\S]*?(?=\n\w|$)/);
                 if (ratingsMatch) {
                     const ratingsYaml = ratingsMatch[0];
-                    console.log('YAML des notes trouvé:', ratingsYaml);
 
                     // Extraire les scores et commentaires avec une meilleure regex
                     const foodScore = ratingsYaml.match(/food:\n\s*score:\s*(\d+)/)?.[1] || '5';
@@ -2548,38 +2540,52 @@ ${editorContent}`;
                 }
 
                 function markdownToHtml(content) {
+                    console.log("Markdown d'origine :", JSON.stringify(content));
+
                     // D'abord, traiter les listes groupées
                     content = content
                         // Groupes de puces
                         .replace(/((?:^- .*(?:\n|$))+)/gm, match => {
+                            console.log("Match liste à puces :", JSON.stringify(match));
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^- /, '') + '</li>';
                             }).join('');
+                            console.log("Liste UL transformée :", items);
                             return '<ul>' + items + '</ul>';
                         })
                         // Groupes numérotés
                         .replace(/((?:^\d+\.\s+.*(?:\n|$))+)/gm, match => {
+                            console.log("Match liste numérotée :", JSON.stringify(match));
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^\d+\.\s+/, '') + '</li>';
                             }).join('');
+                            console.log("Liste OL transformée :", items);
                             return '<ol>' + items + '</ol>';
                         });
+
+                    console.log("Après traitement UL/OL :", content);
 
                     // Gras et italique
                     content = content
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
                         .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italique
 
+                    console.log("Après traitement gras/italique :", content);
+
                     // Gérer les paragraphes
                     const blocks = content.split(/\n{2,}/)
                         .map(para => para.trim())
                         .filter(para => para.length > 0);
 
+                    console.log("Blocs après split \\n\\n :", blocks);
+
                     let finalContent = '';
                     let previousWasList = false;
 
-                    blocks.forEach(block => {
+                    blocks.forEach((block, index) => {
                         const isList = block.startsWith('<ul>') || block.startsWith('<ol>');
+
+                        console.log(`Block[${index}] :`, JSON.stringify(block), "isList:", isList);
 
                         if (isList) {
                             finalContent += block;
@@ -2590,8 +2596,11 @@ ${editorContent}`;
                         }
                     });
 
+                    console.log("Contenu final HTML :", finalContent);
+
                     return finalContent;
                 }
+
 
 
 
