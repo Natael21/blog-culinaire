@@ -2394,11 +2394,11 @@ ${editorContent}`;
                 // Traiter les images de la galerie
                 for (let i = 0; i < galleryImageFiles.length; i++) {
                     const file = galleryImageFiles[i];
-                    const galleryImageSrc = document.getElementById(`galleryImage${i}`).src;  // Si l'image a un attribut src
-                    if (isBase64(galleryImageSrc)) {
+                    
+                    if (isBase64(file)) {
                         draftData.images.push({
                             name: file.name,
-                            data: galleryImageSrc,  // Ajouter directement la chaîne Base64
+                            data: file.data,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
                     } else if (file instanceof File) {
@@ -2411,6 +2411,7 @@ ${editorContent}`;
                         });
                     } else {
                         // Si c'est une URL, l'ajouter directement
+                        const galleryImageSrc = document.getElementById(`galleryImage${i}`).src;  // Si l'image a un attribut src
                         draftData.images.push({
                             name: file.name,
                             data: galleryImageSrc,
