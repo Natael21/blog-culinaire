@@ -2366,17 +2366,16 @@ ${editorContent}`;
 
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    console.log(mainImageFile.name);
                     if (isBase64(mainImageFile)) {
-                        console.log('mainImageFile is base64');
                         draftData.images.push({
-                            name: mainImageFile.name,
+                            name: "to find",
                             data: mainImageFile,  // Ajouter directement la chaîne Base64
                             isMain: true
                         });
                     } else if (mainImageFile instanceof File) {
                         // Convertir l'image en base64 si c'est un fichier
                         const mainImageBase64 = await fileToBase64(mainImageFile);
+                        console.log(mainImageFile.name);
                         draftData.images.push({
                             name: mainImageFile.name,
                             data: mainImageBase64,
@@ -2397,16 +2396,13 @@ ${editorContent}`;
                 for (let i = 0; i < galleryImageFiles.length; i++) {
                     const file = galleryImageFiles[i];
 
-                    console.log(file);
                     if (isBase64(file)) {
-                        console.log('file.data is base64');
                         draftData.images.push({
-                            name: file.name,
+                            name: "to find",
                             data: file,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
                     } else if (file instanceof File) {
-                        console.log('file is a file');
                         // Convertir l'image en base64 si c'est un fichier
                         const galleryBase64 = await fileToBase64(file);
                         draftData.images.push({
@@ -2415,7 +2411,6 @@ ${editorContent}`;
                             isMain: false
                         });
                     } else {
-                        console.log('file is a url');
                         // Si c'est une URL, l'ajouter directement
                         const galleryImageSrc = document.getElementById(`galleryImage${i}`).src;  // Si l'image a un attribut src
                         draftData.images.push({
