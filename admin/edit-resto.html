@@ -2547,17 +2547,17 @@ ${editorContent}`;
                     document.getElementById('overallRating').value = average;
                 }
 
-                function markdownToHtml(markdown_text) {
+                function markdownToHtml(content) {
                     // D'abord, traiter les listes groupées
-                    content_temp = markdown_text
-                        // Un groupe de puces
+                    content = content
+                        // Groupes de puces
                         .replace(/((?:^- .*(?:\n|$))+)/gm, match => {
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^- /, '') + '</li>';
                             }).join('');
                             return '<ul>' + items + '</ul>';
                         })
-                        // Un groupe de numérotées
+                        // Groupes de numérotées
                         .replace(/((?:^\d+\. .*(?:\n|$))+)/gm, match => {
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^\d+\. /, '') + '</li>';
@@ -2566,23 +2566,37 @@ ${editorContent}`;
                         });
 
                     // Gras et italique
-                    content_temp = markdown_text
+                    content = content
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Gras
                         .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italique
 
                     // Gérer les paragraphes
-                    content_temp = markdown_text
-                        .split(/\n\n+/) // split par double retour
-                        .map(para => {
-                            // Ne pas envelopper une liste déjà transformée
-                            if (para.trim().startsWith('<ul>') || para.trim().startsWith('<ol>')) {
-                                return para;
-                            }
-                            return `<p>${para.replace(/\n/g, '<br>')}</p>`;
-                        })
-                        .join('');
+                    const blocks = content.split(/\n{2,}/)
+                        .map(para => para.trim())
+                        .filter(para => para.length > 0);
 
-                    return content_temp;
+                    let finalContent = '';
+                    let previousWasList = false;
+
+                    blocks.forEach(block => {
+                        const isList = block.startsWith('<ul>') || block.startsWith('<ol>');
+
+                        if (isList) {
+                            finalContent += block;
+                            previousWasList = true;
+                        } else {
+                            if (previousWasList) {
+                                // Juste coller sans <p> si suite directe d'une liste
+                                finalContent += block.replace(/\n/g, '<br>');
+                            } else {
+                                // Sinon mettre normalement dans un paragraphe
+                                finalContent += `<p>${block.replace(/\n/g, '<br>')}</p>`;
+                            }
+                            previousWasList = false;
+                        }
+                    });
+
+                    return finalContent;
                 }
 
                 // Convertir le markdown en HTML
