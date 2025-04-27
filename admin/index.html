@@ -809,12 +809,7 @@ title: Administration - Blog Culinaire
 
                 // Utilisation de `onchange` pour gérer l'affichage des boutons à chaque changement d'étape
                 intro.onchange(function (stepIndex) {
-                    // Par exemple, rendre les boutons visibles dès qu'on arrive à une étape spécifique
-                    if (stepIndex >= 7 && stepIndex < 10) {  // À partir d'une certaine étape
-                        showButtons();
-                    } else {
-                        hideButtons();
-                    }
+                    showButtons();
                 });
 
                 console.log("Démarrer le tutoriel");
