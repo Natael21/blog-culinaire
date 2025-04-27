@@ -2374,7 +2374,7 @@ ${editorContent}`;
         });
 
         // Fonction pour charger un restaurant
-        async function loadDraft(filename) {
+        function loadDraft(filename) {
             try {
                 const repo = 'Natael21/blog-culinaire';
                 
@@ -2411,7 +2411,7 @@ ${editorContent}`;
                     // Si pas de draft local, charger depuis GitHub
                     const path = `_posts/${filename}`;
                     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-                    const response = await fetch(url);
+                    const response =  fetch(url);
 
                     if (!response.ok) {
                         console.error('Erreur lors de la récupération du fichier:', {
@@ -2421,7 +2421,7 @@ ${editorContent}`;
                         throw new Error('Fichier non trouvé');
                     }
 
-                    const data = await response.json();
+                    const data = response.json();
                     markdown = decodeURIComponent(escape(atob(data.content)));                    
                     frontMatter = markdown.match(/---\n([\s\S]*?)\n---/)[1];
                     content = markdown.split('---')[2].trim();
@@ -2568,7 +2568,7 @@ ${editorContent}`;
                 let htmlContent = markdownToHtml(content)
 
                 // Initialiser l'éditeur avec le contenu converti
-                await initializeEditor(htmlContent);
+                initializeEditor(htmlContent);
 
                 // Mettre à jour le nom du fichier
                 document.getElementById('filename').value = filename;
