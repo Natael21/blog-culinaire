@@ -2066,13 +2066,9 @@ ${editorContent}`;
                 <div class="restaurant-image">
                     ${mainImageFile ? 
                         `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
-                        (mainImageBase64 ? 
-                            `<img src="${mainImageBase64}" alt="${title}">` : 
-                            `<i class="fas fa-image"></i>`
-                        )
+                        `<i class="fas fa-image"></i>`
                     }
                 </div>
-
                 
                 <div class="restaurant-description">
                     ${description}
