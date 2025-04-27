@@ -822,6 +822,8 @@ title: Administration - Blog Culinaire
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
 
             console.log(pendingChanges);
+            console.log(drafts);
+            console.log(deletedImages);
             
             // Vérifier si l'un ou l'autre existe
             const hasChanges = (pendingChanges && pendingChanges.length > 0) || 
