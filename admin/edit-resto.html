@@ -2386,7 +2386,10 @@ ${editorContent}`;
                     return /^data:image\/[a-zA-Z]+;base64,/.test(str);
                 };
 
-                const { mainImageName, galleryImageNames } = extractImageNames(markdownContent);
+                const { mainImage, galleryImages } = extractImageNames(markdownContent);
+
+                console.log(mainImage);
+                console.log(galleryImages);
 
                 // Traiter l'image principale
                 if (mainImageFile) {
@@ -2458,7 +2461,7 @@ ${editorContent}`;
                     drafts.push(draftData);
                 }
 
-                return;
+                await sleep(3000);
 
                 try {
                     // Sauvegarder dans localStorage

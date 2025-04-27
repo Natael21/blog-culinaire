@@ -494,13 +494,11 @@ title: Administration - Blog Culinaire
             const userEmail = document.getElementById('user-email');
 
             if (user) {
-                console.log('Mise à jour UI avec utilisateur:', user);
                 loginContainer.style.display = 'none';
                 adminContent.style.display = 'block';
 
                 // Si c'est la première fois qu'on affiche l'interface admin
                 if (!sessionStorage.getItem('adminLoaded')) {
-                    console.log('Premier chargement de l\'interface admin, rafraîchissement prévu...');
                     sessionStorage.setItem('adminLoaded', 'true');
                     // Rafraîchir la page après 1 seconde
                     setTimeout(() => {
@@ -523,7 +521,6 @@ title: Administration - Blog Culinaire
                     userEmail.textContent = displayName;
                 }
             } else {
-                console.log('Mise à jour UI sans utilisateur');
                 loginContainer.style.display = 'block';
                 adminContent.style.display = 'none';
                 // Réinitialiser les flags de session lors de la déconnexion
@@ -542,7 +539,6 @@ title: Administration - Blog Culinaire
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
             showLoading();
 
             // S'assurer que le script Netlify Identity est chargé
@@ -554,25 +550,21 @@ title: Administration - Blog Culinaire
                     
                     // Configurer les écouteurs d'événements
                     netlifyIdentity.on('init', user => {
-                        console.log('Netlify Identity initialized');
                         updateUI(user);
                         enableInterface(); // Activer l'interface après l'initialisation
                     });
 
                     netlifyIdentity.on('login', user => {
-                        console.log('Login event');
                         netlifyIdentity.close();
                         updateUI(user);
                         enableInterface(); // Activer l'interface après la connexion
                     });
 
                     netlifyIdentity.on('logout', () => {
-                        console.log('Logout event');
                         updateUI(null);
                     });
 
                     netlifyIdentity.on('error', err => {
-                        console.error('Netlify Identity error:', err);
                         showError('Une erreur est survenue lors de l\'authentification. Veuillez réessayer.');
                     });
 
@@ -583,7 +575,6 @@ title: Administration - Blog Culinaire
                         enableInterface(); // Activer l'interface si l'utilisateur est déjà connecté
                     }
                 } else {
-                    console.error('Netlify Identity non chargé');
                     showError('Erreur de chargement de l\'authentification');
                 }
             }
@@ -606,12 +597,10 @@ title: Administration - Blog Culinaire
             const currentDraft = localStorage.getItem('currentDraft');
             const publishButton = document.getElementById('publishDraft');
             const cancelButton = document.getElementById('cancelDraft');
-            console.log('publishButton:', publishButton);
 
             function attachPublishHandler() {
                 if (publishButton && !publishButton._handlerAttached) {
                     publishButton.addEventListener('click', async function() {
-                        console.log('Bouton publication cliqué');
                         try {
                             const draftData = JSON.parse(localStorage.getItem('currentDraft'));
                             // Utiliser directement les images en base64 du brouillon
@@ -624,8 +613,6 @@ title: Administration - Blog Culinaire
                                 content: draftData.content,
                                 images: images
                             };
-
-                            console.log('Envoi des données:', data);
                             
                             // Envoyer les données à la fonction Netlify
                             const response = await fetch('/.netlify/functions/create-restaurant-with-images', {
@@ -685,10 +672,8 @@ title: Administration - Blog Culinaire
 
         // Debug function to find the correct localStorage key
         function debugLocalStorage() {
-            console.log('All localStorage keys:');
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                console.log(`${key}: ${localStorage.getItem(key)}`);
             }
         }
 
@@ -702,7 +687,6 @@ title: Administration - Blog Culinaire
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
                     if (key.includes('decap-cms-') || key.includes('netlify-cms-')) {
-                        console.log('Found CMS key:', key);
                         const data = localStorage.getItem(key);
                         try {
                             const parsed = JSON.parse(data);
@@ -803,8 +787,6 @@ title: Administration - Blog Culinaire
 
         // Fonction pour afficher l'overlay de chargement
         function showLoadingOverlay(message = 'Chargement...') {
-            console.log('=== Début showLoadingOverlay ===');
-            console.log('Message:', message);
             const overlay = document.createElement('div');
             overlay.className = 'loading-overlay';
             overlay.innerHTML = `
@@ -818,30 +800,21 @@ title: Administration - Blog Culinaire
                 </div>
             `;
             document.body.appendChild(overlay);
-            console.log('Overlay créé et ajouté au DOM');
             return overlay;
         }
 
         // Fonction pour masquer l'overlay de chargement
         function hideLoadingOverlay(overlay) {
-            console.log('=== Début hideLoadingOverlay ===');
-            console.log('Overlay à masquer:', !!overlay);
             if (overlay) {
                 overlay.remove();
-                console.log('Overlay supprimé du DOM');
             }
         }
 
         // Fonction pour vérifier et afficher/masquer les boutons de gestion des modifications
         function updatePendingChangesButtons() {
-            console.log('=== MISE À JOUR DES BOUTONS DE MODIFICATIONS ===');
             const buttons = document.getElementById('pendingChangesButtons');
             const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-            
-            console.log('État actuel:');
-            console.log('- Nombre de modifications en attente:', pendingChanges.length);
-            console.log('- Nombre de brouillons:', drafts.length);
             
             // Vérifier si l'un ou l'autre existe
             const hasChanges = (pendingChanges && pendingChanges.length > 0) || 
@@ -849,11 +822,6 @@ title: Administration - Blog Culinaire
             
             if (buttons) {
                 buttons.style.display = hasChanges ? 'flex' : 'none';
-                console.log('État des boutons:', {
-                    pendingChanges: pendingChanges.length,
-                    drafts: drafts.length,
-                    display: buttons.style.display
-                });
             } else {
                 console.error('Élément des boutons non trouvé !');
             }
@@ -864,7 +832,6 @@ title: Administration - Blog Culinaire
             let loadingOverlay = null;
             
             try {
-                console.log('=== Début publishChanges ===');
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 const deletedImages = JSON.parse(localStorage.getItem('deletedImages') || '[]');
@@ -875,9 +842,7 @@ title: Administration - Blog Culinaire
                 }
 
                 // Afficher le spinner central
-                console.log('Tentative d\'affichage du spinner...');
                 loadingOverlay = showLoadingOverlay('Publication des modifications en cours...');
-                console.log('Spinner affiché:', !!loadingOverlay);
 
                 // Préparer les données à envoyer
                 const changes = [...pendingChanges];
@@ -901,8 +866,6 @@ title: Administration - Blog Culinaire
                         isImage: true
                     });
                 });
-
-                console.log('Données à publier:', changes);
 
                 // Envoyer les modifications à GitHub via la fonction Netlify
                 const response = await fetch('/.netlify/functions/publish-changes', {
@@ -936,18 +899,12 @@ title: Administration - Blog Culinaire
                 showNotification(error.message || 'Erreur lors de la publication des modifications', 'error');
             } finally {
                 // Cacher le spinner central
-                console.log('Tentative de masquage du spinner...');
                 hideLoadingOverlay(loadingOverlay);
-                console.log('Spinner masqué');
             }
         }
 
         // Fonction pour annuler les modifications
         async function cancelChanges() {
-            console.log('=== DÉBUT DE L\'ANNULATION DES MODIFICATIONS ===');
-            console.log('État actuel du localStorage:');
-            console.log('- pendingChanges:', JSON.parse(localStorage.getItem('pendingChanges') || '[]'));
-            console.log('- drafts:', JSON.parse(localStorage.getItem('drafts') || '[]'));
 
             const modal = document.createElement('div');
             modal.className = 'confirmation-modal';
@@ -969,19 +926,12 @@ title: Administration - Blog Culinaire
                 const cancelButton = modal.querySelector('.confirmation-button.cancel');
 
                 confirmButton.onclick = () => {
-                    console.log('Utilisateur a confirmé l\'annulation');
                     
                     // Supprimer toutes les modifications en attente
                     localStorage.removeItem('pendingChanges');
                     localStorage.removeItem('drafts');
                     localStorage.removeItem('deletedImages');
                     localStorage.removeItem('upcomingRestaurants');
-                    
-                    console.log('État du localStorage après suppression:');
-                    console.log('- pendingChanges:', localStorage.getItem('pendingChanges'));
-                    console.log('- drafts:', localStorage.getItem('drafts'));
-                    console.log('- deletedImages:', localStorage.getItem('deletedImages'));
-                    console.log('- upcomingRestaurants:', localStorage.getItem('upcomingRestaurants'));
                     
                     // Déclencher l'événement personnalisé pour mettre à jour les autres pages
                     window.dispatchEvent(new Event('pendingChangesCleared'));
@@ -1000,7 +950,6 @@ title: Administration - Blog Culinaire
                 };
 
                 cancelButton.onclick = () => {
-                    console.log('Utilisateur a annulé l\'opération');
                     modal.remove();
                     resolve(false);
                 };
