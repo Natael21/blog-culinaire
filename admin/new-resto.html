@@ -2270,9 +2270,13 @@ ${editorContent}`;
                     .replace(/[^a-z0-9]/g, '-')
                     .replace(/-+/g, '-')
                     .replace(/^-|-$/g, '');
+
+                console.log(formData.get('date'));
                 
-                const date = formData.get('date').toISOString().split('T')[0];
+                const date = new Date(formData.get('date')).toISOString().split('T')[0];
                 const filePath = `${date}-${filename}.md`;
+
+                console.log(date);
 
                 // Créer l'objet du brouillon avec le contenu initial
                 let markdownContent = generateMarkdown();
