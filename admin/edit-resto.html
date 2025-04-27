@@ -1693,18 +1693,14 @@
                 } else {
                     imageUrl = `data:image/jpeg;base64,${file}`;
                 }
-                console.log('Image principale chargée depuis URL/base64');
             } else if (file instanceof File) {
                 // Si c'est un objet File
                 imageUrl = URL.createObjectURL(file);
-                console.log('Image principale chargée depuis File');
             } else if (file instanceof Blob) {
                 // Si c'est un Blob
                 imageUrl = URL.createObjectURL(file);
-                console.log('Image principale chargée depuis Blob');
             }
 
-            console.log(file);
             mainImageFile = file;
             const container = document.getElementById('mainImagePreview');
             container.innerHTML = '';
@@ -2380,6 +2376,8 @@ ${editorContent}`;
 
                 const { mainImageName, galleryImageNames } = extractImageNames(markdownContent);
 
+                console.log(mainImageFile.name);
+
                 // Traiter l'image principale
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
@@ -2391,7 +2389,6 @@ ${editorContent}`;
                     } else if (mainImageFile instanceof File) {
                         // Convertir l'image en base64 si c'est un fichier
                         const mainImageBase64 = await fileToBase64(mainImageFile);
-                        console.log(mainImageFile.name);
                         draftData.images.push({
                             name: mainImageFile.name,
                             data: mainImageBase64,
@@ -2562,7 +2559,6 @@ ${editorContent}`;
                         galleryImageFiles = [];
                         
                         // Utiliser la première image comme image principale
-                        console.log(localDraft.images[0]);
                         const mainImage = localDraft.images[0];
                         const galleryImages = localDraft.images.slice(1); // Toutes les autres images vont dans la galerie
                                                 
