@@ -109,6 +109,97 @@ title: Administration - Blog Culinaire
             margin-right: 10px;
             font-size: 1.2rem;
         }
+
+        .action-button-new-resto {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-button-new-resto:hover {
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+        }
+        
+        .action-button-restaurants {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-button-restaurants:hover {
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+        }
+
+        .action-button-upcoming {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-button-upcoming:hover {
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+        }
+
+        .action-button-images {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-button-images:hover {
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .admin-actions {
                 grid-template-columns: 1fr;
@@ -595,16 +686,16 @@ title: Administration - Blog Culinaire
             </div>
 
             <div class="action-buttons" style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;">
-                <a href="new-resto.html" class="action-button">
+                <a href="new-resto.html" class="action-button-new-resto">
                     <i class="fas fa-plus"></i> Nouveau Restaurant
                 </a>
-                <a href="restaurants.html" class="action-button">
+                <a href="restaurants.html" class="action-button-restaurants">
                     <i class="fas fa-list"></i> Gérer les restaurants
                 </a>
-                <a href="upcoming.html" class="action-button">
+                <a href="upcoming.html" class="action-button-upcoming">
                     <i class="fas fa-calendar-alt"></i> Gérer les restaurants à venir
                 </a>
-                <a href="images.html" class="action-button">
+                <a href="images.html" class="action-button-images">
                     <i class="fas fa-images"></i> Gérer les images
                 </a>
             </div>
@@ -645,19 +736,19 @@ title: Administration - Blog Culinaire
                         intro: "Ce compteur affiche le nombre de restaurants en brouillon."
                     },
                     {
-                        element: document.querySelector('a[href="new-resto.html"]'),
+                        element: document.querySelector('.action-button-new-resto'),
                         intro: "Cliquez ici pour ajouter un nouveau restaurant."
                     },
                     {
-                        element: document.querySelector('a[href="restaurants.html"]'),
+                        element: document.querySelector('.action-button-restaurants'),
                         intro: "Ici vous pouvez gérer tous les restaurants existants."
                     },
                     {
-                        element: document.querySelector('a[href="upcoming.html"]'),
+                        element: document.querySelector('.action-button-upcoming'),
                         intro: "Gérez les restaurants à venir ici."
                     },
                     {
-                        element: document.querySelector('a[href="images.html"]'),
+                        element: document.querySelector('.action-button-images'),
                         intro: "Cette option vous permet de gérer les images des restaurants."
                     },
                     {
