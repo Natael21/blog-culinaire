@@ -421,7 +421,7 @@
                     debounceTimer = setTimeout(async () => {
                         try {
                             suggestions = await searchAddress(query);
-                            displaySuggestions(suggestions, suggestionsContainer);
+                            displaySuggestions(suggestions, suggestionsContainer, input);
                         } catch (error) {
                             console.error('Erreur lors de la recherche d\'adresse:', error);
                         }
@@ -467,7 +467,7 @@
         }
 
         // Fonction pour afficher les suggestions d'adresse
-        function displaySuggestions(suggestions, container) {
+        function displaySuggestions(suggestions, container, input) {
             if (!suggestions.length) {
                 container.style.display = 'none';
                 return;
@@ -480,7 +480,7 @@
                 div.textContent = suggestion.display_name;
                 
                 div.addEventListener('click', () => {
-                    selectAddress(suggestion, container.previousElementSibling, container);
+                    selectAddress(suggestion, input, container);
                 });
 
                 div.addEventListener('mouseenter', () => {
