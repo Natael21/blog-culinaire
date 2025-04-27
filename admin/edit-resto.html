@@ -2366,7 +2366,7 @@ ${editorContent}`;
 
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    console.log(mainImageFile);
+                    console.log(mainImageFile.src);
                     const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
                     if (isBase64(mainImageSrc)) {
                         draftData.images.push({
