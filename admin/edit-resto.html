@@ -1797,12 +1797,7 @@
             }
 
             // Valider l'éditeur
-            try {
-                const editorContent = editor.getHTML();
-            } catch (error) {
-                initializeEditor();
-                const editorContent = editor.getHTML();
-            }
+            const editorContent = editor.getHTML();
             
             const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
             
