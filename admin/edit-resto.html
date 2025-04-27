@@ -1797,7 +1797,12 @@
             }
 
             // Valider l'éditeur
-            const editorContent = editor.getHTML();
+            try {
+                const editorContent = editor.getHTML();
+            } catch (error) {
+                initializeEditor();
+                const editorContent = editor.getHTML();
+            }
             
             const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
             
@@ -2041,11 +2046,7 @@ ${editorContent}`;
             await sleep(1000);
 
             // Récupérer le contenu de l'éditeur
-            try {
-                const editorContent = editor.getHTML() || '';
-            } catch (error) {
-                const editorContent = '';
-            }
+            const editorContent = editor.getHTML() || '';
             
             // Créer le HTML de l'aperçu
             preview.innerHTML = `
