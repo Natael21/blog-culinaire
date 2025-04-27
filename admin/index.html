@@ -721,7 +721,7 @@ title: Administration - Blog Culinaire
         // Wizard
         document.getElementById('wizard-trigger').addEventListener('click', function () {
             var intro = introJs();
-    
+
             // Sélectionner l'élément contenant les boutons
             const pendingChangesButtons = document.getElementById('pendingChangesButtons');
 
@@ -755,31 +755,31 @@ title: Administration - Blog Culinaire
                     },
                     {
                         element: document.querySelector('.action-button-restaurants'),
-                        intro: "Ici vous pouvez gérer tous les restaurants existants. En les modifiant ou en les supprimant. Il faut noter qu'après une modification le restaurant n'est plus viisble dans la liste des restaurants jusqu'à ce que vous publiez les modifications."
+                        intro: "Ici vous pouvez gérer tous les restaurants existants. En les modifiant ou en les supprimant. Il faut noter qu'après une modification le restaurant n'est plus visible dans la liste des restaurants jusqu'à ce que vous publiez les modifications."
                     },
                     {
                         element: document.querySelector('.action-button-upcoming'),
-                        intro: "Vous pouvez soit ajouter, modifier ou supprimé les restaurants à venir visible sur la page d'accueil."
+                        intro: "Vous pouvez ajouter, modifier ou supprimer des restaurants à venir visibles sur la page d'accueil."
                     },
                     {
                         element: document.querySelector('.action-button-images'),
-                        intro: "Cette option vous permet de gérer les images en supprimant celles qui ne sont plus utiles et elles seront retiré du site."
+                        intro: "Cette option vous permet de gérer les images en supprimant celles qui ne sont plus utiles et elles seront retirées du site."
                     },
                     {
-                        element: document.querySelector('.action-button publish'),
-                        intro: "Cette option vous permet de publier les modifications et les rendre acives sur le site."
+                        element: document.querySelector('.action-button.publish'),
+                        intro: "Cette option vous permet de publier les modifications et les rendre actives sur le site."
                     },
                     {
-                        element: document.querySelector('.action-button cancel'),
-                        intro: "Cette option vous permet d'annuler toutes les modifications qui ont été effectuées."
+                        element: document.querySelector('.action-button.cancel'),
+                        intro: "Cette option vous permet d'annuler toutes les modifications effectuées."
                     },
                     {
-                        element: document.querySelector('.action-button special'),
+                        element: document.querySelector('.action-button.special'),
                         intro: "Cette option vous permet de voir toutes les modifications en attente de publication."
                     },
                     {
-                        element: document.querySelector('#admin-card text-center'),
-                        intro: "Si vous avez terminé, vous pouvez fermer vous déconnecter."
+                        element: document.querySelector('.admin-header'),
+                        intro: "Si vous avez terminé, vous pouvez vous déconnecter."
                     }
                 ],
                 showProgress: true,
@@ -789,16 +789,16 @@ title: Administration - Blog Culinaire
                 exitOnOverlayClick: false,
 
                 // Quand le tutoriel commence, rendre les boutons visibles
-                onbeforechange: function() {
-                    showButtons();
+                onbeforestart: function() {
+                    showButtons(); // Affiche les boutons dès le début du tutoriel
                 },
                 
                 // Quand le tutoriel est complet, cacher les boutons
                 oncomplete: function() {
-                    hideButtons();
+                    hideButtons(); // Cache les boutons après la fin du tutoriel
                 }
             });
-            
+
             intro.start();
         });
 
