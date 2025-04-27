@@ -2065,7 +2065,10 @@ ${editorContent}`;
                 
                 <div class="restaurant-image">
                     ${mainImageFile ? 
-                        `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
+                        (typeof mainImageFile === 'string' && mainImageFile.startsWith('data:image') ? 
+                            `<img src="${mainImageFile}" alt="${title}">` : 
+                            `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">`
+                        ) : 
                         `<i class="fas fa-image"></i>`
                     }
                 </div>
