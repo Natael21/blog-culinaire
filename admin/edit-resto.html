@@ -1693,12 +1693,15 @@
                 } else {
                     imageUrl = `data:image/jpeg;base64,${file}`;
                 }
+                console.log("file is a string");
             } else if (file instanceof File) {
                 // Si c'est un objet File
                 imageUrl = URL.createObjectURL(file);
+                console.log("file is a file");
             } else if (file instanceof Blob) {
                 // Si c'est un Blob
                 imageUrl = URL.createObjectURL(file);
+                console.log("file is a blob");
             }
 
             console.log(file);
@@ -1716,6 +1719,8 @@
             if (errorDiv) {
                 errorDiv.remove();
             }
+
+            console.log(mainImageFile);
             
             updateMarkdownPreview();
         }
@@ -2635,7 +2640,6 @@ ${editorContent}`;
                                     const fileName = imagePath.split('/').pop();
                                     const file = new File([blob], fileName, { type: 'image/jpeg' });
                                     mainImageFile = file;
-                                    console.log(mainImageFile);
                                     await handleMainImageUpload(file);                                    
                                 } else {
                                     console.error('Erreur lors du chargement de l\'image principale:', response.status);
