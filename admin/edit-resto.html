@@ -1330,6 +1330,7 @@
                                     name: file.name,
                                     data: galleryImageFiles[i]  // Ajoute directement la chaîne Base64
                                 });
+                                console.Log("l'image est une base64")
                             } else if (file instanceof File) {
                                 // Convertir l'image en base64 si c'est un fichier
                                 const galleryBase64 = await fileToBase64(file);
@@ -1337,6 +1338,7 @@
                                     name: file.name,
                                     data: galleryBase64
                                 });
+                                console.Log("l'image est un file")
                             } else {
                                 // Si l'image est juste une URL, on l'ajoute directement
                                 const galleryImageSrc = document.getElementById(`galleryImage${i}`).src; // Si l'image a un attribut src
@@ -1344,6 +1346,7 @@
                                     name: file.name,
                                     data: galleryImageSrc
                                 });
+                                console.Log("l'image est une URL")
                             }
                         }
 
