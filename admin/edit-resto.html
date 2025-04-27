@@ -2493,6 +2493,7 @@ ${editorContent}`;
                             try {
                                 const imageData = mainImage.data.startsWith('data:image') ? mainImage.data : `data:image/jpeg;base64,${mainImage.data}`;
                                 mainImageFile = imageData;
+                                console.log(mainImageFile);
                                 await handleMainImageUpload(imageData);
                             } catch (error) {
                                 console.error('Erreur lors du chargement de l\'image principale:', error);
