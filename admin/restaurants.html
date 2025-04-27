@@ -597,7 +597,6 @@
                 
                 // Récupérer les données du localStorage
                 const localStorageData = JSON.parse(localStorage.getItem('drafts') || '[]');
-                console.log('Données brutes du localStorage:', localStorageData);
 
                 // Créer un Map pour un accès rapide aux données du localStorage
                 const localStorageMap = new Map(
@@ -610,7 +609,6 @@
                     const localItem = localStorageMap.get(githubItem.title);
                     
                     if (localItem) {
-                        console.log(`Restaurant ${githubItem.title} trouvé dans localStorage`);
                         const localParsedData = parseFrontMatter(localItem.content);
                         
                         // Extraire le contenu détaillé (tout ce qui est après le front matter)
@@ -647,9 +645,6 @@
                         return restaurantData;
                     }
                     
-                    // Si pas dans localStorage, utiliser les données GitHub
-                    console.log(`Restaurant ${githubItem.title} non trouvé dans localStorage, utilisation des données GitHub`);
-                    
                     // Extraire le contenu détaillé de GitHub
                     const contentMatch = githubItem.content.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
                     const detailedContent = contentMatch ? contentMatch[1].trim() : '';
@@ -680,7 +675,6 @@
                 // Ajouter les nouveaux brouillons qui n'existent pas dans GitHub
                 localStorageData.forEach(localItem => {
                     if (!restaurants.some(item => item.title === localItem.title)) {
-                        console.log(`Nouveau brouillon ajouté: ${localItem.title}`);
                         const localParsedData = parseFrontMatter(localItem.content);
                         
                         // Extraire le contenu détaillé
@@ -758,7 +752,6 @@
             container.innerHTML = '';
 
             if (restaurants.length === 0) {
-                console.log('Aucun restaurant trouvé');
                 container.innerHTML = `
                     <div class="no-restaurants-message">
                         <i class="fas fa-utensils"></i>
@@ -768,62 +761,37 @@
                 return;
             }
 
-            console.log('Création des cartes de restaurants...');
             restaurants.forEach(restaurant => {
-                console.log('=== Détails du restaurant ===');
-                console.log('Titre:', restaurant.title);
-                console.log('Source:', restaurant.isFromLocalStorage ? 'localStorage' : 'GitHub');
-                console.log('État:', restaurant.state);
-                console.log('Données pour affichage:', {
-                    address: restaurant.address,
-                    style: restaurant.style,
-                    date: restaurant.date
-                });
                 
                 // Déterminer la source de l'image
                 let imageSource = null;
                 
-                console.log('=== Début de la sélection d\'image ===');
-                console.log('Restaurant:', restaurant.title);
-                console.log('Source:', restaurant.isFromLocalStorage ? 'localStorage' : 'GitHub');
-                
                 // Si vient du localStorage, chercher l'image principale dans le tableau images
                 if (restaurant.isFromLocalStorage) {
-                    console.log('-> Restaurant trouvé dans localStorage');
-                    console.log('Images disponibles:', restaurant.images);
                     
                     if (Array.isArray(restaurant.images) && restaurant.images.length > 0) {
                         const firstImage = restaurant.images[0];
-                        console.log('Première image:', firstImage);
                         
                         if (firstImage.data) {
-                            console.log('-> Données base64 trouvées');
                             // Construire l'URL data avec le bon type MIME
                             const mimeType = firstImage.name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
-                            console.log('Type MIME détecté:', mimeType);
                             imageSource = `data:${mimeType};base64,${firstImage.data}`;
-                            console.log('URL data construite:', imageSource.substring(0, 50) + '...');
                         } else {
-                            console.log('-> Pas de données base64 dans l\'image');
                         }
                     } else {
-                        console.log('-> Pas d\'images dans le tableau');
+                        console.error('-> Pas d\'images dans le tableau');
                     }
                 }
                 
                 // Si aucune image n'a été trouvée dans le localStorage, essayer l'image GitHub
                 if (!imageSource && restaurant.image && restaurant.image.startsWith('/images/')) {
-                    console.log('-> Utilisation de l\'image GitHub:', restaurant.image);
                     imageSource = restaurant.image;
                 }
                 
                 // Si toujours pas d'image
                 if (!imageSource) {
-                    console.log('-> Pas d\'image disponible pour', restaurant.title);
+                    console.error('-> Pas d\'image disponible pour', restaurant.title);
                 }
-
-                console.log(`Source finale de l'image pour ${restaurant.title}:`, imageSource);
-                console.log('=== Fin de la sélection d\'image ===');
 
                 const imageHtml = imageSource
                     ? `<div class="restaurant-image">
@@ -880,7 +848,6 @@
                 `;
                 container.appendChild(card);
             });
-            console.log('Affichage des restaurants terminé');
         }
 
         // Fonction pour gérer les erreurs de chargement d'images
@@ -907,7 +874,6 @@
                 const confirmed = await showConfirmationModal(restaurantTitle);
                 
                 if (!confirmed) {
-                    console.log('Suppression annulée');
                     return;
                 }
 
@@ -1011,11 +977,6 @@
                 const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
                 const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
                 const deletions = pendingChanges.filter(change => change.type === 'delete');
-                
-                console.log('=== Préparation des modifications ===');
-                console.log('Nombre de brouillons:', drafts.length);
-                console.log('Nombre de suppressions:', deletions.length);
-                console.log('Détails des suppressions:', deletions);
 
                 if (drafts.length === 0 && deletions.length === 0) {
                     showNotification('Aucune modification à publier', 'info');
@@ -1026,9 +987,7 @@
                 const changes = [];
                 
                 // Ajouter les brouillons
-                for (const draft of drafts) {
-                    console.log(`Traitement du brouillon : ${draft.title}`);
-                    
+                for (const draft of drafts) {                    
                     // Vérifier et nettoyer le contenu des images
                     if (draft.imageContent) {
                         if (!isValidBase64(draft.imageContent)) {
@@ -1050,16 +1009,11 @@
 
                 // Ajouter les suppressions
                 for (const deletion of deletions) {
-                    console.log(`Traitement de la suppression : ${deletion.filename}`);
                     changes.push({
                         type: 'delete',
                         path: deletion.filename
                     });
                 }
-
-                console.log('=== Données à envoyer ===');
-                console.log('Nombre total de changements:', changes.length);
-                console.log('Détails des changements:', changes);
 
                 // Envoyer les modifications
                 const response = await fetch('/.netlify/functions/publish-changes', {
@@ -1078,8 +1032,7 @@
                 }
 
                 const result = await response.json();
-                console.log('Publication réussie:', result);
-                
+
                 // Vider le stockage local et recharger la liste
                 localStorage.removeItem('drafts');
                 localStorage.removeItem('pendingChanges');
@@ -1143,8 +1096,6 @@
                     cancelButton.appendChild(textSpan);
                 }
             }
-            
-            console.log(`${totalChanges} modification(s) en attente`);
         }
 
         // Fonction pour afficher l'état de chargement
