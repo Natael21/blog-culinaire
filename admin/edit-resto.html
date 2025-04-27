@@ -2359,25 +2359,64 @@ ${editorContent}`;
                     lastModified: new Date().toISOString()
                 };
 
+                // Fonction pour vérifier si une image est en base64 ou en URL
+                const isBase64 = (str) => {
+                    return /^data:image\/[a-zA-Z]+;base64,/.test(str);
+                };
+
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    const mainImageBase64 = await fileToBase64(mainImageFile);
-                    draftData.images.push({
-                        name: mainImageFile.name,
-                        data: mainImageBase64,
-                        isMain: true
-                    });
+                    const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
+                    if (isBase64(mainImageSrc)) {
+                        draftData.images.push({
+                            name: mainImageFile.name,
+                            data: mainImageSrc,  // Ajouter directement la chaîne Base64
+                            isMain: true
+                        });
+                    } else if (mainImageFile instanceof File) {
+                        // Convertir l'image en base64 si c'est un fichier
+                        const mainImageBase64 = await fileToBase64(mainImageFile);
+                        draftData.images.push({
+                            name: mainImageFile.name,
+                            data: mainImageBase64,
+                            isMain: true
+                        });
+                    } else {
+                        // Si c'est une URL, l'ajouter directement
+                        draftData.images.push({
+                            name: mainImageFile.name,
+                            data: mainImageSrc,
+                            isMain: true
+                        });
+                    }
                 }
 
                 // Traiter les images de la galerie
                 for (let i = 0; i < galleryImageFiles.length; i++) {
                     const file = galleryImageFiles[i];
-                    const galleryBase64 = await fileToBase64(file);
-                    draftData.images.push({
-                        name: file.name,
-                        data: galleryBase64,
-                        isMain: false
-                    });
+                    const galleryImageSrc = document.getElementById(`galleryImage${i}`).src;  // Si l'image a un attribut src
+                    if (isBase64(galleryImageSrc)) {
+                        draftData.images.push({
+                            name: file.name,
+                            data: galleryImageSrc,  // Ajouter directement la chaîne Base64
+                            isMain: false
+                        });
+                    } else if (file instanceof File) {
+                        // Convertir l'image en base64 si c'est un fichier
+                        const galleryBase64 = await fileToBase64(file);
+                        draftData.images.push({
+                            name: file.name,
+                            data: galleryBase64,
+                            isMain: false
+                        });
+                    } else {
+                        // Si c'est une URL, l'ajouter directement
+                        draftData.images.push({
+                            name: file.name,
+                            data: galleryImageSrc,
+                            isMain: false
+                        });
+                    }
                 }
 
                 // Récupérer les restaurants existants
@@ -2419,6 +2458,7 @@ ${editorContent}`;
                 showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
             }
         }
+
 
         // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
         function escapeRegExp(string) {
