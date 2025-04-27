@@ -2557,7 +2557,7 @@ ${editorContent}`;
                             }).join('');
                             return '<ul>' + items + '</ul>';
                         })
-                        // Groupes de numérotées
+                        // Groupes numérotés
                         .replace(/((?:^\d+\. .*(?:\n|$))+)/gm, match => {
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^\d+\. /, '') + '</li>';
@@ -2576,28 +2576,20 @@ ${editorContent}`;
                         .filter(para => para.length > 0);
 
                     let finalContent = '';
-                    let previousWasList = false;
 
                     blocks.forEach(block => {
                         const isList = block.startsWith('<ul>') || block.startsWith('<ol>');
 
                         if (isList) {
                             finalContent += block;
-                            previousWasList = true;
                         } else {
-                            if (previousWasList) {
-                                // Juste coller sans <p> si suite directe d'une liste
-                                finalContent += block.replace(/\n/g, '<br>');
-                            } else {
-                                // Sinon mettre normalement dans un paragraphe
-                                finalContent += `<p>${block.replace(/\n/g, '<br>')}</p>`;
-                            }
-                            previousWasList = false;
+                            finalContent += `<p>${block.replace(/\n/g, '<br>')}</p>`;
                         }
                     });
 
                     return finalContent;
                 }
+
 
                 // Convertir le markdown en HTML
                 let htmlContent = markdownToHtml(content)
