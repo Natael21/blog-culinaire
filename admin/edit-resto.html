@@ -1648,7 +1648,9 @@
 
         function handleMainImageUpload(file) {
             const container = document.getElementById('mainImagePreview');
-
+            
+            mainImageFile = file;
+            
             createImagePreview(file, container);
             updateMarkdownPreview();
         }
