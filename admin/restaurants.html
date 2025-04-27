@@ -774,10 +774,10 @@
                         
                         if (firstImage.data) {
                             // Construire l'URL data avec le bon type MIME
-                            console.log(firstImage.name);
                             const mimeType = firstImage.name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
                             imageSource = `data:${mimeType};base64,${firstImage.data}`;
                         } else {
+                            console.log('-> Pas d\'image dans le tableau');
                         }
                     } else {
                         console.error('-> Pas d\'images dans le tableau');
