@@ -465,8 +465,8 @@ title: Administration - Blog Culinaire
                         <i class="fas fa-times"></i> Annuler les modifications
                     </button>
                 </div>
-                <button onclick="myNewButtonAction()" class="action-button special">
-                    <i class="fas fa-magic"></i> Mon Nouveau Bouton
+                <button onclick="viewChanges()" class="action-button special">
+                    <i class="fas fa-eye"></i> Voir les modifications
                 </button>
             </div>
         </div>
@@ -820,6 +820,8 @@ title: Administration - Blog Culinaire
             const buttons = document.getElementById('pendingChangesButtons');
             const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+
+            console.log(pendingChanges);
             
             // Vérifier si l'un ou l'autre existe
             const hasChanges = (pendingChanges && pendingChanges.length > 0) || 
@@ -959,6 +961,10 @@ title: Administration - Blog Culinaire
                     resolve(false);
                 };
             });
+        }
+
+        function viewChanges() {
+            window.location.href = 'changes.html';
         }
 
         // Fonction pour sauvegarder un brouillon
