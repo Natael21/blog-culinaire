@@ -1704,6 +1704,7 @@
                 console.log('Image principale chargée depuis Blob');
             }
 
+            console.log(file);
             mainImageFile = file;
             const container = document.getElementById('mainImagePreview');
             container.innerHTML = '';
@@ -2379,9 +2380,6 @@ ${editorContent}`;
 
                 const { mainImageName, galleryImageNames } = extractImageNames(markdownContent);
 
-                console.log(draftData.content);
-                console.log(markdownContent);
-
                 // Traiter l'image principale
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
@@ -2564,6 +2562,7 @@ ${editorContent}`;
                         galleryImageFiles = [];
                         
                         // Utiliser la première image comme image principale
+                        console.log(localDraft.images[0]);
                         const mainImage = localDraft.images[0];
                         const galleryImages = localDraft.images.slice(1); // Toutes les autres images vont dans la galerie
                                                 
