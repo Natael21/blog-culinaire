@@ -2366,12 +2366,10 @@ ${editorContent}`;
 
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    console.log(mainImageFile.src);
-                    const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
-                    if (isBase64(mainImageSrc)) {
+                    if (isBase64(mainImageFile)) {
                         draftData.images.push({
                             name: mainImageFile.name,
-                            data: mainImageSrc,  // Ajouter directement la chaîne Base64
+                            data: mainImageFile.data,  // Ajouter directement la chaîne Base64
                             isMain: true
                         });
                     } else if (mainImageFile instanceof File) {
@@ -2384,6 +2382,7 @@ ${editorContent}`;
                         });
                     } else {
                         // Si c'est une URL, l'ajouter directement
+                        const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
                         draftData.images.push({
                             name: mainImageFile.name,
                             data: mainImageSrc,
