@@ -1682,7 +1682,7 @@
             });
         }
 
-        function handleMainImageUpload(file) {
+        async function handleMainImageUpload(file) {
 
             if (typeof file === 'string') {
                 // Si c'est une URL ou une chaîne base64
@@ -1722,7 +1722,7 @@
 
             console.log(mainImageFile);
             
-            updateMarkdownPreview();
+            await updateMarkdownPreview();
         }
 
         function handleGalleryUpload(files) {
