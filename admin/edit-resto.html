@@ -2412,6 +2412,8 @@ ${editorContent}`;
                 for (let i = 0; i < galleryImageFiles.length; i++) {
                     const file = galleryImageFiles[i];
 
+                    console.log(galleryImageNames[i]);
+
                     if (isBase64(file)) {
                         draftData.images.push({
                             name: galleryImageNames[i],
