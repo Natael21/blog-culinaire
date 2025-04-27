@@ -2066,9 +2066,13 @@ ${editorContent}`;
                 <div class="restaurant-image">
                     ${mainImageFile ? 
                         `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">` : 
-                        `<i class="fas fa-image"></i>`
+                        (mainImageBase64 ? 
+                            `<img src="${mainImageBase64}" alt="${title}">` : 
+                            `<i class="fas fa-image"></i>`
+                        )
                     }
                 </div>
+
                 
                 <div class="restaurant-description">
                     ${description}
@@ -2478,11 +2482,11 @@ ${editorContent}`;
                     if (localDraft.images && localDraft.images.length > 0) {
                         
                         // Réinitialiser les tableaux d'images
-                        //mainImageFile = null;
+                        mainImageFile = null;
                         galleryImageFiles = [];
                         
                         // Utiliser la première image comme image principale
-                        //const mainImage = localDraft.images[0];
+                        const mainImage = localDraft.images[0];
                         const galleryImages = localDraft.images.slice(1); // Toutes les autres images vont dans la galerie
                                                 
                         //// Charger l'image principale si elle existe
