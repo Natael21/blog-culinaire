@@ -242,6 +242,7 @@
         }
 
         .gallery-item .actions button:last-child {
+            background: #3498db; /* Bleu */
             margin-left: 0.5rem; /* Espace entre les deux boutons */
         }
 
@@ -285,10 +286,13 @@
 
         // Fonction pour télécharger l'image
         function downloadImage(imageUrl) {
-            const a = document.createElement('a');
-            a.href = imageUrl;
-            a.download = imageUrl.substring(imageUrl.lastIndexOf('/') + 1); // Nom du fichier
-            a.click();
+            const a = document.createElement('a'); // Crée un lien temporaire
+            a.href = imageUrl; // Lien vers l'image
+            a.download = imageUrl.substring(imageUrl.lastIndexOf('/') + 1); // Nom du fichier (le nom de l'image)
+            a.style.display = 'none'; // Cache le lien
+            document.body.appendChild(a); // Ajoute le lien au DOM
+            a.click(); // Déclenche le téléchargement
+            document.body.removeChild(a); // Retire le lien du DOM après le téléchargement
         }
 
         // Fonction pour charger les images depuis GitHub
