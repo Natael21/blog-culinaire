@@ -2139,11 +2139,17 @@ ${editorContent}`;
                 <h2 class="gallery-title">Galerie photos</h2>
                 <div class="restaurant-gallery">
                     ${galleryImageFiles.length > 0 ? 
-                        galleryImageFiles.map(file => `
-                            <div class="gallery-image">
-                                <img src="${URL.createObjectURL(file)}" alt="Galerie">
-                            </div>
-                        `).join('') : 
+                        galleryImageFiles.map(file => {
+                            // Vérifier si l'élément est un base64 ou un fichier
+                            const imgSrc = (typeof file === 'string' && file.startsWith('data:image')) 
+                                ? file // Si c'est une image en base64
+                                : URL.createObjectURL(file); // Si c'est un fichier
+                            return `
+                                <div class="gallery-image">
+                                    <img src="${imgSrc}" alt="Galerie">
+                                </div>
+                            `;
+                        }).join('') : 
                         `<div class="gallery-image">
                             <i class="fas fa-images"></i>
                         </div>`
@@ -2153,19 +2159,16 @@ ${editorContent}`;
         }
 
         function createImagePreview(file, container, isMainImage = false) {
-            console.log('=== DÉBUT CREATE IMAGE PREVIEW ===', { isMainImage, type: typeof file });
             const div = document.createElement('div');
             div.className = 'image-preview-container';
 
             const deleteButtonHandler = function() {
-                console.log(`Suppression image: ${isMainImage ? 'Principale' : 'Galerie'}`);
                 div.remove();
                 if (isMainImage) {
                     mainImageFile = null;
                 } else {
                     const index = galleryImageFiles.findIndex(item => item === file);
                     if (index > -1) {
-                        console.log(`Suppression de l'index ${index} dans la galerie`);
                         galleryImageFiles.splice(index, 1);
                     }
                 }
@@ -2173,7 +2176,6 @@ ${editorContent}`;
             };
 
             if (file instanceof Blob || file instanceof File) {
-                console.log('createImagePreview: Traitement comme Blob/File');
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     div.innerHTML = `
@@ -2190,7 +2192,6 @@ ${editorContent}`;
                 }
                 reader.readAsDataURL(file);
             } else if (typeof file === 'string') {
-                console.log('createImagePreview: Traitement comme base64');
                 const imgSrc = file.startsWith('data:image') ? file : `data:image/jpeg;base64,${file}`;
                 div.innerHTML = `
                     <img src="${imgSrc}" class="image-preview" alt="Image preview">
@@ -2203,26 +2204,15 @@ ${editorContent}`;
             } else {
                 console.error("Type de fichier non supporté dans createImagePreview", file);
             }
-            console.log('=== FIN CREATE IMAGE PREVIEW ===');
         }
 
-        function updateGalleryPreview() {
-            console.log('=== DÉBUT UPDATE GALLERY PREVIEW ===');
-            console.log('Nombre d\'images dans la galerie:', galleryImageFiles.length);
-            
+        function updateGalleryPreview() {            
             const container = document.getElementById('galleryPreview');
             container.innerHTML = '';
             
             galleryImageFiles.forEach((file, index) => {
-                console.log(`Traitement image ${index + 1}:`, {
-                    type: typeof file,
-                    isBlob: file instanceof Blob,
-                    isFile: file instanceof File
-                });
                 createImagePreview(file, container);
-            });
-            
-            console.log('=== FIN UPDATE GALLERY PREVIEW ===');
+            });            
         }
 
         function showLoadingState(button) {
