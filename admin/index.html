@@ -728,6 +728,8 @@ title: Administration - Blog Culinaire
             // Sélectionner l'élément contenant les boutons
             const pendingChangesButtons = document.getElementById('pendingChangesButtons');
 
+            console.log(pendingChangesButtons);
+
             // Fonction pour rendre les boutons visibles pendant le tutoriel
             function showButtons() {
                 console.log("Affichage des boutons...");
@@ -771,20 +773,20 @@ title: Administration - Blog Culinaire
                             element: document.querySelector('.action-button-images'),
                             intro: "Cette option vous permet de gérer les images en supprimant celles qui ne sont plus utiles et elles seront retirées du site."
                         },
+                        //{
+                        //    element: document.querySelector('.action-button publish'),
+                        //    intro: "Cette option vous permet de publier les modifications et les rendre actives sur le site."
+                        //},
+                        //{
+                        //    element: document.querySelector('.action-button cancel'),
+                        //    intro: "Cette option vous permet d'annuler toutes les modifications effectuées."
+                        //},
+                        //{
+                        //    element: document.querySelector('.action-button special'),
+                        //    intro: "Cette option vous permet de voir toutes les modifications en attente de publication."
+                        //},
                         {
-                            element: document.querySelector('.action-button publish'),
-                            intro: "Cette option vous permet de publier les modifications et les rendre actives sur le site."
-                        },
-                        {
-                            element: document.querySelector('.action-button cancel'),
-                            intro: "Cette option vous permet d'annuler toutes les modifications effectuées."
-                        },
-                        {
-                            element: document.querySelector('.action-button special'),
-                            intro: "Cette option vous permet de voir toutes les modifications en attente de publication."
-                        },
-                        {
-                            element: document.querySelector('.admin-header'),
+                            element: document.querySelector('.user-info'),
                             intro: "Si vous avez terminé, vous pouvez vous déconnecter."
                         }
                     ],
