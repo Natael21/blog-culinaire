@@ -387,14 +387,12 @@
 
         // Fonction pour rechercher une adresse
         async function searchAddress(query) {
-            console.log('Recherche d\'adresse pour:', query);
             try {
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('Résultats de la recherche:', data);
                 return data;
             } catch (error) {
                 console.error('Erreur lors de la recherche d\'adresse:', error);
@@ -404,32 +402,25 @@
 
         // Fonction pour initialiser l'autocomplétion d'adresse
         function initializeAddressAutocomplete() {
-            console.log('Initialisation de l\'autocomplétion d\'adresse...');
             const inputs = document.querySelectorAll('[data-field="address"]');
-            console.log('Nombre de champs d\'adresse trouvés:', inputs.length);
             
             inputs.forEach(input => {
-                console.log('Configuration du champ:', input);
                 const suggestionsContainer = document.createElement('div');
                 suggestionsContainer.className = 'address-suggestions';
                 input.parentNode.appendChild(suggestionsContainer);
 
                 input.addEventListener('input', async function() {
-                    console.log('Changement dans le champ d\'adresse:', this.value);
                     clearTimeout(debounceTimer);
                     const query = this.value.trim();
 
                     if (query.length < 3) {
-                        console.log('Requête trop courte, masquage des suggestions');
                         suggestionsContainer.style.display = 'none';
                         return;
                     }
 
-                    console.log('Recherche d\'adresses pour:', query);
                     debounceTimer = setTimeout(async () => {
                         try {
                             suggestions = await searchAddress(query);
-                            console.log('Suggestions trouvées:', suggestions);
                             displaySuggestions(suggestions, suggestionsContainer);
                         } catch (error) {
                             console.error('Erreur lors de la recherche d\'adresse:', error);
@@ -477,9 +468,7 @@
 
         // Fonction pour afficher les suggestions d'adresse
         function displaySuggestions(suggestions, container) {
-            console.log('Affichage des suggestions:', suggestions);
             if (!suggestions.length) {
-                console.log('Aucune suggestion à afficher');
                 container.style.display = 'none';
                 return;
             }
@@ -491,7 +480,6 @@
                 div.textContent = suggestion.display_name;
                 
                 div.addEventListener('click', () => {
-                    console.log('Suggestion sélectionnée:', suggestion);
                     selectAddress(suggestion, container.previousElementSibling, container);
                 });
 
@@ -506,7 +494,6 @@
             });
 
             container.style.display = 'block';
-            console.log('Suggestions affichées');
         }
 
         // Fonction pour sélectionner une adresse
@@ -832,7 +819,6 @@
             // Vérifier si un appel est déjà en cours pour cet ID
             const now = Date.now();
             if (lastSaveCall[id] && (now - lastSaveCall[id]) < 1000) {
-                console.log('Appel ignoré - trop rapide après le dernier appel pour:', id);
                 return;
             }
             lastSaveCall[id] = now;
