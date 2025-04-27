@@ -2366,11 +2366,12 @@ ${editorContent}`;
 
                 // Traiter l'image principale
                 if (mainImageFile) {
-                    console.log(mainImageFile);
+                    console.log(mainImagePath)
                     if (isBase64(mainImageFile)) {
+                        console.log('mainImageFile is base64');
                         draftData.images.push({
                             name: mainImageFile.name,
-                            data: mainImageFile.data,  // Ajouter directement la chaîne Base64
+                            data: mainImageFile,  // Ajouter directement la chaîne Base64
                             isMain: true
                         });
                     } else if (mainImageFile instanceof File) {
