@@ -1294,13 +1294,16 @@
                             return /^data:image\/[a-zA-Z]+;base64,/.test(str);
                         };
 
+                        const drafts3 = JSON.parse(localStorage.getItem('drafts') || '[]');
+                        const localDraft3 = drafts3.find(d => d.filename === filename);
+
                         // Sauvegarder l'image principale
                         if (mainImageFile) {
                             // Si l'image est déjà en URL ou en Base64
-                            
+                            console.log(mainImageFile)
                             if (isBase64(mainImageFile)) {
                                 draftData.images.push({
-                                    name: "to find",
+                                    name: localDraft3.images[0].name,
                                     data: mainImageFile  // Ajoute directement la chaîne Base64
                                 });
                             } else if (mainImageFile instanceof File) {
@@ -1327,7 +1330,7 @@
                             
                             if (isBase64(file)) {
                                 draftData.images.push({
-                                    name: "to find",
+                                    name: localDraft3.images[i+1].name,
                                     data: galleryImageFiles[i]  // Ajoute directement la chaîne Base64
                                 });
                                 console.log("l'image est une base64")
@@ -2389,21 +2392,13 @@ ${editorContent}`;
                 const drafts2 = JSON.parse(localStorage.getItem('drafts') || '[]');
                 const localDraft2 = drafts2.find(d => d.filename === filename);
 
-                if(localDraft2){
-                    const mainImage = localDraft2.images[0];
-                    const galleryImages = localDraft2.images.slice(1); // Toutes les autres images vont dans la galerie
-                }
-
                 //const { mainImage, galleryImages } = extractImageNames(markdownContent);
-
-                console.log(mainImage.name);
-                console.log(galleryImages.name);
 
                 // Traiter l'image principale
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
                         draftData.images.push({
-                            name: "to find", //TODO: Remplacer par le nom de l'image
+                            name: localDraft2.images[0].name,
                             data: mainImageFile,  // Ajouter directement la chaîne Base64
                             isMain: true
                         });
@@ -2432,7 +2427,7 @@ ${editorContent}`;
 
                     if (isBase64(file)) {
                         draftData.images.push({
-                            name: "to find",//TODO: Remplacer par le nom de l'image
+                            name: localDraft2.images[i+1].name,
                             data: file,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
