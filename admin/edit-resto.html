@@ -2007,7 +2007,7 @@ ${editorContent}`;
             return average;
         }
 
-        function updateMarkdownPreview() {
+        async function updateMarkdownPreview() {
             const preview = document.querySelector('.restaurant-preview');
             const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
             
@@ -2635,7 +2635,8 @@ ${editorContent}`;
                                     const fileName = imagePath.split('/').pop();
                                     const file = new File([blob], fileName, { type: 'image/jpeg' });
                                     mainImageFile = file;
-                                    await handleMainImageUpload(file);
+                                    console.log(mainImageFile);
+                                    await handleMainImageUpload(file);                                    
                                 } else {
                                     console.error('Erreur lors du chargement de l\'image principale:', response.status);
                                 }
