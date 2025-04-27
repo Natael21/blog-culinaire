@@ -1372,7 +1372,7 @@
 
                     } catch (error) {
                         console.error('Erreur:', error);
-                        showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
+                        //showNotification(error.message || 'Erreur lors de la sauvegarde du restaurant', 'error');
                         
                         // En cas d'erreur, on cache le spinner
                         const saveButton = document.getElementById('saveButton');
@@ -2359,16 +2359,32 @@ ${editorContent}`;
                     lastModified: new Date().toISOString()
                 };
 
+                function extractImageNames(markdown) {
+                    const mainImageMatch = markdown.match(/image:\s*['"]?\/images\/([^'"\n]+)/);
+                    const galleryImageMatches = [...markdown.matchAll(/- image:\s*['"]\/images\/([^'"\n]+)/g)];
+
+                    const mainImage = mainImageMatch ? mainImageMatch[1] : null;
+                    const galleryImages = galleryImageMatches.map(match => match[1]);
+
+                    return {
+                        mainImage,
+                        galleryImages
+                    };
+                }
+
                 // Fonction pour vérifier si une image est en base64 ou en URL
                 const isBase64 = (str) => {
                     return /^data:image\/[a-zA-Z]+;base64,/.test(str);
                 };
 
+                const { mainImageName, galleryImageNames } = extractImageNames(markdownContent);
+
+
                 // Traiter l'image principale
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
                         draftData.images.push({
-                            name: "to find",
+                            name: mainImageName,
                             data: mainImageFile,  // Ajouter directement la chaîne Base64
                             isMain: true
                         });
@@ -2398,7 +2414,7 @@ ${editorContent}`;
 
                     if (isBase64(file)) {
                         draftData.images.push({
-                            name: "to find",
+                            name: galleryImageNames[i],
                             data: file,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
