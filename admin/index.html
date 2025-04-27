@@ -716,11 +716,23 @@ title: Administration - Blog Culinaire
         </div>
     </div>
 
-    <script>
-
-        // Wizard
+<script>
         document.getElementById('wizard-trigger').addEventListener('click', function () {
             var intro = introJs();
+            
+            // Sélectionner l'élément contenant les boutons
+            const pendingChangesButtons = document.getElementById('pendingChangesButtons');
+    
+            // Fonction pour rendre les boutons visibles pendant le tutoriel
+            function showButtons() {
+                pendingChangesButtons.style.display = 'flex'; // Rend visible l'élément
+            }
+    
+            // Fonction pour cacher les boutons après le tutoriel
+            function hideButtons() {
+                pendingChangesButtons.style.display = 'none'; // Cache l'élément
+            }
+    
             intro.setOptions({
                 steps: [
                     {
@@ -745,26 +757,48 @@ title: Administration - Blog Culinaire
                     },
                     {
                         element: document.querySelector('.action-button-upcoming'),
-                        intro: "Gérez les restaurants à venir ici."
+                        intro: "Vous pouvez ajouter, modifier ou supprimer des restaurants à venir."
                     },
                     {
                         element: document.querySelector('.action-button-images'),
-                        intro: "Cette option vous permet de gérer les images des restaurants."
+                        intro: "Cette option vous permet de gérer les images."
                     },
                     {
-                        element: document.querySelector('#login-container'),
-                        intro: "Si vous n'êtes pas connecté, vous devrez vous connecter pour accéder à l'administration."
+                        element: document.querySelector('.action-button.publish'),
+                        intro: "Cette option vous permet de publier les modifications."
+                    },
+                    {
+                        element: document.querySelector('.action-button.cancel'),
+                        intro: "Cette option vous permet d'annuler toutes les modifications."
+                    },
+                    {
+                        element: document.querySelector('.action-button.special'),
+                        intro: "Cette option vous permet de voir les modifications en attente."
+                    },
+                    {
+                        element: document.querySelector('#admin-card .text-center'),
+                        intro: "Si vous avez terminé, vous pouvez vous déconnecter."
                     }
                 ],
                 showProgress: true,
                 showBullets: false,
                 showStepNumbers: false,
                 exitOnEsc: true,
-                exitOnOverlayClick: false
+                exitOnOverlayClick: false,
+    
+                // Quand le tutoriel commence, rendre les boutons visibles
+                onbeforechange: function() {
+                    showButtons();
+                },
+                
+                // Quand le tutoriel est complet, cacher les boutons
+                oncomplete: function() {
+                    hideButtons();
+                }
             });
+    
             intro.start();
-        });
-
+        });  
 
         // Fonctions utilitaires
         function showLoading() {
