@@ -2379,12 +2379,15 @@ ${editorContent}`;
 
                 const { mainImageName, galleryImageNames } = extractImageNames(markdownContent);
 
+                console.log(mainImageName);
+                console.log(galleryImageNames);
+
 
                 // Traiter l'image principale
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
                         draftData.images.push({
-                            name: mainImageName,
+                            name: "to find",
                             data: mainImageFile,  // Ajouter directement la chaîne Base64
                             isMain: true
                         });
@@ -2412,11 +2415,9 @@ ${editorContent}`;
                 for (let i = 0; i < galleryImageFiles.length; i++) {
                     const file = galleryImageFiles[i];
 
-                    console.log(galleryImageNames);
-
                     if (isBase64(file)) {
                         draftData.images.push({
-                            name: galleryImageNames[i],
+                            name: "to find",
                             data: file,  // Ajouter directement la chaîne Base64
                             isMain: false
                         });
