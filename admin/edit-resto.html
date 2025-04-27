@@ -1466,8 +1466,8 @@
                         editorInitialized = true;
                         resolve(editor);
                     },
-                    onUpdate: async ({ editor }) => {
-                        await updateMarkdownPreview();
+                    onUpdate: ({ editor }) => {
+                        updateMarkdownPreview();
                     }
                 });
 
@@ -1686,7 +1686,7 @@
             });
         }
 
-        async function handleMainImageUpload(file) {
+        function handleMainImageUpload(file) {
 
             if (typeof file === 'string') {
                 // Si c'est une URL ou une chaîne base64
@@ -1717,10 +1717,8 @@
             if (errorDiv) {
                 errorDiv.remove();
             }
-
-            await sleep(1000);
             
-            await updateMarkdownPreview();
+            updateMarkdownPreview();
         }
 
         function handleGalleryUpload(files) {
@@ -2038,7 +2036,7 @@ ${editorContent}`;
             const originalityComment = document.getElementById('originalityComment').value || '';
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
             
-            await sleep(1000);
+            await sleep(500);
 
             // Récupérer le contenu de l'éditeur
             const editorContent = editor.getHTML() || '';
@@ -2593,9 +2591,7 @@ ${editorContent}`;
                         updateGalleryPreview();
                         
                         // Mettre à jour l'aperçu markdown
-                        await sleep(1000);
-                        
-                        await updateMarkdownPreview();
+                        //await updateMarkdownPreview();
                     } else {
                         console.error('Aucune image trouvée dans le localStorage');
                     }
