@@ -2542,25 +2542,21 @@ ${editorContent}`;
                 function markdownToHtml(content) {
                     console.log("Markdown d'origine :", JSON.stringify(content));
 
-                    // D'abord, traiter les listes groupées
+                    // Traiter les listes (groupées)
                     content = content
-                        // Groupes de puces
+                        // Listes à puces
                         .replace(/((?:^- .*(?:\n|$))+)/gm, match => {
-                            console.log("Match liste à puces :", JSON.stringify(match));
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^- /, '') + '</li>';
                             }).join('');
-                            console.log("Liste UL transformée :", items);
-                            return '<ul>' + items + '</ul>';
+                            return '\n\n<UL_BLOCK><ul>' + items + '</ul></UL_BLOCK>\n\n'; // Encapsuler avec des tags spéciaux
                         })
-                        // Groupes numérotés
+                        // Listes numérotées
                         .replace(/((?:^\d+\.\s+.*(?:\n|$))+)/gm, match => {
-                            console.log("Match liste numérotée :", JSON.stringify(match));
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^\d+\.\s+/, '') + '</li>';
                             }).join('');
-                            console.log("Liste OL transformée :", items);
-                            return '<ol>' + items + '</ol>';
+                            return '\n\n<OL_BLOCK><ol>' + items + '</ol></OL_BLOCK>\n\n'; // Pareil ici
                         });
 
                     console.log("Après traitement UL/OL :", content);
@@ -2580,19 +2576,16 @@ ${editorContent}`;
                     console.log("Blocs après split \\n\\n :", blocks);
 
                     let finalContent = '';
-                    let previousWasList = false;
 
                     blocks.forEach((block, index) => {
-                        const isList = block.startsWith('<ul>') || block.startsWith('<ol>');
+                        console.log(`Block[${index}] :`, JSON.stringify(block));
 
-                        console.log(`Block[${index}] :`, JSON.stringify(block), "isList:", isList);
-
-                        if (isList) {
-                            finalContent += block;
-                            previousWasList = true;
+                        if (block.startsWith('<UL_BLOCK>')) {
+                            finalContent += block.replace('<UL_BLOCK>', '').replace('</UL_BLOCK>', '');
+                        } else if (block.startsWith('<OL_BLOCK>')) {
+                            finalContent += block.replace('<OL_BLOCK>', '').replace('</OL_BLOCK>', '');
                         } else {
                             finalContent += `<p>${block.replace(/\n/g, '<br>')}</p>`;
-                            previousWasList = false;
                         }
                     });
 
@@ -2600,8 +2593,6 @@ ${editorContent}`;
 
                     return finalContent;
                 }
-
-
 
 
                 // Convertir le markdown en HTML
