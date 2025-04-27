@@ -2540,7 +2540,7 @@ ${editorContent}`;
                 }
 
                 function markdownToHtml(content) {
-                    console.log("Markdown d'origine :", JSON.stringify(content));
+                    console.log("Markdown d'origine :", content);
 
                     // Traiter les listes (groupées)
                     content = content
@@ -2549,14 +2549,14 @@ ${editorContent}`;
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^- /, '') + '</li>';
                             }).join('');
-                            return '\n\n<UL_BLOCK><ul>' + items + '</ul></UL_BLOCK>\n\n'; // Encapsuler avec des tags spéciaux
+                            return '<ul>' + items + '</ul>';
                         })
                         // Listes numérotées
                         .replace(/((?:^\d+\.\s+.*(?:\n|$))+)/gm, match => {
                             const items = match.trim().split('\n').map(line => {
                                 return '<li>' + line.replace(/^\d+\.\s+/, '') + '</li>';
                             }).join('');
-                            return '\n\n<OL_BLOCK><ol>' + items + '</ol></OL_BLOCK>\n\n'; // Pareil ici
+                            return '<ol>' + items + '</ol>';
                         });
 
                     console.log("Après traitement UL/OL :", content);
@@ -2577,15 +2577,14 @@ ${editorContent}`;
 
                     let finalContent = '';
 
-                    blocks.forEach((block, index) => {
-                        console.log(`Block[${index}] :`, JSON.stringify(block));
+                    blocks.forEach((block) => {
+                        console.log("Block :", block);
 
-                        if (block.startsWith('<UL_BLOCK>')) {
-                            finalContent += block.replace('<UL_BLOCK>', '').replace('</UL_BLOCK>', '');
-                        } else if (block.startsWith('<OL_BLOCK>')) {
-                            finalContent += block.replace('<OL_BLOCK>', '').replace('</OL_BLOCK>', '');
+                        // Si le bloc est une liste (ul ou ol), on le garde tel quel
+                        if (block.startsWith('<ul>') || block.startsWith('<ol>')) {
+                            finalContent += block;  // Ajoute la liste telle quelle
                         } else {
-                            // Ici on met dans un <p> sauf si c'est une liste (déjà traitée)
+                            // Sinon, on l'encapsule dans un <p> comme d'habitude
                             finalContent += `<p>${block.replace(/\n/g, '<br>')}</p>`;
                         }
                     });
@@ -2594,6 +2593,7 @@ ${editorContent}`;
 
                     return finalContent;
                 }
+
 
 
                 // Convertir le markdown en HTML
