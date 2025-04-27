@@ -11,6 +11,7 @@ title: Administration - Blog Culinaire
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@6.0.0/minified/intro.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js/minified/introjs.min.css">
     <script src="https://cdn.jsdelivr.net/npm/intro.js/minified/intro.min.js"></script>
     <style>
@@ -739,74 +740,76 @@ title: Administration - Blog Culinaire
                 pendingChangesButtons.style.display = 'none'; // Cache l'élément
             }
 
-            intro.setOptions({
-                steps: [
-                    {
-                        element: document.querySelector('.dashboard-title'),
-                        intro: "Bienvenue dans le tableau de bord ! Ici vous pouvez gérer l'administration des restaurants."
+            setTimeout(function() {
+                intro.setOptions({
+                    steps: [
+                        {
+                            element: document.querySelector('.dashboard-title'),
+                            intro: "Bienvenue dans le tableau de bord ! Ici vous pouvez gérer l'administration des restaurants."
+                        },
+                        {
+                            element: document.querySelector('#published-count'),
+                            intro: "Ce compteur affiche le nombre de restaurants publiés."
+                        },
+                        {
+                            element: document.querySelector('#draft-count'),
+                            intro: "Ce compteur affiche le nombre de restaurants en brouillon. Donc, les restaurants qui ne sont pas encore visibles sur le site."
+                        },
+                        {
+                            element: document.querySelector('.action-button-new-resto'),
+                            intro: "Cliquez ici pour ajouter un nouveau restaurant."
+                        },
+                        {
+                            element: document.querySelector('.action-button-restaurants'),
+                            intro: "Ici vous pouvez gérer tous les restaurants existants. En les modifiant ou en les supprimant. Il faut noter qu'après une modification le restaurant n'est plus visible dans la liste des restaurants jusqu'à ce que vous publiez les modifications."
+                        },
+                        {
+                            element: document.querySelector('.action-button-upcoming'),
+                            intro: "Vous pouvez ajouter, modifier ou supprimer des restaurants à venir visibles sur la page d'accueil."
+                        },
+                        {
+                            element: document.querySelector('.action-button-images'),
+                            intro: "Cette option vous permet de gérer les images en supprimant celles qui ne sont plus utiles et elles seront retirées du site."
+                        },
+                        {
+                            element: document.querySelector('.action-button publish'),
+                            intro: "Cette option vous permet de publier les modifications et les rendre actives sur le site."
+                        },
+                        {
+                            element: document.querySelector('.action-button cancel'),
+                            intro: "Cette option vous permet d'annuler toutes les modifications effectuées."
+                        },
+                        {
+                            element: document.querySelector('.action-button special'),
+                            intro: "Cette option vous permet de voir toutes les modifications en attente de publication."
+                        },
+                        {
+                            element: document.querySelector('.admin-header'),
+                            intro: "Si vous avez terminé, vous pouvez vous déconnecter."
+                        }
+                    ],
+                    showProgress: true,
+                    showBullets: false,
+                    showStepNumbers: false,
+                    exitOnEsc: true,
+                    exitOnOverlayClick: false,
+
+                    // Quand le tutoriel commence, rendre les boutons visibles
+                    onbeforestart: function() {
+                        console.log("Avant le début du tutoriel, les boutons vont être affichés");
+                        showButtons(); // Affiche les boutons dès le début du tutoriel
                     },
-                    {
-                        element: document.querySelector('#published-count'),
-                        intro: "Ce compteur affiche le nombre de restaurants publiés."
-                    },
-                    {
-                        element: document.querySelector('#draft-count'),
-                        intro: "Ce compteur affiche le nombre de restaurants en brouillon. Donc, les restaurants qui ne sont pas encore visibles sur le site."
-                    },
-                    {
-                        element: document.querySelector('.action-button-new-resto'),
-                        intro: "Cliquez ici pour ajouter un nouveau restaurant."
-                    },
-                    {
-                        element: document.querySelector('.action-button-restaurants'),
-                        intro: "Ici vous pouvez gérer tous les restaurants existants. En les modifiant ou en les supprimant. Il faut noter qu'après une modification le restaurant n'est plus visible dans la liste des restaurants jusqu'à ce que vous publiez les modifications."
-                    },
-                    {
-                        element: document.querySelector('.action-button-upcoming'),
-                        intro: "Vous pouvez ajouter, modifier ou supprimer des restaurants à venir visibles sur la page d'accueil."
-                    },
-                    {
-                        element: document.querySelector('.action-button-images'),
-                        intro: "Cette option vous permet de gérer les images en supprimant celles qui ne sont plus utiles et elles seront retirées du site."
-                    },
-                    {
-                        element: document.querySelector('.action-button.publish'),
-                        intro: "Cette option vous permet de publier les modifications et les rendre actives sur le site."
-                    },
-                    {
-                        element: document.querySelector('.action-button.cancel'),
-                        intro: "Cette option vous permet d'annuler toutes les modifications effectuées."
-                    },
-                    {
-                        element: document.querySelector('.action-button.special'),
-                        intro: "Cette option vous permet de voir toutes les modifications en attente de publication."
-                    },
-                    {
-                        element: document.querySelector('#admin-card .text-center'),
-                        intro: "Si vous avez terminé, vous pouvez vous déconnecter."
+
+                    // Quand le tutoriel est complet, cacher les boutons
+                    oncomplete: function() {
+                        console.log("Le tutoriel est terminé, les boutons vont être cachés");
+                        hideButtons(); // Cache les boutons après la fin du tutoriel
                     }
-                ],
-                showProgress: true,
-                showBullets: false,
-                showStepNumbers: false,
-                exitOnEsc: true,
-                exitOnOverlayClick: false,
+                });
 
-                // Quand le tutoriel commence, rendre les boutons visibles
-                onbeforestart: function() {
-                    console.log("Avant le début du tutoriel, les boutons vont être affichés");
-                    showButtons(); // Affiche les boutons dès le début du tutoriel
-                },
-
-                // Quand le tutoriel est complet, cacher les boutons
-                oncomplete: function() {
-                    console.log("Le tutoriel est terminé, les boutons vont être cachés");
-                    hideButtons(); // Cache les boutons après la fin du tutoriel
-                }
-            });
-
-            console.log("Démarrer le tutoriel");
-            intro.start();
+                console.log("Démarrer le tutoriel");
+                intro.start();
+            }, 200); // délai de 200ms pour donner un peu de temps au DOM
         });
 
 
