@@ -1300,7 +1300,7 @@
                             
                             if (isBase64(mainImageFile)) {
                                 draftData.images.push({
-                                    name: mainImageFile.name,
+                                    name: "to find",
                                     data: mainImageFile  // Ajoute directement la chaîne Base64
                                 });
                             } else if (mainImageFile instanceof File) {
@@ -1327,7 +1327,7 @@
                             
                             if (isBase64(file)) {
                                 draftData.images.push({
-                                    name: file.name,
+                                    name: "to find",
                                     data: galleryImageFiles[i]  // Ajoute directement la chaîne Base64
                                 });
                                 console.log("l'image est une base64")
