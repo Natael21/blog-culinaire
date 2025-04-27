@@ -2396,6 +2396,7 @@ ${editorContent}`;
                 //const { mainImage, galleryImages } = extractImageNames(markdownContent);
 
                 // Traiter l'image principale
+                console.log(localDraft2.images[0].name)
                 if (mainImageFile) {
                     if (isBase64(mainImageFile)) {
                         draftData.images.push({
