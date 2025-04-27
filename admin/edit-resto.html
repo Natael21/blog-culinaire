@@ -2469,19 +2469,6 @@ ${editorContent}`;
                             }
                         }
                         
-                        // Charger les images de la galerie
-                        for (const image of galleryImages) {
-                            try {
-                                const imageData = image.data.startsWith('data:image') ? image.data : `data:image/jpeg;base64,${image.data}`;
-                                galleryImageFiles.push(imageData);
-                            } catch (error) {
-                                console.error('Erreur lors du chargement d\'une image de la galerie:', error);
-                            }
-                        }
-                        
-                        // Mettre à jour la prévisualisation de la galerie
-                        updateGalleryPreview();
-                        
                         // Mettre à jour l'aperçu markdown
                         await updateMarkdownPreview();
                     } else {
