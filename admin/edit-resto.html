@@ -2824,11 +2824,9 @@ ${editorContent}`;
                 document.getElementById('filename').value = filename;
 
                 // Mettre à jour l'aperçu
-                try {
-                    updateMarkdownPreview();
-                } catch (error) {
-                    console.error('Erreur lors de la mise à jour de l\'aperçu markdown:', error);
-                }
+                await sleep(1000);
+                
+                await updateMarkdownPreview();
             } 
             catch (error){
                 console.error('Erreur lors du chargement du restaurant:', error);
