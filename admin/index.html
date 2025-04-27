@@ -838,10 +838,6 @@ title: Administration - Blog Culinaire
             const buttons = document.getElementById('pendingChangesButtons');
             const pendingChanges = JSON.parse(localStorage.getItem('pendingChanges') || '[]');
             const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-
-            console.log(pendingChanges);
-            console.log(drafts);
-            console.log(deletedImages);
             
             // Vérifier si l'un ou l'autre existe
             const hasChanges = (pendingChanges && pendingChanges.length > 0) || 
