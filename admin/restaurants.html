@@ -774,7 +774,7 @@
                         
                         if (firstImage.data) {
                             // Construire l'URL data avec le bon type MIME
-                            console.log(firstImage);
+                            console.log(firstImage.name);
                             const mimeType = firstImage.name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
                             imageSource = `data:${mimeType};base64,${firstImage.data}`;
                         } else {
