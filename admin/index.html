@@ -32,6 +32,11 @@ title: Administration - Blog Culinaire
             font-size: 2.5rem;
             margin-bottom: 1rem;
         }
+        .dashboard-title {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
         .admin-subtitle {
             color: #7f8c8d;
             font-size: 1.2rem;
@@ -564,7 +569,7 @@ title: Administration - Blog Culinaire
     <div id="admin-content" style="display: none;">
         <div class="admin-container">
             <div class="admin-header">
-                <h1 class="admin-title">
+                <h1 class="dashboard-title">
                     Tableau de bord 
                     <i class="fas fa-info-circle" id="wizard-trigger" style="cursor: pointer; margin-left: 10px;"></i>
                 </h1>
@@ -628,7 +633,7 @@ title: Administration - Blog Culinaire
             intro.setOptions({
                 steps: [
                     {
-                        element: document.querySelector('.admin-title'),
+                        element: document.querySelector('.dashboard-title'),
                         intro: "Bienvenue dans le tableau de bord ! Ici vous pouvez gérer l'administration des restaurants."
                     },
                     {
