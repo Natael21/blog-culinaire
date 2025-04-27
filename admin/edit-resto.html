@@ -2021,7 +2021,11 @@ ${editorContent}`;
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
             
             // Récupérer le contenu de l'éditeur
-            const editorContent = editor.getHTML() || '';
+            try {
+                const editorContent = editor.getHTML() || '';
+            } catch (error) {
+                const editorContent = '';
+            }
             
             // Créer le HTML de l'aperçu
             preview.innerHTML = `
