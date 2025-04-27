@@ -111,6 +111,78 @@ title: Administration - Blog Culinaire
             font-size: 1.2rem;
         }
 
+        .action-button-publish {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-button-publish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+        }
+
+        .action-button-cancel {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-button-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+        }
+
+        .action-button-special {
+            background: linear-gradient(135deg, #e74c3c, #c23424);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-button-special:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #c23323, #a32011);
+            color: white;
+        }
+
         .action-button-new-resto {
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
@@ -721,7 +793,6 @@ title: Administration - Blog Culinaire
 
         // Wizard
         document.getElementById('wizard-trigger').addEventListener('click', function () {
-            console.log("Clique sur le bouton pour démarrer le tutoriel");
             
             var intro = introJs();
 
@@ -730,13 +801,11 @@ title: Administration - Blog Culinaire
 
             // Fonction pour rendre les boutons visibles pendant le tutoriel
             function showButtons() {
-                console.log("Affichage des boutons...");
                 pendingChangesButtons.style.display = 'flex'; // Rend visible l'élément
             }
 
             // Fonction pour cacher les boutons après le tutoriel
             function hideButtons() {
-                console.log("Masquage des boutons...");
                 pendingChangesButtons.style.display = 'none'; // Cache l'élément
             }
 
@@ -761,7 +830,7 @@ title: Administration - Blog Culinaire
                         },
                         {
                             element: document.querySelector('.action-button-restaurants'),
-                            intro: "Ici vous pouvez gérer tous les restaurants existants. En les modifiant ou en les supprimant. Il faut noter qu'après une modification le restaurant n'est plus visible dans la liste des restaurants jusqu'à ce que vous publiez les modifications."
+                            intro: "Ici vous pouvez gérer tous les restaurants existants, en les modifiant ou en les supprimant. Il faut noter qu'après une modification, le restaurant n'est plus visible dans la liste des restaurants jusqu'à ce que vous publiez les modifications."
                         },
                         {
                             element: document.querySelector('.action-button-upcoming'),
@@ -772,15 +841,15 @@ title: Administration - Blog Culinaire
                             intro: "Cette option vous permet de gérer les images en supprimant celles qui ne sont plus utiles et elles seront retirées du site."
                         },
                         {
-                            element: document.querySelector('.action-button publish'),
+                            element: document.querySelector('.action-button-publish'),
                             intro: "Cette option vous permet de publier les modifications et les rendre actives sur le site."
                         },
                         {
-                            element: document.querySelector('.action-button cancel'),
+                            element: document.querySelector('.action-button-cancel'),
                             intro: "Cette option vous permet d'annuler toutes les modifications effectuées."
                         },
                         {
-                            element: document.querySelector('.action-button special'),
+                            element: document.querySelector('.action-button-special'),
                             intro: "Cette option vous permet de voir toutes les modifications en attente de publication."
                         },
                         {
@@ -797,13 +866,11 @@ title: Administration - Blog Culinaire
 
                 // Quand le tutoriel est complet, cacher les boutons
                 intro.oncomplete(function() {
-                    console.log("Le tutoriel est terminé, les boutons vont être cachés");
                     hideButtons(); // Cache les boutons après la fin du tutoriel
                 });
 
                 // Quand le tutoriel est complet, cacher les boutons
                 intro.onexit(function() {
-                    console.log("Le tutoriel est terminé, les boutons vont être cachés");
                     hideButtons(); // Cache les boutons après la fin du tutoriel
                 });
 
@@ -812,7 +879,6 @@ title: Administration - Blog Culinaire
                     showButtons();
                 });
 
-                console.log("Démarrer le tutoriel");
                 intro.start();
             }, 200); // délai de 200ms pour donner un peu de temps au DOM
         });
