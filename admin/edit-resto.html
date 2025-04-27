@@ -2585,6 +2585,7 @@ ${editorContent}`;
                         } else if (block.startsWith('<OL_BLOCK>')) {
                             finalContent += block.replace('<OL_BLOCK>', '').replace('</OL_BLOCK>', '');
                         } else {
+                            // Ici on met dans un <p> sauf si c'est une liste (déjà traitée)
                             finalContent += `<p>${block.replace(/\n/g, '<br>')}</p>`;
                         }
                     });
