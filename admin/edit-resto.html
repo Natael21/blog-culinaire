@@ -2548,9 +2548,6 @@ ${editorContent}`;
                 }
 
                 function markdownToHtml(content) {
-                    // Fusionner les lignes numérotées cassées
-                    content = content.replace(/^(\d+\.)\n(?!\d+\.)/gm, '$1 ');
-
                     // D'abord, traiter les listes groupées
                     content = content
                         // Groupes de puces
@@ -2561,9 +2558,9 @@ ${editorContent}`;
                             return '<ul>' + items + '</ul>';
                         })
                         // Groupes numérotés
-                        .replace(/((?:^\d+\. .*(?:\n|$))+)/gm, match => {
+                        .replace(/((?:^\d+\.\s+.*(?:\n|$))+)/gm, match => {
                             const items = match.trim().split('\n').map(line => {
-                                return '<li>' + line.replace(/^\d+\. /, '') + '</li>';
+                                return '<li>' + line.replace(/^\d+\.\s+/, '') + '</li>';
                             }).join('');
                             return '<ol>' + items + '</ol>';
                         });
@@ -2579,19 +2576,23 @@ ${editorContent}`;
                         .filter(para => para.length > 0);
 
                     let finalContent = '';
+                    let previousWasList = false;
 
                     blocks.forEach(block => {
                         const isList = block.startsWith('<ul>') || block.startsWith('<ol>');
 
                         if (isList) {
                             finalContent += block;
+                            previousWasList = true;
                         } else {
                             finalContent += `<p>${block.replace(/\n/g, '<br>')}</p>`;
+                            previousWasList = false;
                         }
                     });
 
                     return finalContent;
                 }
+
 
 
                 // Convertir le markdown en HTML
