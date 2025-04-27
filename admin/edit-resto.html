@@ -1647,6 +1647,27 @@
         }
 
         function handleMainImageUpload(file) {
+            
+            if (typeof file === 'string') {
+                // Si c'est une URL ou une chaîne base64
+                if (file.startsWith('data:image')) {
+                    imageUrl = file;
+                } else if (file.startsWith('http')) {
+                    imageUrl = file;
+                } else {
+                    imageUrl = `data:image/jpeg;base64,${file}`;
+                }
+                console.log('Image principale chargée depuis URL/base64');
+            } else if (file instanceof File) {
+                // Si c'est un objet File
+                imageUrl = URL.createObjectURL(file);
+                console.log('Image principale chargée depuis File');
+            } else if (file instanceof Blob) {
+                // Si c'est un Blob
+                imageUrl = URL.createObjectURL(file);
+                console.log('Image principale chargée depuis Blob');
+            }
+
             mainImageFile = file;
             const container = document.getElementById('mainImagePreview');
             container.innerHTML = '';
@@ -2451,7 +2472,6 @@ ${editorContent}`;
                             try {
                                 const imageData = mainImage.data.startsWith('data:image') ? mainImage.data : `data:image/jpeg;base64,${mainImage.data}`;
                                 mainImageFile = imageData;
-                                console.log(mainImageFile);
                                 await handleMainImageUpload(imageData);
                             } catch (error) {
                                 console.error('Erreur lors du chargement de l\'image principale:', error);
