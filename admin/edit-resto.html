@@ -1466,8 +1466,8 @@
                         editorInitialized = true;
                         resolve(editor);
                     },
-                    onUpdate: ({ editor }) => {
-                        updateMarkdownPreview();
+                    onUpdate: async ({ editor }) => {
+                        await updateMarkdownPreview();
                     }
                 });
 
@@ -1718,7 +1718,7 @@
                 errorDiv.remove();
             }
 
-            await sleep(500);
+            await sleep(1000);
             
             await updateMarkdownPreview();
         }
@@ -2038,10 +2038,14 @@ ${editorContent}`;
             const originalityComment = document.getElementById('originalityComment').value || '';
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
             
-            await sleep(500);
+            await sleep(1000);
 
             // Récupérer le contenu de l'éditeur
-            const editorContent = editor.getHTML() || '';
+            try {
+                const editorContent = editor.getHTML() || '';
+            } catch (error) {
+                const editorContent = '';
+            }
             
             // Créer le HTML de l'aperçu
             preview.innerHTML = `
@@ -2593,7 +2597,9 @@ ${editorContent}`;
                         updateGalleryPreview();
                         
                         // Mettre à jour l'aperçu markdown
-                        //await updateMarkdownPreview();
+                        await sleep(1000);
+                        
+                        await updateMarkdownPreview();
                     } else {
                         console.error('Aucune image trouvée dans le localStorage');
                     }
