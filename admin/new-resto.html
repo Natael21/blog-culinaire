@@ -1218,15 +1218,11 @@
         // Initialiser TipTap
         let editor;
         window.addEventListener('load', () => {
-            console.log('=== INITIALISATION DE LA PAGE ===');
-            console.log('Étape 1: Début de l\'initialisation');
             
             // Ajouter un gestionnaire d'événements sur le bouton pour le débogage
             const saveButton = document.getElementById('saveButton');
-            console.log('Étape 2: Recherche du bouton de sauvegarde');
-            
+
             if (saveButton) {
-                console.log('Étape 3: Bouton trouvé, ajout du gestionnaire de clic');
                 
                 // Ajouter le spinner au bouton
                 const spinnerDiv = document.createElement('div');
@@ -1239,7 +1235,6 @@
                 saveButton.appendChild(textSpan);
                 
                 saveButton.addEventListener('click', async function(e) {
-                    console.log('Étape 4: Clic sur le bouton détecté');
                     e.preventDefault();
                     
                     // Afficher l'état de chargement
@@ -1247,7 +1242,6 @@
                     
                     const form = document.getElementById('restaurantForm');
                     if (form) {
-                        console.log('Étape 5: Formulaire trouvé, déclenchement de la soumission');
                         form.dispatchEvent(new Event('submit'));
                     }
                     
@@ -1261,22 +1255,15 @@
 
             // Ajouter un gestionnaire d'événements sur le formulaire
             const form = document.getElementById('restaurantForm');
-            console.log('Étape 9: Recherche du formulaire pour le gestionnaire de soumission');
             
             if (form) {
-                console.log('Étape 10: Formulaire trouvé, ajout du gestionnaire de soumission');
                 form.addEventListener('submit', async function(e) {
-                    console.log('Étape 11: Événement de soumission du formulaire déclenché');
                     e.preventDefault();
-                    console.log('Étape 12: Début de la validation');
                     
                     if (!validateForm()) {
-                        console.log('Étape 13: Validation échouée');
                         return;
                     }
                     
-                    console.log('Étape 14: Validation réussie, traitement du formulaire');
-
                     try {
                         // Générer le nom du fichier à partir du titre
                         const title = document.getElementById('title').value;
@@ -1287,7 +1274,8 @@
                             .replace(/-+/g, '-')
                             .replace(/^-|-$/g, '');
                         
-                        const date = new Date().toISOString().split('T')[0];
+                        const formData = new FormData(document.getElementById('restaurantForm'));
+                        const date = new Date(formData.get('date')).toISOString().split('T')[0];
                         const filePath = `${date}-${filename}.md`;
 
                         // Créer un objet pour stocker les données du brouillon
@@ -1664,7 +1652,6 @@
         }
 
         function validateForm() {
-            console.log('=== DÉBUT DE LA VALIDATION DU FORMULAIRE ===');
             let isValid = true;
             let errorFields = [];
 
@@ -1675,12 +1662,7 @@
                 const wrapper = field ? field.closest('.input-wrapper') : null;
                 const errorDiv = wrapper ? wrapper.querySelector('.invalid-feedback') : null;
 
-                console.log(`\nValidation du champ ${fieldName}:`);
-                console.log(`- valeur: ${value}`);
-                console.log(`- requis: ${isRequired}`);
-
                 if (isRequired && !value) {
-                    console.log(`⚠️ Champ ${fieldName} vide - ajout de l'état d'erreur`);
                     if (field) {
                         field.classList.add('is-invalid');
                         field.classList.add('show-error');
@@ -1691,7 +1673,6 @@
                     }
                     isValid = false;
                 } else {
-                    console.log(`✓ Champ ${fieldName} valide`);
                     if (field) {
                         field.classList.remove('is-invalid');
                         field.classList.remove('show-error');
@@ -1711,12 +1692,9 @@
             validateField('price', 'Gamme de prix');
 
             // Valider l'image principale
-            console.log('\n=== VALIDATION DE L\'IMAGE PRINCIPALE ===');
             const mainImageZone = document.getElementById('mainImageZone');
-            console.log('Image principale présente:', !!mainImageFile);
             
             if (!mainImageFile) {
-                console.log('⚠️ Pas d\'image principale - ajout de l\'état d\'erreur');
                 mainImageZone.classList.add('show-error');
                 let errorDiv = mainImageZone.parentNode.querySelector('.invalid-feedback');
                 if (!errorDiv) {
@@ -1729,7 +1707,6 @@
                 errorFields.push(mainImageZone);
                 isValid = false;
             } else {
-                console.log('✓ Image principale présente');
                 mainImageZone.classList.remove('show-error');
                 const existingError = mainImageZone.parentNode.querySelector('.invalid-feedback');
                 if (existingError) {
@@ -1738,16 +1715,12 @@
             }
 
             // Valider l'éditeur
-            console.log('\n=== VALIDATION DE L\'ÉDITEUR ===');
             const editorContent = editor.getHTML();
-            console.log('Contenu HTML de l\'éditeur:', editorContent);
             
             const isEmpty = editorContent.replace(/<[^>]*>/g, '').trim() === '';
-            console.log('L\'éditeur est vide:', isEmpty);
             
             const editorElement = document.querySelector('.ProseMirror');
             if (isEmpty) {
-                console.log('⚠️ L\'éditeur est vide - ajout de l\'état d\'erreur');
                 editorElement.classList.add('editor-invalid');
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'invalid-feedback';
@@ -1756,7 +1729,6 @@
                 errorFields.push(editorElement);
                 isValid = false;
             } else {
-                console.log('✓ L\'éditeur contient du contenu');
                 editorElement.classList.remove('editor-invalid');
                 const existingError = editorElement.parentNode.querySelector('.invalid-feedback');
                 if (existingError) {
@@ -1780,7 +1752,6 @@
 
             // Trouver le premier champ en erreur dans l'ordre du DOM
             if (errorFields.length > 0) {
-                console.log('Recherche du premier champ en erreur dans l\'ordre du DOM');
                 const allElements = document.querySelectorAll('*');
                 let firstErrorInDOM = null;
                 
@@ -1792,12 +1763,10 @@
                 }
 
                 if (firstErrorInDOM) {
-                    console.log('Défilement vers le premier champ en erreur');
                     firstErrorInDOM.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
 
-            console.log(`\n=== FIN DE LA VALIDATION - Résultat: ${isValid ? 'Valide' : 'Invalide'} ===`);
             return isValid;
         }
 
@@ -1832,9 +1801,6 @@
             
             // Mettre à jour le compteur de modifications en attente
             const totalChanges = pendingChanges.length + drafts.length;
-            
-            // Vous pouvez ajouter ici d'autres mises à jour de l'interface si nécessaire
-            console.log(`${totalChanges} modification(s) en attente`);
         }
 
         // Initialiser les boutons au chargement de la page
@@ -2270,13 +2236,9 @@ ${editorContent}`;
                     .replace(/[^a-z0-9]/g, '-')
                     .replace(/-+/g, '-')
                     .replace(/^-|-$/g, '');
-
-                console.log(formData.get('date'));
                 
                 const date = new Date(formData.get('date')).toISOString().split('T')[0];
                 const filePath = `${date}-${filename}.md`;
-
-                console.log(date);
 
                 // Créer l'objet du brouillon avec le contenu initial
                 let markdownContent = generateMarkdown();
