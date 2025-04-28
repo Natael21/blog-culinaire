@@ -2332,6 +2332,38 @@ ${editorContent}`;
             });
         }
 
+        function showFormConfirmationModalReturn() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'form-confirmation-modal';
+                modal.innerHTML = `
+                    <div class="form-confirmation-content">
+                        <h3 class="form-confirmation-title">Annuler les modifications</h3>
+                        <p class="form-confirmation-message">Êtes-vous sûr de vouloir quitter sans enregistrer ? Toutes les modifications non sauvegardées seront perdues.</p>
+                        <div class="form-confirmation-buttons">
+                            <button class="form-confirmation-button confirm">Oui, annuler</button>
+                            <button class="form-confirmation-button cancel">Non, continuer</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                const confirmButton = modal.querySelector('.form-confirmation-button.confirm');
+                const cancelButton = modal.querySelector('.form-confirmation-button.cancel');
+
+                confirmButton.onclick = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+
+                cancelButton.onclick = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
         // Modifier la fonction d'annulation existante
         async function cancelForm() {
             // Afficher le modal de confirmation
@@ -2344,6 +2376,21 @@ ${editorContent}`;
                 
                 // Rediriger vers la page d'administration
                 window.location.href = 'restaurants.html';
+            }
+        }
+
+        // Modifier la fonction d'annulation existante
+        async function cancelFormReturn() {
+            // Afficher le modal de confirmation
+            const confirmed = await showFormConfirmationModalReturn();
+            
+            if (confirmed) {
+                // Vider le localStorage
+                localStorage.removeItem('currentDraft');
+                localStorage.removeItem('pendingChanges');
+                
+                // Rediriger vers la page d'administration
+                window.location.href = 'index.html';
             }
         }
 
@@ -2850,7 +2897,7 @@ ${editorContent}`;
 <body>
     <header class="admin-header">
         <h1 class="admin-title">Modifier un restaurant</h1>
-        <a href="restaurants.html" class="action-button">
+        <a class="action-button" onclick="cancelFormReturn()">
             <i class="fas fa-arrow-left"></i> Retour au gestionnaire de restaurants
         </a>
     </header>
