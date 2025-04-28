@@ -1438,12 +1438,6 @@
 
             // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
-
-            updateMarkdownPreview();
-
-            updateMarkdownPreview();
-
-            updateMarkdownPreview();
         });
 
         // Variable pour stocker l'éditeur
@@ -1516,6 +1510,8 @@
                     button.classList.toggle('is-active', editor.isActive(command));
                 });
             });
+
+            updateMarkdownPreview();
         }
 
         async function searchAddress(query) {
