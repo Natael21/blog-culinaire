@@ -1281,7 +1281,7 @@
                         console.log(document.getElementById('date').value)
                         
                         const date = new Date(document.getElementById('date').value).toISOString().split('T')[0];
-                        const filePath = `${date}-${filename}.md`;
+                        const filePath = `${date}-${filename}.markdown`;
 
                         // Créer un objet pour stocker les données du restaurant
                         const draftData = {
