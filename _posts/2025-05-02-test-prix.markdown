@@ -1,0 +1,45 @@
+---
+layout: restaurant
+title: "test prix"
+date: 2025-05-02
+state: draft
+note: 5.0
+style: "Italien"
+diet: "vegan-friendly"
+description: "saads"
+price: "medium"
+address: "鮫洲大山線, Shinagawa, 142-0041, Japan"
+image: "/images/Baladi Nicolas.jpg"
+images:
+  - image: "/images/Baladi nourriture Nicolas.jpg"
+
+ratings:
+  food:
+    score: 5
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "mkmk"
+  service:
+    score: 5
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: "kmmkl"
+  ambiance:
+    score: 5
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: "mklkm"
+  value:
+    score: 5
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: "mklklm"
+  originality:
+    score: 5
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "kmlkml"
+  overall:
+    score: 5
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: "kmlkml"
+---
+
+
+
+mklkml
