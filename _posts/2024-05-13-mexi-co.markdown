@@ -1,6 +1,6 @@
 ---
 layout: restaurant
-title: 'Mexi & co'
+title: 'Mexi et co'
 date: 2024-05-13
 state: ready
 note: 8.2
