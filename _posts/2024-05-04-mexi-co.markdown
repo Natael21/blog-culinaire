@@ -9,7 +9,7 @@ diet: 'vegetarian-friendly'
 description: 'test'
 price: '$$ (20-40$)'
 address: '1700 Rue King Ouest, Sherbrooke, QC J1J 2C9'
-image: '/images/Caffucino.jpg'
+image: '/images/Mexi&co.png'
 images:
   - image: "/images/Caffucino_Nicolas.jpg"
   - image: "/images/Caffucino_Nataël.jpg"
