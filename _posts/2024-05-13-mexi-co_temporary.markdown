@@ -6,7 +6,7 @@ state: draft
 note: 8.2
 style: 'Mexicain & Latino'
 diet: 'vegetarian-friendly'
-description: 'L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !'
+description: "L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !"
 price: '$$ (20-40$)'
 address: '297, Rue King Ouest, Sherbrooke, Quebec, J1H 1P8, Canada'
 image: '/images/Mexi&co.png'
