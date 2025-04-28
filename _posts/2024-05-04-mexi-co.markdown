@@ -6,7 +6,7 @@ state: ready
 note: 7.0
 style: "Mexicain & Latino"
 diet: 'vegetarian-friendly'
-description: 'C'est un beau restaurant !'
+description: "C'est un beau restaurant !"
 price: '$$ (20-40$)'
 address: '1700 Rue King Ouest, Sherbrooke, QC J1J 2C9'
 image: '/images/Mexi&co.png'
