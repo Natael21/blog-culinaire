@@ -1919,7 +1919,17 @@
             const description = document.getElementById('description').value;
             const address = document.getElementById('address').value;
             const style = document.getElementById('style').value;
-            const price = document.getElementById('price').value;
+
+            // Corriger la gamme de prix
+            const priceMap = {
+                '$ (0-20$)': 'budget',
+                '$$ (20-40$)': 'medium',
+                '$$$ (40$ et +)': 'expensive'
+            };
+            const price = priceMap[restaurantData.price] || restaurantData.price;
+            document.getElementById('price').value = priceValue;
+
+            //const price = document.getElementById('price').value;
             
             const dietOptions = [];
             if (document.getElementById('vegetarian').checked) {
@@ -2762,9 +2772,9 @@ ${editorContent}`;
                 
                 // Corriger la gamme de prix
                 const priceMap = {
-                    '$ (0-20$)': 'budget',
-                    '$$ (20-40$)': 'medium',
-                    '$$$ (40$ et +)': 'expensive'
+                    'budget': '$ (0-20$)',
+                    'moyen': '$$ (20-40$)',
+                    'haut': '$$$ (40$ et +)'
                 };
                 const priceValue = priceMap[restaurantData.price] || restaurantData.price;
                 document.getElementById('price').value = priceValue;

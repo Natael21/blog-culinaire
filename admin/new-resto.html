@@ -1828,7 +1828,17 @@
             const description = document.getElementById('description').value;
             const address = document.getElementById('address').value;
             const style = document.getElementById('style').value;
-            const price = document.getElementById('price').value;
+
+            // Corriger la gamme de prix
+            const priceMap = {
+                '$ (0-20$)': 'budget',
+                '$$ (20-40$)': 'medium',
+                '$$$ (40$ et +)': 'expensive'
+            };
+            const price = priceMap[restaurantData.price] || restaurantData.price;
+            document.getElementById('price').value = priceValue;
+
+            //const price = document.getElementById('price').value;
             
             const dietOptions = [];
             if (document.getElementById('vegetarian').checked) {
@@ -2490,9 +2500,9 @@ ${editorContent}`;
                         <div class="input-wrapper">
                             <select class="form-control" id="price" name="price" required>
                                 <option value="">Sélectionner une gamme de prix</option>
-                                <option value="budget">$ (0-20$)</option>
-                                <option value="medium">$$ (20-40$)</option>
-                                <option value="expensive">$$$ (40$ et +)</option>
+                                <option value="$ (0-20$)">$ (0-20$)</option>
+                                <option value="$$ (20-40$)">$$ (20-40$)</option>
+                                <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
                             </select>
                             <div class="invalid-feedback">Veuillez sélectionner une gamme de prix</div>
                         </div>
