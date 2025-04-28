@@ -2046,13 +2046,8 @@ ${editorContent}`;
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
             
             await sleep(500);
-
-            try {
-                const date = new Date(document.getElementById('date').value).toISOString().split('T')[0];
-            } catch (error) {
-                console.error('Erreur lors de la conversion de la date:', error);
-                const date = new Date().toISOString().split('T')[0];
-            }
+            
+            const date = new Date(document.getElementById('date').value).toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
 
             // Récupérer le contenu de l'éditeur
             const editorContent = editor.getHTML() || '';
