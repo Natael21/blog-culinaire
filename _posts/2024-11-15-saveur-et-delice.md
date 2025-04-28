@@ -7,7 +7,7 @@ note: 7.3
 style: 'Asiatique'
 diet: 'vegetarian-friendly'
 description: 'Fusion asiatique-québécoise avec ambiance musicale douce et prix abordables.'
-price: '$ (0-20$)'
+price: 'budget'
 address: '70 Rue Wellington Nord, Sherbrooke, QC J1H 5B9'
 image: '/images/Saveur et délice.jpg'
 images:
