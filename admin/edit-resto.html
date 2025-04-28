@@ -2907,9 +2907,6 @@ ${editorContent}`;
                 // Mettre à jour le nom du fichier
                 document.getElementById('filename').value = filename;
 
-                // Mettre à jour l'aperçu
-                await sleep(5000);
-
                 await updateMarkdownPreview();
             } 
             catch (error){
@@ -2925,6 +2922,13 @@ ${editorContent}`;
                 window.location.href = 'restaurants.html';
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function() {            
+            setTimeout(function() {
+                updateMarkdownPreview();
+            }, 5000); // 5000 millisecondes = 5 secondes
+        });
+
     </script>
 </head>
 <body>
