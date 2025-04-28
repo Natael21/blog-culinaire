@@ -2345,152 +2345,152 @@ ${editorContent}`;
         }
 
         // Fonction pour sauvegarder le restaurant
-        async function saveDraft() {
-            try {
-                const formData = new FormData(document.getElementById('restaurantForm'));
-                const title = formData.get('title');
-                
-                // Générer le nom du fichier à partir du titre
-                const filename = title.toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .replace(/[^a-z0-9]/g, '-')
-                    .replace(/-+/g, '-')
-                    .replace(/^-|-$/g, '');
-                
-                const date = new Date(formData.get('date')).toISOString().split('T')[0];
-                const filePath = `${date}-${filename}.md`;
-
-                // Créer l'objet du restaurant avec le contenu initial
-                let markdownContent = generateMarkdown();
-                const draftData = {
-                    filename: filePath,
-                    title: title,
-                    content: markdownContent,
-                    images: [],
-                    lastModified: new Date().toISOString()
-                };
-
-                function extractImageNames(markdown) {
-                    const mainImageMatch = markdown.match(/image:\s*['"]?\/images\/([^'"\n]+)/);
-                    const galleryImageMatches = [...markdown.matchAll(/- image:\s*['"]\/images\/([^'"\n]+)/g)];
-
-                    const mainImage = mainImageMatch ? mainImageMatch[1] : null;
-                    const galleryImages = galleryImageMatches.map(match => match[1]);
-
-                    return {
-                        mainImage,
-                        galleryImages
-                    };
-                }
-
-                // Fonction pour vérifier si une image est en base64 ou en URL
-                const isBase64 = (str) => {
-                    return /^data:image\/[a-zA-Z]+;base64,/.test(str);
-                };
-
-                const drafts2 = JSON.parse(localStorage.getItem('drafts') || '[]');
-                const localDraft2 = drafts2.find(d => d.filename === filename);
-
-                //const { mainImage, galleryImages } = extractImageNames(markdownContent);
-
-                // Traiter l'image principale
-                if (mainImageFile) {
-                    if (isBase64(mainImageFile)) {
-                        draftData.images.push({
-                            name: localDraft2.images[0].name,
-                            data: mainImageFile,  // Ajouter directement la chaîne Base64
-                            isMain: true
-                        });
-                    } else if (mainImageFile instanceof File) {
-                        // Convertir l'image en base64 si c'est un fichier
-                        const mainImageBase64 = await fileToBase64(mainImageFile);
-                        draftData.images.push({
-                            name: mainImageFile.name,
-                            data: mainImageBase64,
-                            isMain: true
-                        });
-                    } else {
-                        // Si c'est une URL, l'ajouter directement
-                        const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
-                        draftData.images.push({
-                            name: mainImageFile.name,
-                            data: mainImageSrc,
-                            isMain: true
-                        });
-                    }
-                }
-
-                // Traiter les images de la galerie
-                for (let i = 0; i < galleryImageFiles.length; i++) {
-                    const file = galleryImageFiles[i];
-
-                    if (isBase64(file)) {
-                        draftData.images.push({
-                            name: localDraft2.images[i+1].name,
-                            data: file,  // Ajouter directement la chaîne Base64
-                            isMain: false
-                        });
-                    } else if (file instanceof File) {
-                        // Convertir l'image en base64 si c'est un fichier
-                        const galleryBase64 = await fileToBase64(file);
-                        draftData.images.push({
-                            name: file.name,
-                            data: galleryBase64,
-                            isMain: false
-                        });
-                    } else {
-                        // Si c'est une URL, l'ajouter directement
-                        const galleryImageSrc = document.getElementById(`galleryImage${i}`).src;  // Si l'image a un attribut src
-                        draftData.images.push({
-                            name: file.name,
-                            data: galleryImageSrc,
-                            isMain: false
-                        });
-                    }
-                }
-
-                // Récupérer les restaurants existants
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                
-                // Vérifier si un restaurant avec le même nom existe déjà
-                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
-                
-                if (existingIndex !== -1) {
-                    // Mettre à jour le restaurant existant
-                    drafts[existingIndex] = draftData;
-                } else {
-                    // Ajouter un nouveau restaurant
-                    drafts.push(draftData);
-                }
-
-                try {
-                    // Sauvegarder dans localStorage
-                    localStorage.setItem('drafts', JSON.stringify(drafts));
-                    showNotification('Restaurant enregistré avec succès', 'success');
-                    
-                    // Mettre à jour l'interface
-                    updatePendingChangesButtons();
-                    
-                    setTimeout(() => {
-                        window.location.href = 'restaurants.html';
-                    }, 1500);
-                } catch (storageError) {
-                    if (storageError.name === 'QuotaExceededError') {
-                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des restaurants existants.', 'error');
-                        return;
-                    } else {
-                        showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
-                        return;
-                    }
-                    console.error('Erreur de stockage:', storageError);
-                }
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
-            }
-        }
+        //async function saveDraft() {
+        //    try {
+        //        const formData = new FormData(document.getElementById('restaurantForm'));
+        //        const title = formData.get('title');
+        //        
+        //        // Générer le nom du fichier à partir du titre
+        //        const filename = title.toLowerCase()
+        //            .normalize('NFD')
+        //            .replace(/[\u0300-\u036f]/g, '')
+        //            .replace(/[^a-z0-9]/g, '-')
+        //            .replace(/-+/g, '-')
+        //            .replace(/^-|-$/g, '');
+        //        
+        //        const date = new Date(formData.get('date')).toISOString().split('T')[0];
+        //        const filePath = `${date}-${filename}.md`;
+//
+        //        // Créer l'objet du restaurant avec le contenu initial
+        //        let markdownContent = generateMarkdown();
+        //        const draftData = {
+        //            filename: filePath,
+        //            title: title,
+        //            content: markdownContent,
+        //            images: [],
+        //            lastModified: new Date().toISOString()
+        //        };
+//
+        //        function extractImageNames(markdown) {
+        //            const mainImageMatch = markdown.match(/image:\s*['"]?\/images\/([^'"\n]+)/);
+        //            const galleryImageMatches = [...markdown.matchAll(/- image:\s*['"]\/images\/([^'"\n]+)/g)];
+//
+        //            const mainImage = mainImageMatch ? mainImageMatch[1] : null;
+        //            const galleryImages = galleryImageMatches.map(match => match[1]);
+//
+        //            return {
+        //                mainImage,
+        //                galleryImages
+        //            };
+        //        }
+//
+        //        // Fonction pour vérifier si une image est en base64 ou en URL
+        //        const isBase64 = (str) => {
+        //            return /^data:image\/[a-zA-Z]+;base64,/.test(str);
+        //        };
+//
+        //        const drafts2 = JSON.parse(localStorage.getItem('drafts') || '[]');
+        //        const localDraft2 = drafts2.find(d => d.filename === filename);
+//
+        //        //const { mainImage, galleryImages } = extractImageNames(markdownContent);
+//
+        //        // Traiter l'image principale
+        //        if (mainImageFile) {
+        //            if (isBase64(mainImageFile)) {
+        //                draftData.images.push({
+        //                    name: localDraft2.images[0].name,
+        //                    data: mainImageFile,  // Ajouter directement la chaîne Base64
+        //                    isMain: true
+        //                });
+        //            } else if (mainImageFile instanceof File) {
+        //                // Convertir l'image en base64 si c'est un fichier
+        //                const mainImageBase64 = await fileToBase64(mainImageFile);
+        //                draftData.images.push({
+        //                    name: mainImageFile.name,
+        //                    data: mainImageBase64,
+        //                    isMain: true
+        //                });
+        //            } else {
+        //                // Si c'est une URL, l'ajouter directement
+        //                const mainImageSrc = document.getElementById('mainImage').src;  // Si l'image a un attribut src
+        //                draftData.images.push({
+        //                    name: mainImageFile.name,
+        //                    data: mainImageSrc,
+        //                    isMain: true
+        //                });
+        //            }
+        //        }
+//
+        //        // Traiter les images de la galerie
+        //        for (let i = 0; i < galleryImageFiles.length; i++) {
+        //            const file = galleryImageFiles[i];
+//
+        //            if (isBase64(file)) {
+        //                draftData.images.push({
+        //                    name: localDraft2.images[i+1].name,
+        //                    data: file,  // Ajouter directement la chaîne Base64
+        //                    isMain: false
+        //                });
+        //            } else if (file instanceof File) {
+        //                // Convertir l'image en base64 si c'est un fichier
+        //                const galleryBase64 = await fileToBase64(file);
+        //                draftData.images.push({
+        //                    name: file.name,
+        //                    data: galleryBase64,
+        //                    isMain: false
+        //                });
+        //            } else {
+        //                // Si c'est une URL, l'ajouter directement
+        //                const galleryImageSrc = document.getElementById(`galleryImage${i}`).src;  // Si l'image a un attribut src
+        //                draftData.images.push({
+        //                    name: file.name,
+        //                    data: galleryImageSrc,
+        //                    isMain: false
+        //                });
+        //            }
+        //        }
+//
+        //        // Récupérer les restaurants existants
+        //        const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+        //        
+        //        // Vérifier si un restaurant avec le même nom existe déjà
+        //        const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+        //        
+        //        if (existingIndex !== -1) {
+        //            // Mettre à jour le restaurant existant
+        //            drafts[existingIndex] = draftData;
+        //        } else {
+        //            // Ajouter un nouveau restaurant
+        //            drafts.push(draftData);
+        //        }
+//
+        //        try {
+        //            // Sauvegarder dans localStorage
+        //            localStorage.setItem('drafts', JSON.stringify(drafts));
+        //            showNotification('Restaurant enregistré avec succès', 'success');
+        //            
+        //            // Mettre à jour l'interface
+        //            updatePendingChangesButtons();
+        //            
+        //            setTimeout(() => {
+        //                window.location.href = 'restaurants.html';
+        //            }, 1500);
+        //        } catch (storageError) {
+        //            if (storageError.name === 'QuotaExceededError') {
+        //                showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des restaurants existants.', 'error');
+        //                return;
+        //            } else {
+        //                showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
+        //                return;
+        //            }
+        //            console.error('Erreur de stockage:', storageError);
+        //        }
+//
+        //    } catch (error) {
+        //        console.error('Erreur:', error);
+        //        showNotification('Erreur lors de la sauvegarde du restaurant', 'error');
+        //    }
+        //}
 
 
         // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
@@ -2507,7 +2507,7 @@ ${editorContent}`;
                     if (!validateForm()) {
                         return;
                     }
-                    await saveDraft();
+                    //await saveDraft();
                 });
             } else {
                 console.error('Formulaire non trouvé');
