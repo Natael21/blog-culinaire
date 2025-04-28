@@ -2899,17 +2899,13 @@ ${editorContent}`;
                 document.getElementById('filename').value = filename;
 
                 // Mettre à jour l'aperçu
-                await sleep(1000);
-
-                await updateMarkdownPreview();
-
-                // Mettre à jour l'aperçu
-                await sleep(1500);
+                await sleep(5000);
 
                 await updateMarkdownPreview();
             } 
             catch (error){
                 console.error('Erreur lors du chargement du restaurant:', error);
+                await updateMarkdownPreview();
             }
         }
 
