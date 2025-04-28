@@ -1904,6 +1904,14 @@
             updatePendingChangesButtons();
         });
 
+        function escapeForYAML(str) {
+            return str
+                .replace(/\\/g, '\\\\')    // échappe les backslashes
+                .replace(/"/g, '\\"')       // échappe les guillemets doubles
+                .replace(/\n/g, '\\n')      // échappe les retours à la ligne
+                .replace(/\r/g, '');        // enlève les retours chariots (Windows)
+        }
+
         function generateMarkdown() {
             const state = document.getElementById('state').value;
             const title = document.getElementById('title').value;
@@ -1960,16 +1968,16 @@
 
             return `---
 layout: restaurant
-title: '${title}'
+title: "${title}"
 date: ${date}
 state: ${state}
 note: ${overallRating}
-style: '${style}'
-diet: '${diet}'
-description: '${description}'
-price: '${price}'
-address: '${address}'
-image: '${mainImagePath}'
+style: "${style}"
+diet: "${diet}"
+description: "${escapeForYAML(description)}"
+price: "${price}"
+address: "${address}"
+image: "${mainImagePath}"
 images:
 ${galleryPaths.join('\n')}
 
@@ -1977,27 +1985,27 @@ ratings:
   food:
     score: ${ratings.food.score}
     criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: '${ratings.food.comment}'
+    comment: "${escapeForYAML(ratings.food.comment)}"
   service:
     score: ${ratings.service.score}
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: '${ratings.service.comment}'
+    comment: "${escapeForYAML(ratings.service.comment)}"
   ambiance:
     score: ${ratings.ambiance.score}
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: '${ratings.ambiance.comment}'
+    comment: "${escapeForYAML(ratings.ambiance.comment)}"
   value:
     score: ${ratings.value.score}
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
-    comment: '${ratings.value.comment}'
+    comment: "${escapeForYAML(ratings.value.comment)}"
   originality:
     score: ${ratings.originality.score}
     criteria: 'Innovation, créativité, authenticité'
-    comment: '${ratings.originality.comment}'
+    comment: "${escapeForYAML(ratings.originality.comment)}"
   overall:
     score: ${ratings.overallExperience.score}
     criteria: 'Expérience globale, facteur "wow"'
-    comment: '${ratings.overallExperience.comment}'
+    comment: "${escapeForYAML(ratings.overallExperience.comment)}"
 ---
 
 ${editorContent}`;
