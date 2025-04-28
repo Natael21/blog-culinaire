@@ -588,6 +588,12 @@
                 });
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des restaurants');
+                    if (!sessionStorage.getItem('hasRefreshed')) {
+                    sessionStorage.setItem('hasRefreshed', 'true');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                }
                 }
                 const githubData = await response.json();
                 
