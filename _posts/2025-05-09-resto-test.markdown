@@ -1,7 +1,7 @@
 ---
 layout: restaurant
 title: 'resto test'
-date: 2025-04-28
+date: 2025-05-09
 state: draft
 note: 5.0
 style: 'Moyen-Orient'
