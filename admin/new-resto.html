@@ -1275,7 +1275,7 @@
                             .replace(/-+/g, '-')
                             .replace(/^-|-$/g, '');
                         
-                        const formData = new FormData(document.getElementById('restaurantForm'));
+                        console.log(document.getElementById('date').value)
                         const date = new Date(document.getElementById('date').value).toISOString().split('T')[0];
                         const filePath = `${date}-${filename}.markdown`;
 
@@ -1316,13 +1316,13 @@
                             drafts[existingIndex] = {
                                 ...drafts[existingIndex],
                                 ...draftData,
-                                lastModified: new Date().toISOString()
+                                lastModified: new Date(document.getElementById('date').value).toISOString()
                             };
                         } else {
                             // Ajouter un nouveau brouillon
                             drafts.push({
                                 ...draftData,
-                                lastModified: new Date().toISOString()
+                                lastModified: new Date(document.getElementById('date').value).toISOString()
                             });
                         }
 
@@ -1870,7 +1870,7 @@
             return `---
 layout: restaurant
 title: '${title}'
-date: ${today}
+date: ${date}
 state: draft
 note: ${overallRating}
 style: '${style}'
