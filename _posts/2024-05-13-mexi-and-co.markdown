@@ -1,17 +1,16 @@
 ---
 layout: restaurant
-title: "Mexi & Co"
+title: 'Mexi & Co'
 date: 2024-05-13
 state: ready
-note: 7.8
-style: "Mexicain & Latino"
-diet: "vegetarian-friendly"
-description: "L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !"
-price: "medium"
-address: "297 Rue King Ouest, Sherbrooke, QC J1H 1R2"
-image: "/images/Mexi&co.png"
+note: 8.2
+style: 'Mexicain & Latino'
+diet: 'vegetarian-friendly'
+description: 'L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !'
+price: '$$ (20-40$)'
+address: '297 Rue King Ouest, Sherbrooke, QC J1H 1R2'
+image: '/images/Mexi&co.png'
 images:
-  - image: "/images/Mexi&co.png"
   - image: "/images/Mexi&Co_tacos.jpg"
   - image: "/images/Mexi&Co_tacos_1.jpg"
   - image: "/images/Mexi&Co_mousse_lime.jpg"
@@ -22,34 +21,39 @@ images:
   - image: "/images/Mexi&Co Nataël_2.jpg"
   - image: "/images/Mexi&co Nicolas.jpg"
   - image: "/images/Mexi&Co Nataël_3.jpg"
+
 ratings:
   food:
     score: 8
-    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
-    comment: "Les nachos sont préparés à la main avec des légumes frais, et les tacos sont délicieux. La présentation est attrayante et les saveurs sont authentiques. Quelques plats manquent parfois de piquant."
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: 'Les nachos sont préparés à la main avec des légumes frais, et les tacos sont délicieux. La présentation est attrayante et les saveurs sont authentiques. Quelques plats manquent parfois de piquant.'
   service:
-    score: 7
-    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
-    comment: "Équipe dynamique mais parfois débordée en période d'affluence. Service attentionné mais peut être lent."
+    score: 9
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: 'Équipe dynamique et chaleureuse.'
   ambiance:
     score: 8
-    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
-    comment: "Ambiance festive avec une belle terrasse en arrière. L'établissement est bien entretenu mais peut être bruyant."
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: 'Ambiance festive avec une belle terrasse en arrière. '
   value:
     score: 8
-    comment: "Bon rapport qualité/prix, particulièrement avec les promotions étudiantes. Prix réguliers un peu élevés."
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: 'Bon rapport qualité/prix, particulièrement avec les promotions étudiantes. Prix réguliers un peu élevés.'
   originality:
-    score: 7
-    comment: "Concept de personnalisation des nachos intéressant mais menu parfois répétitif. Promotions créatives."
+    score: 8
+    criteria: 'Innovation, créativité, authenticité'
+    comment: 'Concept de personnalisation des nachos intéressant mais menu parfois répétitif. Mais avec des promotions créatives.'
   overall:
     score: 8
-    criteria: "Facteur \"wow\""
-    comment: "Une expérience culinaire agréable qui combine authenticité et convivialité, avec quelques points à améliorer."
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: 'Une expérience culinaire agréable qui combine authenticité et convivialité.'
 ---
+
+
 
 Nous avons eu la chance d'essayer ce nouveau petit restaurant au centre-ville de Sherbrooke l'été passé (2023), servant l'un des meilleurs Nachos en ville !
 
-Depuis notre première visite, c'est notre meilleure tournée; toutes les papilles gustatives se mettent en marche; toutes les saveurs sont au rendez-vous. C'est un restaurant à ne pas manquer, surtout pour les étudiants, car tout ce que vous mangez chez Mexi & Co. est à 25 % de rabais les lundis (apporter votre carte étudiante comme preuve d'identité). De plus, vous avez l'opportunité de non seulement siroter la boisson mexicaine de votre choix, mais aussi de caler un shooter de tequila en échange de « taguer » et publier sur Facebook votre photo-souvenir du bar à nachos. 
+Depuis notre première visite, c'est notre meilleure tournée; toutes les papilles gustatives se mettent en marche; toutes les saveurs sont au rendez-vous. C'est un restaurant à ne pas manquer, surtout pour les étudiants, car tout ce que vous mangez chez Mexi &amp; Co. est à 25 % de rabais les lundis (apporter votre carte étudiante comme preuve d'identité). De plus, vous avez l'opportunité de non seulement siroter la boisson mexicaine de votre choix, mais aussi de caler un shooter de tequila en échange de « taguer » et publier sur Facebook votre photo-souvenir du bar à nachos.
 
 De plus, nous avons la chance de côtoyer une équipe dynamique et qui cuisine votre repas sans répit ; il n'y a pas de préparation congelée pour les nachos, uniquement faits à la main et avec des légume très frais. Nous pouvons les remercier grandement pour transmettre leur passion ainsi que leur « vibe » épicée qui renchérit notre expérience culinaire. De plus, l'arrivée des tacos délicieux vous plongera dans un monde mexicain sans précédent !
 
@@ -57,4 +61,4 @@ Par ailleurs, ce resto s'adresse à une vaste clientèle. D'emblée, ça peut ê
 
 D'ailleurs, ne négligez pas les formats ; nous avons mangé des nachos de format « partager ensemble » et nous étions pleins à rebord ! Donc, parmi les formats suivants : petit, régulier et à partager, ceux qui ont une petite fringale, nous vous conseillons le plus petit format.
 
-Durant votre visite, vous choisissez les légumes, la salsa, le fromage ainsi que la saveur des croustilles, puis vous inscrivez le tout sur le carnet qui sera à votre disposition. Vous avez la possibilité de goûter aux churros et aux autres surprises… Avant votre départ, vous pouvez démontrez votre satisfaction en dessinant un chef-d'œuvre sur votre table avec l'aide de votre imagination spontanée (en date de 2023). Buen provecho ! 🙂 
+Durant votre visite, vous choisissez les légumes, la salsa, le fromage ainsi que la saveur des croustilles, puis vous inscrivez le tout sur le carnet qui sera à votre disposition. Vous avez la possibilité de goûter aux churros et aux autres surprises… Avant votre départ, vous pouvez démontrez votre satisfaction en dessinant un chef-d'œuvre sur votre table avec l'aide de votre imagination spontanée (en date de 2023). Buen provecho ! 🙂
