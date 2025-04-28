@@ -2,7 +2,7 @@
 layout: restaurant
 title: 'Le Dauphin'
 date: 2023-08-29
-state: ready
+state: draft
 note: 7.5
 style: 'Bistro & Café'
 diet: 'none'

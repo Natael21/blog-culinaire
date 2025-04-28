@@ -6,10 +6,10 @@ state: ready
 note: 7.0
 style: 'Bistro & Café'
 diet: 'vegetarian-friendly'
-description: 'Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !'
+description: 'test'
 price: '$$ (20-40$)'
 address: '1700 Rue King Ouest, Sherbrooke, QC J1J 2C9'
-image: '/images/Caffucino.jpg'
+image: '/images/Mexi&co.png'
 images:
   - image: "/images/Caffucino_Nicolas.jpg"
   - image: "/images/Caffucino_Nataël.jpg"
