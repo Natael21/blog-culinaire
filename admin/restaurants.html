@@ -632,6 +632,8 @@
                         const contentMatch = localItem.content.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
                         const detailedContent = contentMatch ? contentMatch[1].trim() : '';
                         
+                        console.log(localItem.filename)
+
                         // Assurer que les champs requis existent
                         const restaurantData = {
                             // Champs de base
@@ -786,7 +788,7 @@
                 // Si vient du localStorage, chercher l'image principale dans le tableau images
                 if (restaurant.isFromLocalStorage) {
 
-                    return; //TODO: Supprimer
+                    return;
                     
                     if (Array.isArray(restaurant.images) && restaurant.images.length > 0) {
                         const firstImage = restaurant.images[0];

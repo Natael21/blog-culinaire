@@ -1477,8 +1477,8 @@
                         editorInitialized = true;
                         resolve(editor);
                     },
-                    onUpdate: ({ editor }) => {
-                        updateMarkdownPreview();
+                    onUpdate: async ({ editor }) => {
+                        await updateMarkdownPreview();
                     }
                 });
 
@@ -1610,7 +1610,7 @@
             container.style.display = 'block';
         }
 
-        function selectAddress(suggestion, input, container) {
+        async function selectAddress(suggestion, input, container) {
             let formattedAddress = '';
             
             if (suggestion.address) {
@@ -1651,7 +1651,7 @@
             selectedIndex = -1;
             input.classList.add('is-valid');
             input.classList.remove('is-invalid');
-            updateMarkdownPreview();
+            await updateMarkdownPreview();
         }
 
         function initializeDropZones() {
@@ -1697,7 +1697,7 @@
             });
         }
 
-        function handleMainImageUpload(file) {
+        async function handleMainImageUpload(file) {
 
             if (typeof file === 'string') {
                 // Si c'est une URL ou une chaîne base64
@@ -1729,17 +1729,17 @@
                 errorDiv.remove();
             }
             
-            updateMarkdownPreview();
+            await updateMarkdownPreview();
         }
 
-        function handleGalleryUpload(files) {
+        async function handleGalleryUpload(files) {
             Array.from(files).forEach(file => {
                 if (file.type.startsWith('image/')) {
                     galleryImageFiles.push(file);
                 }
             });
             updateGalleryPreview();
-            updateMarkdownPreview();
+            await updateMarkdownPreview();
         }
 
         function validateForm() {
@@ -2191,11 +2191,11 @@ ${editorContent}`;
             `;
         }
 
-        function createImagePreview(file, container, isMainImage = false) {
+        async function createImagePreview(file, container, isMainImage = false) {
             const div = document.createElement('div');
             div.className = 'image-preview-container';
 
-            const deleteButtonHandler = function() {
+            const deleteButtonHandler = async function() {
                 div.remove();
                 if (isMainImage) {
                     mainImageFile = null;
@@ -2205,7 +2205,7 @@ ${editorContent}`;
                         galleryImageFiles.splice(index, 1);
                     }
                 }
-                updateMarkdownPreview();
+                await updateMarkdownPreview();
             };
 
             if (file instanceof Blob || file instanceof File) {

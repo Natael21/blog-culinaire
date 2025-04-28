@@ -1130,6 +1130,7 @@ title: Administration - Blog Culinaire
                     let draftCount = 0;
                     
                     postsData.forEach(post => {
+                        console.log(post.data.filename)
                         if (post.data && post.data.state === 'draft') {
                             draftCount++;
                         } else if (post.data && post.data.state === 'ready') {
