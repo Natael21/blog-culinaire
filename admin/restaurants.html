@@ -1152,14 +1152,13 @@
             }
         }
 
-        // Fonction pour afficher une notification
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.textContent = message;
             notification.style.position = 'fixed';
             notification.style.top = '10px';
-            notification.style.right = '50%';
+            notification.style.left = '50%'; // <-- correction ici
             notification.style.transform = 'translateX(-50%)';
             notification.style.padding = '15px 25px';
             notification.style.borderRadius = 'var(--border-radius)';
@@ -1168,12 +1167,26 @@
             notification.style.boxShadow = 'var(--box-shadow)';
             notification.style.zIndex = '1000';
             notification.style.animation = 'slideInTop 0.3s ease-out';
+            
+            // Ajout du background selon le type
+            if (type === 'success') {
+                notification.style.backgroundColor = '#4CAF50'; // vert
+            } else if (type === 'error') {
+                notification.style.backgroundColor = '#F44336'; // rouge
+            } else if (type === 'warning') {
+                notification.style.backgroundColor = '#FFC107'; // jaune
+                notification.style.color = '#000'; // pour que ce soit lisible sur fond jaune
+            } else {
+                notification.style.backgroundColor = '#2196F3'; // bleu par défaut (info)
+            }
+
             document.body.appendChild(notification);
 
             setTimeout(() => {
                 notification.remove();
             }, 3000);
         }
+
     </script>
 </body>
 </html>
