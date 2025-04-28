@@ -1438,6 +1438,12 @@
 
             // Initialiser l'aperçu markdown au chargement
             updateMarkdownPreview();
+
+            updateMarkdownPreview();
+
+            updateMarkdownPreview();
+
+            updateMarkdownPreview();
         });
 
         // Variable pour stocker l'éditeur
@@ -2021,180 +2027,174 @@ ${editorContent}`;
         }
 
         async function updateMarkdownPreview() {
-            try {
-                const preview = document.querySelector('.restaurant-preview');
-                const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
-                // Récupérer les valeurs du formulaire
-                const title = document.getElementById('title').value || 'Nom du restaurant';
-                const description = document.getElementById('description').value || 'Description du restaurant';
-                const address = document.getElementById('address').value || 'Adresse du restaurant';
-                const style = document.getElementById('style').value || 'Style de cuisine';
-                const price = document.getElementById('price').value || 'Gamme de prix';
-                
-                // Récupérer les notes
-                const foodScore = document.getElementById('foodScore').value || '5';
-                const serviceScore = document.getElementById('serviceScore').value || '5';
-                const ambianceScore = document.getElementById('ambianceScore').value || '5';
-                const valueScore = document.getElementById('valueScore').value || '5';
-                const originalityScore = document.getElementById('originalityScore').value || '5';
-                const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
-                
-                // Récupérer les commentaires
-                const foodComment = document.getElementById('foodComment').value || '';
-                const serviceComment = document.getElementById('serviceComment').value || '';
-                const ambianceComment = document.getElementById('ambianceComment').value || '';
-                const valueComment = document.getElementById('valueComment').value || '';
-                const originalityComment = document.getElementById('originalityComment').value || '';
-                const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
-                
-                await sleep(500);
-                
-                const date = new Date(document.getElementById('date').value).toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
+            const preview = document.querySelector('.restaurant-preview');
+            const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
+            // Récupérer les valeurs du formulaire
+            const title = document.getElementById('title').value || 'Nom du restaurant';
+            const description = document.getElementById('description').value || 'Description du restaurant';
+            const address = document.getElementById('address').value || 'Adresse du restaurant';
+            const style = document.getElementById('style').value || 'Style de cuisine';
+            const price = document.getElementById('price').value || 'Gamme de prix';
+            
+            // Récupérer les notes
+            const foodScore = document.getElementById('foodScore').value || '5';
+            const serviceScore = document.getElementById('serviceScore').value || '5';
+            const ambianceScore = document.getElementById('ambianceScore').value || '5';
+            const valueScore = document.getElementById('valueScore').value || '5';
+            const originalityScore = document.getElementById('originalityScore').value || '5';
+            const overallExperienceScore = document.getElementById('overallExperienceScore').value || '5';
+            
+            // Récupérer les commentaires
+            const foodComment = document.getElementById('foodComment').value || '';
+            const serviceComment = document.getElementById('serviceComment').value || '';
+            const ambianceComment = document.getElementById('ambianceComment').value || '';
+            const valueComment = document.getElementById('valueComment').value || '';
+            const originalityComment = document.getElementById('originalityComment').value || '';
+            const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
+            
+            await sleep(500);
+            
+            const date = new Date(document.getElementById('date').value).toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
 
-                // Récupérer le contenu de l'éditeur
-                const editorContent = editor.getHTML() || '';
+            // Récupérer le contenu de l'éditeur
+            const editorContent = editor.getHTML() || '';
+            
+            // Créer le HTML de l'aperçu
+            preview.innerHTML = `
+                <div class="restaurant-header">
+                    <h1 class="restaurant-title">${title}</h1>
+                    <div class="restaurant-meta">
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${address}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-star"></i>
+                            ${calculateOverallRating()}/10
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-utensils"></i>
+                            ${style}
+                        </span>
+                        ${document.getElementById('vegetarian').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-leaf"></i>
+                                Options végétariennes
+                            </span>
+                        ` : ''}
+                        ${document.getElementById('vegan').checked ? `
+                            <span class="restaurant-meta-item">
+                                <i class="fas fa-seedling"></i>
+                                Options végétaliennes
+                            </span>
+                        ` : ''}
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            ${date}
+                        </span>
+                        <span class="restaurant-meta-item">
+                            <i class="fas fa-tag"></i>
+                            ${price}
+                        </span>
+                    </div>
+                </div>
                 
-                // Créer le HTML de l'aperçu
-                preview.innerHTML = `
-                    <div class="restaurant-header">
-                        <h1 class="restaurant-title">${title}</h1>
-                        <div class="restaurant-meta">
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                ${address}
-                            </span>
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-star"></i>
-                                ${calculateOverallRating()}/10
-                            </span>
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-utensils"></i>
-                                ${style}
-                            </span>
-                            ${document.getElementById('vegetarian').checked ? `
-                                <span class="restaurant-meta-item">
-                                    <i class="fas fa-leaf"></i>
-                                    Options végétariennes
-                                </span>
-                            ` : ''}
-                            ${document.getElementById('vegan').checked ? `
-                                <span class="restaurant-meta-item">
-                                    <i class="fas fa-seedling"></i>
-                                    Options végétaliennes
-                                </span>
-                            ` : ''}
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                ${date}
-                            </span>
-                            <span class="restaurant-meta-item">
-                                <i class="fas fa-tag"></i>
-                                ${price}
-                            </span>
+                <div class="restaurant-image">
+                    ${mainImageFile ? 
+                        (typeof mainImageFile === 'string' && mainImageFile.startsWith('data:image') ? 
+                            `<img src="${mainImageFile}" alt="${title}">` : 
+                            `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">`
+                        ) : 
+                        `<i class="fas fa-image"></i>`
+                    }
+                </div>
+                
+                <div class="restaurant-description">
+                    ${description}
+                </div>
+                
+                <div class="restaurant-content">
+                    ${editorContent}
+                </div>
+                
+                <div class="restaurant-ratings">
+                    <h2>Pourquoi cette note ?</h2>
+                    
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Qualité de la nourriture</span>
+                            <span class="rating-score">${foodScore}/10</span>
                         </div>
+                        <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
+                        <div class="rating-comment">${foodComment}</div>
                     </div>
                     
-                    <div class="restaurant-image">
-                        ${mainImageFile ? 
-                            (typeof mainImageFile === 'string' && mainImageFile.startsWith('data:image') ? 
-                                `<img src="${mainImageFile}" alt="${title}">` : 
-                                `<img src="${URL.createObjectURL(mainImageFile)}" alt="${title}">`
-                            ) : 
-                            `<i class="fas fa-image"></i>`
-                        }
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Service</span>
+                            <span class="rating-score">${serviceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
+                        <div class="rating-comment">${serviceComment}</div>
                     </div>
                     
-                    <div class="restaurant-description">
-                        ${description}
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Ambiance</span>
+                            <span class="rating-score">${ambianceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
+                        <div class="rating-comment">${ambianceComment}</div>
                     </div>
                     
-                    <div class="restaurant-content">
-                        ${editorContent}
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Rapport qualité/prix</span>
+                            <span class="rating-score">${valueScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
+                        <div class="rating-comment">${valueComment}</div>
                     </div>
                     
-                    <div class="restaurant-ratings">
-                        <h2>Pourquoi cette note ?</h2>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Qualité de la nourriture</span>
-                                <span class="rating-score">${foodScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Goût, fraîcheur, cuisson, présentation, créativité</div>
-                            <div class="rating-comment">${foodComment}</div>
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Originalité / Concept</span>
+                            <span class="rating-score">${originalityScore}/10</span>
                         </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Service</span>
-                                <span class="rating-score">${serviceScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Rapidité, amabilité, professionnalisme, attention aux détails</div>
-                            <div class="rating-comment">${serviceComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Ambiance</span>
-                                <span class="rating-score">${ambianceScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Décor, musique, éclairage, confort, propreté, atmosphère générale</div>
-                            <div class="rating-comment">${ambianceComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Rapport qualité/prix</span>
-                                <span class="rating-score">${valueScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Prix des plats, portions, qualité des ingrédients, rapport avec la prestation</div>
-                            <div class="rating-comment">${valueComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Originalité / Concept</span>
-                                <span class="rating-score">${originalityScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
-                            <div class="rating-comment">${originalityComment}</div>
-                        </div>
-                        
-                        <div class="rating-category">
-                            <div class="rating-header">
-                                <span class="rating-title">Expérience globale</span>
-                                <span class="rating-score">${overallExperienceScore}/10</span>
-                            </div>
-                            <div class="rating-criteria">Facteur "wow"</div>
-                            <div class="rating-comment">${overallExperienceComment}</div>
-                        </div>
+                        <div class="rating-criteria">Innovation culinaire, créativité des recettes, authenticité, concept unique</div>
+                        <div class="rating-comment">${originalityComment}</div>
                     </div>
                     
-                    <h2 class="gallery-title">Galerie photos</h2>
-                    <div class="restaurant-gallery">
-                        ${galleryImageFiles.length > 0 ? 
-                            galleryImageFiles.map(file => {
-                                // Vérifier si l'élément est un base64 ou un fichier
-                                const imgSrc = (typeof file === 'string' && file.startsWith('data:image')) 
-                                    ? file // Si c'est une image en base64
-                                    : URL.createObjectURL(file); // Si c'est un fichier
-                                return `
-                                    <div class="gallery-image">
-                                        <img src="${imgSrc}" alt="Galerie">
-                                    </div>
-                                `;
-                            }).join('') : 
-                            `<div class="gallery-image">
-                                <i class="fas fa-images"></i>
-                            </div>`
-                        }
+                    <div class="rating-category">
+                        <div class="rating-header">
+                            <span class="rating-title">Expérience globale</span>
+                            <span class="rating-score">${overallExperienceScore}/10</span>
+                        </div>
+                        <div class="rating-criteria">Facteur "wow"</div>
+                        <div class="rating-comment">${overallExperienceComment}</div>
                     </div>
-                `;
-            } catch (error) {
-                await sleep(2000);
-                console.error("Erreur lors de la mise à jour de l'aperçu:", error);
-                updateMarkdownPreview();
-            }
+                </div>
+                
+                <h2 class="gallery-title">Galerie photos</h2>
+                <div class="restaurant-gallery">
+                    ${galleryImageFiles.length > 0 ? 
+                        galleryImageFiles.map(file => {
+                            // Vérifier si l'élément est un base64 ou un fichier
+                            const imgSrc = (typeof file === 'string' && file.startsWith('data:image')) 
+                                ? file // Si c'est une image en base64
+                                : URL.createObjectURL(file); // Si c'est un fichier
+                            return `
+                                <div class="gallery-image">
+                                    <img src="${imgSrc}" alt="Galerie">
+                                </div>
+                            `;
+                        }).join('') : 
+                        `<div class="gallery-image">
+                            <i class="fas fa-images"></i>
+                        </div>`
+                    }
+                </div>
+            `;
         }
 
         function createImagePreview(file, container, isMainImage = false) {
