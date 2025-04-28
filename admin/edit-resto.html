@@ -1919,6 +1919,7 @@
             const description = document.getElementById('description').value;
             const address = document.getElementById('address').value;
             const style = document.getElementById('style').value;
+            const price = document.getElementById('price').value;
 
             // Corriger la gamme de prix
             const priceMap = {
@@ -1926,10 +1927,8 @@
                 '$$ (20-40$)': 'medium',
                 '$$$ (40$ et +)': 'expensive'
             };
-            const price = priceMap[restaurantData.price] || restaurantData.price;
-            document.getElementById('price').value = priceValue;
-
-            //const price = document.getElementById('price').value;
+            const newPrice = priceMap[price] || price;
+            
             
             const dietOptions = [];
             if (document.getElementById('vegetarian').checked) {
@@ -1985,7 +1984,7 @@ note: ${overallRating}
 style: "${style}"
 diet: "${diet}"
 description: "${escapeForYAML(description)}"
-price: "${price}"
+price: "${newPrice}"
 address: "${address}"
 image: "${mainImagePath}"
 images:
