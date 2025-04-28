@@ -2762,9 +2762,9 @@ ${editorContent}`;
                 
                 // Corriger la gamme de prix
                 const priceMap = {
-                    'budget': '$ (0-20$)',
-                    'moyen': '$$ (20-40$)',
-                    'haut': '$$$ (40$ et +)'
+                    '$ (0-20$)': 'budget',
+                    '$$ (20-40$)': 'medium',
+                    '$$$ (40$ et +)': 'expensive'
                 };
                 const priceValue = priceMap[restaurantData.price] || restaurantData.price;
                 document.getElementById('price').value = priceValue;
@@ -2994,9 +2994,9 @@ ${editorContent}`;
                         <div class="input-wrapper">
                             <select class="form-control" id="price" name="price" required>
                                 <option value="">Sélectionner une gamme de prix</option>
-                                <option value="$ (0-20$)">$ (0-20$)</option>
-                                <option value="$$ (20-40$)">$$ (20-40$)</option>
-                                <option value="$$$ (40$ et +)">$$$ (40$ et +)</option>
+                                <option value="budget">$ (0-20$)</option>
+                                <option value="medium">$$ (20-40$)</option>
+                                <option value="expensive">$$$ (40$ et +)</option>
                             </select>
                             <div class="invalid-feedback">Veuillez sélectionner une gamme de prix</div>
                         </div>
