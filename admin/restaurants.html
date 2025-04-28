@@ -76,6 +76,17 @@
             padding: 0 1rem;
         }
 
+        @keyframes slideInTop {
+        0% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        }
+
         .search-input {
             width: 100%;
             padding: 1rem 1.5rem;
@@ -1160,7 +1171,7 @@
             notification.style.position = 'fixed';
             notification.style.top = '20px';
             notification.style.left = '50%';
-            //notification.style.transform = 'translateX(-50%)';
+            notification.style.transform = 'translateX(-50%)';
             notification.style.width = '70%'; // <--- large ruban
             notification.style.maxWidth = '600px'; // <--- limite pour pas être trop grand sur desktop
             notification.style.padding = '15px 30px'; // <--- padding plus aéré
@@ -1171,7 +1182,7 @@
             notification.style.zIndex = '1000';
             notification.style.textAlign = 'center'; // <--- texte centré
             notification.style.fontSize = '1.0rem'; // <--- un peu plus gros
-            notification.style.animation = 'slideInTop 0.0s ease-out';
+            notification.style.animation = 'slideInTop 0.3s ease-out';
 
             // Couleurs par type
             if (type === 'success') {
