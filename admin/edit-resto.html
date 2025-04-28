@@ -1278,7 +1278,7 @@
                             .replace(/-+/g, '-')
                             .replace(/^-|-$/g, '');
                         
-                        const date = new Date().toISOString().split('T')[0];
+                        const date = new Date(document.getElementById('date').value).toISOString().split('T')[0];
                         const filePath = `${date}-${filename}.md`;
 
                         // Créer un objet pour stocker les données du restaurant
