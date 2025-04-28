@@ -2025,7 +2025,8 @@ ${editorContent}`;
             
             // Récupérer les valeurs du formulaire
             const title = document.getElementById('title').value || 'Nom du restaurant';
-            const date = document.getElementById('date').value || new Date(document.getElementById('date').value).toISOString().split('T')[0];
+            console.log(document.getElementById('date').value)
+            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
             const description = document.getElementById('description').value || 'Description du restaurant';
             const address = document.getElementById('address').value || 'Adresse du restaurant';
             const style = document.getElementById('style').value || 'Style de cuisine';
