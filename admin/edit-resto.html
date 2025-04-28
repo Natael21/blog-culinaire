@@ -2772,11 +2772,11 @@ ${editorContent}`;
                 // Corriger la gamme de prix
                 const priceMap = {
                     'budget': '$ (0-20$)',
-                    'moyen': '$$ (20-40$)',
-                    'haut': '$$$ (40$ et +)'
+                    'medium': '$$ (20-40$)',
+                    'expensive': '$$$ (40$ et +)'
                 };
                 const priceValue = priceMap[restaurantData.price] || restaurantData.price;
-                document.getElementById('price').value = priceValue;
+                document.getElementById('price').value = restaurantData.price;
 
                 // Remplir les options alimentaires
                 const dietString = (restaurantData.diet || '').trim();
