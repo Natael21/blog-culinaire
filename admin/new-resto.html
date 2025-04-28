@@ -1276,8 +1276,8 @@
                             .replace(/^-|-$/g, '');
                         
                         const formData = new FormData(document.getElementById('restaurantForm'));
-                        const date = new Date(formData.get('date')).toISOString().split('T')[0];
-                        const filePath = `${date}-${filename}.md`;
+                        const date = new Date(document.getElementById('date').value).toISOString().split('T')[0];
+                        const filePath = `${date}-${filename}.markdown`;
 
                         // Créer un objet pour stocker les données du brouillon
                         const draftData = {
@@ -2272,92 +2272,92 @@ ${editorContent}`;
         }
 
         // Fonction pour sauvegarder le brouillon
-        async function saveDraft() {
-            try {
-                const formData = new FormData(document.getElementById('restaurantForm'));
-                const title = formData.get('title');
-                
-                // Générer le nom du fichier à partir du titre
-                const filename = title.toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .replace(/[^a-z0-9]/g, '-')
-                    .replace(/-+/g, '-')
-                    .replace(/^-|-$/g, '');
-                
-                const date = new Date(formData.get('date')).toISOString().split('T')[0];
-                const filePath = `${date}-${filename}.md`;
-
-                // Créer l'objet du brouillon avec le contenu initial
-                let markdownContent = generateMarkdown();
-                const draftData = {
-                    filename: filePath,
-                    title: title,
-                    content: markdownContent,
-                    images: [],
-                    lastModified: new Date().toISOString()
-                };
-
-                // Traiter l'image principale
-                if (mainImageFile) {
-                    const mainImageBase64 = await fileToBase64(mainImageFile);
-                    draftData.images.push({
-                        name: mainImageFile.name,
-                        data: mainImageBase64,
-                        isMain: true
-                    });
-                }
-
-                // Traiter les images de la galerie
-                for (let i = 0; i < galleryImageFiles.length; i++) {
-                    const file = galleryImageFiles[i];
-                    const galleryBase64 = await fileToBase64(file);
-                    draftData.images.push({
-                        name: file.name,
-                        data: galleryBase64,
-                        isMain: false
-                    });
-                }
-
-                // Récupérer les brouillons existants
-                const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-                
-                // Vérifier si un brouillon avec le même nom existe déjà
-                const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
-                
-                if (existingIndex !== -1) {
-                    // Mettre à jour le brouillon existant
-                    drafts[existingIndex] = draftData;
-                } else {
-                    // Ajouter un nouveau brouillon
-                    drafts.push(draftData);
-                }
-
-                try {
-                    // Sauvegarder dans localStorage
-                    localStorage.setItem('drafts', JSON.stringify(drafts));
-                    showNotification('Brouillon enregistré avec succès', 'success');
-                    
-                    // Mettre à jour l'interface
-                    updatePendingChangesButtons();
-                    
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                } catch (storageError) {
-                    if (storageError.name === 'QuotaExceededError') {
-                        showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des brouillons existants.', 'error');
-                    } else {
-                        showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
-                    }
-                    console.error('Erreur de stockage:', storageError);
-                }
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
-            }
-        }
+        //async function saveDraft() {
+        //    try {
+        //        const formData = new FormData(document.getElementById('restaurantForm'));
+        //        const title = formData.get('title');
+        //        
+        //        // Générer le nom du fichier à partir du titre
+        //        const filename = title.toLowerCase()
+        //            .normalize('NFD')
+        //            .replace(/[\u0300-\u036f]/g, '')
+        //            .replace(/[^a-z0-9]/g, '-')
+        //            .replace(/-+/g, '-')
+        //            .replace(/^-|-$/g, '');
+        //        
+        //        const date = new Date(document.getElementById('date').value).toISOString().split('T')[0];
+        //        const filePath = `${date}-${filename}.markdown`;
+//
+        //        // Créer l'objet du brouillon avec le contenu initial
+        //        let markdownContent = generateMarkdown();
+        //        const draftData = {
+        //            filename: filePath,
+        //            title: title,
+        //            content: markdownContent,
+        //            images: [],
+        //            lastModified: new Date().toISOString()
+        //        };
+//
+        //        // Traiter l'image principale
+        //        if (mainImageFile) {
+        //            const mainImageBase64 = await fileToBase64(mainImageFile);
+        //            draftData.images.push({
+        //                name: mainImageFile.name,
+        //                data: mainImageBase64,
+        //                isMain: true
+        //            });
+        //        }
+//
+        //        // Traiter les images de la galerie
+        //        for (let i = 0; i < galleryImageFiles.length; i++) {
+        //            const file = galleryImageFiles[i];
+        //            const galleryBase64 = await fileToBase64(file);
+        //            draftData.images.push({
+        //                name: file.name,
+        //                data: galleryBase64,
+        //                isMain: false
+        //            });
+        //        }
+//
+        //        // Récupérer les brouillons existants
+        //        const drafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+        //        
+        //        // Vérifier si un brouillon avec le même nom existe déjà
+        //        const existingIndex = drafts.findIndex(d => d.filename === draftData.filename);
+        //        
+        //        if (existingIndex !== -1) {
+        //            // Mettre à jour le brouillon existant
+        //            drafts[existingIndex] = draftData;
+        //        } else {
+        //            // Ajouter un nouveau brouillon
+        //            drafts.push(draftData);
+        //        }
+//
+        //        try {
+        //            // Sauvegarder dans localStorage
+        //            localStorage.setItem('drafts', JSON.stringify(drafts));
+        //            showNotification('Brouillon enregistré avec succès', 'success');
+        //            
+        //            // Mettre à jour l'interface
+        //            updatePendingChangesButtons();
+        //            
+        //            setTimeout(() => {
+        //                window.location.href = 'index.html';
+        //            }, 1500);
+        //        } catch (storageError) {
+        //            if (storageError.name === 'QuotaExceededError') {
+        //                showNotification('Impossible de sauvegarder : espace de stockage insuffisant. Veuillez supprimer des brouillons existants.', 'error');
+        //            } else {
+        //                showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+        //            }
+        //            console.error('Erreur de stockage:', storageError);
+        //        }
+//
+        //    } catch (error) {
+        //        console.error('Erreur:', error);
+        //        showNotification('Erreur lors de la sauvegarde du brouillon', 'error');
+        //    }
+        //}
 
         // Fonction utilitaire pour échapper les caractères spéciaux dans une regex
         function escapeRegExp(string) {
