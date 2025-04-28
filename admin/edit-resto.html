@@ -2023,7 +2023,10 @@ ${editorContent}`;
             const formData = new FormData(document.getElementById('restaurantForm'));
             const preview = document.querySelector('.restaurant-preview');
             const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
-            
+            console.log(formData.get('date'))
+            console.log(new Date(formData.get('date')).toISOString().split('T')[0])
+            console.log(document.getElementById('date').value)
+            console.log(new Date(document.getElementById('date').value).toISOString().split('T')[0])
             // Récupérer les valeurs du formulaire
             const title = document.getElementById('title').value || 'Nom du restaurant';
             console.log(new Date(formData.get('date')).toISOString().split('T')[0])
