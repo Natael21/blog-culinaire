@@ -1,44 +1,44 @@
 ---
 layout: restaurant
-title: 'Caffuccino'
+title: "Caffuccino"
 date: 2024-05-04
 state: ready
-note: 7.0
-style: 'Bistro & Café'
-diet: 'vegetarian-friendly'
-description: 'Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !'
-price: 'medium'
-address: '1700 Rue King Ouest, Sherbrooke, QC J1J 2C9'
-image: '/images/Caffucino.jpg'
+note: 7.8
+style: "Bistro & Café"
+diet: "vegetarian-friendly"
+description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
+price: "medium"
+address: "1700 Rue King Ouest, Sherbrooke, QC J1J 2C9"
+image: "/images/Caffucino.jpg"
 images:
   - image: "/images/Caffucino_Nicolas.jpg"
   - image: "/images/Caffucino_Nataël.jpg"
 
 ratings:
   food:
-    score: 7
-    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: 'Plats frais mais parfois trop simples. Les sandwichs sont bons mais manquent d'
-  service:
     score: 8
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "Plats frais, savoureux et plein de saveur."
+  service:
+    score: 9
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: 'Service efficace et souriant mais parfois un peu précipité. Personnel accueillant mais manque de personnalité.'
+    comment: "Service efficace et souriant et personnel accueillant, mais service un peu lent."
   ambiance:
     score: 8
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: 'Ambiance chaleureuse mais décoration un peu kitsch. Belle terrasse en été mais peut être bruyante.'
+    comment: "Ambiance chaleureuse mais décoration un peu kitsch. Belle terrasse en été mais peut être bruyante."
   value:
     score: 7
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
-    comment: 'Prix un peu élevés pour la simplicité des plats. Portions correctes mais pas exceptionnelles.'
+    comment: "Prix un peu élevés pour la simplicité des plats, mais des portions respectable."
   originality:
-    score: 5
-    criteria: 'Innovation, créativité, authenticité'
-    comment: 'Menu très classique de café-bistro sans réelle innovation. Manque de créativité dans les recettes.'
-  overall:
     score: 7
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "Menu très classique de café-bistro sans réelle innovation. Manque de créativité dans les recettes."
+  overall:
+    score: 8
     criteria: 'Expérience globale, facteur "wow"'
-    comment: 'Cuisine de café-bistro classique bien exécutée.'
+    comment: "Cuisine de café-bistro classique bien exécutée."
 ---
 
 
