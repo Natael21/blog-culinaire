@@ -1,12 +1,12 @@
 ---
 layout: restaurant
-title: 'Mexi et co'
-date: 2024-05-13
+title: 'Mexi & Co'
+date: 2024-05-04
 state: ready
 note: 7.0
-style: 'Mexicain & Latino'
+style: 'Bistro & Café'
 diet: 'vegetarian-friendly'
-description: 'L'un des meilleurs restaurants de nachos à Sherbrooke, avec une ambiance festive et des promotions alléchantes !'
+description: 'Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !'
 price: '$$ (20-40$)'
 address: '1700 Rue King Ouest, Sherbrooke, QC J1J 2C9'
 image: '/images/Caffucino.jpg'
