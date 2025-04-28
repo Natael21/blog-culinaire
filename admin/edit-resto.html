@@ -1905,6 +1905,7 @@
         });
 
         function generateMarkdown() {
+            const state = document.getElementById('state').value;
             const title = document.getElementById('title').value;
             const date = document.getElementById('date').value;
             const description = document.getElementById('description').value;
@@ -1955,13 +1956,13 @@
                 }
             };
 
-            const today = new Date().toISOString().split('T')[0];
+            //const today = new Date().toISOString().split('T')[0];
 
             return `---
 layout: restaurant
 title: '${title}'
-date: ${today}
-state: draft
+date: ${date}
+state: ${state}
 note: ${overallRating}
 style: '${style}'
 diet: '${diet}'

@@ -1156,28 +1156,33 @@
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.textContent = message;
+            
             notification.style.position = 'fixed';
-            notification.style.top = '10px';
-            notification.style.left = '50%'; // <-- correction ici
+            notification.style.top = '20px';
+            notification.style.left = '50%';
             notification.style.transform = 'translateX(-50%)';
-            notification.style.padding = '15px 25px';
+            notification.style.width = '80%'; // <--- large ruban
+            notification.style.maxWidth = '600px'; // <--- limite pour pas être trop grand sur desktop
+            notification.style.padding = '15px 30px'; // <--- padding plus aéré
             notification.style.borderRadius = 'var(--border-radius)';
             notification.style.color = 'white';
-            notification.style.fontWeight = '500';
+            notification.style.fontWeight = '600';
             notification.style.boxShadow = 'var(--box-shadow)';
             notification.style.zIndex = '1000';
+            notification.style.textAlign = 'center'; // <--- texte centré
+            notification.style.fontSize = '1.1rem'; // <--- un peu plus gros
             notification.style.animation = 'slideInTop 0.3s ease-out';
-            
-            // Ajout du background selon le type
+
+            // Couleurs par type
             if (type === 'success') {
                 notification.style.backgroundColor = '#4CAF50'; // vert
             } else if (type === 'error') {
                 notification.style.backgroundColor = '#F44336'; // rouge
             } else if (type === 'warning') {
                 notification.style.backgroundColor = '#FFC107'; // jaune
-                notification.style.color = '#000'; // pour que ce soit lisible sur fond jaune
+                notification.style.color = '#000';
             } else {
-                notification.style.backgroundColor = '#2196F3'; // bleu par défaut (info)
+                notification.style.backgroundColor = '#2196F3'; // bleu
             }
 
             document.body.appendChild(notification);
@@ -1186,6 +1191,7 @@
                 notification.remove();
             }, 3000);
         }
+
 
     </script>
 </body>
