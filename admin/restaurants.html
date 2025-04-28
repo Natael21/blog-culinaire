@@ -751,7 +751,7 @@
                 displayRestaurants(sortedData);
             } catch (error) {
                 console.error('Erreur:', error);
-                showNotification('Erreur lors du chargement des restaurants', 'error');
+                showNotification('Erreur lors du chargement des restaurants, rechargez la page', 'error');
                 if (!sessionStorage.getItem('hasRefreshed')) {
                     sessionStorage.setItem('hasRefreshed', 'true');
                     setTimeout(() => {

@@ -136,11 +136,11 @@ title: Accueil
               <span class="cuisine-style"><i class="fas fa-utensils"></i> {{ post.style }}</span>
               {% endif %}
               <span class="price" style="display: inline-flex; align-items: center; vertical-align: middle;">
-                {% if post.price == "budget" %}
+                {% if post.price == "budget" or post.price == "$ (0-20$)" %}
                   <i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i>
-                {% elsif post.price == "medium" %}
+                {% elsif post.price == "medium" or post.price == "$$ (20-40$)" %}
                   <i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i><i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i>
-                {% elsif post.price == "expensive" %}
+                {% elsif post.price == "expensive" or post.price == "$$$ (40$ et +)" %}
                   <i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i><i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i><i class="fas fa-dollar-sign" style="margin-right: -2px; line-height: 1; vertical-align: middle;"></i>
                 {% endif %}
               </span>
