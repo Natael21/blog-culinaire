@@ -631,8 +631,6 @@
                         // Extraire le contenu détaillé (tout ce qui est après le front matter)
                         const contentMatch = localItem.content.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
                         const detailedContent = contentMatch ? contentMatch[1].trim() : '';
-                        
-                        console.log(localItem.filename)
 
                         // Assurer que les champs requis existent
                         const restaurantData = {
@@ -663,6 +661,8 @@
                         
                         return restaurantData;
                     }
+
+                    console.log(restaurantData)
                     
                     // Extraire le contenu détaillé de GitHub
                     const contentMatch = githubItem.content.match(/^---\s*[\s\S]*?---\s*([\s\S]*)$/);
