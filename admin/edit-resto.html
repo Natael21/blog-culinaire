@@ -2046,7 +2046,16 @@ ${editorContent}`;
                 const description = document.getElementById('description').value || 'Description du restaurant';
                 const address = document.getElementById('address').value || 'Adresse du restaurant';
                 const style = document.getElementById('style').value || 'Style de cuisine';
-                const price = document.getElementById('price').value || 'Gamme de prix';
+
+                // Corriger la gamme de prix
+                const priceMap = {
+                    'budget': '$ (0-20$)',
+                    'medium': '$$ (20-40$)',
+                    'expensive': '$$$ (40$ et +)'
+                };
+                const newPrice = priceMap[price] || price;
+
+                const price = newPrice || 'Gamme de prix';
                 
                 // Récupérer les notes
                 const foodScore = document.getElementById('foodScore').value || '5';
