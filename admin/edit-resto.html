@@ -2020,17 +2020,10 @@ ${editorContent}`;
         }
 
         async function updateMarkdownPreview() {
-            const formData = new FormData(document.getElementById('restaurantForm'));
             const preview = document.querySelector('.restaurant-preview');
             const draftData = JSON.parse(localStorage.getItem('currentDraft') || '{}');
-            console.log(formData.get('date'))
-            console.log(new Date(formData.get('date')).toISOString().split('T')[0])
-            console.log(document.getElementById('date').value)
-            console.log(new Date(document.getElementById('date').value).toISOString().split('T')[0])
             // Récupérer les valeurs du formulaire
             const title = document.getElementById('title').value || 'Nom du restaurant';
-            console.log(new Date(formData.get('date')).toISOString().split('T')[0])
-            const date = new Date(formData.get('date')).toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
             const description = document.getElementById('description').value || 'Description du restaurant';
             const address = document.getElementById('address').value || 'Adresse du restaurant';
             const style = document.getElementById('style').value || 'Style de cuisine';
@@ -2053,6 +2046,8 @@ ${editorContent}`;
             const overallExperienceComment = document.getElementById('overallExperienceComment').value || '';
             
             await sleep(500);
+
+            const date = new Date(document.getElementById('date').value).toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
 
             // Récupérer le contenu de l'éditeur
             const editorContent = editor.getHTML() || '';
