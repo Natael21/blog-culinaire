@@ -22,7 +22,7 @@ ratings:
   service:
     score: 8
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: "Service simple mais efficace, communication parfois limitée en français."
+    comment: "Service simple, mais efficace."
   ambiance:
     score: 9
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
