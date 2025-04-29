@@ -3,9 +3,9 @@ layout: restaurant
 title: "OMG Resto"
 date: 2024-03-04
 state: ready
-note: 6.8
+note: 7.7
 style: "Américain"
-diet: "standard"
+diet: "vegetarian-friendly"
 description: "Restaurant spacieux et luxueux offrant burgers, tacos, poutines et tartares, accompagnés d'une sélection de vins et bières artisanales."
 price: "medium"
 address: "1175 Rue King Ouest, Sherbrooke, QC J1H 3H8"
@@ -14,35 +14,40 @@ images:
   - image: "/images/OMG_natael.JPG"
   - image: "/images/OMG_Nicolas.jpg"
   - image: "/images/OMG_bieres.jpg"
+
 ratings:
   food:
-    score: 6
-    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
-    comment: "Menu très limité et décevant comparé à avant. Burgers corrects mais sans plus, comme un fast-food premium."
-  service:
-    score: 7
-    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
-    comment: "Service professionnel mais manque de passion. Bonne connaissance des boissons."
-  ambiance:
     score: 8
-    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
-    comment: "Cadre luxueux avec foyer mais ambiance parfois trop froide. Décor impressionnant."
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "Menu très limité et décevant comparé à avant. Bon burgers, mais sans plus."
+  service:
+    score: 8
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: "Service professionnel et bonne connaissance des boissons."
+  ambiance:
+    score: 9
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: "Cadre luxueux et décor impressionnant d'une ancienne église."
   value:
-    score: 6
-    comment: "Prix élevés pour la qualité de la nourriture. Seule la dégustation de bières justifie le prix."
-  originality:
-    score: 5
-    comment: "Menu très standard et décevant. Seule la sélection de boissons apporte de l'originalité."
-  overall:
     score: 7
-    criteria: "Facteur \"wow\""
-    comment: "Une expérience décevante pour la nourriture mais agréable pour les boissons. Le cadre luxueux ne compense pas le menu limité."
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: "Prix élevés pour la qualité/quantité de la nourriture. "
+  originality:
+    score: 6
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "Menu standard et décevant comparer à OMG Burger."
+  overall:
+    score: 8
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: "Une expérience un peu décevante pour la variété de burger, mais très agréable tout de même."
 ---
 
-**Nataël** :
+
+
+<strong>Nataël</strong> :
 
 Ça faisait déjà plusieurs années que j'y étais allé, probablement avant la covid. Donc, je m'attendais à voir leur énorme carte de burgers comme auparavant, mais à ma déception, il y a plus de choix de vins que de repas haha. Pour commencer le repas, on a partagé à deux leur palette de dégustation de bières ! Les bières de la brasserie Le Trou du Diable qu'on nous a servies étaient vraiment incroyables, probablement la meilleure dégustation de la soirée. Je vais définitivement aller m'acheter de cette bière à l'avenir. Sinon, pour le repas j'ai décidé de prendre le burger de poulet et frites. C'était bon et je vais citer Nicolas qui décrivait très bien le tout « C'est comme un burger de chez McDonald's de luxe » ! En fait, le goût y était, le poulet était vraiment tendre et accompagné d'une sauce ranch, le mix de saveurs était parfait, mais pas assez pour se démarquer de la compétition personnellement. Donc, somme toute, c'est un bon restaurant, mais il ne faut pas y aller pour y découvrir les burgers d'avant !
 
-**Nicolas** :
+<strong>Nicolas</strong> :
 
-De mon côté, c'était une première, et lorsque j'y suis pénétré, « OMG » a été ma première impression ! Le restaurant est généralement spacieux et luxueux, nous avons même pu nous réchauffer à côté d'un foyer lors de notre souper. Le burger était succulent, puis ce resto a réussi à mon avis à égaler celui de La Buvette du Centro à Sherbrooke. La dégustation de bières s'est faite avec brio, le même concept qu'au Refuge des Brasseurs. 
+De mon côté, c'était une première, et lorsque j'y suis pénétré, « OMG » a été ma première impression ! Le restaurant est généralement spacieux et luxueux, nous avons même pu nous réchauffer à côté d'un foyer lors de notre souper. Le burger était succulent, puis ce resto a réussi à mon avis à égaler celui de La Buvette du Centro à Sherbrooke. La dégustation de bières s'est faite avec brio, le même concept qu'au Refuge des Brasseurs.

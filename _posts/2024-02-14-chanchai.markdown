@@ -3,7 +3,7 @@ layout: restaurant
 title: "Chanchai"
 date: 2024-02-14
 state: ready
-note: 7
+note: 8.5
 style: "Asiatique"
 diet: "vegetarian-friendly"
 description: "Saveurs thaïlandaises authentiques et portions généreuses dans un cadre tranquille."
@@ -11,40 +11,44 @@ price: "medium"
 address: "11 Rue Wellington Nord, Sherbrooke, QC J1H 5A9"
 image: "/images/chanchai.jpeg"
 images:
-  - image: "/images/chanchai.jpeg"
   - image: "/images/chanchai_natael.jpg"
   - image: "/images/chanchai_nicolas.jpg"
+
 ratings:
   food:
-    score: 7
-    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
-    comment: "Cuisine thaïlandaise correcte mais parfois trop adaptée au goût local. Saveurs équilibrées mais manquent de piquant."
+    score: 9
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "Cuisine thaïlandaise avec saveurs équilibrées et bien maitrisées."
   service:
-    score: 6
-    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
-    comment: "Service basique et efficace. Très occupé, nécessite une réservation. Manque de personnalité."
-  ambiance:
-    score: 7
-    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
-    comment: "Cadre simple et fonctionnel. Ambiance tranquille mais manque d'authenticité thaïlandaise."
-  value:
     score: 8
-    comment: "Portions généreuses pour le prix. Bon rapport qualité/prix malgré la popularité."
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: "Service agréable et efficace. Il est possible à la fois de manger sur place ou pour emporter."
+  ambiance:
+    score: 8
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: "Cadre simple et fonctionnel. Ambiance tranquille, parfaite pour discuter."
+  value:
+    score: 9
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: "Portions généreuses pour le prix. Bon rapport qualité/prix."
   originality:
-    score: 5
-    comment: "Menu très traditionnel sans innovation. Manque de créativité dans les recettes."
+    score: 8
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "Menu très traditionnel asiatique. Manque peut-être d'un peu de créativité dans les recettes."
   overall:
-    score: 7
-    criteria: "Facteur \"wow\""
-    comment: "Une expérience culinaire correcte mais sans surprise. Bon pour un repas simple et copieux."
+    score: 9
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: "Une expérience culinaire mémorable. Bon pour un repas simple et copieux."
 ---
 
-**Nataël** :
+
+
+<strong>Nataël</strong> :
 
 Excellent endroit tranquille pour manger de la bonne nourriture de type thaïlandaise ! Pour ma part, j'ai eu la chance de goûter un poulet général Chanchai, l'équivalent d'un poulet général Tao. Les saveurs étaient au rendez-vous à tous les niveaux ! Le poulet était très bien assaisonné et dans une bonne sauce, les légumes sautés étaient parfaitement salés et goûteux et finalement les nouilles complétaient très bien le tout ! De plus, ce sont de généreuses portions pour le prix, donc ça en vaut la peine !
 
-**Nicolas** :
+<strong>Nicolas</strong> :
 
 Nous étions chanceux d'avoir eu nos places, le resto n'acceptait plus les réservations ! Heureusement, nous sommes arrivés dès l'ouverture et il ne restait plus que trois tables pour deux disponibles. Il avait aussi l'option d'emporter notre souper, mais ça n'aurait pas suffi pour apprécier pleinement !
 
-J'ai pris le Pad Sew Cew (ou Pad Sew Ew) qui a le goût similaire de la recette originale, mais les nouilles sont plutôt dérivées du Chow Mein. J'ai adoré ce plat, surtout que tous les légumes y sont frais, ça fait la différence ! Cependant, j'ai trouvé que c'était une trop grande portion, j'imagine que les différents formats (petit, moyen, grand) viendront s'ajouter bientôt. Pour l'instant, assurez-vous d'avoir un bon appétit avant de commander 🙂 
+J'ai pris le Pad Sew Cew (ou Pad Sew Ew) qui a le goût similaire de la recette originale, mais les nouilles sont plutôt dérivées du Chow Mein. J'ai adoré ce plat, surtout que tous les légumes y sont frais, ça fait la différence ! Cependant, j'ai trouvé que c'était une trop grande portion, j'imagine que les différents formats (petit, moyen, grand) viendront s'ajouter bientôt. Pour l'instant, assurez-vous d'avoir un bon appétit avant de commander 🙂
