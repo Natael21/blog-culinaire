@@ -3,7 +3,7 @@ layout: restaurant
 title: "Baladi"
 date: 2023-07-29
 state: ready
-note: 7.0
+note: 7.3
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"
 description: "Cuisine libanaise authentique dans un cadre chaleureux."
@@ -11,7 +11,6 @@ price: "medium"
 address: "1564 Rue Denault, Sherbrooke, QC J1H 2R2"
 image: "/images/Baladi.jpeg"
 images:
-  - image: "/images/Baladi.jpeg"
   - image: "/images/Baladi Nicolas.jpg"
   - image: "/images/Baladi Nataël.jpg"
 
@@ -19,23 +18,23 @@ ratings:
   food:
     score: 7
     criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: "Cuisine libanaise correcte mais manque d"
+    comment: "Cuisine libanaise correcte, mais manque un peu de fraicheur. Très bon breuvage traditionnel."
   service:
     score: 7
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: "Service efficace mais manque de chaleur. L"
+    comment: "Service efficace mais manque de chaleur."
   ambiance:
     score: 7
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: "Ambiance chaleureuse mais manque d"
+    comment: "Ambiance chaleureuse, mais simple."
   value:
     score: 8
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
     comment: "Bon rapport qualité/prix avec des portions généreuses. Prix raisonnables."
   originality:
-    score: 6
+    score: 8
     criteria: 'Innovation, créativité, authenticité'
-    comment: "Menu traditionnel sans innovation. Manque de créativité dans les recettes."
+    comment: "Menu traditionnel, parfait pour essayer ce type de culture."
   overall:
     score: 7
     criteria: 'Expérience globale, facteur "wow"'

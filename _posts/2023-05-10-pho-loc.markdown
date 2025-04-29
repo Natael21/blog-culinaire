@@ -3,48 +3,52 @@ layout: restaurant
 title: "Pho Loc"
 date: 2023-05-10
 state: ready
-note: 8.5
+note: 8.7
 style: "Asiatique"
 diet: "vegetarian-friendly"
 description: "Une authentique cuisine vietnamienne dans un cadre pittoresque et intime"
-price: "budget"
+price: "medium"
 address: "1425 Rue King Ouest, Sherbrooke, QC J1J 2C1"
 image: "/images/pho loc.PNG"
 images:
-  - image: "/images/pho loc.PNG"
   - image: "/images/Pho Loc Nicolas.jpg"
   - image: "/images/Pho Loc Nataël.jpg"
+
 ratings:
   food:
-    score: 8
-    criteria: "Goût, fraîcheur, cuisson, présentation, créativité"
-    comment: "Cuisine vietnamienne correcte, saveurs équilibrées mais manque parfois d'intensité. Légumes frais et bien préparés."
+    score: 9
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "Cuisine vietnamienne excellente, saveurs équilibrées et bien exécuté."
   service:
     score: 8
-    criteria: "Rapidité, amabilité, professionnalisme, attention aux détails"
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
     comment: "Service simple mais efficace, communication parfois limitée en français."
   ambiance:
-    score: 8
-    criteria: "Décor, musique, éclairage, confort, propreté, atmosphère générale"
-    comment: "Décor modeste mais authentique, musique traditionnelle appréciable. Éclairage un peu trop vif."
+    score: 9
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: "Décor authentique et musique traditionnelle appréciable."
   value:
-    score: 8
+    score: 9
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
     comment: "Très bon rapport qualité/prix, portions généreuses pour les prix demandés."
   originality:
-    score: 7
-    comment: "Menu vietnamien classique, peu de surprises mais bien exécuté."
+    score: 8
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "Menu vietnamien classique, mais parfait pour découvrir cette culture."
   overall:
-    score: 7
-    criteria: "Facteur \"wow\""
+    score: 9
+    criteria: 'Expérience globale, facteur "wow"'
     comment: "Une expérience culinaire honnête dans un cadre simple et authentique."
 ---
 
+
+
 Chào mừng ! C'est par un bel après-midi ensoleillé que nous nous sommes réfugiés de la chaleur torride chez Pho Loc, l'un des restaurants vietnamiens les plus notoires de l'Estrie.
 
-**Nataël** :
+<strong>Nataël</strong> :
 
 C'est avec ma famille que j'ai pu découvrir ce merveilleux endroit ! Je m'y étais régalé et je rêvais d'y retourner depuis longtemps, surtout pour manger le fameux chow mein !
 
-**Nicolas** :
+<strong>Nicolas</strong> :
 
-Nous avons dégusté de délicieuses nouilles Chow mein, mais avec une touche vietnamienne. Pour les personnes qui en sont moins familier, la cuisine vietnamienne est principalement riche en glucides dérivés du riz et des plats de nouilles de riz. D'autre part, les plats chinois sont riches en sauces épaisses et en ingrédients de plus grande taille. D'ailleurs, ce fut un repas léger et exotique; plusieurs légumes de toutes couleurs accompagnent ce plat de résistance. Nous avons eu même l'opportunité d'entendre la musique vietnamienne traditionnelle. De plus, nous étions seuls, c'était l'un des endroits les plus intimes et figure l'un des restaurants les plus pittoresques depuis notre tournée culinaire régionale ! 
+Nous avons dégusté de délicieuses nouilles Chow mein, mais avec une touche vietnamienne. Pour les personnes qui en sont moins familier, la cuisine vietnamienne est principalement riche en glucides dérivés du riz et des plats de nouilles de riz. D'autre part, les plats chinois sont riches en sauces épaisses et en ingrédients de plus grande taille. D'ailleurs, ce fut un repas léger et exotique; plusieurs légumes de toutes couleurs accompagnent ce plat de résistance. Nous avons eu même l'opportunité d'entendre la musique vietnamienne traditionnelle. De plus, nous étions seuls, c'était l'un des endroits les plus intimes et figure l'un des restaurants les plus pittoresques depuis notre tournée culinaire régionale !
