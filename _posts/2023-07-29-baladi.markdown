@@ -1,0 +1,53 @@
+---
+layout: restaurant
+title: "Baladi"
+date: 2023-07-29
+state: ready
+note: 7.0
+style: "Moyen-Orient"
+diet: "vegetarian-friendly"
+description: "Cuisine libanaise authentique dans un cadre chaleureux."
+price: "medium"
+address: "1564 Rue Denault, Sherbrooke, QC J1H 2R2"
+image: "/images/Baladi.jpeg"
+images:
+  - image: "/images/Baladi.jpeg"
+  - image: "/images/Baladi Nicolas.jpg"
+  - image: "/images/Baladi Nataël.jpg"
+
+ratings:
+  food:
+    score: 7
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "Cuisine libanaise correcte et manque de fraicheur. Très bon thé à la menthe."
+  service:
+    score: 7
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: "Service efficace, mais manque de chaleur."
+  ambiance:
+    score: 7
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: "Ambiance chaleureuse mais simple."
+  value:
+    score: 8
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: "Bon rapport qualité/prix avec des portions généreuses. Prix raisonnables."
+  originality:
+    score: 6
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "Menu traditionnel sans innovation. Manque de créativité dans les recettes."
+  overall:
+    score: 7
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: "Une expérience correcte mais sans surprise. Bon pour un repas simple et copieux."
+---
+
+
+
+<strong>Nataël</strong> :
+
+Après avoir goûté à de la nourriture iranienne, on a décidé de continuer sur notre lancée et d'en essayer un nouveau. Leur thé à la menthe est complètement incroyable et je le recommande fortement ! J'ai choisi le couscous aux légumes qui était copieux et savoureux. Les épices étaient bien dosées et les légumes parfaitement cuits.
+
+<strong>Nicolas</strong> :
+
+J'ai opté pour un plat de couscous royal qui était excellent ! Le couscous était parfaitement cuit, la viande était tendre et bien assaisonnée, et les légumes étaient frais. Le thé à la menthe était délicieux et le service était rapide. L'ambiance était très agréable et le personnel était très accueillant. C'est un excellent endroit pour découvrir la cuisine libano-marocaine !
