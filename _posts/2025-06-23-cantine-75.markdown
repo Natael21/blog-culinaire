@@ -1,0 +1,47 @@
+---
+layout: restaurant
+title: "Cantine 75"
+date: 2025-06-23
+state: draft
+note: 8.5
+style: "Américain"
+diet: "vegetarian-friendly"
+description: "Cantine promouvant des classiques réinventés et savoureux"
+price: "budget"
+address: "96, Rue King Ouest, Sherbrooke, Quebec, J1H 1P3, Canada"
+image: "/images/Cantine 75.png"
+images:
+  - image: "/images/Cantine 75_Natael.jpg"
+  - image: "/images/Cantine 75 Nicolas.jpg"
+  - image: "/images/Cantine 75 repas.jpg"
+
+ratings:
+  food:
+    score: 8
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "Plat à prime à bord classique d'une cantine, mais qui offre une explosion de saveur assez surprenante et délicieuse."
+  service:
+    score: 8
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: "Très bon service amical et rapide, mais puisque ça reste une cantine avec un service minimal, la note de 10 n'est pas donnée."
+  ambiance:
+    score: 7
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: "Bonne musique de style Maitre Gims joué en arrière-plan et pas beaucoup de place assise, donc par énormément de bruit. Mais le point négatif est la chaleur, puisque la cuisine et la salle à manger sont dans la même pièce à air ouvertes !"
+  value:
+    score: 9
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: "Très grosses portions difficile à terminer même en ayant faim, donc très bon rapport qualité prix ici !"
+  originality:
+    score: 10
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "Il y a énormément de choix, comme des smashs burger, des burgers gourmets, des sandwichs et des tacos français, le tout offert dans une grande gamme de saveur inédite."
+  overall:
+    score: 9
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: "Très agréablement surpris du choix et de la qualité des saveurs et ingrédients utilisés !\nC'est un endroit où nous allons retourner c'est certains !"
+---
+
+
+
+À completer
