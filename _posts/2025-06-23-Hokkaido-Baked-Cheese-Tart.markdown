@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Hokkaido Baked Cheese Tart"
 date: 2025-07-06
-state: ready
+state: draft
 note: 10
 style: "Américain"
 diet: "vegetarian-friendly"

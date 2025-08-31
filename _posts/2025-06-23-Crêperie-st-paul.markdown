@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Crêperie st.paul"
 date: 2025-08-23
-state: ready
+state: draft
 note: 10
 style: "Bistro & Café"
 diet: "vegetarian-friendly"
@@ -14,7 +14,7 @@ image: "/images/Creperie st-paul.png"
 images:
   - image: "/images/Creperie st-paul_Natael.jpg"
   - image: "/images/Creperie st-paul_Nicolas.jpg"
-  - image: "/Creperie st-paul_repas.jpg"
+  - image: "/images/Creperie st-paul_repas.jpg"
 
 ratings:
   food:
