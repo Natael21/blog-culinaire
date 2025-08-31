@@ -1213,15 +1213,6 @@ function updateMapMarkers() {
       }
     }
   });
-
-  // Ajuster la vue de la carte selon la localisation sélectionnée
-  if (selectedLocation === 'Sherbrooke') {
-    map.setView([45.4040, -71.8929], 13);
-  } else if (selectedLocation === 'Montréal') {
-    map.setView([45.5017, -73.5673], 12);
-  } else if (selectedLocation === 'International') {
-    map.setView([40.7128, -74.0060], 10); // New York
-  }
 }
 
 // Fonction pour forcer le géocodage des restaurants visibles
@@ -1344,6 +1335,16 @@ function filterRestaurants() {
       if (coords) {
         addMarker(restaurant, coords);
       }
+
+      // Ajuster la vue de la carte selon la localisation sélectionnée
+    if (selectedLocation === 'Sherbrooke') {
+      map.setView([45.4040, -71.8929], 13);
+    } else if (selectedLocation === 'Montréal') {
+      map.setView([45.5017, -73.5673], 12);
+    } else if (selectedLocation === 'International') {
+      map.setView([40.7128, -74.0060], 10); // New York
+    }
+    
     });
 
     // Forcer le géocodage des restaurants visibles qui n'ont pas encore de coordonnées
