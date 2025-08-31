@@ -1230,6 +1230,15 @@ function updateMapMarkers() {
       padding: [50, 50],
       maxZoom: 15
     });
+  } else {
+    // Si aucun marqueur visible, centrer sur la localisation sélectionnée
+    if (selectedLocation === 'Sherbrooke') {
+      map.setView([45.4040, -71.8929], 13);
+    } else if (selectedLocation === 'Montréal') {
+      map.setView([45.5017, -73.5673], 12);
+    } else if (selectedLocation === 'International') {
+      map.setView([40.7128, -74.0060], 10); // New York
+    }
   }
 }
 
@@ -1445,37 +1454,8 @@ function resetFilters() {
   const sherbrookeBtn = document.querySelector('.location-btn[data-location="Sherbrooke"]');
   if (sherbrookeBtn) sherbrookeBtn.classList.add('active');
   
-  // Réafficher tous les restaurants
-  restaurantGrid.innerHTML = '';
-  restaurants.forEach(restaurant => {
-    restaurant.style.display = '';
-    restaurantGrid.appendChild(restaurant);
-  });
-
-  // Mettre à jour les marqueurs si on est en vue carte
-  if (map) {
-    // Supprimer tous les marqueurs existants
-    markers.forEach(marker => marker.remove());
-    markers.clear();
-
-    // Ajouter les marqueurs pour tous les restaurants
-    restaurants.forEach(restaurant => {
-      const coords = geocodedCoordinates.get(restaurant.id);
-      if (coords) {
-        addMarker(restaurant, coords);
-      }
-    });
-
-    // Ajuster la vue de la carte pour montrer tous les marqueurs
-    const bounds = L.latLngBounds(restaurants.map(restaurant => {
-      const coords = geocodedCoordinates.get(restaurant.id);
-      return coords ? [coords.lat, coords.lng] : null;
-    }).filter(coord => coord !== null));
-    
-    if (bounds.getNorth() !== bounds.getSouth() || bounds.getEast() !== bounds.getWest()) {
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }
+  // Appliquer le filtre après la réinitialisation
+  filterRestaurants();
 }
 
 // Ajouter les event listeners pour les cases à cocher
@@ -1562,6 +1542,8 @@ document.addEventListener('DOMContentLoaded', function() {
       restaurantGrid.style.display = 'none';
       mapContainer.style.display = 'block';
       await initMap();
+      // Appliquer les filtres actuels sur la carte
+      updateMapMarkers();
     }
 
     // Sauvegarder la vue actuelle
@@ -1670,25 +1652,12 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Une fois tous les marqueurs ajoutés, ajuster la vue
       Promise.all(geocodingPromises).then(() => {
-        const bounds = new L.LatLngBounds();
-        let hasVisibleMarkers = false;
-
-        markers.forEach(marker => {
-          if (map.hasLayer(marker)) {
-            bounds.extend(marker.getLatLng());
-            hasVisibleMarkers = true;
-          }
-        });
-
-        if (hasVisibleMarkers) {
-          map.fitBounds(bounds, {
-            padding: [50, 50],
-            maxZoom: 15
-          });
-        }
-        
-        console.log(`Marqueurs ajoutés: ${markers.size}/${restaurants.length}`);
+        // Appliquer les filtres actuels sur la carte
+        updateMapMarkers();
       });
+    } else {
+      // Si la carte existe déjà, juste s'assurer qu'elle est visible
+      map.invalidateSize();
     }
   }
 
