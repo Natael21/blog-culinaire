@@ -8,7 +8,7 @@ style: "Américain"
 diet: "vegetarian-friendly"
 description: "Probablement les meilleurs cheesecakes au monde"
 price: "budget"
-address: "315, 5th Ave, New York, New York, 10016, États-Unis"
+address: "315, 5th Avenue, New York, New York, 10016, United States"
 location: "International"
 image: "/images/Hokkaido Baked Cheese Tart.png"
 images:

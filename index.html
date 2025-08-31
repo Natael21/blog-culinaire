@@ -36,6 +36,19 @@ title: Accueil
         <i class="fas fa-sliders-h"></i> Filtres avancés
       </button>
 
+      <!-- Boutons de filtre par localisation -->
+      <div class="location-filters">
+        <button class="location-btn active" data-location="Sherbrooke">
+          <i class="fas fa-map-marker-alt"></i> Sherbrooke
+        </button>
+        <button class="location-btn" data-location="Montréal">
+          <i class="fas fa-map-marker-alt"></i> Montréal
+        </button>
+        <button class="location-btn" data-location="International">
+          <i class="fas fa-globe"></i> International
+        </button>
+      </div>
+
       <!-- Filtres avancés (cachés par défaut) -->
       <div id="advanced-filters" class="advanced-filters" style="display: none;">
         <!-- Tri -->
@@ -112,6 +125,7 @@ title: Accueil
            data-title="{{ post.title | downcase }}"
            data-price="{{ post.price | default: 'medium' }}"
            data-diet="{{ post.diet | default: 'standard' }}"
+           data-location="{{ post.location }}"
            data-lat="{{ post.latitude }}"
            data-lng="{{ post.longitude }}"
            data-image="{{ post.image }}"
@@ -289,6 +303,51 @@ title: Accueil
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
+/* Styles pour les boutons de filtre par localisation */
+.location-filters {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.location-btn {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  background: #f8f8f8;
+  color: var(--primary-color);
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.location-btn:hover {
+  background: #f0f0f0;
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.location-btn.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+}
+
+.location-btn i {
+  font-size: 1rem;
+}
+
 .advanced-filters {
   width: 100%;
   max-width: 600px;
@@ -394,6 +453,19 @@ title: Accueil
     padding: 0.7rem;
     font-size: 0.95rem;
     max-width: 200px;
+  }
+  
+  /* Styles pour les boutons de localisation sur mobile */
+  .location-filters {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+  }
+  
+  .location-btn {
+    padding: 0.7rem;
+    font-size: 0.9rem;
+    min-width: auto;
   }
   
   /* Masquer les boutons de vue sur mobile */
@@ -918,10 +990,12 @@ const priceFilter = document.getElementById('price-filter');
 const advancedFiltersToggle = document.getElementById('advanced-filters-toggle');
 const advancedFilters = document.getElementById('advanced-filters');
 const restaurantGrid = document.getElementById('restaurant-grid');
+const locationButtons = document.querySelectorAll('.location-btn');
 let restaurants = Array.from(restaurantGrid.children);
 let map = null;
 let markers = new Map(); // Pour stocker les marqueurs
 let geocodedCoordinates = new Map(); // Pour stocker les coordonnées géocodées
+let selectedLocation = 'Sherbrooke'; // Localisation sélectionnée par défaut
 
 // Cache pour le géocodage
 const geocodeCache = {
@@ -1046,6 +1120,20 @@ advancedFiltersToggle.addEventListener('click', function() {
     '<i class="fas fa-sliders-h"></i> Filtres avancés';
 });
 
+// Gestion des boutons de localisation
+locationButtons.forEach(button => {
+  button.addEventListener('click', function() {
+    // Retirer la classe active de tous les boutons
+    locationButtons.forEach(btn => btn.classList.remove('active'));
+    // Ajouter la classe active au bouton cliqué
+    this.classList.add('active');
+    // Mettre à jour la localisation sélectionnée
+    selectedLocation = this.dataset.location;
+    // Appliquer le filtre
+    filterRestaurants();
+  });
+});
+
 // Fonction pour mettre à jour les marqueurs sur la carte
 function updateMapMarkers() {
   if (!map) return;
@@ -1063,10 +1151,12 @@ function updateMapMarkers() {
     const style = restaurant.dataset.style;
     const price = restaurant.dataset.price;
     const diet = restaurant.dataset.diet;
+    const location = restaurant.dataset.location;
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
+    const locationMatch = !selectedLocation || location === selectedLocation;
     
     // Nouvelle logique pour le régime alimentaire
     let dietMatch = true;
@@ -1090,7 +1180,7 @@ function updateMapMarkers() {
       }
     }
 
-    if (titleMatch && styleMatch && priceMatch && dietMatch) {
+    if (titleMatch && styleMatch && priceMatch && dietMatch && locationMatch) {
       if (!map.hasLayer(marker)) {
         marker.addTo(map);
       }
@@ -1138,10 +1228,12 @@ function filterRestaurants() {
     const style = restaurant.dataset.style;
     const price = restaurant.dataset.price;
     const diet = restaurant.dataset.diet;
+    const location = restaurant.dataset.location;
     
     const titleMatch = !searchTitle || title.includes(searchTitle);
     const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
     const priceMatch = !selectedPrice || price === selectedPrice;
+    const locationMatch = !selectedLocation || location === selectedLocation;
     
     // Nouvelle logique pour le régime alimentaire avec cases à cocher
     let dietMatch = true;
@@ -1166,7 +1258,7 @@ function filterRestaurants() {
       }
     }
     
-    return titleMatch && styleMatch && priceMatch && dietMatch;
+    return titleMatch && styleMatch && priceMatch && dietMatch && locationMatch;
   });
 
   // Trier les restaurants filtrés
@@ -1293,6 +1385,12 @@ function resetFilters() {
   if (document.getElementById('sort-filter')) document.getElementById('sort-filter').value = 'date-desc';
   if (advancedFilters) advancedFilters.style.display = 'none';
   if (advancedFiltersToggle) advancedFiltersToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
+  
+  // Réinitialiser le filtre de localisation à Sherbrooke
+  selectedLocation = 'Sherbrooke';
+  locationButtons.forEach(btn => btn.classList.remove('active'));
+  const sherbrookeBtn = document.querySelector('.location-btn[data-location="Sherbrooke"]');
+  if (sherbrookeBtn) sherbrookeBtn.classList.add('active');
   
   // Réafficher tous les restaurants
   restaurantGrid.innerHTML = '';
