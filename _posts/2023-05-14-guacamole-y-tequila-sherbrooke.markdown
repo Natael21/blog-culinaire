@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Belle ambiance mexicaine, ce restaurant offre des classiques mexicains ainsi qu'une grande variété de cocktails."
 price: "medium"
 address: "2340 Rue King Ouest, Sherbrooke, QC J1J 2E8"
+location: "Sherbrooke"
 image: "/images/Guacamole y tequila.png"
 images:
   - image: "/images/Guecamole y Tequila Nicolas.png"

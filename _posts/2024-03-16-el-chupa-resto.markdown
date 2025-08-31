@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "C'est la relève du fameux restaurant El Tabernaco ! De plus, la décoration et l'ambiance est la même qu'avant, ce qui est assez incroyable !"
 price: "medium"
 address: "243 Rue Alexandre, Sherbrooke, QC J1H 4S8"
+location: "Sherbrooke"
 image: "/images/El Chupa Resto.png"
 images:
   - image: "/images/El Chupa Resto_natael.jpg"

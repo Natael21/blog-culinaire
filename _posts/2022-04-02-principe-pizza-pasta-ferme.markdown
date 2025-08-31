@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Un établissement qui proposait une cuisine italienne traditionnelle, avec des pizzas et des pâtes authentiques dans une ambiance familiale chaleureuse."
 price: "medium"
 address: "1824 Rue King Ouest, Sherbrooke, QC J1J 2E2"
+location: "Sherbrooke"
 image: "/images/la brigade resto.jpg"
 images:
   - image: "/images/La Brigade Nicolas et Nataël.jpg"

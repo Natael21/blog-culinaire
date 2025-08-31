@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Un charmant café-bistro qui vous accueille dans une ambiance chaleureuse et conviviale !"
 price: "medium"
 address: "1700 Rue King Ouest, Sherbrooke, QC J1J 2C9"
+location: "Sherbrooke"
 image: "/images/Caffucino.jpg"
 images:
   - image: "/images/Caffucino_Nicolas.jpg"

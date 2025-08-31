@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Restaurant libanais offrant des portions généreuses et des desserts succulents."
 price: "budget"
 address: "966, Rue Galt Ouest, Sherbrooke, Quebec, J1H 1Z7, Canada"
+location: "Sherbrooke"
 image: "/images/Restaurant Beyrouth.png"
 images:
   - image: "/images/Restaurant Beyrouth_Natael.jpg"

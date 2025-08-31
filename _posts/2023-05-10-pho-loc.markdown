@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Une authentique cuisine vietnamienne dans un cadre pittoresque et intime"
 price: "medium"
 address: "1425 Rue King Ouest, Sherbrooke, QC J1J 2C1"
+location: "Sherbrooke"
 image: "/images/pho loc.PNG"
 images:
   - image: "/images/Pho Loc Nicolas.jpg"

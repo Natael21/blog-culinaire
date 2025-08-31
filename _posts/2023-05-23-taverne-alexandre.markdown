@@ -9,6 +9,7 @@ diet: "none"
 description: "Une très belle ambiance comme on pourrait s'attendre d'un pub !"
 price: "medium"
 address: "440 Rue Alexandre, Sherbrooke, QC J1H 4T4"
+location: "Sherbrooke"
 image: "/images/Taverne Alexandre.PNG"
 images:
   - image: "/images/Taverne Alexandre Nicolas.jpg"

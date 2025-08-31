@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Un endroit chaleureux où les viennoiseries et les sandwichs sont préparés avec passion."
 price: "budget"
 address: "242 Rue King Ouest, Sherbrooke, QC J1H 1P8"
+location: "Sherbrooke"
 image: "/images/Les Vraies Richesses.jpeg"
 images:
 

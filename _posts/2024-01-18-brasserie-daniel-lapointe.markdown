@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Une brasserie réputée pour ses délicieuses crevettes à volonté les jeudis soirs !"
 price: "medium"
 address: "2660 Rue King Ouest, Sherbrooke, QC J1L 1C5"
+location: "Sherbrooke"
 image: "/images/Daniel lapointe.jpg"
 images:
   - image: "/images/Daniel Lapointe Natael.jpg"

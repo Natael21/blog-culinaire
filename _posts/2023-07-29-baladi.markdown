@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Cuisine libanaise authentique dans un cadre chaleureux."
 price: "medium"
 address: "1564 Rue Denault, Sherbrooke, QC J1H 2R2"
+location: "Sherbrooke"
 image: "/images/Baladi.jpeg"
 images:
   - image: "/images/Baladi Nicolas.jpg"

@@ -9,6 +9,7 @@ diet: "vegetarian-friendly,vegan-friendly"
 description: "Un restaurant végétarien offrant des burgers créatifs et une sélection impressionnante de boissons locales"
 price: "medium"
 address: "117 Rue Wellington Nord, Sherbrooke, QC J1H 5B9"
+location: "Sherbrooke"
 image: "/images/La buvette.PNG"
 images:
   - image: "/images/La Buvette Nicolas.jpg"

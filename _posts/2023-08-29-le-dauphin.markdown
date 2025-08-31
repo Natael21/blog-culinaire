@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Un bistro offrant des plats classiques comme des côtes levées et des frites dans une ambiance chaleureuse"
 price: "medium"
 address: "1269 Rue King Est, Sherbrooke, QC J1G 1E7"
+location: "Sherbrooke"
 image: "/images/Le Dauphin.jpg"
 images:
   - image: "/images/Le Dauphin_Nataël.jpg"

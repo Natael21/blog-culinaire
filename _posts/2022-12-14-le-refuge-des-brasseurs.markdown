@@ -10,6 +10,7 @@ description: "Une microbrasserie offrant des plats gastronomiques et une sélect
 price: "medium"
 address: "2155 Rue Galt Ouest, Sherbrooke, QC J1K 1K3"
 image: "/images/Le Refuge des Brasseurs - Microbrasserie.jpg"
+location: "Sherbrooke"
 images:
   - image: "/images/Refuge des Brasseurs Nicolas.jpg"
   - image: "/images/Refuge des Brasseurs Nataël.jpg"

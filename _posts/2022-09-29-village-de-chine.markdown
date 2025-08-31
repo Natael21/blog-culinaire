@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Un restaurant chinois avec un vaste menu, idéal pour découvrir la cuisine chinoise traditionnelle"
 price: "budget"
 address: "1748 Rue King Ouest, Sherbrooke, QC J1J 2C9"
+location: "Sherbrooke"
 image: "/images/Village de chine.PNG"
 images:
 

@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Cantine promouvant des classiques réinventés et savoureux"
 price: "budget"
 address: "96, Rue King Ouest, Sherbrooke, Quebec, J1H 1P3, Canada"
+location: "Sherbrooke"
 image: "/images/Cantine 75.png"
 images:
   - image: "/images/Cantine 75_Natael.jpg"

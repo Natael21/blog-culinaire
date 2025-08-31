@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Un fast-food mexicain parfait pour s'initier à la cuisine mexicaine avec des prix abordables"
 price: "budget"
 address: "54 Bd Jacques-Cartier Nord, Sherbrooke, QC J1J 2Z8"
+location: "Sherbrooke"
 image: "/images/Habenaros Grill Mexicain.JPG"
 images:
 

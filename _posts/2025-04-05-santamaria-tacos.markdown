@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Restaurant de tacos rafraichissant et authentique !"
 price: "budget"
 address: "38, Rue Wellington Sud, Sherbrooke, Quebec, J1H 5C7, Canada"
+location: "Sherbrooke"
 image: "/images/SantaMaria tacos.jpg"
 images:
   - image: "/images/SantaMaria tacos_Natael.JPG"

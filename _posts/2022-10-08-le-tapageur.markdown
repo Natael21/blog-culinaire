@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Un bistro festif offrant des plats spectaculaires et une ambiance vivante, parfait pour les célébrations"
 price: "medium"
 address: "83 Rue King Ouest, Sherbrooke, QC J1H 1P1"
+location: "Sherbrooke"
 image: "/images/Le Tapageur.jpg"
 images:
 

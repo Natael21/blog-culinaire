@@ -9,6 +9,7 @@ diet: "vegetarian-friendly"
 description: "Restaurant spacieux et luxueux offrant burgers, tacos, poutines et tartares, accompagnés d'une sélection de vins et bières artisanales."
 price: "medium"
 address: "1175 Rue King Ouest, Sherbrooke, QC J1H 3H8"
+location: "Sherbrooke"
 image: "/images/OMG_Resto.jpg"
 images:
   - image: "/images/OMG_natael.JPG"
