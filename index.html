@@ -1364,6 +1364,9 @@ function filterRestaurants() {
       }
     });
 
+    // Forcer le géocodage des restaurants visibles qui n'ont pas encore de coordonnées
+    forceGeocodeVisibleRestaurants();
+
     // Ajuster la vue de la carte pour montrer tous les marqueurs
     if (filteredRestaurants.length > 0) {
       const bounds = L.latLngBounds(filteredRestaurants.map(restaurant => {
