@@ -1148,6 +1148,12 @@ locationButtons.forEach(button => {
     selectedLocation = this.dataset.location;
     // Appliquer le filtre
     filterRestaurants();
+    // Mettre à jour les marqueurs sur la carte si on est en vue carte
+    if (map) {
+      updateMapMarkers();
+      // Forcer le géocodage des restaurants visibles qui n'ont pas encore de coordonnées
+      forceGeocodeVisibleRestaurants();
+    }
   });
 });
 
@@ -1225,6 +1231,36 @@ function updateMapMarkers() {
       maxZoom: 15
     });
   }
+}
+
+// Fonction pour forcer le géocodage des restaurants visibles
+async function forceGeocodeVisibleRestaurants() {
+  if (!map) return;
+  
+  const visibleRestaurants = Array.from(restaurantGrid.children).filter(restaurant => 
+    restaurant.style.display !== 'none'
+  );
+  
+  for (const restaurant of visibleRestaurants) {
+    const coords = geocodedCoordinates.get(restaurant.id);
+    if (!coords) {
+      const address = restaurant.dataset.address;
+      if (address) {
+        console.log(`Géocodage forcé pour ${restaurant.querySelector('h2').textContent}`);
+        const newCoords = await geocodeAddress(address);
+        if (newCoords) {
+          geocodedCoordinates.set(restaurant.id, newCoords);
+          restaurant.dataset.lat = newCoords.lat;
+          restaurant.dataset.lng = newCoords.lng;
+          addMarker(restaurant, newCoords);
+          console.log(`✅ Marqueur ajouté pour ${restaurant.querySelector('h2').textContent}`);
+        }
+      }
+    }
+  }
+  
+  // Ajuster la vue de la carte après avoir ajouté les nouveaux marqueurs
+  updateMapMarkers();
 }
 
 // Modifier la fonction filterRestaurants pour gérer les cases à cocher
