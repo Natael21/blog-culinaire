@@ -1,76 +1,27 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+# =========================
+#   Jekyll – CritiqueResto
+# =========================
 
-# Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
-title: Blog Culinaire Sherbrooke
+title: CritiqueResto – Avis & critiques de restaurants
 email: your-email@example.com
-description: >- # this means to ignore newlines until "baseurl:"
-  Nos critiques honnêtes de restaurants à Sherbrooke – pour les amoureux de bonne bouffe
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://appreciationrestaurantssherbrooke.netlify.app" # the base hostname & protocol for your site, e.g. http://example.com
+description: >-
+  CritiqueResto publie des critiques honnêtes de restaurants partout dans le monde.
+  Guides, avis détaillés, photos et expériences culinaires.
 
-# Disqus Comments
+# Domaine canonique (sans www)
+url: "https://critiqueresto.com"
+baseurl: ""           # servi à la racine du domaine
+
+# Commentaires (à ajuster si tu utilises Disqus)
 disqus:
-  shortname: appreciationrestaurantssherbrooke # REMPLACEZ CECI par le shortname que vous avez choisi sur Disqus
+  shortname: critiqueresto   # <-- remplace par ton vrai shortname ou retire cette section
 
-# Build settings
+# Thème
 theme: minima
+show_excerpts: false
 
-# minima theme settings
-show_excerpts: false # set to true to show excerpts on the homepage
-
-# Minima date format
-# refer to http://shopify.github.io/liquid/filters/date/ if you want to customize this
 minima:
   date_format: "%b %-d, %Y"
-
-# If you want to link only specific pages in your header, uncomment
-# this and add the path to the pages in order as they should show up
-#header_pages:
-# - about.html
-
-# social links
-twitter_username: jekyllrb
-github_username:  jekyll
-rss: rss
-# dribbble_username: jekyll
-# facebook_username: jekyll
-# flickr_username: jekyll
-# instagram_username: jekyll
-# linkedin_username: jekyll
-# pinterest_username: jekyll
-# youtube_username: jekyll
-# googleplus_username: +jekyll
-
-# Mastodon instances
-# mastodon:
-# - username: jekyll
-#   instance: example.com
-# - username: jekyll2
-#   instance: example.com
-
-# Exclude from processing.
-# The following items will not be processed, by default. Create a custom list
-# to override the default setting.
-# exclude:
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
 
 # Collections
 collections:
@@ -78,26 +29,22 @@ collections:
     output: false
     permalink: /upcoming/:path/
 
-# Performance Optimizations
+# Performance / build
 incremental: true
 liquid:
   error_mode: warn
   strict_filters: true
-  strict_variables: false  # Pour éviter les erreurs non critiques
-
-# Cache settings
+  strict_variables: false
 cache:
   enabled: true
   path: .jekyll-cache
-
-# Build optimizations
-limit_posts: 0  # Désactivé pour garder tous les posts
+limit_posts: 0
 future: false
 unpublished: false
-lsi: false  # Désactive l'indexation des posts similaires
-profile: false  # Désactive le profilage
+lsi: false
+profile: false
 
-# Compression
+# CSS/HTML compression
 compress_html:
   clippings: all
   comments: ["<!-- ", " -->"]
@@ -105,17 +52,24 @@ compress_html:
   blanklines: false
   profile: false
 
-# Asset Pipeline
+# Sass
 sass:
   style: compressed
   sourcemap: never
 
-# Plugin settings
+# Plugins
+plugins:
+  - jekyll-sitemap
+
+# jekyll-sitemap options (fichier auto à la racine du site)
 jekyll-sitemap:
   filename: "/sitemap.xml"
 
-# Exclude non-essential files from processing
+# Fichiers à exclure de la build et de l'indexation
 exclude:
+  - admin/
+  - admin/**/*
+  - google*.html
   - Gemfile
   - Gemfile.lock
   - node_modules
