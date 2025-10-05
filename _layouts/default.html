@@ -1,84 +1,60 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
+    <!-- Doivent arriver avant {% seo %} -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ page.title }} | Blog Culinaire</title>
 
-    <link rel="canonical" href="{{ site.url }}{{ page.url | replace:'index.html','' }}" />
-    
+    {%- seo -%}
+
     <!-- Préchargement des ressources critiques -->
     <link rel="preload" href="{{ '/assets/css/style.css' | relative_url }}" as="style">
     <link rel="preload" href="/images/header.jpg" as="image">
-    
+
     <!-- Préconnexion aux domaines externes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    
+
     <!-- Chargement des styles -->
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
-    
+
     <!-- Fallback pour le chargement des polices si JavaScript est désactivé -->
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </noscript>
-    
+
     <!-- Chargement différé du widget Netlify Identity -->
     <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    
+
     <!-- Leaflet CSS et JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
+
     <style>
       /* Styles critiques inlinés */
       .site-return {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 10px 20px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        position: fixed; top: 20px; right: 20px;
+        padding: 10px 20px; background-color: #2c3e50; color: white;
+        border: none; border-radius: 8px; font-weight: 600;
+        text-decoration: none; transition: all 0.3s ease; z-index: 1000;
+        display: flex; align-items: center; gap: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
-      .site-return:hover {
-        background-color: #34495e;
-        transform: translateY(-2px);
-      }
-      .site-return i {
-        font-size: 0.9em;
-      }
+      .site-return:hover { background-color: #34495e; transform: translateY(-2px); }
+      .site-return i { font-size: 0.9em; }
       @media (max-width: 768px) {
-        .site-return {
-          top: 10px;
-          right: 10px;
-          padding: 8px 15px;
-          font-size: 0.9em;
-        }
+        .site-return { top: 10px; right: 10px; padding: 8px 15px; font-size: 0.9em; }
       }
-      
-      /* Styles pour éviter le flash de contenu non stylé */
-      .hero {
-        min-height: 400px;
-        position: relative;
-        background-color: #f8f9fa;
-      }
+      /* Évite le flash non stylé */
+      .hero { min-height: 400px; position: relative; background-color: #f8f9fa; }
     </style>
   </head>
+
   <body>
     <header class="hero" style="background-image: url('/images/header.jpg');">
       <div class="hero-overlay">
@@ -119,22 +95,17 @@
       // Optimisation du scroll to top avec throttling
       let scrollTimeout;
       const scrollToTopButton = document.getElementById('scroll-to-top');
-      
+
       window.addEventListener('scroll', () => {
         if (!scrollTimeout) {
           scrollTimeout = setTimeout(() => {
             if (window.pageYOffset > 300) {
               scrollToTopButton.classList.add('show');
-              // Vérifier si on est en bas de la page
               const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
-              if (isBottom) {
-                scrollToTopButton.classList.add('bottom-page');
-              } else {
-                scrollToTopButton.classList.remove('bottom-page');
-              }
+              if (isBottom) { scrollToTopButton.classList.add('bottom-page'); }
+              else { scrollToTopButton.classList.remove('bottom-page'); }
             } else {
-              scrollToTopButton.classList.remove('show');
-              scrollToTopButton.classList.remove('bottom-page');
+              scrollToTopButton.classList.remove('show', 'bottom-page');
             }
             scrollTimeout = null;
           }, 100);
@@ -142,10 +113,7 @@
       });
 
       scrollToTopButton.addEventListener('click', () => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     </script>
   </body>
