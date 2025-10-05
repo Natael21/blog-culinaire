@@ -73,13 +73,6 @@
   to = "/admin/index.html"
   status = 200
 
-# Forcer le domaine principal (avec www)
-[[redirects]]
-  from = "https://critiqueresto.com/*"
-  to = "https://www.critiqueresto.com/:splat"
-  status = 301
-  force = true
-
 # Rediriger l’ancien site Netlify vers le nouveau domaine
 [[redirects]]
   from = "https://appreciationrestaurantssherbrooke.netlify.app/*"
