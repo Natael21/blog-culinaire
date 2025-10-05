@@ -1,5 +1,9 @@
+# =============================
+# 🔧 Netlify configuration pour CritiqueResto.com
+# =============================
+
 [build]
-  publish = "."
+  publish = "_site" # Jekyll génère le site ici
   command = "bundle install --deployment && JEKYLL_ENV=production bundle exec jekyll build --trace"
 
 [build.environment]
@@ -9,6 +13,9 @@
   BUNDLER_VERSION = "1.17.1"
   CONCURRENT_DOWNLOAD = "true"
 
+# =============================
+# 🔄 Traitement automatique (optimisations)
+# =============================
 [build.processing]
   skip_processing = false
 
@@ -26,20 +33,27 @@
 [build.processing.html]
   pretty_urls = true
 
-# Cache Headers
+# =============================
+# ⚙️ Cache & sécurité
+# =============================
+
+# HTML: revalidation rapide
 [[headers]]
   for = "/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000"
+    Cache-Control = "public, max-age=0, must-revalidate"
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
 
+# Assets: cache long
 [[headers]]
   for = "/assets/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000"
+    Cache-Control = "public, max-age=31536000, immutable"
 
-# Build Cache
+# =============================
+# 🧱 Build cache
+# =============================
 [build.cache]
   directories = [
     "vendor/bundle",
@@ -49,23 +63,54 @@
     ".bundle"
   ]
 
-# Redirects
+# =============================
+# 🔀 Redirections
+# =============================
+
+# Interface admin (CMS)
 [[redirects]]
   from = "/admin/*"
   to = "/admin/index.html"
   status = 200
 
+# Forcer le domaine principal (avec www)
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+  from = "https://critiqueresto.com/*"
+  to = "https://www.critiqueresto.com/:splat"
+  status = 301
+  force = true
 
+# Rediriger l’ancien site Netlify vers le nouveau domaine
+[[redirects]]
+  from = "https://appreciationrestaurantssherbrooke.netlify.app/*"
+  to   = "https://www.critiqueresto.com/:splat"
+  status = 301
+  force = true
+
+# =============================
+# 🔍 Plugins
+# =============================
+
+# Génère un sitemap automatiquement
+[[plugins]]
+  package = "@netlify/plugin-sitemap"
+  [plugins.inputs]
+  buildDir = "_site"
+  siteUrl  = "https://www.critiqueresto.com"
+  exclude  = [
+    "**/admin/**",
+    "google*.html"
+  ]
+
+# Audit Lighthouse (qualité du site)
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
 
-# Build optimization
+# =============================
+# 🚀 Contextes
+# =============================
 [context.production]
   command = "JEKYLL_ENV=production bundle exec jekyll build --trace"
 
 [context.deploy-preview]
-  command = "JEKYLL_ENV=production bundle exec jekyll build --trace --drafts" 
+  command = "JEKYLL_ENV=production bundle exec jekyll build --trace --drafts"
