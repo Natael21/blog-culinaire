@@ -3,6 +3,37 @@ layout: default
 comments: true
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Review",
+  "headline": "{{ page.title | escape }}",
+  "datePublished": "{{ page.date | date_to_xmlschema }}",
+  "author": {
+    "@type": "Organization",
+    "name": "CritiqueResto"
+  },
+  "reviewBody": {{ page.description | jsonify }},
+  "reviewRating": {
+    "@type": "Rating",
+    "ratingValue": "{{ page.note }}",
+    "bestRating": "10",
+    "worstRating": "0"
+  },
+  "itemReviewed": {
+    "@type": "Restaurant",
+    "name": "{{ page.title | escape }}",
+    "address": "{{ page.address | escape }}",
+    "servesCuisine": "{{ page.style | escape }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "CritiqueResto",
+    "url": "{{ site.url }}"
+  }
+}
+</script>
+
 <link rel="stylesheet" href="{{ '/assets/css/restaurant.css' | relative_url }}">
 
 <article class="restaurant-detail">
