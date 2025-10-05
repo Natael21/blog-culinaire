@@ -68,8 +68,6 @@ jekyll-sitemap:
 
 # Fichiers à exclure de la build et de l'indexation
 exclude:
-  - admin/
-  - admin/**/*
   - google*.html
   - Gemfile
   - Gemfile.lock
