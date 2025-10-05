@@ -96,7 +96,7 @@
   package = "@netlify/plugin-sitemap"
   [plugins.inputs]
   buildDir = "_site"
-  siteUrl  = "https://www.critiqueresto.com"
+  baseUrl  = "https://www.critiqueresto.com"
   exclude  = [
     "**/admin/**",
     "google*.html"
