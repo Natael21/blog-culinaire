@@ -60,6 +60,7 @@ sass:
 # Plugins
 plugins:
   - jekyll-sitemap
+  - jekyll-seo-tag
 
 # jekyll-sitemap options (fichier auto à la racine du site)
 jekyll-sitemap:
