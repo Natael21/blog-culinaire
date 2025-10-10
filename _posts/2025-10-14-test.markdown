@@ -1,0 +1,46 @@
+---
+layout: restaurant
+title: "test"
+date: 2025-10-14
+state: draft
+note: 5.0
+style: "Asiatique"
+diet: "none"
+description: "se"
+price: "budget"
+address: "Ramallah, 123, Palestinian Territories"
+location: "Sherbrooke"
+image: "/images/image (2).png"
+images:
+
+
+ratings:
+  food:
+    score: 5
+    criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
+    comment: "f"
+  service:
+    score: 5
+    criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
+    comment: "f"
+  ambiance:
+    score: 5
+    criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
+    comment: "f"
+  value:
+    score: 5
+    criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
+    comment: "d"
+  originality:
+    score: 5
+    criteria: 'Innovation, créativité, authenticité'
+    comment: "d"
+  overall:
+    score: 5
+    criteria: 'Expérience globale, facteur "wow"'
+    comment: "d"
+---
+
+
+
+d
