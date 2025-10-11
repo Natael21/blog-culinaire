@@ -154,14 +154,12 @@ comments: true
   </div>
   {% endif %}
 
-  <!-- Section Commentaires -->
   <div class="comments-section">
     <h2>Commentaires</h2>
     <div id="disqus_thread"></div>
   </div>
 </div>
 
-<!-- Navigation buttons -->
 <div class="restaurant-navigation">
   {% assign posts = site.posts | where: "layout", "restaurant" | where: "state", "ready" | sort: "date" | reverse %}
   {% for post in posts %}
@@ -189,7 +187,6 @@ comments: true
   {% endfor %}
 </div>
 
-<!-- Modal -->
 <div id="imageModal" class="modal">
   <span class="close" onclick="closeModal()">&times;</span>
   <button class="nav-arrow prev" onclick="changeImage(-1)">
@@ -207,7 +204,6 @@ comments: true
 </a>
 
 <script>
-  // Store the scroll position when leaving the page
   window.addEventListener('beforeunload', function() {
     sessionStorage.setItem('scrollPosition', window.scrollY);
   });
@@ -220,7 +216,6 @@ comments: true
     window.location.href = "{{ '/' | relative_url }}";
   }
 
-  // Handle back button appearance on scroll
   window.addEventListener('scroll', function() {
     const backButton = document.querySelector('.back-button');
     const isBottom = window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 100;
@@ -240,12 +235,10 @@ comments: true
     const modalImg = document.getElementById('modalImage');
     modal.style.display = "flex";
     
-    // Récupérer toutes les images de la galerie
     const galleryItems = document.querySelectorAll('.gallery-item img');
     galleryImages.length = 0; // Vider le tableau
     galleryItems.forEach(img => galleryImages.push(img.src));
     
-    // Trouver l'index de l'image cliquée
     const clickedImage = element.querySelector('img');
     currentImageIndex = galleryImages.indexOf(clickedImage.src);
     
