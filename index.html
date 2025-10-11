@@ -9,10 +9,8 @@ title: Accueil
     <p>Explorez nos critiques de restaurants ci-dessous</p>
   </div>
 
-  <!-- Barre de filtres -->
   <div class="filters-container">
     <div class="filter-group">
-      <!-- Barre de recherche et boutons de vue -->
       <div class="search-and-view">
         <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
@@ -31,12 +29,10 @@ title: Accueil
         </div>
       </div>
 
-      <!-- Bouton filtres avancés -->
       <button id="advanced-filters-toggle" class="advanced-filters-btn">
         <i class="fas fa-sliders-h"></i> Filtres avancés
       </button>
 
-      <!-- Boutons de filtre par localisation -->
       <div class="location-filters">
         <button class="location-btn active" data-location="Sherbrooke">
           <i class="fas fa-map-marker-alt"></i> Sherbrooke
@@ -49,9 +45,7 @@ title: Accueil
         </button>
       </div>
 
-      <!-- Filtres avancés (cachés par défaut) -->
       <div id="advanced-filters" class="advanced-filters" style="display: none;">
-        <!-- Tri -->
         <div class="filter-item">
           <label for="sort-filter">Trier par</label>
           <select id="sort-filter" class="filter-select">
@@ -64,7 +58,6 @@ title: Accueil
           </select>
         </div>
 
-        <!-- Style de cuisine -->
         <div class="filter-item">
           <label for="style-filter">Style de cuisine</label>
           <select id="style-filter" class="filter-select">
@@ -80,7 +73,6 @@ title: Accueil
           </select>
         </div>
 
-        <!-- Prix -->
         <div class="filter-item">
           <label for="price-filter">Fourchette de prix</label>
           <select id="price-filter" class="filter-select">
@@ -91,7 +83,6 @@ title: Accueil
           </select>
         </div>
 
-        <!-- Régime alimentaire -->
         <div class="filter-item">
           <label>Régime alimentaire</label>
           <div class="checkbox-group">
@@ -106,7 +97,6 @@ title: Accueil
           </div>
         </div>
 
-        <!-- Bouton de réinitialisation -->
         <button class="reset-filters" onclick="resetFilters()">
           <i class="fas fa-undo"></i> Réinitialiser les filtres
         </button>
@@ -114,7 +104,6 @@ title: Accueil
     </div>
   </div>
 
-  <!-- Grille des restaurants -->
   <div class="post-grid" id="restaurant-grid">
     {% for post in site.posts %}
       {% if post.layout == 'restaurant' and post.state == 'ready' %}
@@ -166,12 +155,10 @@ title: Accueil
     {% endfor %}
   </div>
 
-  <!-- Conteneur de la carte -->
   <div id="map-container" style="display: none;" class="map-view"></div>
 </div>
 
 <style>
-/* Styles généraux */
 .main-content {
   max-width: 1400px;
   margin: 0 auto;
@@ -303,7 +290,6 @@ title: Accueil
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Styles pour les boutons de filtre par localisation */
 .location-filters {
   display: flex;
   gap: 1rem;
@@ -455,7 +441,6 @@ title: Accueil
     max-width: 200px;
   }
   
-  /* Styles pour les boutons de localisation sur mobile */
   .location-filters {
     flex-direction: column;
     gap: 0.5rem;
@@ -468,12 +453,10 @@ title: Accueil
     min-width: auto;
   }
   
-  /* Masquer les boutons de vue sur mobile */
   .view-buttons {
     display: none !important;
   }
   
-  /* Forcer la vue en pastilles sur mobile */
   .post-grid {
     display: grid !important;
     grid-template-columns: 1fr !important;
@@ -498,7 +481,6 @@ title: Accueil
   }
 }
 
-/* Spécifique pour l'orientation portrait sur mobile */
 @media (max-width: 768px) and (orientation: portrait) {
   .filters-container {
     padding: 1rem;
@@ -634,7 +616,6 @@ title: Accueil
   font-size: 0.9rem;
 }
 
-/* Style pour la vue en liste */
 .post-grid.list-view {
   display: flex;
   flex-direction: column;
@@ -776,7 +757,6 @@ title: Accueil
   }
 }
 
-/* Styles spécifiques pour la vue en grille */
 .post-grid.grid-view {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -880,7 +860,6 @@ title: Accueil
   }
 }
 
-/* Style pour la vue carte */
 .map-view {
   width: 100%;
   height: 700px;
@@ -889,7 +868,6 @@ title: Accueil
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Style pour les popups de la carte */
 .map-popup {
   padding: 0;
   max-width: 300px;
@@ -946,7 +924,6 @@ title: Accueil
   color: #2ecc71;
 }
 
-/* Ajustements responsive pour la carte */
 @media (max-width: 768px) {
   .map-view {
     height: calc(100vh - 250px);
@@ -955,7 +932,6 @@ title: Accueil
   }
 }
 
-/* Styles pour les cases à cocher */
 .checkbox-group {
   display: flex;
   flex-direction: column;
