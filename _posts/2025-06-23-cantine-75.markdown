@@ -20,11 +20,11 @@ ratings:
   food:
     score: 8
     criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: "Plat à prime à bord classique d'une cantine, mais qui offre une explosion de saveur assez surprenante et délicieuse."
+    comment: "« Des plats à prime abord classiques, mais qui ont tous un “twist” réinventé et très savoureux !"
   service:
     score: 8
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: "Très bon service amical et rapide, mais puisque ça reste une cantine avec un service minimal, la note de 10 n'est pas donnée."
+    comment: "Service très bon, amical et rapide, mais comme il s’agit d’une cantine au service minimal, la note de 10 n’est pas tout à fait méritée."
   ambiance:
     score: 7
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
@@ -40,7 +40,7 @@ ratings:
   overall:
     score: 9
     criteria: 'Expérience globale, facteur "wow"'
-    comment: "Très agréablement surpris du choix et de la qualité des saveurs et ingrédients utilisés !\nC'est un endroit où nous allons retourner c'est certains !"
+    comment: "Très agréablement surpris du choix et de la qualité des saveurs et ingrédients utilisés !"
 ---
 
 

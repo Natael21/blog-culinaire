@@ -33,7 +33,7 @@ ratings:
   value:
     score: 7
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
-    comment: "Très bonne qualité, mais pour être rassasié, il faut commander deux assiettes de tacos. Le rapport qualité/prix est donc un peu moins impressionnant que dans d'autres restaurants."
+    comment: "Très bonne qualité, mais pour être rassasié, il faut commander deux assiettes de tacos. Le rapport qualité/prix est donc un peu moins impressionnant que dans d"
   originality:
     score: 9
     criteria: 'Innovation, créativité, authenticité'
@@ -46,4 +46,14 @@ ratings:
 
 
 
-À compléter
+<strong>Nataël :</strong>
+
+Ce n’était pas ma première visite, et c’est justement ce qui m’a donné envie de le faire découvrir à Nicolas ! Les tacos peuvent être un peu chers, mais lors de la journée « tacos 2 pour 1 », le rapport qualité‑prix est excellent. Les saveurs sont au rendez‑vous et assez proches de ce que l’on trouve au Mexique.
+
+Ce qui se démarque vraiment, ce sont les bananes frites en dessert : absolument sublimes ! Des bananes plantain frites, nappées d’un caramel façon dulce de leche blanc, et agrémentées d’une sorte de fromage feta mexicain, moins salé, qui se marie parfaitement avec le reste.
+
+Le seul bémol : les chaises deviennent rapidement inconfortables.
+
+<strong>Nicolas :</strong>
+
+À venir

@@ -45,4 +45,16 @@ ratings:
 
 
 
-À compléter
+<strong>Nataël :</strong>
+
+Avec une façade douteuse, j’appréhendais un peu en arrivant, mais j’ai été très agréablement surpris ! Les employés sont serviables et sympathiques, et la nourriture est vraiment bonne, respectant parfaitement le style libanais.
+
+J’ai pris une assiette shawarma avec du bœuf et de l’agneau, accompagnée de patates en cubes rissolées, de riz aromatisé et d’une salade riche en légumes, le tout avec une sauce à l’ail. Souvent, dans les restaurants libanais, l’ail est trop présent, mais ici il est servi à part, permettant de doser selon ses goûts.
+
+Pour le dessert, ils ont des beignets au miel incroyables ! Vraiment savoureux, parfaitement sucrés, juteux et moelleux. Je recommande d’y aller rien que pour ça !
+
+En résumé, une très belle expérience et une nourriture vraiment délicieuse !
+
+<strong>Nicolas :</strong>
+
+À venir
