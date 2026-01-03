@@ -388,7 +388,7 @@
         // Fonction pour rechercher une adresse
         async function searchAddress(query) {
             try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+                const response = await fetch(`/.netlify/functions/search-address?q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }

@@ -1040,20 +1040,16 @@ async function geocodeAddress(address, retryCount = 0) {
   if (isInternational) {
     // Pour les adresses internationales, utiliser l'adresse telle quelle
     encodedAddress = encodeURIComponent(cleanAddress);
-    url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
+    url = `/.netlify/functions/search-address?q=${encodedAddress}&limit=1`;
   } else {
     // Pour les adresses canadiennes, ajouter Sherbrooke, Quebec, Canada
     encodedAddress = encodeURIComponent(cleanAddress + ', Sherbrooke, Quebec, Canada');
-    url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1&countrycodes=ca`;
+    url = `/.netlify/functions/search-address?q=${encodedAddress}&limit=1&countrycodes=ca`;
   }
   
   try {
     console.log(`Tentative de géocodage pour: ${address}`);
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'BlogCulinaireSherbrooke/1.0'
-      }
-    });
+    const response = await fetch(url);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1075,15 +1071,11 @@ async function geocodeAddress(address, retryCount = 0) {
     if (postalCode) {
       let postalUrl;
       if (isInternational) {
-        postalUrl = `https://nominatim.openstreetmap.org/search?q=${postalCode}&format=json&limit=1`;
+        postalUrl = `/.netlify/functions/search-address?q=${encodeURIComponent(postalCode)}&limit=1`;
       } else {
-        postalUrl = `https://nominatim.openstreetmap.org/search?q=${postalCode}&format=json&limit=1&countrycodes=ca`;
+        postalUrl = `/.netlify/functions/search-address?q=${encodeURIComponent(postalCode)}&limit=1&countrycodes=ca`;
       }
-      const postalResponse = await fetch(postalUrl, {
-        headers: {
-          'User-Agent': 'BlogCulinaireSherbrooke/1.0'
-        }
-      });
+      const postalResponse = await fetch(postalUrl);
       
       if (postalResponse.ok) {
         const postalData = await postalResponse.json();
