@@ -103,7 +103,7 @@
 # 🚀 Contextes
 # =============================
 [context.production]
-  command = "JEKYLL_ENV=production bundle exec jekyll build --trace"
+  command = "bundle install --deployment && JEKYLL_ENV=production bundle exec jekyll build --trace"
 
 [context.deploy-preview]
-  command = "JEKYLL_ENV=production bundle exec jekyll build --trace --drafts"
+  command = "bundle install --deployment && JEKYLL_ENV=production bundle exec jekyll build --trace --drafts"
