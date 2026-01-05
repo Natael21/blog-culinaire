@@ -73,12 +73,18 @@
   to = "/admin/index.html"
   status = 200
 
-# Rediriger l’ancien site Netlify vers le nouveau domaine
+# Rediriger l'ancien site Netlify vers le nouveau domaine
 [[redirects]]
   from = "https://appreciationrestaurantssherbrooke.netlify.app/*"
   to   = "https://www.critiqueresto.com/:splat"
   status = 301
   force = true
+
+# Rediriger favicon.ico vers favicon.svg
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/favicon.svg"
+  status = 301
 
 # =============================
 # 🔍 Plugins
