@@ -1,14 +1,35 @@
 exports.handler = async function(event, context) {
     console.log('Début de la fonction get-restaurants');
+    
+    // Headers CORS pour toutes les réponses
+    const corsHeaders = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Content-Type': 'application/json'
+    };
+    
     try {
         // Configuration de l'API GitHub
         const token = process.env.GITHUB_TOKEN;
+        
+        // Vérifier que le token GitHub existe
+        if (!token) {
+            console.error('GITHUB_TOKEN non configuré dans les variables d\'environnement');
+            return {
+                statusCode: 500,
+                headers: corsHeaders,
+                body: JSON.stringify({ 
+                    error: 'Configuration serveur manquante. Veuillez contacter l\'administrateur.' 
+                })
+            };
+        }
+        
         const owner = process.env.GITHUB_OWNER || 'Natael21';
         const repo = process.env.GITHUB_REPO || 'blog-culinaire';
         const branch = process.env.GITHUB_BRANCH || 'master';
         const path = '_posts';
 
-        console.log('Configuration GitHub:', { owner, repo, branch, path });
+        console.log('Configuration GitHub:', { owner, repo, branch, path, hasToken: !!token });
 
         // Récupérer la liste des fichiers dans le dossier _posts
         const response = await fetch(
@@ -22,7 +43,13 @@ exports.handler = async function(event, context) {
         );
 
         if (!response.ok) {
-            throw new Error(`Erreur GitHub: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Erreur GitHub API:', {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorText
+            });
+            throw new Error(`Erreur GitHub API: ${response.status} ${response.statusText}`);
         }
 
         const files = await response.json();
@@ -118,17 +145,23 @@ exports.handler = async function(event, context) {
         }));
 
         const validRestaurants = restaurants.filter(restaurant => restaurant !== null);
-        console.log('Liste finale des restaurants:', validRestaurants);
+        console.log('Liste finale des restaurants:', validRestaurants.length, 'restaurants trouvés');
 
         return {
             statusCode: 200,
+            headers: corsHeaders,
             body: JSON.stringify(validRestaurants)
         };
     } catch (error) {
         console.error('Erreur globale:', error);
+        const errorMessage = error.message || 'Erreur lors de la récupération des restaurants';
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Erreur lors de la récupération des restaurants' })
+            headers: corsHeaders,
+            body: JSON.stringify({ 
+                error: errorMessage,
+                details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            })
         };
     }
 }; 
