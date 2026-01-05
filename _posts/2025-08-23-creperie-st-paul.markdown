@@ -8,7 +8,7 @@ style: "Bistro & Café"
 diet: "vegetarian-friendly"
 description: "Charmante crêperie du Vieux-Montréal, idéale pour savourer des crêpes sucrées ou salées dans une ambiance cosy."
 price: "budget"
-address: "140, Rue Saint-Paul E, Montréal, Quebec, H2Y 1G8, Canada"
+address: "140, Rue Saint-Paul E, Montréal, Quebec, H2Y 1G6, Canada"
 location: "Montréal"
 image: "/images/Creperie st-paul.png"
 images:
