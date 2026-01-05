@@ -17,7 +17,19 @@ module Jekyll
     def geocode_with_retry(address, attempt = 1)
       timeout = [INITIAL_TIMEOUT * (BACKOFF_FACTOR ** (attempt - 1)), MAX_TIMEOUT].min
       
-      full_address = address.downcase.include?('sherbrooke') ? address : "#{address}, Sherbrooke, QC"
+      # Ne pas ajouter "Sherbrooke, QC" si l'adresse contient déjà :
+      # - Un nom de pays (Canada, United States, etc.)
+      # - Une grande ville (Montréal, New York, Toronto, etc.)
+      # - Le mot "sherbrooke"
+      address_lower = address.downcase
+      countries = ['canada', 'united states', 'usa', 'france', 'italy', 'spain', 'mexico']
+      major_cities = ['montréal', 'montreal', 'new york', 'toronto', 'vancouver', 'quebec', 'ottawa', 'calgary', 'edmonton', 'winnipeg']
+      
+      should_add_sherbrooke = !address_lower.include?('sherbrooke') && 
+                               !countries.any? { |country| address_lower.include?(country) } &&
+                               !major_cities.any? { |city| address_lower.include?(city) }
+      
+      full_address = should_add_sherbrooke ? "#{address}, Sherbrooke, QC" : address
       encoded_address = URI.encode_www_form_component(full_address)
       url = "https://nominatim.openstreetmap.org/search?q=#{encoded_address}&format=json&limit=1"
       
