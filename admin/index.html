@@ -1304,8 +1304,28 @@ title: Administration - Blog Culinaire
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Erreur lors de la publication des modifications');
+                    // Gérer les erreurs selon le code de statut
+                    let errorMessage = 'Erreur lors de la publication des modifications';
+                    
+                    if (response.status === 401 || response.status === 403) {
+                        errorMessage = 'Erreur d\'authentification. Veuillez vous reconnecter.';
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else {
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorData.message || errorMessage;
+                        } catch (e) {
+                            // Si la réponse n'est pas du JSON
+                            if (response.status === 500) {
+                                errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+                            } else if (response.status === 404) {
+                                errorMessage = 'Ressource non trouvée.';
+                            }
+                        }
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 // Vider le localStorage après publication réussie

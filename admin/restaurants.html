@@ -516,9 +516,25 @@
         function getAuthToken() {
             const user = netlifyIdentity.currentUser();
             if (!user) {
-                throw new Error('No authorization header');
+                throw new Error('Erreur d\'authentification : utilisateur non connecté');
             }
             return user.token.access_token;
+        }
+
+        // Fonction helper pour obtenir un message d'erreur selon le code HTTP
+        function getErrorMessage(response, defaultMessage = 'Une erreur est survenue') {
+            if (response.status === 401 || response.status === 403) {
+                return 'Erreur d\'authentification. Veuillez vous reconnecter.';
+            } else if (response.status === 500) {
+                return 'Erreur serveur. Veuillez réessayer plus tard.';
+            } else if (response.status === 404) {
+                return 'Ressource non trouvée.';
+            } else if (response.status === 400) {
+                return 'Requête invalide. Vérifiez les données saisies.';
+            } else if (response.status === 429) {
+                return 'Trop de requêtes. Veuillez patienter avant de réessayer.';
+            }
+            return defaultMessage;
         }
 
         // Fonction pour afficher le modal de confirmation
@@ -598,13 +614,20 @@
                     }
                 });
                 if (!response.ok) {
-                    throw new Error('Erreur lors du chargement des restaurants');
-                    if (!sessionStorage.getItem('hasRefreshed')) {
-                    sessionStorage.setItem('hasRefreshed', 'true');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                }
+                    // Différencier les erreurs selon le code de statut
+                    let errorMessage = 'Erreur lors du chargement des restaurants';
+                    if (response.status === 401 || response.status === 403) {
+                        errorMessage = 'Erreur d\'authentification. Veuillez vous reconnecter.';
+                        // Rediriger vers la page de login après 2 secondes
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else if (response.status === 500) {
+                        errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+                    } else if (response.status === 404) {
+                        errorMessage = 'Ressource non trouvée.';
+                    }
+                    throw new Error(errorMessage);
                 }
                 const githubData = await response.json();
                 
@@ -751,12 +774,18 @@
                 displayRestaurants(sortedData);
             } catch (error) {
                 console.error('Erreur:', error);
-                showNotification('Erreur lors du chargement des restaurants, rechargez la page', 'error');
-                if (!sessionStorage.getItem('hasRefreshed')) {
-                    sessionStorage.setItem('hasRefreshed', 'true');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
+                // Utiliser le message d'erreur spécifique si disponible
+                const errorMessage = error.message || 'Erreur lors du chargement des restaurants. Veuillez recharger la page.';
+                showNotification(errorMessage, 'error');
+                
+                // Ne recharger que pour les erreurs non-authentification
+                if (!error.message || !error.message.includes('authentification')) {
+                    if (!sessionStorage.getItem('hasRefreshed')) {
+                        sessionStorage.setItem('hasRefreshed', 'true');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
                 }
             } finally {
                 hideSpinner();
@@ -984,7 +1013,7 @@
                 // Vérifier si l'utilisateur est authentifié
                 const user = netlifyIdentity.currentUser();
                 if (!user) {
-                    showNotification('Veuillez vous connecter pour publier les modifications', 'error');
+                    showNotification('Erreur d\'authentification : veuillez vous connecter pour publier les modifications', 'error');
                     netlifyIdentity.open('login');
                     return;
                 }
@@ -1045,9 +1074,28 @@
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('Erreur de réponse:', errorData);
-                    throw new Error(errorData.message || 'Erreur lors de la publication');
+                    // Gérer les erreurs selon le code de statut
+                    let errorMessage = 'Erreur lors de la publication des modifications';
+                    
+                    if (response.status === 401 || response.status === 403) {
+                        errorMessage = 'Erreur d\'authentification. Veuillez vous reconnecter.';
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else {
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.message || errorMessage;
+                        } catch (e) {
+                            // Si la réponse n'est pas du JSON, utiliser le message par défaut
+                            if (response.status === 500) {
+                                errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+                            } else if (response.status === 404) {
+                                errorMessage = 'Ressource non trouvée.';
+                            }
+                        }
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const result = await response.json();
