@@ -1126,7 +1126,23 @@ locationButtons.forEach(button => {
 });
 
 // Fonction pour mettre à jour les marqueurs sur la carte
+// Debounce pour optimiser les mises à jour de la carte
+let updateMapMarkersTimeout = null;
 function updateMapMarkers() {
+  if (!map) return;
+  
+  // Annuler la mise à jour précédente si elle n'a pas encore été exécutée
+  if (updateMapMarkersTimeout) {
+    clearTimeout(updateMapMarkersTimeout);
+  }
+  
+  // Debounce de 100ms pour éviter les mises à jour trop fréquentes
+  updateMapMarkersTimeout = setTimeout(() => {
+    updateMapMarkersImmediate();
+  }, 100);
+}
+
+function updateMapMarkersImmediate() {
   if (!map) return;
 
   const searchTitle = titleSearch ? titleSearch.value.toLowerCase() : '';
@@ -1135,52 +1151,62 @@ function updateMapMarkers() {
   const dietFilterEl = document.getElementById('diet-filter');
   const selectedDiet = dietFilterEl ? dietFilterEl.value : 'all';
 
-  markers.forEach((marker, restaurantId) => {
-    const restaurant = document.getElementById(restaurantId);
-    if (!restaurant) return;
-
-    const title = restaurant.dataset.title;
-    const style = restaurant.dataset.style;
-    const price = restaurant.dataset.price;
-    const diet = restaurant.dataset.diet;
-    const location = restaurant.dataset.location;
-    
-    const titleMatch = !searchTitle || title.includes(searchTitle);
-    const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
-    const priceMatch = !selectedPrice || price === selectedPrice;
-    const locationMatch = !selectedLocation || location === selectedLocation;
-    
-    // Nouvelle logique pour le régime alimentaire
-    let dietMatch = true;
-    if (selectedDiet && selectedDiet !== 'all') {
-      switch(selectedDiet) {
-        case 'vegetarian':
-          dietMatch = diet === 'vegetarian';
-          break;
-        case 'vegan':
-          dietMatch = diet === 'vegan';
-          break;
-        case 'vegetarian-friendly':
-          dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
-          break;
-        case 'vegan-friendly':
-          dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
-          break;
-        case 'standard':
-          dietMatch = diet === 'standard';
-          break;
+  // Utiliser requestAnimationFrame pour optimiser le rendu
+  requestAnimationFrame(() => {
+    markers.forEach((marker, restaurantId) => {
+      const restaurant = document.getElementById(restaurantId);
+      if (!restaurant) {
+        // Nettoyer les marqueurs orphelins
+        if (map.hasLayer(marker)) {
+          marker.remove();
+        }
+        markers.delete(restaurantId);
+        return;
       }
-    }
 
-    if (titleMatch && styleMatch && priceMatch && dietMatch && locationMatch) {
-      if (!map.hasLayer(marker)) {
+      const title = restaurant.dataset.title;
+      const style = restaurant.dataset.style;
+      const price = restaurant.dataset.price;
+      const diet = restaurant.dataset.diet;
+      const location = restaurant.dataset.location;
+      
+      const titleMatch = !searchTitle || title.toLowerCase().includes(searchTitle);
+      const styleMatch = selectedStyle === 'all' || selectedStyle === '' || style === selectedStyle;
+      const priceMatch = !selectedPrice || price === selectedPrice;
+      const locationMatch = !selectedLocation || location === selectedLocation;
+      
+      // Nouvelle logique pour le régime alimentaire
+      let dietMatch = true;
+      if (selectedDiet && selectedDiet !== 'all') {
+        switch(selectedDiet) {
+          case 'vegetarian':
+            dietMatch = diet === 'vegetarian';
+            break;
+          case 'vegan':
+            dietMatch = diet === 'vegan';
+            break;
+          case 'vegetarian-friendly':
+            dietMatch = diet === 'vegetarian-friendly' || diet === 'vegetarian' || diet === 'vegan';
+            break;
+          case 'vegan-friendly':
+            dietMatch = diet === 'vegan-friendly' || diet === 'vegan';
+            break;
+          case 'standard':
+            dietMatch = diet === 'standard';
+            break;
+        }
+      }
+
+      const shouldShow = titleMatch && styleMatch && priceMatch && dietMatch && locationMatch;
+      const isVisible = map.hasLayer(marker);
+
+      // Ne modifier que si l'état a changé
+      if (shouldShow && !isVisible) {
         marker.addTo(map);
-      }
-    } else {
-      if (map.hasLayer(marker)) {
+      } else if (!shouldShow && isVisible) {
         marker.remove();
       }
-    }
+    });
   });
 }
 
@@ -1599,7 +1625,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Lancer le préchargement en arrière-plan
   preloadCoordinates();
 
-  // Fonction pour initialiser la carte
+  // Fonction pour initialiser la carte (optimisée)
   async function initMap() {
     if (!map) {
       map = L.map('map-container').setView([45.4040, -71.8929], 13);
@@ -1609,37 +1635,66 @@ document.addEventListener('DOMContentLoaded', function() {
         maxZoom: 19
       }).addTo(map);
 
-      // Ajouter d'abord les restaurants avec des coordonnées existantes
+      // Utiliser directement les coordonnées du build (déjà géocodées)
       const restaurants = document.querySelectorAll('.post-card');
+      let markersAdded = 0;
+      let needsGeocoding = [];
+      
       restaurants.forEach(restaurant => {
         const lat = parseFloat(restaurant.dataset.lat);
         const lng = parseFloat(restaurant.dataset.lng);
+        
+        // Si les coordonnées existent déjà (du build), les utiliser directement
         if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
           addMarker(restaurant, { lat, lng });
-        }
-      });
-
-      // Lancer le géocodage en arrière-plan pour les restaurants restants
-      const geocodingPromises = Array.from(restaurants).map(async (restaurant) => {
-        const address = restaurant.dataset.address;
-        let lat = parseFloat(restaurant.dataset.lat);
-        let lng = parseFloat(restaurant.dataset.lng);
-        
-        if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && address) {
-          const coords = await geocodeAddress(address);
-          if (coords) {
-            geocodedCoordinates.set(restaurant.id, coords);
-            restaurant.dataset.lat = coords.lat;
-            restaurant.dataset.lng = coords.lng;
-            addMarker(restaurant, coords);
+          geocodedCoordinates.set(restaurant.id, { lat, lng });
+          markersAdded++;
+        } else {
+          // Sinon, ajouter à la liste pour géocodage en arrière-plan
+          const address = restaurant.dataset.address;
+          if (address) {
+            needsGeocoding.push(restaurant);
           }
         }
       });
       
-      // Une fois tous les marqueurs ajoutés, ajuster la vue
-      Promise.all(geocodingPromises).then(() => {
-        // Appliquer les filtres actuels sur la carte
-        updateMapMarkers();
+      console.log(`✅ ${markersAdded} marqueurs ajoutés directement depuis le build`);
+      
+      // Géocoder seulement les restaurants manquants en arrière-plan (batch)
+      if (needsGeocoding.length > 0) {
+        console.log(`⏳ Géocodage de ${needsGeocoding.length} restaurants restants...`);
+        const batchSize = 3;
+        for (let i = 0; i < needsGeocoding.length; i += batchSize) {
+          const batch = needsGeocoding.slice(i, i + batchSize);
+          await Promise.all(batch.map(async (restaurant) => {
+            const address = restaurant.dataset.address;
+            const coords = await geocodeAddress(address);
+            if (coords) {
+              geocodedCoordinates.set(restaurant.id, coords);
+              restaurant.dataset.lat = coords.lat;
+              restaurant.dataset.lng = coords.lng;
+              addMarker(restaurant, coords);
+            }
+          }));
+          // Mettre à jour la carte après chaque batch
+          updateMapMarkers();
+          if (i + batchSize < needsGeocoding.length) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+        }
+        console.log('✅ Géocodage terminé');
+      }
+      
+      // Appliquer les filtres actuels sur la carte
+      updateMapMarkers();
+      
+      // Optimiser les événements de zoom/move avec debounce
+      let zoomTimeout = null;
+      map.on('zoomend moveend', () => {
+        if (zoomTimeout) clearTimeout(zoomTimeout);
+        zoomTimeout = setTimeout(() => {
+          // Pas besoin de mettre à jour les marqueurs lors du zoom, ils restent visibles
+        }, 200);
       });
     } else {
       // Si la carte existe déjà, juste s'assurer qu'elle est visible
