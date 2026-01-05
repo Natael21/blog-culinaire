@@ -512,10 +512,66 @@
     </div>
 
     <script>
+        // Protection d'authentification : vérifier et rediriger si non authentifié
+        function checkAuthentication() {
+            // Attendre que netlifyIdentity soit chargé
+            if (typeof netlifyIdentity === 'undefined') {
+                // Si netlifyIdentity n'est pas encore chargé, attendre un peu
+                setTimeout(checkAuthentication, 100);
+                return;
+            }
+            
+            // Initialiser netlifyIdentity si nécessaire
+            if (netlifyIdentity && !netlifyIdentity.currentUser) {
+                netlifyIdentity.init();
+            }
+            
+            // Vérifier si l'utilisateur est authentifié
+            const user = netlifyIdentity.currentUser();
+            if (!user) {
+                // Rediriger vers la page de login
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Vérifier l'authentification dès le chargement de la page
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAuthentication);
+        } else {
+            checkAuthentication();
+        }
+
+        // Vérifier aussi quand netlifyIdentity est prêt
+        window.addEventListener('load', () => {
+            if (typeof netlifyIdentity !== 'undefined') {
+                netlifyIdentity.on('init', () => {
+                    if (!checkAuthentication()) {
+                        return;
+                    }
+                });
+                
+                // Vérifier immédiatement si netlifyIdentity est déjà initialisé
+                if (netlifyIdentity.currentUser) {
+                    checkAuthentication();
+                } else {
+                    // Attendre un peu pour que netlifyIdentity se charge
+                    setTimeout(() => {
+                        if (!checkAuthentication()) {
+                            return;
+                        }
+                    }, 500);
+                }
+            }
+        });
+
         // Fonction pour récupérer le token d'authentification
         function getAuthToken() {
             const user = netlifyIdentity.currentUser();
             if (!user) {
+                // Rediriger vers la page de login
+                window.location.href = 'index.html';
                 throw new Error('Erreur d\'authentification : utilisateur non connecté');
             }
             return user.token.access_token;

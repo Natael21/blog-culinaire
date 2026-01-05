@@ -1147,6 +1147,36 @@
         }
     </style>
 
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+        // Protection d'authentification : vérifier et rediriger si non authentifié
+        function checkAuthentication() {
+            if (typeof netlifyIdentity === 'undefined') {
+                setTimeout(checkAuthentication, 100);
+                return;
+            }
+            if (netlifyIdentity && !netlifyIdentity.currentUser) {
+                netlifyIdentity.init();
+            }
+            const user = netlifyIdentity.currentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(checkAuthentication, 500));
+        } else {
+            setTimeout(checkAuthentication, 500);
+        }
+        window.addEventListener('load', () => {
+            if (typeof netlifyIdentity !== 'undefined') {
+                netlifyIdentity.on('init', checkAuthentication);
+                setTimeout(checkAuthentication, 500);
+            }
+        });
+    </script>
     <script>
         // Variables globales pour stocker les fichiers d'images
         let mainImageFile = null;

@@ -380,6 +380,34 @@
             return data;
         }
 
+        // Protection d'authentification : vérifier et rediriger si non authentifié
+        function checkAuthentication() {
+            if (typeof netlifyIdentity === 'undefined') {
+                setTimeout(checkAuthentication, 100);
+                return;
+            }
+            if (netlifyIdentity && !netlifyIdentity.currentUser) {
+                netlifyIdentity.init();
+            }
+            const user = netlifyIdentity.currentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(checkAuthentication, 500));
+        } else {
+            setTimeout(checkAuthentication, 500);
+        }
+        window.addEventListener('load', () => {
+            if (typeof netlifyIdentity !== 'undefined') {
+                netlifyIdentity.on('init', checkAuthentication);
+                setTimeout(checkAuthentication, 500);
+            }
+        });
+
         // Variables globales pour l'autocomplétion d'adresse
         let debounceTimer;
         let selectedIndex = -1;
