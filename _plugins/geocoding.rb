@@ -14,23 +14,8 @@ module Jekyll
     MAX_TIMEOUT = 15
     BACKOFF_FACTOR = 1.5
 
-    def geocode_with_retry(address, attempt = 1)
-      timeout = [INITIAL_TIMEOUT * (BACKOFF_FACTOR ** (attempt - 1)), MAX_TIMEOUT].min
-      
-      # Ne pas ajouter "Sherbrooke, QC" si l'adresse contient déjà :
-      # - Un nom de pays (Canada, United States, etc.)
-      # - Une grande ville (Montréal, New York, Toronto, etc.)
-      # - Le mot "sherbrooke"
-      address_lower = address.downcase
-      countries = ['canada', 'united states', 'usa', 'france', 'italy', 'spain', 'mexico']
-      major_cities = ['montréal', 'montreal', 'new york', 'toronto', 'vancouver', 'quebec', 'ottawa', 'calgary', 'edmonton', 'winnipeg']
-      
-      should_add_sherbrooke = !address_lower.include?('sherbrooke') && 
-                               !countries.any? { |country| address_lower.include?(country) } &&
-                               !major_cities.any? { |city| address_lower.include?(city) }
-      
-      full_address = should_add_sherbrooke ? "#{address}, Sherbrooke, QC" : address
-      encoded_address = URI.encode_www_form_component(full_address)
+    def try_geocode(address_variant, timeout)
+      encoded_address = URI.encode_www_form_component(address_variant)
       url = "https://nominatim.openstreetmap.org/search?q=#{encoded_address}&format=json&limit=1"
       
       uri = URI(url)
@@ -46,6 +31,72 @@ module Jekyll
       if response.is_a?(Net::HTTPSuccess)
         result = JSON.parse(response.body)
         return result if result.any?
+      end
+      
+      nil
+    rescue => e
+      nil
+    end
+
+    def geocode_with_retry(address, attempt = 1)
+      timeout = [INITIAL_TIMEOUT * (BACKOFF_FACTOR ** (attempt - 1)), MAX_TIMEOUT].min
+      
+      # Ne pas ajouter "Sherbrooke, QC" si l'adresse contient déjà :
+      # - Un nom de pays (Canada, United States, etc.)
+      # - Une grande ville (Montréal, New York, Toronto, etc.)
+      # - Le mot "sherbrooke"
+      address_lower = address.downcase
+      countries = ['canada', 'united states', 'usa', 'france', 'italy', 'spain', 'mexico']
+      major_cities = ['montréal', 'montreal', 'new york', 'toronto', 'vancouver', 'quebec', 'ottawa', 'calgary', 'edmonton', 'winnipeg']
+      
+      should_add_sherbrooke = !address_lower.include?('sherbrooke') && 
+                               !countries.any? { |country| address_lower.include?(country) } &&
+                               !major_cities.any? { |city| address_lower.include?(city) }
+      
+      base_address = should_add_sherbrooke ? "#{address}, Sherbrooke, QC" : address
+      
+      # Construire une liste de variantes à essayer
+      variants = [base_address]
+      
+      # Essayer sans code postal
+      if address.match(/\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b/)
+        no_postal = address.gsub(/\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b/, '').gsub(/,\s*,/, ',').strip
+        variants << no_postal unless no_postal.empty?
+      end
+      
+      # Essayer sans pays
+      if address.include?(', Canada') || address.include?(', United States')
+        no_country = address.gsub(/,\s*(Canada|United States).*$/i, '').strip
+        variants << no_country unless no_country.empty?
+      end
+      
+      # Essayer sans direction (E, O, Est, Ouest)
+      if address.match(/\s+([EO]|Est|Ouest)\b/i)
+        no_direction = address.gsub(/\s+([EO]|Est|Ouest)\b/i, '').gsub(/,\s*,/, ',').strip
+        variants << no_direction unless no_direction.empty?
+      end
+      
+      # Essayer avec "Québec" au lieu de "Quebec"
+      if address.include?('Quebec') && !address.include?('Québec')
+        with_accent = address.gsub('Quebec', 'Québec')
+        variants << with_accent
+      end
+      
+      # Essayer juste numéro + rue + ville
+      parts = address.split(',').map(&:strip)
+      if parts.length >= 3
+        simple = parts.first(3).join(', ')
+        variants << simple unless variants.include?(simple)
+      end
+      
+      # Essayer chaque variante
+      variants.uniq.each do |variant|
+        next if variant.strip.empty?
+        result = try_geocode(variant.strip, timeout)
+        if result && result.any?
+          return result
+        end
+        sleep(0.5)  # Respecter le rate limiting de Nominatim
       end
       
       nil
