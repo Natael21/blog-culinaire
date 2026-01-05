@@ -1129,10 +1129,11 @@ locationButtons.forEach(button => {
 function updateMapMarkers() {
   if (!map) return;
 
-  const searchTitle = titleSearch.value.toLowerCase();
-  const selectedStyle = styleFilter.value;
-  const selectedPrice = priceFilter.value;
-  const selectedDiet = document.getElementById('diet-filter').value;
+  const searchTitle = titleSearch ? titleSearch.value.toLowerCase() : '';
+  const selectedStyle = styleFilter ? styleFilter.value : 'all';
+  const selectedPrice = priceFilter ? priceFilter.value : '';
+  const dietFilterEl = document.getElementById('diet-filter');
+  const selectedDiet = dietFilterEl ? dietFilterEl.value : 'all';
 
   markers.forEach((marker, restaurantId) => {
     const restaurant = document.getElementById(restaurantId);
@@ -1183,7 +1184,7 @@ function updateMapMarkers() {
   });
 }
 
-// Fonction pour forcer le géocodage des restaurants visibles
+// Fonction pour forcer le géocodage des restaurants visibles (optimisée avec batch)
 async function forceGeocodeVisibleRestaurants() {
   if (!map) return;
   
@@ -1191,26 +1192,57 @@ async function forceGeocodeVisibleRestaurants() {
     restaurant.style.display !== 'none'
   );
   
-  for (const restaurant of visibleRestaurants) {
+  // Filtrer les restaurants qui ont besoin de géocodage
+  const restaurantsToGeocode = visibleRestaurants.filter(restaurant => {
     const coords = geocodedCoordinates.get(restaurant.id);
-    if (!coords) {
+    return !coords && restaurant.dataset.address;
+  });
+  
+  if (restaurantsToGeocode.length === 0) {
+    updateMapMarkers();
+    return;
+  }
+  
+  console.log(`Géocodage de ${restaurantsToGeocode.length} restaurants...`);
+  
+  // Géocoder par batch de 3 pour éviter de surcharger l'API
+  const batchSize = 3;
+  for (let i = 0; i < restaurantsToGeocode.length; i += batchSize) {
+    const batch = restaurantsToGeocode.slice(i, i + batchSize);
+    
+    // Géocoder en parallèle pour ce batch
+    const geocodePromises = batch.map(async (restaurant) => {
       const address = restaurant.dataset.address;
-      if (address) {
-        console.log(`Géocodage forcé pour ${restaurant.querySelector('h2').textContent}`);
+      if (!address) return null;
+      
+      try {
         const newCoords = await geocodeAddress(address);
         if (newCoords) {
           geocodedCoordinates.set(restaurant.id, newCoords);
           restaurant.dataset.lat = newCoords.lat;
           restaurant.dataset.lng = newCoords.lng;
           addMarker(restaurant, newCoords);
-          console.log(`✅ Marqueur ajouté pour ${restaurant.querySelector('h2').textContent}`);
+          return restaurant;
         }
+      } catch (error) {
+        console.error(`Erreur de géocodage pour ${restaurant.id}:`, error);
       }
+      return null;
+    });
+    
+    // Attendre que le batch soit terminé
+    await Promise.all(geocodePromises);
+    
+    // Mettre à jour la carte après chaque batch
+    updateMapMarkers();
+    
+    // Petit délai entre les batches pour respecter le rate limiting
+    if (i + batchSize < restaurantsToGeocode.length) {
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
   
-  // Ajuster la vue de la carte après avoir ajouté les nouveaux marqueurs
-  updateMapMarkers();
+  console.log('✅ Géocodage terminé');
 }
 
 // Modifier la fonction filterRestaurants pour gérer les cases à cocher
