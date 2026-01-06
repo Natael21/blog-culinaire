@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Restaurant Beyrouth"
 date: 2025-04-30
-state: draft
+state: ready
 note: 7.3
 style: "Moyen-Orient"
 diet: "vegetarian-friendly"
