@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Santamaria Tacos"
 date: 2025-04-05
-state: draft
+state: ready
 note: 8.3
 style: "Mexicain & Latino"
 diet: "vegetarian-friendly"
