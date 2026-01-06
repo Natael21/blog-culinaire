@@ -57,4 +57,4 @@ En résumé, une très belle expérience et une nourriture vraiment délicieuse 
 
 <strong>Nicolas :</strong>
 
-À venir
+Ils ont aussi des baklavas pour les intéressés ! Je trouvais par contre que le temps de se faire servir était un peu long, mais le repas (même que Nataël) était très généreux en portion et assez délicieux.
