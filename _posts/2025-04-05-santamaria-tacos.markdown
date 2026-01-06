@@ -56,4 +56,4 @@ Le seul bémol : les chaises deviennent rapidement inconfortables.
 
 <strong>Nicolas :</strong>
 
-À venir
+Les tacos sont vraiment délicieux, ils sont à la fois légers et bien assaisonnés ! Je suis d'accord à ce que les chaises étaient incorfontables.
