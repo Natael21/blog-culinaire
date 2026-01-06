@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Saveur et Délice"
 date: 2025-04-28
-state: draft
+state: ready
 note: 7.3
 style: "Asiatique"
 diet: "vegetarian-friendly"
@@ -57,4 +57,4 @@ Par la suite, j'ai sélectionné un mets nouveau pour m'aventurer dans de nouvea
 
 <strong>Nicolas</strong> :
 
-C'est un endroit convivial, parfait pour manger et se parler sans être envahi de brouhahas dérangeants ! Le riz parfumé était exquis, mais je trouvais que les crevettes était moins tendres que je le pensais. 
+C'est un endroit convivial, parfait pour manger et se parler sans être envahi de brouhahas dérangeants ! Le riz parfumé était exquis, mais je trouvais que les crevettes était moins tendres que je le pensais.
