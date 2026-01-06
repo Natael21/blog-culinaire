@@ -51,4 +51,4 @@ Pour ma part, j’ai pris une crêpe salée au fromage et aux asperges. Je m’a
 
 <strong>Nicolas :</strong>
 
-À venir
+D'accord avec l'avis de Nataël ! J'ai trouvé que c'était une nouvelle manière de cuisiner des crêpes, une manière moderne de les garnir. J'ai pris une crêpe avec poulet, comme si c'était un wrap au poulet, et c'était exquis avec les asperges (première fois que j'en mangeais !). Une seule crêpe suffit pour être plein au ventre et en énergie !

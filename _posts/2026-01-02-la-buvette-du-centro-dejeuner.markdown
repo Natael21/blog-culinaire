@@ -3,7 +3,7 @@ layout: restaurant
 title: "La Buvette du Centro (Déjeuner)"
 date: 2026-01-02
 state: draft
-note: 5.0
+note: 9.0
 style: "Bistro & Café"
 diet: "vegetarian-friendly"
 description: "Nouveauté : les déjeuners à la Buvette du Centro, et c’est incroyable !"
@@ -19,31 +19,39 @@ images:
 
 ratings:
   food:
-    score: 5
+    score: 9
     criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: "???"
+    comment: "Ce resto a diversifié son menu !"
   service:
-    score: 5
+    score: 9
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: "???"
+    comment: "Bon service et assez rapide."
   ambiance:
-    score: 5
+    score: 9
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: "???"
+    comment: "Tranquille et conviviale."
   value:
-    score: 5
+    score: 10
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
-    comment: "???"
+    comment: "Très bon rapport qualité-prix, surtout pour les omelettes (moins chers que dans les restos de brunchs) !"
   originality:
-    score: 5
+    score: 8
     criteria: 'Innovation, créativité, authenticité'
-    comment: "???"
+    comment: "Ce resto est passé pour servir seulement en souper et bar mais ont créé un menu déjeuner. Par contre, le menu déjeuner est principalement juste des omelettes."
   overall:
-    score: 5
+    score: 9
     criteria: 'Expérience globale, facteur "wow"'
-    comment: "???"
+    comment: "Bonne expérience en général."
 ---
 
 
 
-À venir
+<strong>Nataël</strong>
+
+À venir = poutine déjeuner
+
+
+
+<strong>Nicolas</strong>
+
+J'ai choisi l'omelette forestière (5 oeufs environ, champignons et piments verts/rouges/oranges et quelques tomates et oignons). Vraiment, ça vaut le détour puisque c'est moins cher que dans plusieurs restos de brunch. Il y a par contre un peu trop d'ail dans cette omelette.
