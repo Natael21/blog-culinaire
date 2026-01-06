@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Crêperie st.paul"
 date: 2025-08-23
-state: draft
+state: ready
 note: 8.0
 style: "Bistro & Café"
 diet: "vegetarian-friendly"
