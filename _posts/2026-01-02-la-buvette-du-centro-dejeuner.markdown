@@ -2,7 +2,7 @@
 layout: restaurant
 title: "La Buvette du Centro (Déjeuner)"
 date: 2026-01-02
-state: draft
+state: ready
 note: 9.0
 style: "Bistro & Café"
 diet: "vegetarian-friendly"

@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Cantine 75"
 date: 2025-06-23
-state: draft
+state: ready
 note: 8.5
 style: "Américain"
 diet: "vegetarian-friendly"

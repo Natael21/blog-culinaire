@@ -2,7 +2,7 @@
 layout: restaurant
 title: "Di Me Tutto Pizzeria"
 date: 2025-12-27
-state: draft
+state: ready
 note: 8.3
 style: "Italien"
 diet: "vegetarian-friendly,vegan-friendly"
@@ -28,7 +28,7 @@ ratings:
   ambiance:
     score: 8
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: "Endroit assez tranquille avec une belle petite musique d'ambiance."
+    comment: "Endroit assez tranquille avec une belle petite musique d"
   value:
     score: 9
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
