@@ -21,37 +21,39 @@ ratings:
   food:
     score: 9
     criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: "Ce resto a diversifié son menu !"
+    comment: "Ce restaurant a diversifié son menu et propose maintenant des déjeuners variés, tous aussi délicieux les uns que les autres."
   service:
     score: 9
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: "Bon service et assez rapide."
+    comment: "Bon service, efficace et rapide, ce qui rend l’expérience encore plus agréable."
   ambiance:
     score: 9
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: "Tranquille et conviviale."
+    comment: "Ambiance tranquille et conviviale, idéale pour passer un bon moment."
   value:
     score: 10
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
-    comment: "Très bon rapport qualité-prix, surtout pour les omelettes (moins chers que dans les restos de brunchs) !"
+    comment: "Excellent rapport qualité-prix, particulièrement pour les omelettes, qui sont offertes à un prix plus abordable que dans la plupart des restaurants de brunch."
   originality:
     score: 8
     criteria: 'Innovation, créativité, authenticité'
-    comment: "Ce resto est passé pour servir seulement en souper et bar mais ont créé un menu déjeuner. Par contre, le menu déjeuner est principalement juste des omelettes."
+    comment: "À l’origine, ce restaurant se consacrait uniquement au service du souper et au bar, mais il a récemment ajouté un menu déjeuner. Cela dit, l’offre matinale demeure assez limitée, étant principalement composée d’omelettes."
   overall:
     score: 9
     criteria: 'Expérience globale, facteur "wow"'
-    comment: "Bonne expérience en général."
+    comment: "Une bonne expérience dans l’ensemble, agréable et satisfaisante."
 ---
 
 
 
 <strong>Nataël</strong>
 
-À venir = poutine déjeuner
+J’avais très hâte de découvrir leurs déjeuners, puisque pour le souper, il s’agit de l’un de mes restaurants favoris à Sherbrooke. Et je n’ai pas été déçu. Certes, la diversité du menu n’est pas très grande, mais c’est également le cas pour le souper : l’établissement mise sur un nombre limité d’options, toutes aussi savoureuses les unes que les autres.
 
+J’ai eu la chance de déguster une poutine déjeuner formidable, garnie d’un œuf poché, de patates déjeuner en rondelles bien assaisonnées, d’une délicieuse sauce hollandaise, sans oublier le fromage en grains et quelques autres ingrédients qui complètent parfaitement le plat.
 
+Je recommande fortement cet endroit pour un déjeuner délicieux et très abordable, entre 16 $ et 18 $ pour n’importe quelle assiette.
 
 <strong>Nicolas</strong>
 
-J'ai choisi l'omelette forestière (5 oeufs environ, champignons et piments verts/rouges/oranges et quelques tomates et oignons). Vraiment, ça vaut le détour puisque c'est moins cher que dans plusieurs restos de brunch. Il y a par contre un peu trop d'ail dans cette omelette.
+J'ai choisi l'omelette forestière (cinq œufs environ, champignons et piments verts/rouges/orange et quelques tomates et oignons). Vraiment, ça vaut le détour, puisque c'est moins cher que dans plusieurs restos de brunch. Il y a par contre un peu trop d'ail dans cette omelette.

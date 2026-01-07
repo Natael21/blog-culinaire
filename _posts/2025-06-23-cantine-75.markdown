@@ -20,7 +20,7 @@ ratings:
   food:
     score: 8
     criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: "« Des plats à prime abord classiques, mais qui ont tous un “twist” réinventé et très savoureux !"
+    comment: "Des plats à prime abord classiques, mais qui ont tous un “twist” réinventé et très savoureux !"
   service:
     score: 8
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
@@ -47,9 +47,7 @@ ratings:
 
 <strong>Nataël</strong>
 
-à venir
-
-
+Choix varié, saveurs qui se démarquent et concept intéressant. J’ai beaucoup apprécié mon expérience de « fast-food de luxe ». J’ai opté pour un taco français, généreusement portionné et très savoureux. Pour ceux qui recherchent un repas rapide, mais de qualité, c’est assurément la bonne adresse.
 
 <strong>Nicolas</strong>
 

@@ -20,15 +20,15 @@ ratings:
   food:
     score: 8
     criteria: 'Goût, fraîcheur, cuisson, présentation, créativité'
-    comment: "Très bonne en général."
+    comment: "Très bon en général, il offre des pizzas de style italien avec croute mince."
   service:
     score: 8
     criteria: 'Rapidité, amabilité, professionnalisme, attention aux détails'
-    comment: "Bon service."
+    comment: "Bon service et personnel chaleureux."
   ambiance:
     score: 8
     criteria: 'Décor, musique, éclairage, confort, propreté, atmosphère générale'
-    comment: "Assez tranquille avec petite musique."
+    comment: "Endroit assez tranquille avec une belle petite musique d'ambiance."
   value:
     score: 9
     criteria: 'Rapport qualité/prix, portions, prix par rapport au marché'
@@ -36,21 +36,13 @@ ratings:
   originality:
     score: 9
     criteria: 'Innovation, créativité, authenticité'
-    comment: "Plusieurs sortes de pizza italiennes différentes."
+    comment: "Grandes variétés de pizza italienne différentes."
   overall:
     score: 8
     criteria: 'Expérience globale, facteur "wow"'
-    comment: "Ça vaut le détour."
+    comment: "Ça vaut le détour et ils font beaucoup de commande en ligne."
 ---
 
 
 
-<strong>Nataël</strong>
-
-À venir
-
-
-
-<strong>Nicolas</strong>
-
-Nous nous sommes commandés une pizza 14 pouces pour nous deux et c'était amplement suffisant, même en jeûnant toute la journée ! Nous étions impressionnés par la pizza au merguez, juste assez piquant et garniture satisfaisante (équilibre sauce tomate et fromage). :) L'ambiance est tranquille, et le monsieur à la caisse a pris même la peine de diffuser la musique lorsque nous nous sommes installés à table. :)
+Nous nous sommes commandé une pizza 14 pouces pour nous deux et c'était amplement suffisant, même en jeûnant toute la journée ! Nous étions impressionnés par la pizza à la merguez, juste assez piquant et garniture satisfaisante (équilibre sauce tomate et fromage). :) L'ambiance est tranquille, et le monsieur à la caisse a pris même la peine de diffuser la musique lorsque nous nous sommes installés à table. :)
